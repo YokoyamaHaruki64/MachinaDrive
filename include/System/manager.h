@@ -1,0 +1,100 @@
+﻿#pragma once
+
+
+#include <vector>
+#include <memory>
+#include <unordered_map>
+#include <functional>
+#include <string>
+#include "math/vector3.h"
+#include "System/GameObject.h"
+
+class Camera;
+class Component;
+
+class Manager
+{
+private:
+	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
+    static std::unordered_map<std::string,
+        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
+	static Camera* m_Camera;
+
+    // prefabから生成のみを行う関数（外部からは呼び出さない）
+    // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
+    static void InstantiateForBeginScene(
+        const std::string& prefabName,
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale)
+    {
+        auto it = m_FactoryMap.find(prefabName);
+        if (it != m_FactoryMap.end())
+        {
+            GameObject* newObj = it->second(position, rotation, scale);
+            m_GameObjects.emplace_back(newObj);
+
+            std::vector<Component*> components = newObj->GetComponents();
+        }
+    }
+
+public:
+	static void Init();
+	static void Uninit();
+	static void Update();
+	static void Draw();
+
+    static void RegisterFactory(
+        const std::string& typeName,
+        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)> factoryFunction)
+    {
+        m_FactoryMap[typeName] = factoryFunction;
+    }
+
+    static GameObject* Instantiate(
+        const std::string& prefabName,
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale)
+    {
+        auto it = m_FactoryMap.find(prefabName);
+        if (it != m_FactoryMap.end())
+        {
+            GameObject* newObj = it->second(position, rotation, scale);
+            m_GameObjects.emplace_back(newObj);
+
+            std::vector<Component*> components = newObj->GetComponents();
+            for (Component* comp : components)
+            {
+                comp->OnStart();
+            }
+
+            return newObj;
+        }
+        return nullptr; // タイプが見つからない場合
+    }
+
+    static GameObject* CreateEmpty(
+        Vector3 position = Vector3::Zero(),
+        Vector3 rotation = Vector3::Zero(),
+        Vector3 scale = Vector3::One())
+	{
+        m_GameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
+        return m_GameObjects.back().get();
+	}
+
+    // コンポーネントからゲームオブジェクトを取得するための関数
+    template <typename T>
+    static GameObject* GetFirstObjectByComponent()
+    {
+        for (const auto& gameObject : m_GameObjects)
+        {
+            if (gameObject->GetComponent<T>() != nullptr)
+            {
+                return gameObject.get();
+            }
+        }
+        return nullptr; // 見つからない場合
+	}
+
+};
