@@ -2,6 +2,8 @@
 
 #include "System/main.h"
 #include "System/manager.h"
+#include "System/GM_Time.h"
+
 #include <thread>
 
 
@@ -88,11 +90,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		else
 		{
 			dwCurrentTime = timeGetTime();
-
-			if((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
+            DWORD deltaTime = dwCurrentTime - dwExecLastTime;
+			if( deltaTime >= (1000 / 60))
 			{
 				dwExecLastTime = dwCurrentTime;
-
+                Time::Update(deltaTime / 1000.0f);
 				Manager::Update();
 				Manager::Draw();
 			}
