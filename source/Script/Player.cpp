@@ -1,4 +1,6 @@
-﻿#include "Script/Player.h"
+﻿#include "pch.h"
+
+#include "Script/Player.h"
 
 #include "System/input.h"
 #include "Component/Transform.h"

@@ -1,4 +1,6 @@
-﻿#include "Component/Camera.h"
+﻿#include "pch.h"
+
+#include "Component/Camera.h"
 #include "System/Renderer.h"
 #include "Component/Transform.h"
 

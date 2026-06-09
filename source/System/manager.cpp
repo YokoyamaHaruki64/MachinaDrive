@@ -1,4 +1,6 @@
-﻿#include "System/manager.h"
+﻿#include "pch.h"
+
+#include "System/manager.h"
 
 #include "System/PrefabFactory.h"
 #include "System/input.h"

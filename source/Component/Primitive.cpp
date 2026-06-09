@@ -1,4 +1,6 @@
-﻿#include "Component/Primitive.h"
+﻿#include "pch.h"
+
+#include "Component/Primitive.h"
 
 #include "System/renderer.h"
 #include "Component/Transform.h"

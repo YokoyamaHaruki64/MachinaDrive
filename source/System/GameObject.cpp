@@ -1,4 +1,6 @@
-﻿#include "System/GameObject.h"
+﻿#include "pch.h"
+
+#include "System/GameObject.h"
 #include "Component/Transform.h"
 
 GameObject::GameObject()
