@@ -161,6 +161,7 @@
     <ClInclude Include="include\System\manager.h" />
     <ClInclude Include="include\System\PrefabFactory.h" />
     <ClInclude Include="include\System\renderer.h" />
+    <ClInclude Include="include\System\RendererBase.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\common.hlsl">

@@ -3,10 +3,10 @@
 #include "System/renderer.h"
 #include "Component/Transform.h"
 
-const char* Primitive::DEFAULT_VERTEX_SHADER_FILE = "BuildedShader/unlitTextureVS.cso";
-const char* Primitive::DEFAULT_PIXEL_SHADER_FILE = "BuildedShader/unlitTexturePS.cso";
+const char* PrimitiveRenderer::DEFAULT_VERTEX_SHADER_FILE = "BuildedShader/unlitTextureVS.cso";
+const char* PrimitiveRenderer::DEFAULT_PIXEL_SHADER_FILE = "BuildedShader/unlitTexturePS.cso";
 
-void Primitive::LoadTexture(const wchar_t* textureFile)
+void PrimitiveRenderer::LoadTexture(const wchar_t* textureFile)
 {
     if(textureFile == nullptr)
     {
@@ -63,7 +63,7 @@ void Primitive::LoadTexture(const wchar_t* textureFile)
 
 }
 
-void Primitive::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
+void PrimitiveRenderer::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
 {
    Renderer::CreateVertexShader(
         m_vertexShader.GetAddressOf(),
@@ -71,14 +71,14 @@ void Primitive::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
         vertexShaderFile);
 }
 
-void Primitive::CreatePixelShader(const char* pixelShaderFile)
+void PrimitiveRenderer::CreatePixelShader(const char* pixelShaderFile)
 {
     Renderer::CreatePixelShader(
         m_pixelShader.GetAddressOf(),
         pixelShaderFile);
 }
 
-void Primitive::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize)
+void PrimitiveRenderer::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize)
 {
     D3D11_BUFFER_DESC bd = {};
     bd.Usage = D3D11_USAGE_DEFAULT;
@@ -97,7 +97,7 @@ void Primitive::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize
     }
 }
 
-void Primitive::CreateIndexBuffer(const unsigned int* indexData, size_t indexDataSize)
+void PrimitiveRenderer::CreateIndexBuffer(const unsigned int* indexData, size_t indexDataSize)
 {
     D3D11_BUFFER_DESC bd = {};
     bd.Usage = D3D11_USAGE_DEFAULT;
@@ -114,7 +114,7 @@ void Primitive::CreateIndexBuffer(const unsigned int* indexData, size_t indexDat
     }
 }
 
-void Primitive::Draw()
+void PrimitiveRenderer::Draw()
 {
     // 入力レイアウトとシェーダーの設定
     Renderer::GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
@@ -165,7 +165,7 @@ void Primitive::Draw()
 Quad::Quad(GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 
@@ -208,7 +208,7 @@ Plane::Plane(
     GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 
@@ -257,7 +257,7 @@ Cube::Cube(
     GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 

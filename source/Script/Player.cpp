@@ -50,14 +50,14 @@ void Player::Update()
 	m_velocity.x -= m_velocity.x * friction * dt;	// 摩擦
 	m_velocity.z -= m_velocity.z * friction * dt;	// 摩擦
 
-    m_transform->Translate(m_velocity * dt); // 位置の更新
+    transform()->Translate(m_velocity * dt); // 位置の更新
     float targetRotationY = atan2f(m_velocity.x, m_velocity.z); // 移動方向に向く
-    const Vector3& myRot = m_transform->GetRotation();
-    m_transform->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * dt), myRot.z)); // 回転の更新
+    const Vector3& myRot = transform()->GetRotation();
+    transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * dt), myRot.z)); // 回転の更新
 
-	if(m_transform->GetPosition().y < 0.0f)
+	if(transform()->GetPosition().y < 0.0f)
 	{
-        m_transform->SetPosition(Vector3(m_transform->GetPosition().x, 0.0f, m_transform->GetPosition().z)); // 地面に接地
+        transform()->SetPosition(Vector3(transform()->GetPosition().x, 0.0f, transform()->GetPosition().z)); // 地面に接地
 		m_velocity.y = 0.0f; // 垂直方向の速度をリセット
 		m_isGrounded = true;
 	}
