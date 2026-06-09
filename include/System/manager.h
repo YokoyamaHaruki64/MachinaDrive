@@ -18,7 +18,6 @@ private:
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::unordered_map<std::string,
         std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
-	static Camera* m_Camera;
 
     // prefabから生成のみを行う関数（外部からは呼び出さない）
     // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意

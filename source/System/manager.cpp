@@ -13,7 +13,6 @@
 #include "Script/CameraController.h"
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
-Camera* Manager::m_Camera = nullptr;
 
 std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
@@ -38,7 +37,7 @@ void Manager::Init()
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso");
 
-    GameObject* obj = CreateEmpty(Vector3(0.0f, 1.0f, 0.0f));
+    GameObject* obj = CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
     obj->AddComponentForBeginScene<Cube>(
         L"Assets\\Textures\\DarkMatReal.png",
         "BuildedShader\\Dice_VS.cso",
@@ -48,8 +47,23 @@ void Manager::Init()
     InstantiateForBeginScene(
         "Player",
         Vector3(0.0f, 0.0f, 1.0f),
-        Vector3::Zero(),
+        Vector3(0.0f, 0.0f, 0.0f),
         Vector3::One());
+
+    const Vector3 enemyPos[] = {
+        Vector3(4.0f, 0.0f, 4.0f),
+        Vector3(-4.0f, 0.0f, 4.0f),
+        Vector3(0.0f, 0.0f, 6.0f),
+    };
+
+    for (const auto& pos : enemyPos)
+    {
+        InstantiateForBeginScene(
+            "Enemy",
+            pos,
+            Vector3::Zero(),
+            Vector3::One());
+    }
 
 
 	for (auto& gameObject : m_GameObjects)
@@ -80,6 +94,28 @@ void Manager::Update()
     for (auto& gameObject : m_GameObjects)
     {
         gameObject->LateUpdate();
+    }
+
+    // 破棄されたオブジェクトの削除
+    for (size_t i = 0; i < m_GameObjects.size();)
+    {
+        if (m_GameObjects[i]->IsDestroyed())
+        {
+            m_GameObjects[i]->OnDestroy();
+
+            // 末尾と入れ替え
+            std::swap(m_GameObjects[i], m_GameObjects.back());
+
+            // 末尾削除
+            m_GameObjects.pop_back();
+
+            // インクリメントしない
+            // swap後に新しい要素が i に来るので再チェック
+        }
+        else
+        {
+            ++i;
+        }
     }
 }
 

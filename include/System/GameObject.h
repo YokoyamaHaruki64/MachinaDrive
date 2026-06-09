@@ -13,12 +13,24 @@ protected:
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
 
+    bool m_isDestroy = false;
+
 public:
     GameObject();
     GameObject(
         const Vector3& position,
         const Vector3& rotation = Vector3::Zero(),
         const Vector3& scale = Vector3::One());
+
+    void Destroy()
+    {
+        m_isDestroy = true;
+    }
+
+    bool IsDestroyed() const
+    {
+        return m_isDestroy;
+    }
 
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)

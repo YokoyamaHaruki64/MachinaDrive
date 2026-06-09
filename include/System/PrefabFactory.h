@@ -6,6 +6,7 @@
 #include "Component/modelRenderer.h"
 
 #include "Script/Player.h"
+#include "Script/Enemy.h"
 
 GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
@@ -35,7 +36,11 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
     enemy->AddComponent<ModelRenderer>(
         "Assets\\Models\\Player.obj",
         "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
+        "BuildedShader\\unlitTexturePS.cso",
+        ModelRenderer::InverseAxis::Y); // Y軸反転
+
+    enemy->AddComponent<Enemy>();
 
     return enemy;
 }
+

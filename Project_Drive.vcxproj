@@ -144,6 +144,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\Script\CameraController.cpp" />
+    <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\System\input.cpp" />
     <ClCompile Include="source\System\main.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="include\math\Vector3.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\Script\CameraController.h" />
+    <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\Player.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\System\component.h" />
