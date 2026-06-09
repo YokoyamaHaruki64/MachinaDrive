@@ -65,16 +65,16 @@ void Manager::Init()
         InstantiateForBeginScene(
             "Enemy",
             pos,
-            Vector3::Zero(),
+            Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
             Vector3::One());
     }
 
     float treePosY = 3.5f; // 木の高さを調整
     const Vector3 treePos[] = {
-        Vector3(5.0f, treePosY, -8.0f),
-        Vector3(-5.0f, treePosY, -8.0f),
-        Vector3(5.0f, treePosY, -5.0f),
-        Vector3(-5.0f, treePosY, -5.0f),
+        Vector3(5.0f, treePosY, 12.0f),
+        Vector3(-5.0f, treePosY, 12.0f),
+        Vector3(7.0f, treePosY, 8.0f),
+        Vector3(-7.0f, treePosY, 8.0f),
     };
 
     for (const auto& pos : treePos)
