@@ -3,9 +3,11 @@
 #include "Script/Player.h"
 
 #include "System/input.h"
+#include "System/manager.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "math/MathCommon.h"
+#include "Script/Bullet.h"
 
 
 void Player::Update()
@@ -45,6 +47,19 @@ void Player::Update()
 		m_velocity.y += jumpForce; // ジャンプ
 		m_isGrounded = false; // ジャンプしたので地面から離れる
 	}
+
+    if( Input::GetKeyPress(Input::KK_SHIFT))
+    {
+        inputDirection *= 2.0f; // ダッシュ
+    }
+
+    if( Input::GetKeyTrigger(Input::KK_F))
+    {
+        GameObject* bullet = Manager::Instantiate("Bullet",
+            transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f)
+            , Vector3::Zero(), Vector3::One()); // 弾の生成
+        bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f); // 弾の速度設定
+    }
 
 	m_velocity += inputDirection.Normalized() * moveSpeed * dt; // 加速度
 

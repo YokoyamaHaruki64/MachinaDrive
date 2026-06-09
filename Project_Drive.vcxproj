@@ -143,9 +143,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\Script\Bullet.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
+    <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
     <ClCompile Include="source\System\main.cpp" />
     <ClCompile Include="source\System\GameObject.cpp" />
@@ -160,6 +162,7 @@
     <ClInclude Include="include\math\MathCommon.h" />
     <ClInclude Include="include\math\Vector3.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\Script\Bullet.h" />
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\Player.h" />
@@ -167,6 +170,7 @@
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
+    <ClInclude Include="include\System\GM_Time.h" />
     <ClInclude Include="include\System\input.h" />
     <ClInclude Include="include\System\main.h" />
     <ClInclude Include="include\System\manager.h" />
