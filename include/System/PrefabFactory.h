@@ -7,6 +7,7 @@
 
 #include "Script/Player.h"
 #include "Script/Enemy.h"
+#include "Script/Bullet.h"
 
 GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
@@ -44,3 +45,17 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
     return enemy;
 }
 
+GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* bullet = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    bullet->AddComponent<ModelRenderer>(
+        "Assets\\Models\\bullet.obj",
+        "BuildedShader\\unlitTextureVS.cso",
+        "BuildedShader\\unlitTexturePS.cso"); // Y軸反転
+    bullet->AddComponent<Bullet>();
+    return bullet;
+}

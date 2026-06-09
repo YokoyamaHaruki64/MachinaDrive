@@ -16,6 +16,7 @@ class Manager
 {
 private:
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
+    static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
     static std::unordered_map<std::string,
         std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
 
@@ -31,10 +32,19 @@ private:
         if (it != m_FactoryMap.end())
         {
             GameObject* newObj = it->second(position, rotation, scale);
-            m_GameObjects.emplace_back(newObj);
+            m_pendingGameObjects.emplace_back(newObj);
 
             std::vector<Component*> components = newObj->GetComponents();
         }
+    }
+
+    static void PendingGameObjectsProcess()
+    {
+        for (auto& pendingObj : m_pendingGameObjects)
+        {
+            m_GameObjects.emplace_back(std::move(pendingObj));
+        }
+        m_pendingGameObjects.clear();
     }
 
 public:
@@ -60,13 +70,9 @@ public:
         if (it != m_FactoryMap.end())
         {
             GameObject* newObj = it->second(position, rotation, scale);
-            m_GameObjects.emplace_back(newObj);
+            m_pendingGameObjects.emplace_back(newObj);
 
-            std::vector<Component*> components = newObj->GetComponents();
-            for (Component* comp : components)
-            {
-                comp->OnStart();
-            }
+            newObj->OnStart(); // 生成と同時にOnStartを呼び出す
 
             return newObj;
         }
@@ -78,8 +84,8 @@ public:
         Vector3 rotation = Vector3::Zero(),
         Vector3 scale = Vector3::One())
 	{
-        m_GameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
-        return m_GameObjects.back().get();
+        m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
+        return m_pendingGameObjects.back().get();
 	}
 
     // コンポーネントからゲームオブジェクトを取得するための関数

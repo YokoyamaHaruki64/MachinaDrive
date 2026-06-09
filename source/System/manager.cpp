@@ -13,6 +13,7 @@
 #include "Script/CameraController.h"
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
+std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
 
 std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
@@ -22,7 +23,7 @@ void Manager::Init()
 {
     RegisterFactory("Player", PlayerPrefabFactory);
     RegisterFactory("Enemy", EnemyPrefabFactory);
-
+    RegisterFactory("Bullet", BulletPrefabFactory);
 
 	Renderer::Init();
 	Input::Init();
@@ -56,6 +57,7 @@ void Manager::Init()
         Vector3(0.0f, 0.0f, 6.0f),
     };
 
+
     for (const auto& pos : enemyPos)
     {
         InstantiateForBeginScene(
@@ -65,6 +67,7 @@ void Manager::Init()
             Vector3::One());
     }
 
+    PendingGameObjectsProcess();
 
 	for (auto& gameObject : m_GameObjects)
 	{
@@ -77,6 +80,7 @@ void Manager::Uninit()
 {
 	Renderer::Uninit();
 	Input::Uninit();
+    PendingGameObjectsProcess();
 	for (auto& gameObject : m_GameObjects)
 	{
         gameObject->OnDestroy();
@@ -86,6 +90,9 @@ void Manager::Uninit()
 void Manager::Update()
 {
 	Input::Update();
+
+    PendingGameObjectsProcess();
+
 	for (auto& gameObject : m_GameObjects)
 	{
 		gameObject->Update();

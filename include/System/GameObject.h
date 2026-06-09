@@ -14,6 +14,7 @@ protected:
 	std::vector<std::unique_ptr<Component>> m_components;
 
     bool m_isDestroy = false;
+    
 
 public:
     GameObject();
@@ -97,6 +98,7 @@ public:
 			component->Update();
 		}
 	}
+
     void LateUpdate()
     {
         for (auto& component : m_components)
