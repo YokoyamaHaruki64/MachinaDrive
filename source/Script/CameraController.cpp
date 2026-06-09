@@ -1,6 +1,9 @@
-﻿#include "Script/CameraController.h"
+﻿#include "pch.h"
+
+#include "Script/CameraController.h"
 #include "System/manager.h"
 #include "System/input.h"
+
 #include "Component/Camera.h"
 #include "Component/Transform.h"
 

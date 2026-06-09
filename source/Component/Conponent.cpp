@@ -1,4 +1,6 @@
-﻿#include "System/component.h"
+﻿#include "pch.h"
+
+#include "System/component.h"
 #include "System/GameObject.h"
 
 Transform* Component::transform() const

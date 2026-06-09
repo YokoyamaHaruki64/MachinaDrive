@@ -4,10 +4,11 @@
 #include <wrl/client.h>
 #include "math/Vector3.h"
 #include "System/GameObject.h"
+#include "System/RendererBase.h"
 using Microsoft::WRL::ComPtr;
 
 
-class Primitive : public Component
+class PrimitiveRenderer : public RendererBase
 {
 protected:
     ComPtr<ID3D11Buffer> m_vertexBuffer;
@@ -31,13 +32,13 @@ protected:
     static const char* DEFAULT_VERTEX_SHADER_FILE;
     static const char* DEFAULT_PIXEL_SHADER_FILE;
 public:
-    Primitive() = delete;
-    Primitive(GameObject* owner) : Component(owner) {}
-    virtual ~Primitive() {}
+    PrimitiveRenderer() = delete;
+    PrimitiveRenderer(GameObject* owner) : RendererBase(owner) {}
+    virtual ~PrimitiveRenderer() {}
     void Draw() override;
 };
 
-class Quad : public Primitive
+class Quad : public PrimitiveRenderer
 {
 private:
     static constexpr int QUAD_INDEX_COUNT = 6;
@@ -48,10 +49,9 @@ public:
         const wchar_t* textureFile,
         const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
         const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE);
-    
 };
 
-class Plane : public Primitive
+class Plane : public PrimitiveRenderer
 {
 private:
     static constexpr int PLANE_INDEX_COUNT = 6;
@@ -65,7 +65,7 @@ public:
     
 };
 
-class Cube : public Primitive
+class Cube : public PrimitiveRenderer
 {
 private:
     static constexpr int CUBE_INDEX_COUNT = 36;

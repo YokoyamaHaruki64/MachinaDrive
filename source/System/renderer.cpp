@@ -1,4 +1,5 @@
-﻿
+﻿#include "pch.h"
+
 #include "System/main.h"
 #include "System/renderer.h"
 #include <io.h>

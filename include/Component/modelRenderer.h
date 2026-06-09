@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "System/renderer.h"
-#include "System/component.h"
+#include "System/RendererBase.h"
 #include <string>
 #include <unordered_map>
 #include <d3d11.h>
@@ -51,7 +51,7 @@ struct MODEL
 };
 
 class Transform;
-class ModelRenderer : public Component
+class ModelRenderer : public RendererBase
 {
 public:
     enum InverseAxis
@@ -84,12 +84,10 @@ public:
         const char* modelFileName,
         const char* vertexShaderFileName,
         const char* pixelShaderFileName,
-        uint8_t inverseAxisFlags = 0) : Component(Object), m_InverseAxisFlags(inverseAxisFlags)
+        uint8_t inverseAxisFlags = 0) : RendererBase(Object), m_InverseAxisFlags(inverseAxisFlags)
     {
         Load(modelFileName, vertexShaderFileName, pixelShaderFileName);
     }
-
-	using Component::Component;
 
 	void Load(
         const char* modelFileName,
