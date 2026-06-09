@@ -70,10 +70,10 @@ void Manager::Init()
 
     float treePosY = 3.5f; // 木の高さを調整
     const Vector3 treePos[] = {
-        Vector3(5.0f, treePosY, 0.0f),
-        Vector3(-5.0f, treePosY, 0.0f),
-        Vector3(5.0f, treePosY, 8.0f),
-        Vector3(-5.0f, treePosY, 8.0f),
+        Vector3(5.0f, treePosY, -8.0f),
+        Vector3(-5.0f, treePosY, -8.0f),
+        Vector3(5.0f, treePosY, -5.0f),
+        Vector3(-5.0f, treePosY, -5.0f),
     };
 
     for (const auto& pos : treePos)

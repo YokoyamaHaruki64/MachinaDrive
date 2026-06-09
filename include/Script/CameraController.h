@@ -11,7 +11,7 @@ class CameraController : public Component
     Camera* m_camera = nullptr;
 
     static constexpr float CAMERA_DISTANCE = 8.0f;
-    static constexpr float CAMERA_HEIGHT = 5.0f;
+    static constexpr float CAMERA_HEIGHT = 3.0f;
 public:
     CameraController() = default;
     explicit CameraController(GameObject* owner)
@@ -22,5 +22,5 @@ public:
     Transform* GetTarget() const { return m_target; }
 
     void OnStart() override;
-    void Update() override;
+    void LateUpdate() override;
 };

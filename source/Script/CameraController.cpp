@@ -25,7 +25,7 @@ void CameraController::OnStart()
     m_camera = Camera::GetMainCamera();
 }
 
-void CameraController::Update()
+void CameraController::LateUpdate()
 {
     if (m_target == nullptr)
     {
