@@ -10,13 +10,13 @@ void ExplosionEffect::Update()
 {
     m_elapsedTime += Time::GetDeltaTime(); // 経過時間を更新
     // エフェクトの寿命を超えたらゲームオブジェクトを削除
-    if (m_elapsedTime >= lifetime)
+    if (m_elapsedTime >= LIFETIME)
     {
         m_owner->Destroy();
         return;
     }
     // スプライトシートのフレームを計算
-    int currentFrame = static_cast<int>(m_elapsedTime / frameDuration);
+    int currentFrame = static_cast<int>(m_elapsedTime / FRAME_DURATION);
     float width = 1.0f / 4.0f;
     float height = 1.0f / 4.0f;
     float offsetX = (currentFrame % 4) * width;

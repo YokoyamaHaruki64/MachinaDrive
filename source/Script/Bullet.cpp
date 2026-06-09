@@ -10,6 +10,12 @@
 void Bullet::Update()
 {
     transform()->SetPosition(transform()->GetPosition() + m_velocity * Time::GetDeltaTime());
+    m_elapsedTime += Time::GetDeltaTime();
+    if (m_elapsedTime >= LIFE_TIME)
+    {
+        m_owner->Destroy(); // 寿命が尽きたら弾を破壊
+        return;
+    }
 
     // 当たり判定
     auto enemies = Manager::GetObjectsByComponent<Enemy>();
@@ -19,7 +25,7 @@ void Bullet::Update()
         // 簡易的な当たり判定（距離が一定以下ならヒットとする
         float distance =
             (transform()->GetPosition() - enemyTransform->GetPosition()).LengthSqr();
-        if (distance < HitRadius * HitRadius) // ヒットの閾値
+        if (distance < HIT_RADIUS * HIT_RADIUS) // ヒットの閾値
         {
             enemyObj->Destroy();    // 敵を破壊
             m_owner->Destroy();     // 弾を破壊
