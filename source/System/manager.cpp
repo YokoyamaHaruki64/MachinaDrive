@@ -13,7 +13,6 @@
 #include "Script/CameraController.h"
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
-Camera* Manager::m_Camera = nullptr;
 
 std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
@@ -80,6 +79,28 @@ void Manager::Update()
     for (auto& gameObject : m_GameObjects)
     {
         gameObject->LateUpdate();
+    }
+
+    // 破棄されたオブジェクトの削除
+    for (size_t i = 0; i < m_GameObjects.size();)
+    {
+        if (m_GameObjects[i]->IsDestroyed())
+        {
+            m_GameObjects[i]->OnDestroy();
+
+            // 末尾と入れ替え
+            std::swap(m_GameObjects[i], m_GameObjects.back());
+
+            // 末尾削除
+            m_GameObjects.pop_back();
+
+            // インクリメントしない
+            // swap後に新しい要素が i に来るので再チェック
+        }
+        else
+        {
+            ++i;
+        }
     }
 }
 
