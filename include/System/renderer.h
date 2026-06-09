@@ -63,7 +63,8 @@ private:
 	static ID3D11BlendState*		m_BlendState;
 	static ID3D11BlendState*		m_BlendStateATC;
 
-
+    static XMMATRIX m_ViewMatrix;
+    static XMMATRIX m_ProjectionMatrix;
 
 public:
 	static void Init();
@@ -83,6 +84,8 @@ public:
 	static ID3D11Device* GetDevice( void ){ return m_Device; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_DeviceContext; }
 
+    static XMMATRIX GetViewMatrix();
+    static XMMATRIX GetProjectionMatrix();
 
 
 	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);

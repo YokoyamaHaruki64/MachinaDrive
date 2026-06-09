@@ -27,6 +27,8 @@ ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
 ID3D11BlendState*		Renderer::m_BlendState{};
 ID3D11BlendState*		Renderer::m_BlendStateATC{};
 
+XMMATRIX Renderer::m_ViewMatrix{};
+XMMATRIX Renderer::m_ProjectionMatrix{};
 
 
 
@@ -336,6 +338,7 @@ void Renderer::SetWorldMatrix(XMMATRIX WorldMatrix)
 
 void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 {
+    m_ViewMatrix = ViewMatrix;
 	XMFLOAT4X4 viewf;
 	XMStoreFloat4x4(&viewf, XMMatrixTranspose(ViewMatrix));
 	m_DeviceContext->UpdateSubresource(m_ViewBuffer, 0, NULL, &viewf, 0, 0);
@@ -343,6 +346,7 @@ void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 
 void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 {
+    m_ProjectionMatrix = ProjectionMatrix;
 	XMFLOAT4X4 projectionf;
 	XMStoreFloat4x4(&projectionf, XMMatrixTranspose(ProjectionMatrix));
 	m_DeviceContext->UpdateSubresource(m_ProjectionBuffer, 0, NULL, &projectionf, 0, 0);
@@ -359,6 +363,16 @@ void Renderer::SetMaterial( MATERIAL Material )
 void Renderer::SetLight( LIGHT Light )
 {
 	m_DeviceContext->UpdateSubresource(m_LightBuffer, 0, NULL, &Light, 0, 0);
+}
+
+XMMATRIX Renderer::GetViewMatrix()
+{
+    return m_ViewMatrix;
+}
+
+XMMATRIX Renderer::GetProjectionMatrix()
+{
+    return m_ProjectionMatrix;
 }
 
 void Renderer::CreateVertexShader( ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName )

@@ -21,7 +21,14 @@ protected:
     ComPtr<ID3D11ShaderResourceView> m_texture;
     int m_textureWidth = 0;
     int m_textureHeight = 0;
+    int m_vertexCount = 0;
     int m_indexCount = 0;
+
+    float m_uvOffsetX = 0.0f;
+    float m_uvOffsetY = 0.0f;
+    float m_uvWidth = 1.0f;
+    float m_uvHeight = 1.0f;
+    bool m_dirtyUV = false; // UV座標が変更されたかどうかを示すフラグ
 
     void LoadTexture(const wchar_t* textureFile);
     void CreateVertexShaderAndInputLayout(const char* vertexShaderFile);
@@ -36,6 +43,30 @@ public:
     PrimitiveRenderer(GameObject* owner) : RendererBase(owner) {}
     virtual ~PrimitiveRenderer() {}
     void Draw() override;
+
+    void SetUVRect(float offsetX, float offsetY, float width, float height)
+    {
+        m_uvOffsetX = offsetX;
+        m_uvOffsetY = offsetY;
+        m_uvWidth = width;
+        m_uvHeight = height;
+
+        m_dirtyUV = true; // UV座標が変更されたことをマーク
+    }
+
+    void SetUVOffset(float offsetX, float offsetY)
+    {
+        m_uvOffsetX = offsetX;
+        m_uvOffsetY = offsetY;
+        m_dirtyUV = true; // UV座標が変更されたことをマーク
+    }
+
+    void SetUVSize(float width, float height)
+    {
+        m_uvWidth = width;
+        m_uvHeight = height;
+        m_dirtyUV = true; // UV座標が変更されたことをマーク
+    }
 };
 
 class Quad : public PrimitiveRenderer

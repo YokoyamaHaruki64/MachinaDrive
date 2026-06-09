@@ -4,6 +4,7 @@
 
 #include "Component/Transform.h"
 #include "Component/modelRenderer.h"
+#include "Component/Primitive.h"
 
 #include "Script/Player.h"
 #include "Script/Enemy.h"
@@ -58,4 +59,18 @@ GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation
         "BuildedShader\\unlitTexturePS.cso"); // Y軸反転
     bullet->AddComponent<Bullet>();
     return bullet;
+}
+
+GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* tree = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    tree->AddComponent<Quad>(
+        L"Assets\\Textures\\tree.png",
+        "BuildedShader\\unlitTextureVS.cso",
+        "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
+    return tree;
 }

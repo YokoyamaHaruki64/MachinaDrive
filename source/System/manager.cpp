@@ -24,6 +24,7 @@ void Manager::Init()
     RegisterFactory("Player", PlayerPrefabFactory);
     RegisterFactory("Enemy", EnemyPrefabFactory);
     RegisterFactory("Bullet", BulletPrefabFactory);
+    RegisterFactory("Tree", TreePrefabFactory);
 
 	Renderer::Init();
 	Input::Init();
@@ -32,7 +33,7 @@ void Manager::Init()
     camera->AddComponentForBeginScene<Camera>(Camera::MainCamera);
     camera->AddComponentForBeginScene<CameraController>();
 
-    GameObject* field = CreateEmpty(Vector3::Zero());
+    GameObject* field = CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
     field->AddComponentForBeginScene<Plane>(
         L"Assets\\Textures\\glass2.png",
         "BuildedShader\\unlitTextureVS.cso",
@@ -65,6 +66,23 @@ void Manager::Init()
             pos,
             Vector3::Zero(),
             Vector3::One());
+    }
+
+    float treePosY = 3.5f; // 木の高さを調整
+    const Vector3 treePos[] = {
+        Vector3(5.0f, treePosY, 0.0f),
+        Vector3(-5.0f, treePosY, 0.0f),
+        Vector3(5.0f, treePosY, 8.0f),
+        Vector3(-5.0f, treePosY, 8.0f),
+    };
+
+    for (const auto& pos : treePos)
+    {
+        InstantiateForBeginScene(
+            "Tree",
+            pos,
+            Vector3::Zero(),
+            Vector3::One() * 5.0f);
     }
 
     PendingGameObjectsProcess();

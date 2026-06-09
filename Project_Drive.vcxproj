@@ -153,6 +153,7 @@
     <ClCompile Include="source\System\GameObject.cpp" />
     <ClCompile Include="source\System\manager.cpp" />
     <ClCompile Include="source\System\renderer.cpp" />
+    <ClCompile Include="source\System\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Component\Camera.h" />
