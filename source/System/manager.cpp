@@ -37,7 +37,7 @@ void Manager::Init()
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso");
 
-    GameObject* obj = CreateEmpty(Vector3(0.0f, 1.0f, 0.0f));
+    GameObject* obj = CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
     obj->AddComponentForBeginScene<Cube>(
         L"Assets\\Textures\\DarkMatReal.png",
         "BuildedShader\\Dice_VS.cso",
@@ -47,8 +47,23 @@ void Manager::Init()
     InstantiateForBeginScene(
         "Player",
         Vector3(0.0f, 0.0f, 1.0f),
-        Vector3::Zero(),
+        Vector3(0.0f, 0.0f, 0.0f),
         Vector3::One());
+
+    const Vector3 enemyPos[] = {
+        Vector3(4.0f, 0.0f, 4.0f),
+        Vector3(-4.0f, 0.0f, 4.0f),
+        Vector3(0.0f, 0.0f, 6.0f),
+    };
+
+    for (const auto& pos : enemyPos)
+    {
+        InstantiateForBeginScene(
+            "Enemy",
+            pos,
+            Vector3::Zero(),
+            Vector3::One());
+    }
 
 
 	for (auto& gameObject : m_GameObjects)
