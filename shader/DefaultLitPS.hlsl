@@ -7,7 +7,7 @@ SamplerState MainSampler : register(s0);
 
 float4 main(PS_IN input) : SV_Target
 {
-    // ƒn[ƒtƒ‰ƒ“ƒo[ƒgƒ‚ƒfƒ‹‚ğ—˜—p‚µ‚Äƒ‰ƒCƒgŒvZ 
+    // ãƒãƒ¼ãƒ•ãƒ©ãƒ³ãƒãƒ¼ãƒˆãƒ¢ãƒ‡ãƒ«ã‚’åˆ©ç”¨ã—ã¦ãƒ©ã‚¤ãƒˆè¨ˆç®— 
     float3 normal = normalize(input.Normal.xyz);
     float lightIntensity = 0.5 + -dot(normal, Light.Direction.xyz) * 0.5;
     float2 uv = input.TexCoord;
@@ -21,17 +21,4 @@ float4 main(PS_IN input) : SV_Target
     Light.Diffuse.rgb * 
     lightIntensity;
     return float4(returnColor, input.Diffuse.a * tex.a);
-}
-
-int SurfaceFromNormal(float3 normal)
-{
-    // –@ü‚©‚çƒT[ƒtƒFƒCƒXID‚ğŒvZ‚·‚é
-    // ‚±‚±‚Å‚Í’Pƒ‚É–@ü‚Ì•ûŒü‚ÉŠî‚Ã‚¢‚ÄID‚ğŠ„‚è“–‚Ä‚é—á‚ğ¦‚·
-    if (normal.y > 0.5) return 1; // ãŒü‚«‚Ì–Ê
-    if (normal.y < -0.5) return 2; // ‰ºŒü‚«‚Ì–Ê
-    if (normal.x > 0.5) return 3; // ‰EŒü‚«‚Ì–Ê
-    if (normal.x < -0.5) return 4; // ¶Œü‚«‚Ì–Ê
-    if (normal.z > 0.5) return 5; // ‘OŒü‚«‚Ì–Ê
-    if (normal.z < -0.5) return 6; // Œã‚ëŒü‚«‚Ì–Ê
-    return 0; // ‚»‚Ì‘¼‚Ì–Ê
 }

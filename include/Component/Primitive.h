@@ -28,7 +28,6 @@ protected:
     float m_uvOffsetY = 0.0f;
     float m_uvWidth = 1.0f;
     float m_uvHeight = 1.0f;
-    bool m_dirtyUV = false; // UV座標が変更されたかどうかを示すフラグ
 
     void LoadTexture(const wchar_t* textureFile);
     void CreateVertexShaderAndInputLayout(const char* vertexShaderFile);
@@ -50,22 +49,18 @@ public:
         m_uvOffsetY = offsetY;
         m_uvWidth = width;
         m_uvHeight = height;
-
-        m_dirtyUV = true; // UV座標が変更されたことをマーク
     }
 
     void SetUVOffset(float offsetX, float offsetY)
     {
         m_uvOffsetX = offsetX;
         m_uvOffsetY = offsetY;
-        m_dirtyUV = true; // UV座標が変更されたことをマーク
     }
 
     void SetUVSize(float width, float height)
     {
         m_uvWidth = width;
         m_uvHeight = height;
-        m_dirtyUV = true; // UV座標が変更されたことをマーク
     }
 };
 

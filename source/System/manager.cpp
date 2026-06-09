@@ -25,6 +25,7 @@ void Manager::Init()
     RegisterFactory("Enemy", EnemyPrefabFactory);
     RegisterFactory("Bullet", BulletPrefabFactory);
     RegisterFactory("Tree", TreePrefabFactory);
+    RegisterFactory("ExplosionEffect", ExplosionPrefabFactory);
 
 	Renderer::Init();
 	Input::Init();

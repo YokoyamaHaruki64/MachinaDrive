@@ -118,30 +118,6 @@ void PrimitiveRenderer::CreateIndexBuffer(const unsigned int* indexData, size_t 
 
 void PrimitiveRenderer::Draw()
 {
-    if( m_dirtyUV )
-    {
-        // UV座標が変更された場合、頂点バッファを更新する処理をここに追加
-        D3D11_MAPPED_SUBRESOURCE map;
-
-        HRESULT hr = Renderer::GetDeviceContext()->Map(
-            m_vertexBuffer.Get(),0, D3D11_MAP_WRITE_DISCARD, 0, &map);
-        if (FAILED(hr))
-        {
-            MessageBoxA(nullptr, "頂点バッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-            return;
-        }
-        VERTEX_3D* vertices = (VERTEX_3D*)map.pData;
-        // quad,plane,cube共通のUV更新処理
-        for (int i = 0; i < m_vertexCount; i++)
-        {
-            int verticeIndex = i % 4; // 0,1,2,3の繰り返し
-            vertices[i].TexCoord.x = (verticeIndex % 2 == 0) ? m_uvOffsetX : (m_uvOffsetX + m_uvWidth);
-            vertices[i].TexCoord.y = (verticeIndex / 2 == 0) ? m_uvOffsetY : (m_uvOffsetY + m_uvHeight);
-        }
-
-        Renderer::GetDeviceContext()->Unmap(m_vertexBuffer.Get(), 0);
-        m_dirtyUV = false; // 更新後はフラグをリセット
-    }
 
     // 入力レイアウトとシェーダーの設定
     Renderer::GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
@@ -156,6 +132,9 @@ void PrimitiveRenderer::Draw()
     material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     material.TextureEnable = true;
     Renderer::SetMaterial(material);
+
+    // UVの設定
+    Renderer::SetUV(XMFLOAT4(m_uvWidth, m_uvHeight, m_uvOffsetX, m_uvOffsetY));
 
     // 頂点バッファの設定
     UINT stride = sizeof(VERTEX_3D);

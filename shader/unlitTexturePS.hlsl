@@ -11,7 +11,8 @@ void main(in PS_IN In, out float4 outDiffuse : SV_Target)
 
 	if (Material.TextureEnable)
 	{
-		outDiffuse = g_Texture.Sample(g_SamplerState, In.TexCoord);
+        float2 uv = In.TexCoord * UVScale + UVOffset;
+        outDiffuse = g_Texture.Sample(g_SamplerState, uv);
 		outDiffuse *= In.Diffuse;
 	}
 	else

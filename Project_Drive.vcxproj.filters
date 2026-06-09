@@ -87,6 +87,9 @@
     <ClCompile Include="source\System\RendererBase.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ExplosionEffect.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -154,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="include\System\GM_Time.h">
       <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ExplosionEffect.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

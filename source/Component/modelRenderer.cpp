@@ -61,17 +61,6 @@ void ModelRenderer::Draw()
     // 定数バッファ設定
     if (t)
     {
-        //const Vector3& p = t->GetPosition();
-        //const Vector3& r = t->GetRotation();
-        //const Vector3& s = t->GetScale();
-
-        //XMMATRIX pos = XMMatrixTranslation(p.x, p.y, p.z);
-        //XMMATRIX rot = XMMatrixRotationRollPitchYaw(
-        //    m_InverseAxisFlags & InverseAxis::X ? r.x + Math::PI : r.x,
-        //    m_InverseAxisFlags & InverseAxis::Y ? r.y + Math::PI : r.y,
-        //    m_InverseAxisFlags & InverseAxis::Z ? r.z + Math::PI : r.z);
-        //XMMATRIX scale = XMMatrixScaling(s.x, s.y, s.z);
-
         XMMATRIX axisInverse = XMMatrixRotationRollPitchYaw(
             m_InverseAxisFlags & InverseAxis::X ? Math::PI : 0.0f,
             m_InverseAxisFlags & InverseAxis::Y ? Math::PI : 0.0f,
@@ -80,6 +69,9 @@ void ModelRenderer::Draw()
 
         Renderer::SetWorldMatrix(world);
     }
+
+    // UV設定
+    Renderer::SetUV(XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
 
 	for( unsigned int i = 0; i < m_Model->SubsetNum; i++ )
 	{

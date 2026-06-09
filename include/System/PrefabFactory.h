@@ -9,6 +9,7 @@
 #include "Script/Player.h"
 #include "Script/Enemy.h"
 #include "Script/Bullet.h"
+#include "Script/ExplosionEffect.h"
 
 GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
@@ -73,4 +74,20 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
     return tree;
+}
+
+GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* explosion = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    explosion->AddComponent<Quad>(
+        L"Assets\\Textures\\explosion.png",
+        "BuildedShader\\unlitTextureVS.cso",
+        "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::CameraFacing);
+
+    explosion->AddComponent<ExplosionEffect>();
+    return explosion;
 }

@@ -1,0 +1,30 @@
+﻿#include "pch.h"
+
+#include "Script/ExplosionEffect.h"
+
+#include "System/GM_Time.h"
+#include "Component/Primitive.h"
+
+
+void ExplosionEffect::Update()
+{
+    m_elapsedTime += Time::GetDeltaTime(); // 経過時間を更新
+    // エフェクトの寿命を超えたらゲームオブジェクトを削除
+    if (m_elapsedTime >= lifetime)
+    {
+        m_owner->Destroy();
+        return;
+    }
+    // スプライトシートのフレームを計算
+    int currentFrame = static_cast<int>(m_elapsedTime / frameDuration);
+    float width = 1.0f / 4.0f;
+    float height = 1.0f / 4.0f;
+    float offsetX = (currentFrame % 4) * width;
+    float offsetY = (currentFrame / 4) * height;
+    // UV座標を更新
+    PrimitiveRenderer* renderer = m_owner->GetComponent<PrimitiveRenderer>();
+    if (renderer != nullptr)
+    {
+        renderer->SetUVRect(offsetX, offsetY, width, height);
+    }
+}

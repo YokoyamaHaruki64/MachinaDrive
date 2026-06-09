@@ -146,6 +146,7 @@
     <ClCompile Include="source\Script\Bullet.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
+    <ClCompile Include="source\Script\ExplosionEffect.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="include\Script\Bullet.h" />
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\Enemy.h" />
+    <ClInclude Include="include\Script\ExplosionEffect.h" />
     <ClInclude Include="include\Script\Player.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\System\component.h" />

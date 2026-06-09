@@ -55,6 +55,12 @@ cbuffer LightBuffer : register(b4)
 	LIGHT Light;
 }
 
+cbuffer UVBuffer : register(b6)
+{
+    float2 UVScale;
+    float2 UVOffset;
+}
+
 
 
 
