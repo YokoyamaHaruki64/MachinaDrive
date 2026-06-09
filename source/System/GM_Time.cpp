@@ -1,4 +1,6 @@
-﻿#include "System/GM_Time.h"
+﻿#include "pch.h"
+
+#include "System/GM_Time.h"
 
 float Time::m_timeScale = 1.0f;
 float Time::m_deltaTime = 0.0f;

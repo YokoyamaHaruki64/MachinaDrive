@@ -147,6 +147,7 @@
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
+    <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
     <ClCompile Include="source\System\main.cpp" />
     <ClCompile Include="source\System\GameObject.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
+    <ClInclude Include="include\System\GM_Time.h" />
     <ClInclude Include="include\System\input.h" />
     <ClInclude Include="include\System\main.h" />
     <ClInclude Include="include\System\manager.h" />

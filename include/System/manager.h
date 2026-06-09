@@ -102,4 +102,18 @@ public:
         return nullptr; // 見つからない場合
 	}
 
+    template <typename T>
+    static std::vector<GameObject*> GetObjectsByComponent()
+    {
+        std::vector<GameObject*> result;
+        for (const auto& gameObject : m_GameObjects)
+        {
+            if (gameObject->GetComponent<T>() != nullptr)
+            {
+                result.push_back(gameObject.get());
+            }
+        }
+        return result; // 見つからない場合は空のベクターを返す
+    }
+
 };

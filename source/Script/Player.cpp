@@ -53,7 +53,7 @@ void Player::Update()
         inputDirection *= 2.0f; // ダッシュ
     }
 
-    if( Input::GetKeyPress(Input::KK_F))
+    if( Input::GetKeyTrigger(Input::KK_F))
     {
         GameObject* bullet = Manager::Instantiate("Bullet",
             transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f)
