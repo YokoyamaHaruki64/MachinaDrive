@@ -90,6 +90,9 @@
     <ClCompile Include="source\Script\ExplosionEffect.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\SpriteRenderer.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="include\Script\ExplosionEffect.h">
       <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\SpriteRenderer.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

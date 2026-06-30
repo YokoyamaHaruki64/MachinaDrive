@@ -8,6 +8,7 @@
 
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
+#include "Component/SpriteRenderer.h"
 
 #include "Script/RotateCube.h"
 #include "Script/CameraController.h"
@@ -29,6 +30,7 @@ void Manager::Init()
 
 	Renderer::Init();
 	Input::Init();
+
 
     GameObject* camera = CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
     camera->AddComponentForBeginScene<Camera>(Camera::MainCamera);
@@ -59,7 +61,6 @@ void Manager::Init()
         Vector3(0.0f, 0.0f, 6.0f),
     };
 
-
     for (const auto& pos : enemyPos)
     {
         InstantiateForBeginScene(
@@ -86,12 +87,14 @@ void Manager::Init()
             Vector3::One() * 5.0f);
     }
 
+
     PendingGameObjectsProcess();
 
 	for (auto& gameObject : m_GameObjects)
 	{
         gameObject->OnStart();
 	}
+
 }
 
 
@@ -171,14 +174,3 @@ void Manager::Draw()
 	Renderer::End();
 
 }
-
-/*
-GameObject obj = Allocate<GameObject>(new Camera());
-
-Allocateの中身
-事前確保された巨大メモリ
-そこからオフセットやら何やらアルゴリズムでアドレス決定（初回はAllocateで確保した先頭アドレス）
-そのアドレスの位置にCameraのコンストラクタを呼び出してCameraオブジェクトを構築
-↑これがわからん
-そのオブジェクトのアドレスを返す
-*/

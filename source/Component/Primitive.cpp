@@ -116,6 +116,8 @@ void PrimitiveRenderer::CreateIndexBuffer(const unsigned int* indexData, size_t 
     }
 }
 
+
+
 void PrimitiveRenderer::Draw()
 {
 
