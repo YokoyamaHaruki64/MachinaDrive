@@ -4,6 +4,7 @@
 
 #include "System/input.h"
 #include "System/manager.h"
+#include "System/GM_Time.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "math/MathCommon.h"
@@ -22,7 +23,6 @@ void Player::Update()
 	const float moveSpeed = 50.0f;
 	const float jumpForce = 5.0f;
 	const float friction = 10.0f;
-	const float dt = 1.0f / 60.0f; // 仮のデルタタイム（60FPS想定）
 
 	Vector3 inputDirection{ 0.0f, 0.0f, 0.0f };
 	if (Input::GetKeyPress(Input::KK_W))
@@ -61,16 +61,16 @@ void Player::Update()
         bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f); // 弾の速度設定
     }
 
-	m_velocity += inputDirection.Normalized() * moveSpeed * dt; // 加速度
+    m_velocity += inputDirection.Normalized() * moveSpeed * Time::GetDeltaTime(); // 入力に基づく加速度
 
-	m_velocity.y -= 9.81f * dt;					    // 重力
-	m_velocity.x -= m_velocity.x * friction * dt;	// 摩擦
-	m_velocity.z -= m_velocity.z * friction * dt;	// 摩擦
+	m_velocity.y -= 9.81f * Time::GetDeltaTime();					    // 重力
+	m_velocity.x -= m_velocity.x * friction * Time::GetDeltaTime();	// 摩擦
+	m_velocity.z -= m_velocity.z * friction * Time::GetDeltaTime();	// 摩擦
 
-    transform()->Translate(m_velocity * dt); // 位置の更新
+    transform()->Translate(m_velocity * Time::GetDeltaTime()); // 位置の更新
     float targetRotationY = atan2f(m_velocity.x, m_velocity.z); // 移動方向に向く
     const Vector3& myRot = transform()->GetRotation();
-    transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * dt), myRot.z)); // 回転の更新
+    transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * Time::GetDeltaTime()), myRot.z)); // 回転の更新
 
 	if(transform()->GetPosition().y < 0.0f)
 	{
