@@ -28,6 +28,9 @@
 #include <mutex>
 #include <atomic>
 #include <chrono>
+#include <random>
+#include <cassert>
+#include <limits>
 
 // 独自のヘッダーファイル
 #include "math/Vector3.h"

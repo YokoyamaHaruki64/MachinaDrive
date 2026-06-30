@@ -31,7 +31,7 @@ ID3D11BlendState*		Renderer::m_BlendStateATC{};
 XMMATRIX Renderer::m_ViewMatrix{};
 XMMATRIX Renderer::m_ProjectionMatrix{};
 
-
+std::vector<DrawCommand> Renderer::m_DrawCommands{};
 
 void Renderer::Init()
 {
@@ -292,7 +292,24 @@ void Renderer::Begin()
 	m_DeviceContext->ClearDepthStencilView( m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
+void Renderer::Draw()
+{
+    // DrawCommandをsortKeyでソートする
+    std::sort(m_DrawCommands.begin(), m_DrawCommands.end(), [](const DrawCommand& a, const DrawCommand& b) {
+        return a.sortKey < b.sortKey;
+    });
 
+    // DrawCommandを順番に描画する
+    for (const auto& cmd : m_DrawCommands) {
+        if (cmd.renderer)
+        {
+            cmd.renderer->Draw();
+        }
+    }
+
+    // DrawCommandをクリアする
+    m_DrawCommands.clear();
+}
 
 void Renderer::End()
 {
@@ -439,6 +456,11 @@ void Renderer::CreatePixelShader( ID3D11PixelShader** PixelShader, const char* F
 	m_Device->CreatePixelShader(buffer, fsize, NULL, PixelShader);
 
 	delete[] buffer;
+}
+
+void Renderer::SubmitDrawCommand(DrawCommand cmd)
+{
+    m_DrawCommands.push_back(cmd);
 }
 
 

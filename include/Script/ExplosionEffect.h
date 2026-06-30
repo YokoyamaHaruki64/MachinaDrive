@@ -14,5 +14,6 @@ public:
         : Component(owner)
     {
     }
+    void OnStart() override;
     void Update() override;
 };

@@ -11,18 +11,21 @@
 
 class Camera;
 class Component;
+class RendererBase;
 
 class Manager
 {
 private:
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
-    static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
+    static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
+    static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
+
     static std::unordered_map<std::string,
         std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
 
     // prefabから生成のみを行う関数（外部からは呼び出さない）
     // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
-    static void InstantiateForBeginScene(
+    static GameObject* InstantiateForBeginScene(
         const std::string& prefabName,
         const Vector3& position,
         const Vector3& rotation,
@@ -34,8 +37,9 @@ private:
             GameObject* newObj = it->second(position, rotation, scale);
             m_pendingGameObjects.emplace_back(newObj);
 
-            std::vector<Component*> components = newObj->GetComponents();
+            return newObj;
         }
+        return nullptr; // タイプが見つからない場合
     }
 
     static void PendingGameObjectsProcess()
@@ -58,6 +62,25 @@ public:
         std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)> factoryFunction)
     {
         m_FactoryMap[typeName] = factoryFunction;
+    }
+
+    static void RegisterRenderer(RendererBase* renderer)
+    {
+        m_Renderers.push_back(renderer);
+    }
+
+    static void UnregisterRenderer(RendererBase* renderer)
+    {
+        // スワップポップで効率的に削除
+        for(size_t i = 0; i < m_Renderers.size(); ++i)
+        {
+            if(m_Renderers[i] == renderer)
+            {
+                std::swap(m_Renderers[i], m_Renderers.back());
+                break;
+            }
+        }
+        m_Renderers.pop_back();
     }
 
     static GameObject* Instantiate(

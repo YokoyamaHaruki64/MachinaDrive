@@ -16,6 +16,8 @@
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
 
+std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
+
 std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
 
@@ -80,11 +82,13 @@ void Manager::Init()
 
     for (const auto& pos : treePos)
     {
-        InstantiateForBeginScene(
+        GameObject* tree = InstantiateForBeginScene(
             "Tree",
             pos,
             Vector3::Zero(),
             Vector3::One() * 5.0f);
+
+        tree->GetComponent<Quad>()->SetRendererPass(RenderPass::Transparent);
     }
 
 
@@ -107,6 +111,7 @@ void Manager::Uninit()
 	{
         gameObject->OnDestroy();
 	}
+    m_GameObjects.clear();
 }
 
 void Manager::Update()
@@ -166,11 +171,16 @@ void Manager::Draw()
 	light.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	Renderer::SetLight(light);	
 
-	for(auto& gameObject : m_GameObjects)
-	{
-		gameObject->Draw();
-	}
+    for( auto& renderer : m_Renderers)
+    {
+        renderer->Submit();
+    }
+	//for(auto& gameObject : m_GameObjects)
+	//{
+	//	gameObject->Draw();
+	//}
 
+	Renderer::Draw();
 	Renderer::End();
 
 }

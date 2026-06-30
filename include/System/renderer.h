@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "System/main.h"
+#include "System/RendererBase.h"
 
 
 
@@ -37,8 +38,13 @@ struct LIGHT
 };
 
 
+struct DrawCommand
+{
+    uint64_t sortKey;
+    RendererBase* renderer;
+};
 
-class Renderer
+class Renderer 
 {
 private:
 
@@ -66,10 +72,13 @@ private:
     static XMMATRIX m_ViewMatrix;
     static XMMATRIX m_ProjectionMatrix;
 
+    static std::vector<DrawCommand> m_DrawCommands;
+
 public:
 	static void Init();
 	static void Uninit();
 	static void Begin();
+    static void Draw();
 	static void End();
 
 	static void SetDepthEnable(bool Enable);
@@ -92,5 +101,6 @@ public:
 	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);
 	static void CreatePixelShader(ID3D11PixelShader** PixelShader, const char* FileName);
 
+    static void SubmitDrawCommand(DrawCommand cmd);
 
 };

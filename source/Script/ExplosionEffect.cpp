@@ -6,6 +6,17 @@
 #include "Component/Primitive.h"
 
 
+void ExplosionEffect::OnStart()
+{
+    // 初期のUV座標を設定w
+    PrimitiveRenderer* renderer = m_owner->GetComponent<PrimitiveRenderer>();
+    // 透明描画パスに設定
+    if (renderer != nullptr)
+    {
+        renderer->SetRendererPass(RenderPass::Transparent);
+    }
+}
+
 void ExplosionEffect::Update()
 {
     m_elapsedTime += Time::GetDeltaTime(); // 経過時間を更新
