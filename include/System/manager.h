@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -12,6 +11,7 @@
 class Camera;
 class Component;
 class RendererBase;
+class Scene;
 
 class Manager
 {
@@ -23,24 +23,9 @@ private:
     static std::unordered_map<std::string,
         std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
 
-    // prefabから生成のみを行う関数（外部からは呼び出さない）
-    // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
-    static GameObject* InstantiateForBeginScene(
-        const std::string& prefabName,
-        const Vector3& position,
-        const Vector3& rotation,
-        const Vector3& scale)
-    {
-        auto it = m_FactoryMap.find(prefabName);
-        if (it != m_FactoryMap.end())
-        {
-            GameObject* newObj = it->second(position, rotation, scale);
-            m_pendingGameObjects.emplace_back(newObj);
+    static std::unique_ptr<Scene> m_currentScene;
+    static std::unique_ptr<Scene> m_nextScene;
 
-            return newObj;
-        }
-        return nullptr; // タイプが見つからない場合
-    }
 
     static void PendingGameObjectsProcess()
     {
@@ -50,6 +35,8 @@ private:
         }
         m_pendingGameObjects.clear();
     }
+
+    static void InitScene();
 
 public:
 	static void Init();
@@ -83,6 +70,26 @@ public:
         m_Renderers.pop_back();
     }
 
+    // prefabから生成のみを行う関数（シーンから呼び出し）
+    // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
+    static GameObject* InstantiateForBeginScene(
+        const std::string& prefabName,
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale)
+    {
+        auto it = m_FactoryMap.find(prefabName);
+        if (it != m_FactoryMap.end())
+        {
+            GameObject* newObj = it->second(position, rotation, scale);
+            m_pendingGameObjects.emplace_back(newObj);
+
+            return newObj;
+        }
+        return nullptr; // タイプが見つからない場合
+    }
+
+
     static GameObject* Instantiate(
         const std::string& prefabName,
         const Vector3& position,
@@ -110,6 +117,12 @@ public:
         m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
         return m_pendingGameObjects.back().get();
 	}
+
+    template<typename T>
+    static void ChangeScene()
+    {
+        m_nextScene = std::make_unique<T>();
+    }
 
     // コンポーネントからゲームオブジェクトを取得するための関数
     template <typename T>

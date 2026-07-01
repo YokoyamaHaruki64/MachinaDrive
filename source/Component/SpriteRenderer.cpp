@@ -3,6 +3,9 @@
 #include "Component/SpriteRenderer.h"
 #include "System/renderer.h"
 
+const char* SpriteRenderer::DEFAULT_VERTEX_SHADER_FILE = "BuildedShader/unlitTextureVS.cso";
+const char* SpriteRenderer::DEFAULT_PIXEL_SHADER_FILE = "BuildedShader/unlitTexturePS.cso";
+
 SpriteRenderer::SpriteRenderer(
     GameObject* owner,
     const wchar_t* textureFile,

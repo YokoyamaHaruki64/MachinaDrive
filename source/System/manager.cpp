@@ -5,6 +5,8 @@
 #include "System/PrefabFactory.h"
 #include "System/input.h"
 #include "System/renderer.h"
+#include "Scene/Scene.h"
+#include "Scene/TitleScene.h"
 
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
@@ -16,11 +18,46 @@
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
 
+std::unique_ptr<Scene> Manager::m_currentScene;
+std::unique_ptr<Scene> Manager::m_nextScene;
+
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
 std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
 
+
+void Manager::InitScene()
+{
+    if (m_currentScene)
+    {
+        m_currentScene->Uninit();
+
+        // ゲームオブジェクトの破棄処理
+        PendingGameObjectsProcess();
+        for (auto& gameObject : m_GameObjects)
+        {
+            gameObject->OnDestroy();
+        }
+        m_GameObjects.clear();
+
+        m_currentScene.reset();
+    }
+
+    if (m_nextScene)
+    {
+        m_currentScene = std::move(m_nextScene);
+        m_currentScene->Init();
+    }
+
+    PendingGameObjectsProcess();
+
+    for (auto& gameObject : m_GameObjects)
+    {
+        gameObject->OnStart();
+    }
+
+}
 
 void Manager::Init()
 {
@@ -33,72 +70,8 @@ void Manager::Init()
 	Renderer::Init();
 	Input::Init();
 
-
-    GameObject* camera = CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
-    camera->AddComponentForBeginScene<Camera>(Camera::MainCamera);
-    camera->AddComponentForBeginScene<CameraController>();
-
-    GameObject* field = CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    field->AddComponentForBeginScene<Plane>(
-        L"Assets\\Textures\\glass2.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
-
-    GameObject* obj = CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    obj->AddComponentForBeginScene<Cube>(
-        L"Assets\\Textures\\DarkMatReal.png",
-        "BuildedShader\\Dice_VS.cso",
-        "BuildedShader\\Dice_PS.cso");
-    obj->AddComponentForBeginScene<RotateCube>();
-
-    InstantiateForBeginScene(
-        "Player",
-        Vector3(0.0f, 0.0f, 1.0f),
-        Vector3(0.0f, 0.0f, 0.0f),
-        Vector3::One());
-
-    const Vector3 enemyPos[] = {
-        Vector3(4.0f, 0.0f, 4.0f),
-        Vector3(-4.0f, 0.0f, 4.0f),
-        Vector3(0.0f, 0.0f, 6.0f),
-    };
-
-    for (const auto& pos : enemyPos)
-    {
-        InstantiateForBeginScene(
-            "Enemy",
-            pos,
-            Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
-            Vector3::One());
-    }
-
-    float treePosY = 3.5f; // 木の高さを調整
-    const Vector3 treePos[] = {
-        Vector3(5.0f, treePosY, 12.0f),
-        Vector3(-5.0f, treePosY, 12.0f),
-        Vector3(7.0f, treePosY, 8.0f),
-        Vector3(-7.0f, treePosY, 8.0f),
-    };
-
-    for (const auto& pos : treePos)
-    {
-        GameObject* tree = InstantiateForBeginScene(
-            "Tree",
-            pos,
-            Vector3::Zero(),
-            Vector3::One() * 5.0f);
-
-        tree->GetComponent<Quad>()->SetRendererPass(RenderPass::Transparent);
-    }
-
-
-    PendingGameObjectsProcess();
-
-	for (auto& gameObject : m_GameObjects)
-	{
-        gameObject->OnStart();
-	}
-
+    m_nextScene = std::make_unique<TitleScene>();
+    InitScene();
 }
 
 
@@ -119,6 +92,12 @@ void Manager::Update()
 	Input::Update();
 
     PendingGameObjectsProcess();
+
+    if (m_nextScene)
+    {
+        InitScene();
+    }
+
 
 	for (auto& gameObject : m_GameObjects)
 	{
@@ -151,6 +130,7 @@ void Manager::Update()
             ++i;
         }
     }
+
 }
 
 void Manager::Draw()

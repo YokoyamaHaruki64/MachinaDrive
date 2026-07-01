@@ -5,10 +5,12 @@
 #include "System/input.h"
 #include "System/manager.h"
 #include "System/GM_Time.h"
+#include "Scene/TitleScene.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "math/MathCommon.h"
 #include "Script/Bullet.h"
+#include "Script/Enemy.h"
 
 
 void Player::Update()
@@ -78,4 +80,10 @@ void Player::Update()
 		m_velocity.y = 0.0f; // 垂直方向の速度をリセット
 		m_isGrounded = true;
 	}
+
+    auto enemies = Manager::GetObjectsByComponent<Enemy>();
+    if(enemies.empty())
+    {
+        Manager::ChangeScene<TitleScene>();
+    }
 }

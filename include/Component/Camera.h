@@ -34,7 +34,22 @@ public:
         }
         s_camerasByTag[tag] = this;
     }
-
+    ~Camera()
+    {
+        // カメラが破棄されるときに、メインカメラやタグ付きカメラの登録を解除する
+        if (s_mainCamera == this)
+        {
+            s_mainCamera = nullptr;
+        }
+        for (auto it = s_camerasByTag.begin(); it != s_camerasByTag.end(); ++it)
+        {
+            if (it->second == this)
+            {
+                s_camerasByTag.erase(it);
+                break;
+            }
+        }
+    }
     static Camera* GetMainCamera();
     static Camera* GetCameraByTag(CameraTag tag);
 
