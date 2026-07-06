@@ -164,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Common\Color.h" />
+    <ClInclude Include="include\Common\Random.h" />
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\Primitive.h" />
