@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)inlcude\Script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)inlcude\Script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -163,11 +163,13 @@
     <ClCompile Include="source\System\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Common\Color.h" />
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\Primitive.h" />
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />
+    <ClInclude Include="include\math\Curve.h" />
     <ClInclude Include="include\math\MathCommon.h" />
     <ClInclude Include="include\math\Vector3.h" />
     <ClInclude Include="include\pch.h" />
