@@ -5,7 +5,7 @@
 #include "System/input.h"
 #include "System/manager.h"
 #include "System/GM_Time.h"
-#include "Scene/TitleScene.h"
+#include "Scene/ResultScene.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "math/MathCommon.h"
@@ -84,6 +84,6 @@ void Player::Update()
     auto enemies = Manager::GetObjectsByComponent<Enemy>();
     if(enemies.empty())
     {
-        Manager::ChangeScene<TitleScene>();
+        Manager::ChangeScene<ResultScene>();
     }
 }

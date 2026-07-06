@@ -28,7 +28,7 @@ void TitleScene::Init()
                     SCREEN_HEIGHT - SCREEN_HEIGHT / 4.0f,
                     0.0f));
 
-    titleUI->AddComponentForBeginScene<SpriteRenderer>(L"Assets/Textures/EnterText.png");
+    titleUI->AddComponentForBeginScene<SpriteRenderer>(L"Assets/Textures/TitleUI.png");
     titleUI->AddComponentForBeginScene<TitleUI>();
     titleUI->GetTransform()->SetScale(Vector3(800.0f, 200.0f, 1.0f));
 }
