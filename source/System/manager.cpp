@@ -66,6 +66,8 @@ void Manager::Init()
     RegisterFactory("Bullet", BulletPrefabFactory);
     RegisterFactory("Tree", TreePrefabFactory);
     RegisterFactory("ExplosionEffect", ExplosionPrefabFactory);
+    RegisterFactory("Ball", BoundBallPrefabFactory);
+    RegisterFactory("Ripple", RipplePrefabFactory);
 
 	Renderer::Init();
 	Input::Init();

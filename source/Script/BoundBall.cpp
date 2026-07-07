@@ -7,6 +7,28 @@
 #include "Script/BoundBall.h"
 #include "Script/Wall.h"
 
+void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
+{
+    // Rippleエフェクトの生成
+    GameObject* ripple = Manager::Instantiate(
+        "Ripple",
+        position,
+        Vector3::Zero(),
+        Vector3(1.0f, 1.0f, 1.0f)
+    );
+
+    // RippleのTransformを取得して、法線方向に回転させる
+    Transform* rippleTransform = ripple->GetComponent<Transform>();
+    if (rippleTransform)
+    {
+        // 法線ベクトルから回転を計算
+        Vector3 up = Vector3::Up();
+        Vector3 axis = Vector3::Cross(up, normal);
+        float angle = acos(Vector3::Dot(up, normal));
+        rippleTransform->SetRotation(axis * angle);
+    }
+}
+
 void BoundBall::Update()
 {
     float dt = Time::GetDeltaTime();
@@ -53,6 +75,9 @@ void BoundBall::Update()
             // 反射ベクトルの計算
             m_velocity = Vector3::Reflect(m_velocity, normal, m_bounciness);
             pos = closestPoint + normal * m_radius; // 衝突後の位置を修正
+
+            // Rippleエフェクトの生成
+            CreateRippleEffect(normal, closestPoint);
         }
 
     }

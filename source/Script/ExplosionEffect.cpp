@@ -13,7 +13,7 @@ void ExplosionEffect::OnStart()
     // 透明描画パスに設定
     if (renderer != nullptr)
     {
-        renderer->SetRendererPass(RenderPass::Transparent);
+        renderer->SetRenderPass(RenderPass::Transparent);
         // 最初のフレームのUV座標
         renderer->SetUVRect(0.0f, 0.0f, 1.0f / 4.0f, 1.0f / 4.0f); 
     }

@@ -134,10 +134,7 @@ void SpriteRenderer::Draw()
     Renderer::SetWorldMatrix(CalcWorldMatrix());
 
     // マテリアルの設定
-    MATERIAL material{};
-    material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    material.TextureEnable = true;
-    Renderer::SetMaterial(material);
+    Renderer::SetMaterial(m_material);
 
     // UVの設定
     Renderer::SetUV(XMFLOAT4(m_uvWidth, m_uvHeight, m_uvOffsetX, m_uvOffsetY));
