@@ -9,39 +9,8 @@
 const XMMATRIX RendererBase::CalcWorldMatrix()
 {
     Transform* t = transform();
-    XMMATRIX world = XMMatrixIdentity();
-    XMMATRIX scale, rotation, translation;
-    // 回転以外の変換行列を作成
-    scale = XMMatrixScaling(t->GetScale().x, t->GetScale().y, t->GetScale().z);
-    translation = XMMatrixTranslation(t->GetPosition().x, t->GetPosition().y, t->GetPosition().z);
-    // ビルボードの種類に応じて回転行列を作成
-    switch (m_billboardType)
-    {
-    case BillboardType::CameraFacing:
-    {
-        XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
-        // カメラの回転を抽出してビルボードの回転行列を作成
-        inverseView.r[3] = XMVectorSet(0, 0, 0, 1); // 平行移動成分をゼロにする
-        rotation = inverseView;
-    }
-    break;
-    case BillboardType::YAxisFixed:
-    {
-        XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
-        inverseView.r[3] = XMVectorSet(0, 0, 0, 1); // 平行移動成分をゼロにする
-        // Y軸を固定して回転行列を作成
-        inverseView.r[1] = XMVectorSet(0, 1, 0, 0); // Y軸を固定
-        rotation = inverseView;
-    }
-    break;
-    default:
-        rotation = XMMatrixRotationRollPitchYaw(t->GetRotation().x, t->GetRotation().y, t->GetRotation().z);
-        break;
-    }
-    world = scale * rotation * translation;
-    return world;
+    return CalcWorldMatrix(t, m_billboardType);
 }
-
 uint64_t RendererBase::BuildSortKey(const Camera* camera) const
 {
     uint64_t sortKey = 0;
@@ -53,6 +22,7 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
     case RenderPass::Opaque:
         // 不透明オブジェクトは描画順序でソートする
         sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
+        sortKey |= static_cast<uint64_t>(m_blendMode) << 40; // ブレンドモードを40～47ビットに配置
         break;
 
     case RenderPass::Transparent:
@@ -77,10 +47,12 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
 
             sortKey |= static_cast<uint64_t>(m_drawLayer) << 48;    // 描画順序を48～55ビットに配置
             sortKey |= static_cast<uint64_t>(invDepth) << 16;       // 距離を16～47ビットに配置
+            sortKey |= static_cast<uint64_t>(m_blendMode) << 8;        // ブレンドモードを8～15ビットに配置
         }
         break;
     case RenderPass::Overlay:
         sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
+        sortKey |= static_cast<uint64_t>(m_blendMode) << 40; // ブレンドモードを40～47ビットに配置
         break;
     default:
         break;
@@ -104,4 +76,72 @@ void RendererBase::Submit()
     uint64_t sortKey = BuildSortKey(Camera::GetMainCamera());
     DrawCommand cmd = { sortKey, this };
     Renderer::SubmitDrawCommand(cmd);
+}
+
+void RendererBase::BindState()
+{
+    // ブレンドモードや描画パスに応じたGPUステートの設定を行う
+
+    // ブレンドモードの設定
+    if( m_blendMode != Renderer::GetCurrentBlendMode())
+    {
+        Renderer::SetBlendMode(m_blendMode);
+    }
+
+}
+
+const XMMATRIX RendererBase::CalcWorldMatrix(const Transform* transform, BillboardType billboardType)
+{
+    Vector3 position = transform->GetPosition();
+    Vector3 rotation = transform->GetRotation();
+    Vector3 scale = transform->GetScale();
+    return CalcWorldMatrix(position, rotation, scale, billboardType);
+}
+
+const XMMATRIX RendererBase::CalcWorldMatrix(
+    Vector3 position,
+    Vector3 rotation,
+    Vector3 scale,
+    BillboardType billboardType)
+{
+    XMMATRIX world = XMMatrixIdentity();
+    XMMATRIX s, r, t;
+    // 回転以外の変換行列を作成
+    s = XMMatrixScaling(
+        scale.x,
+        scale.y,
+        scale.z);
+    t = XMMatrixTranslation(
+        position.x,
+        position.y,
+        position.z);
+    // ビルボードの種類に応じて回転行列を作成
+    switch (billboardType)
+    {
+    case BillboardType::CameraFacing:
+    {
+        XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
+        // カメラの回転を抽出してビルボードの回転行列を作成
+        inverseView.r[3] = XMVectorSet(0, 0, 0, 1); // 平行移動成分をゼロにする
+        r = inverseView;
+    }
+    break;
+    case BillboardType::YAxisFixed:
+    {
+        XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
+        inverseView.r[3] = XMVectorSet(0, 0, 0, 1); // 平行移動成分をゼロにする
+        // Y軸を固定して回転行列を作成
+        inverseView.r[1] = XMVectorSet(0, 1, 0, 0); // Y軸を固定
+        r = inverseView;
+    }
+    break;
+    default:
+        r = XMMatrixRotationRollPitchYaw(
+            rotation.x,
+            rotation.y,
+            rotation.z);
+        break;
+    }
+    world = s * r * t;
+    return world;
 }

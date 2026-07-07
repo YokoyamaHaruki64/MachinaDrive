@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "System/main.h"
-#include "System/RendererBase.h"
 
 
 
@@ -41,7 +40,12 @@ struct LIGHT
 struct DrawCommand
 {
     uint64_t sortKey;
-    RendererBase* renderer;
+    class RendererBase* renderer;
+};
+enum class BlendMode : uint8_t
+{
+    AlphaBlend = 0,
+    Additive = 1,
 };
 
 class Renderer 
@@ -67,12 +71,15 @@ private:
 	static ID3D11DepthStencilState* m_DepthStateDisable;
 
 	static ID3D11BlendState*		m_BlendState;
+    static ID3D11BlendState*        m_BlendStateAdd;
 	static ID3D11BlendState*		m_BlendStateATC;
 
     static XMMATRIX m_ViewMatrix;
     static XMMATRIX m_ProjectionMatrix;
 
     static std::vector<DrawCommand> m_DrawCommands;
+
+    static BlendMode m_CurrentBlendMode;
 
 public:
 	static void Init();
@@ -90,12 +97,14 @@ public:
 	static void SetMaterial(MATERIAL Material);
 	static void SetLight(LIGHT Light);
     static void SetUV(XMFLOAT4 UV);
+    static void SetBlendMode(BlendMode mode);
 
 	static ID3D11Device* GetDevice( void ){ return m_Device; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_DeviceContext; }
 
     static XMMATRIX GetViewMatrix();
     static XMMATRIX GetProjectionMatrix();
+    static BlendMode GetCurrentBlendMode() { return m_CurrentBlendMode; }
 
 
 	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);
