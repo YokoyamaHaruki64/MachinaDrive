@@ -308,6 +308,17 @@ void Renderer::Draw()
 
     // DrawCommandを順番に描画する
     for (const auto& cmd : m_DrawCommands) {
+
+        // ソートキーの上位8ビットでRenderPassを切り替える
+        if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Opaque) )
+        {
+            SetDepthEnable(true);
+        }
+        else if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Transparent) )
+        {
+            SetDepthEnable(false);
+        }
+
         if (cmd.renderer)
         {
             cmd.renderer->BindState();
