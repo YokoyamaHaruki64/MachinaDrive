@@ -11,6 +11,9 @@
 #include <d3d11.h>
 #pragma comment (lib, "d3d11.lib")
 
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+
 
 #include <DirectXMath.h>
 using namespace DirectX;
