@@ -32,6 +32,15 @@ protected:
     int m_drawLayer = 0; // 描画順序
     BillboardType m_billboardType = BillboardType::None; // ビルボードの種類
 
+    MATERIAL m_material = {
+        {0.2f, 0.2f, 0.2f, 1.0f}, // Ambient
+        {1.0f, 1.0f, 1.0f, 1.0f}, // Diffuse
+        {1.0f, 1.0f, 1.0f, 1.0f}, // Specular
+        {0.0f, 0.0f, 0.0f, 1.0f}, // Emission
+        32.0f,                    // Shininess
+        TRUE                      // TextureEnable
+    };
+
     const XMMATRIX CalcWorldMatrix();
 
 private:
@@ -49,11 +58,17 @@ public:
     void SetDrawLayer(int layer) { m_drawLayer = layer; }
 
     RenderPass GetRendererPass() const { return m_renderPass; }
-    void SetRendererPass(RenderPass pass) { m_renderPass = pass; }
+    void SetRenderPass(RenderPass pass) { m_renderPass = pass; }
 
 
     BillboardType GetBillboardType() const { return m_billboardType; }
     void SetBillboardType(BillboardType type) { m_billboardType = type; }
+
+    MATERIAL GetMaterial() const { return m_material; }
+    void SetMaterial(const MATERIAL& material) { m_material = material; }
+
+    BlendMode GetBlendMode() const { return m_blendMode; }
+    void SetBlendMode(BlendMode mode) { m_blendMode = mode; }
 
     static const XMMATRIX CalcWorldMatrix(const Transform* transform, BillboardType billboardType);
     static const XMMATRIX CalcWorldMatrix(

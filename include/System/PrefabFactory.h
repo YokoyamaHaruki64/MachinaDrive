@@ -5,11 +5,14 @@
 #include "Component/Transform.h"
 #include "Component/modelRenderer.h"
 #include "Component/Primitive.h"
+#include "Component/ParticleSystem.h"
 
 #include "Script/Player.h"
 #include "Script/Enemy.h"
 #include "Script/Bullet.h"
 #include "Script/ExplosionEffect.h"
+#include "Script/Ripple.h"
+#include "Script/BoundBall.h"
 
 GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
@@ -18,13 +21,13 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    player->AddComponent<ModelRenderer>(
+    player->AddComponentForCreate<ModelRenderer>(
         "Assets\\Models\\Player.obj",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso",
         ModelRenderer::InverseAxis::Y); // Y軸反転
 
-    player->AddComponent<Player>();
+    player->AddComponentForCreate<Player>();
 
     return player;
 }
@@ -36,13 +39,13 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
         rotation,
         scale
     );
-    enemy->AddComponent<ModelRenderer>(
+    enemy->AddComponentForCreate<ModelRenderer>(
         "Assets\\Models\\Player.obj",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso",
         ModelRenderer::InverseAxis::Y); // Y軸反転
 
-    enemy->AddComponent<Enemy>();
+    enemy->AddComponentForCreate<Enemy>();
 
     return enemy;
 }
@@ -54,11 +57,11 @@ GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    bullet->AddComponent<ModelRenderer>(
+    bullet->AddComponentForCreate<ModelRenderer>(
         "Assets\\Models\\bullet.obj",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso"); // Y軸反転
-    bullet->AddComponent<Bullet>();
+    bullet->AddComponentForCreate<Bullet>();
     return bullet;
 }
 
@@ -69,7 +72,7 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
         rotation,
         scale
     );
-    tree->AddComponent<Quad>(
+    tree->AddComponentForCreate<Quad>(
         L"Assets\\Textures\\tree.png",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
@@ -83,11 +86,66 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
         rotation,
         scale
     );
-    explosion->AddComponent<Quad>(
+    explosion->AddComponentForCreate<Quad>(
         L"Assets\\Textures\\explosion.png",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::CameraFacing);
 
-    explosion->AddComponent<ExplosionEffect>();
+    explosion->AddComponentForCreate<ExplosionEffect>();
     return explosion;
+}
+
+GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* boundBall = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    boundBall->AddComponentForCreate<BoundBall>();
+    auto p = boundBall->AddComponentForCreate<ParticleEmitter>();
+    ParticleEmitter::EmitterSettings settings = p->GetSettings();
+    settings.burst = false;
+    settings.maxParticles = 100;
+    settings.lifetimeMin = 0.05f;
+    settings.lifetimeMax = 0.05f;
+    settings.gravity = Vector3(0.0f, 0.0f, 0.0f);
+    settings.emitRate = 1000;
+    settings.velocityType = ParticleEmitter::VelocityType::None;
+    settings.spawnType = ParticleEmitter::SpawnType::Point;
+    settings.randomizeSpeed = true;
+    settings.speedMin = 3.0f;
+    settings.speedMax = 5.0f;
+    settings.scaleOverLifetime =
+        Curve<float>(
+            1.0f,
+            1.0f);
+    settings.colorOverLifetime =
+        Curve<Color>(
+            Color(0.1f, 0.3f, 0.4f, 1.0f),
+            Color(0.1f, 0.3f, 0.2f, 0.0f));
+    p->SetSettings(settings);
+
+    boundBall->AddComponentForCreate<ParticleRenderer>(
+        p,
+        L"Assets/Textures/particle.png");
+
+    return boundBall;
+}
+
+GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* ripple = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    auto q = ripple->AddComponentForCreate<Quad>(
+        L"Assets\\Textures\\particle.png",
+        "BuildedShader\\unlitTextureVS.cso",
+        "BuildedShader\\unlitTexturePS.cso");
+    q->SetBlendMode(BlendMode::Additive);
+    q->SetRenderPass(RenderPass::Transparent);
+    ripple->AddComponentForCreate<Ripple>();
+    return ripple;
 }

@@ -41,7 +41,7 @@ public:
 	}
 
     template <typename T, typename... Args>
-    T* AddComponentForBeginScene(Args&&... args)
+    T* AddComponentForCreate(Args&&... args)
     {
         m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
         T* componentPtr = static_cast<T*>(m_components.back().get());
