@@ -148,6 +148,7 @@
     <ClCompile Include="source\Scene\GameScene.cpp" />
     <ClCompile Include="source\Scene\ResultScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
+    <ClCompile Include="source\Script\BallManager.cpp" />
     <ClCompile Include="source\Script\Bullet.cpp" />
     <ClCompile Include="source\Script\BoundBall.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="include\Scene\ResultScene.h" />
     <ClInclude Include="include\Scene\Scene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
+    <ClInclude Include="include\Script\BallManager.h" />
     <ClInclude Include="include\Script\Bullet.h" />
     <ClInclude Include="include\Script\BoundBall.h" />
     <ClInclude Include="include\Script\CameraController.h" />

@@ -13,6 +13,7 @@
 
 #include "Script/Wall.h"
 #include "Script/BoundBall.h"
+#include "Script/BallManager.h"
 #include "Component/ParticleSystem.h"
 #include "Common/Random.h"
 
@@ -68,15 +69,7 @@ void GameScene::Init()
         Vector3(SIZE_XZ, THICKNESS, SIZE_XZ),
         Vector3::Down());
 
-    for( int i = 0; i < 12; ++i)
-    {
-        Vector3 pos = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
-        Vector3 vel = Random::OnUnitSphere() * 10.0f;
+    GameObject* ballManager = Manager::CreateEmpty(Vector3::Zero());
+    ballManager->AddComponentForCreate<BallManager>();
 
-        Manager::InstantiateForBeginScene(
-            "Ball",
-            pos,
-            Vector3::Zero(),
-            Vector3::One())->GetComponent<BoundBall>()->SetVelocity(vel);
-    }
 }

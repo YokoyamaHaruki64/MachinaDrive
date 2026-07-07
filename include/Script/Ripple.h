@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "System/Component.h"
+#include "Common/Color.h"
+#include "math/Curve.h"
 
 class Quad;
 
@@ -12,6 +14,18 @@ class Ripple : public Component
     float m_elapsedTime = 0.0f; // 経過時間
 
     float baseScale = 0.5f; // 基本スケール
+
+    static constexpr int COLOR_PALLET_SIZE = 5;
+    static constexpr Color m_colorPallet[COLOR_PALLET_SIZE] = {
+        Color(0.0f, 0.5f, 1.0f, 1.0f), // 青
+        Color(0.0f, 1.0f, 0.5f, 1.0f), // 緑
+        Color(1.0f, 0.5f, 0.0f, 1.0f), // オレンジ
+        Color(1.0f, 0.0f, 0.5f, 1.0f), // ピンク
+        Color(1.0f, 1.0f, 0.5f, 1.0f)  // 黄色
+    };
+
+    Curve<Color> m_colorCurve{};
+
 public:
     Ripple(GameObject* owner) :Component(owner)
     {}
