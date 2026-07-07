@@ -188,6 +188,7 @@
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\Wall.h" />
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />

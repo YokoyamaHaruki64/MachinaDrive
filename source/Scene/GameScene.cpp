@@ -9,9 +9,9 @@
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
 
-#include "Script/TItleUI.h"
 #include "Script/CameraController.h"
-#include "Script/RotateCube.h"
+
+#include "Script/Wall.h"
 
 
 void GameScene::Init()
@@ -21,56 +21,43 @@ void GameScene::Init()
     camera->AddComponentForBeginScene<Camera>(Camera::MainCamera);
     camera->AddComponentForBeginScene<CameraController>();
 
-    GameObject* field = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    field->AddComponentForBeginScene<Plane>(
-        L"Assets\\Textures\\glass2.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
+    // const float BOX_SIZE = 5.0f;
+    //const float SIZE_HALF = BOX_SIZE * 0.5f;
+    const float SIZE_Y = 4.0f;
+    const float SIZE_XZ = 6.0f;
+    const float THICKNESS = 0.1f;
 
-    GameObject* obj = Manager::CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    obj->AddComponentForBeginScene<Cube>(
-        L"Assets\\Textures\\DarkMatReal.png",
-        "BuildedShader\\Dice_VS.cso",
-        "BuildedShader\\Dice_PS.cso");
-    obj->AddComponentForBeginScene<RotateCube>();
+    const float HEIGHT_OFFSET = 1.5f;
 
-    Manager::InstantiateForBeginScene(
-        "Player",
-        Vector3(0.0f, 0.0f, 1.0f),
-        Vector3(0.0f, 0.0f, 0.0f),
-        Vector3::One());
-
-    const Vector3 enemyPos[] = {
-        Vector3(4.0f, 0.0f, 4.0f),
-        Vector3(-4.0f, 0.0f, 4.0f),
-        Vector3(0.0f, 0.0f, 6.0f),
+    auto CreateWall = [](const Vector3& position,const Vector3& scale)
+    {
+        GameObject* wall = Manager::CreateEmpty(position, Vector3::Zero(), scale);
+        wall->AddComponentForBeginScene<Wall>();
+        wall->AddComponentForBeginScene<Cube>(L"Assets/Textures/DarkMatReal.png");
     };
 
-    for (const auto& pos : enemyPos)
-    {
-        Manager::InstantiateForBeginScene(
-            "Enemy",
-            pos,
-            Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
-            Vector3::One());
-    }
-
-    float treePosY = 3.5f; // 木の高さを調整
-    const Vector3 treePos[] = {
-        Vector3(5.0f, treePosY, 12.0f),
-        Vector3(-5.0f, treePosY, 12.0f),
-        Vector3(7.0f, treePosY, 8.0f),
-        Vector3(-7.0f, treePosY, 8.0f),
-    };
-
-    for (const auto& pos : treePos)
-    {
-        GameObject* tree = Manager::InstantiateForBeginScene(
-            "Tree",
-            pos,
-            Vector3::Zero(),
-            Vector3::One() * 5.0f);
-
-        tree->GetComponent<Quad>()->SetRendererPass(RenderPass::Transparent);
-    }
+    // 床
+    CreateWall(
+        Vector3(0.0f, -HEIGHT_OFFSET + THICKNESS * 0.5f, 0.0f),
+        Vector3(SIZE_XZ, THICKNESS, SIZE_XZ));
+    // 左の壁
+    CreateWall(
+        Vector3(-SIZE_XZ * 0.5f + THICKNESS * 0.5f, -HEIGHT_OFFSET + SIZE_Y * 0.5f, 0.0f),
+        Vector3(THICKNESS, SIZE_Y, SIZE_XZ));
+    // 右の壁
+    CreateWall(
+        Vector3(SIZE_XZ * 0.5f - THICKNESS * 0.5f, -HEIGHT_OFFSET + SIZE_Y * 0.5f, 0.0f),
+        Vector3(THICKNESS, SIZE_Y, SIZE_XZ));
+    // 奥の壁
+    CreateWall(
+        Vector3(0.0f, -HEIGHT_OFFSET + SIZE_Y * 0.5f, -SIZE_XZ * 0.5f + THICKNESS * 0.5f),
+        Vector3(SIZE_XZ, SIZE_Y, THICKNESS));
+    // 手前の壁
+    CreateWall(
+        Vector3(0.0f, -HEIGHT_OFFSET + SIZE_Y * 0.5f, SIZE_XZ * 0.5f - THICKNESS * 0.5f),
+        Vector3(SIZE_XZ, SIZE_Y, THICKNESS));
+    // 天井
+    CreateWall(
+        Vector3(0.0f, -HEIGHT_OFFSET + SIZE_Y - THICKNESS * 0.5f, 0.0f),
+        Vector3(SIZE_XZ, THICKNESS, SIZE_XZ));
 }
