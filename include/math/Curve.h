@@ -16,6 +16,12 @@ public:
 
         T inControl{};
         T outControl{};
+
+        Key() = default;
+        Key(const T& value, float time)
+            : value(value), time(Math::Saturate(time)), inControl(value), outControl(value)
+        {
+        }
     };
 
 private:
