@@ -37,9 +37,10 @@ public:
         int maxParticles = 1000;            // パーティクルの最大数
 
         // バースト
-        bool burst = true;      // true:ループせずワンショットで生成する
-        int burstCount = 10;    // burst=trueのときの合計生成量
-        float burstTime = 0.1f; // burst=trueのときの生成時間
+        bool burst = true;              // true:ループせずワンショットで生成する
+        int burstCount = 10;            // burstの合計生成量
+        float burstTime = 0.1f;         // burstの生成時間
+        bool finishedDestroy = false;   // burstの生成が完了したら自身のGameObjectを破棄する
 
         // ループ
         int emitRate = 20;      // 1秒あたりの生成量

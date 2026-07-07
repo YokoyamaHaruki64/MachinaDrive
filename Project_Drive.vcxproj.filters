@@ -43,6 +43,9 @@
     <Filter Include="ソース ファイル\Scene">
       <UniqueIdentifier>{6fed3312-70ca-4af2-8ac7-545db0be620b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Common">
+      <UniqueIdentifier>{c340e6e6-77b8-46ac-84be-008d5a85e7da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Script\CameraController.cpp">
@@ -113,6 +116,9 @@
     </ClCompile>
     <ClCompile Include="source\Script\ResultUI.cpp">
       <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\ParticleSystem.cpp">
+      <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +211,18 @@
     </ClInclude>
     <ClInclude Include="include\Script\ResultUI.h">
       <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Color.h">
+      <Filter>ヘッダー ファイル\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Random.h">
+      <Filter>ヘッダー ファイル\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\ParticleSystem.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Curve.h">
+      <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
