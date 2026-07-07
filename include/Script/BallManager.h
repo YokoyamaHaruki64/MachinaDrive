@@ -23,5 +23,7 @@ public:
     void DecrementBallCount() { m_ballCount--; }
     int GetBallCount() const { return m_ballCount; }
 
-    void CreateBall();
+    void CreateBoll_Random();
+    void CreateBoll(Vector3 position, Vector3 normal);
+
 };

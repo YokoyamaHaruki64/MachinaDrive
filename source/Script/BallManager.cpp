@@ -9,30 +9,47 @@
 #include "Script/Wall.h"
 #include "Script/BoundBall.h"
 
+#include "Script/PatternTrail.h"
+
 void BallManager::OnStart()
 {
     m_walls = Manager::GetObjectsByComponent<Wall>();
 
     //for( int i = 0 ;i < 16; ++i)
     //{
-    //    CreateBall();
+    //    CreateBoll_Random();
     //}
 }
 
 void BallManager::Update()
 {
-    m_elapsedTime += Time::GetDeltaTime();
-    if (m_elapsedTime >= m_spawnInterval)
-    {
-        m_elapsedTime -= m_spawnInterval;
-        if (m_ballCount < MAX_BALL_COUNT)
-        {
-            CreateBall();
-        }
-    }
+    //m_elapsedTime += Time::GetDeltaTime();
+    //if (m_elapsedTime >= m_spawnInterval)
+    //{
+    //    m_elapsedTime -= m_spawnInterval;
+    //    if (m_ballCount < MAX_BALL_COUNT)
+    //    {
+    //        CreateBoll_Random();
+    //    }
+    //}
 }
 
-void BallManager::CreateBall()
+void BallManager::CreateBoll(Vector3 position,Vector3 normal)
+{
+    if (m_ballCount >= MAX_BALL_COUNT) return;
+
+    // ボールを生成
+    Vector3 randomVelocity = Random::RandomCone(normal, 30.0f) * 10.0f;
+    Manager::Instantiate(
+        "Ball",
+        position,
+        Vector3::Zero(),
+        Vector3(1.0f, 1.0f, 1.0f)
+    )->GetComponent<BoundBall>()->SetVelocity(randomVelocity);
+    m_ballCount++;
+}
+
+void BallManager::CreateBoll_Random()
 {
     if (m_ballCount >= MAX_BALL_COUNT) return;
 
@@ -43,6 +60,7 @@ void BallManager::CreateBall()
 
     Vector3 wallPos = wall->GetTransform()->GetPosition();
     Vector3 wallScale = wall->GetTransform()->GetScale();
+    wallScale *= 0.8f; // 少し小さくして壁の端に出ないようにする
     Vector3 normal = wall->GetComponent<Wall>()->GetNormal();
 
     Vector3 randomPos = wallPos;

@@ -155,6 +155,9 @@
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
+    <ClCompile Include="source\Script\PatternTrail.cpp" />
+    <ClCompile Include="source\Script\PatternTrailHeader.cpp" />
+    <ClCompile Include="source\Script\PatternTrailManager.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Ripple.cpp" />
@@ -191,11 +194,14 @@
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
+    <ClInclude Include="include\Script\PatternTrail.h" />
+    <ClInclude Include="include\Script\PatternTrailManager.h" />
     <ClInclude Include="include\Script\Player.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\PatternTrailHeader.h" />
     <ClInclude Include="include\Script\Wall.h" />
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DirectXTex.h" />

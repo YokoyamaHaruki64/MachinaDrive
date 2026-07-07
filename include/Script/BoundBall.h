@@ -10,8 +10,8 @@ class BoundBall : public Component
     static constexpr float GRAVITY = 30.0f; // 重力加速度
     static constexpr int MAX_BOUND_COUNT = 10; // 最大バウンド回数
 
-    static constexpr float LIFETIME_MIN = 5.0f; // 最小寿命
-    static constexpr float LIFETIME_MAX = 10.0f; // 最大寿命
+    static constexpr float LIFETIME_MIN = 2; // 最小寿命
+    static constexpr float LIFETIME_MAX = 4; // 最大寿命
 
     Vector3 m_velocity;
     BallManager* m_ballManager = nullptr; // ボールマネージャーへの参照

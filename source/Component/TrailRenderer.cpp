@@ -23,7 +23,6 @@ void TrailRenderer::UpdateSegments()
     }
 
     Vector3 currentPosition = transform()->GetPosition() + m_offset;
-    currentPosition.y += 0.7f; // トレイルの高さを調整
     // 新しいセグメントを追加する条件
     if (m_segments.empty() ||
         (currentPosition - m_segments.back().position).LengthSqr() >= m_minSegmentDistance * m_minSegmentDistance)
@@ -160,10 +159,23 @@ void TrailRenderer::Draw()
         Vector3 toCamera = cameraPosition - pos;
         toCamera.Normalize();
 
-        // トレイルの左右方向をトレイルの方向とカメラ方向の外積で求める
-        Vector3 side = Vector3::Cross(toCamera, dir);
-        side.Normalize();
+        // トレイルの左右方向を求める
+        Vector3 normal;
 
+        switch (m_faceMode)
+        {
+        case TrailRenderer::CameraFacing:
+            normal = toCamera;
+            break;
+
+        case TrailRenderer::FixedDirection:
+            normal = m_fixedDirection;
+            normal.Normalize();
+            break;
+        }
+
+        Vector3 side = Vector3::Cross(normal, dir);
+        side.Normalize();
         // セグメントの経過時間に基づいて幅と色を計算
         float ageRate = m_segments[i].elapsedTime / m_trailLifetime;
 
@@ -178,12 +190,12 @@ void TrailRenderer::Draw()
         float v = static_cast<float>(i) / static_cast<float>(segmentCount - 1);
 
         vertices[i * 2 + 0].Position = XMFLOAT3(leftPos.x, leftPos.y, leftPos.z);
-        vertices[i * 2 + 0].Normal = XMFLOAT3(toCamera.x, toCamera.y, toCamera.z);
+        vertices[i * 2 + 0].Normal = XMFLOAT3(normal.x, normal.y, normal.z);
         vertices[i * 2 + 0].Diffuse = XMFLOAT4(color.r, color.g, color.b, color.a);
         vertices[i * 2 + 0].TexCoord = XMFLOAT2(0.0f, v);
 
         vertices[i * 2 + 1].Position = XMFLOAT3(rightPos.x, rightPos.y, rightPos.z);
-        vertices[i * 2 + 1].Normal = XMFLOAT3(toCamera.x, toCamera.y, toCamera.z);
+        vertices[i * 2 + 1].Normal = XMFLOAT3(normal.x, normal.y, normal.z);
         vertices[i * 2 + 1].Diffuse = XMFLOAT4(color.r, color.g, color.b, color.a);
         vertices[i * 2 + 1].TexCoord = XMFLOAT2(1.0f, v);
     }
@@ -222,4 +234,3 @@ void TrailRenderer::Draw()
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 }
-

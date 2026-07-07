@@ -1,0 +1,65 @@
+﻿#pragma once
+
+#include "System/Component.h"
+#include "math/Vector3.h"
+#include "math/Curve.h"
+
+class PatternTrailHeader : public Component
+{
+public:
+    enum Axis
+    {
+        X,
+        Y,
+        Z
+    };
+private:
+    Curve<float> m_timeCurve = Curve<float>(0.0f, 1.0f);
+    Curve<Vector3> m_positionCurve =
+    {
+        {
+            Vector3::Zero(),
+            0.0f,
+            Vector3::Zero(),
+            Vector3(1.0f, 0.0f, 0.0f)
+        },
+        {
+            Vector3(1.0f, 1.0f, 0.0f),
+            1.0f,
+            Vector3(1.0f, 1.0f, 0.0f),
+            Vector3(1.0f, 1.0f, 0.0f)
+        }
+    };
+    Axis m_axis = Axis::Y;
+    Vector3 m_startPos;
+    Vector3 m_surfaceRight;
+    Vector3 m_surfaceUp;
+
+    float angle = 0.0f;
+    float m_lifeTime = 1.0f;
+    float m_elapsedTime = 0.0f;
+
+    void UpdatePosition(float t);
+
+public:
+    PatternTrailHeader() = delete;
+    explicit PatternTrailHeader(GameObject* owner, Axis axis)
+        : Component(owner), m_axis(axis)
+    {
+    }
+    virtual ~PatternTrailHeader() {}
+    virtual void OnStart();
+    virtual void Update();
+
+    void SetAxis(Axis axis){ m_axis = axis; }
+    void SetLifeTime(float lifeTime) { m_lifeTime = lifeTime; }
+    void SetTimeCurve(const Curve<float>& timeCurve) { m_timeCurve = timeCurve; }
+    void SetPositionCurve(const Curve<Vector3>& positionCurve) { m_positionCurve = positionCurve; }
+    void SetAngle(float angle) { this->angle = angle; }
+    void SetSurface(const Vector3& normal)
+    {
+        Vector3::CreateRightUp(normal, m_surfaceRight, m_surfaceUp);
+        UpdatePosition(m_timeCurve.Evaluate(m_elapsedTime / m_lifeTime));
+    }
+
+};

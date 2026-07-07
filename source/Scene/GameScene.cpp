@@ -12,9 +12,9 @@
 #include "Script/CameraController.h"
 
 #include "Script/Wall.h"
-#include "Script/BoundBall.h"
 #include "Script/BallManager.h"
-#include "Component/ParticleSystem.h"
+#include "Script/PatternTrailManager.h"
+
 #include "Common/Random.h"
 
 void GameScene::Init()
@@ -30,12 +30,23 @@ void GameScene::Init()
     const float SIZE_XZ = 6.0f;
     const float THICKNESS = 0.1f;
 
-    const float HEIGHT_OFFSET = 2.0f;
+    const float HEIGHT_OFFSET = 2.2f;
 
     auto CreateWall = [](const Vector3& position, const Vector3& scale, const Vector3& normal)
     {
         GameObject* wall = Manager::CreateEmpty(position, Vector3::Zero(), scale);
         wall->AddComponentForCreate<Wall>()->SetNormal(normal);
+        auto cube = wall->AddComponentForCreate<Cube>(L"Assets/Textures/DarkMatReal.png");
+        cube->SetRenderPass(RenderPass::Transparent);
+        cube->SetBlendMode(BlendMode::AlphaBlend);
+        cube->SetMaterial({
+            {0.2f, 0.2f, 0.2f, 1.0f}, // Ambient
+            {1.0f, 1.0f, 1.0f, 0.02f}, // Diffuse
+            {1.0f, 1.0f, 1.0f, 1.0f}, // Specular
+            {0.0f, 0.0f, 0.0f, 1.0f}, // Emission
+            32.0f,                    // Shininess
+            TRUE                      // TextureEnable
+            });
     };
 
     // 床
@@ -72,4 +83,6 @@ void GameScene::Init()
     GameObject* ballManager = Manager::CreateEmpty(Vector3::Zero());
     ballManager->AddComponentForCreate<BallManager>();
 
+    GameObject* patternTrailManager = Manager::CreateEmpty(Vector3::Zero());
+    patternTrailManager->AddComponentForCreate<PatternTrailManager>();
 }

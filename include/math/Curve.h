@@ -22,6 +22,11 @@ public:
             : value(value), time(Math::Saturate(time)), inControl(value), outControl(value)
         {
         }
+
+        Key(const T& value, float time, const T& inControl, const T& outControl)
+            : value(value), time(Math::Saturate(time)), inControl(inControl), outControl(outControl)
+        {
+        }
     };
 
 private:
@@ -37,6 +42,13 @@ public:
     }
 
     explicit Curve(const std::vector<Key>& keys)
+        : m_keys(keys)
+    {
+        NormalizeKeys();
+    }
+
+    // Initializer_listコンストラクタによるキーの初期化
+    Curve(std::initializer_list<Key> keys)
         : m_keys(keys)
     {
         NormalizeKeys();

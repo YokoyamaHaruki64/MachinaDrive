@@ -106,8 +106,6 @@ void BoundBall::Update()
         Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
         Vector3 v = Random::OnUnitSphere() * 10.0f;
 
-        m_ballManager->CreateBall();
-
         m_ballManager->DecrementBallCount();
         m_owner->Destroy();
         return;
