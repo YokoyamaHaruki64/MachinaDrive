@@ -84,25 +84,25 @@ public:
 
     void OnStart()
     {
-        for (auto& component : m_components)
+        for( size_t i = 0; i < m_components.size(); ++i)
         {
-            component->OnStart();
+            m_components[i]->OnStart();
         }
     }
 
 	void Update()
 	{
-		for (auto& component : m_components)
+        for (size_t i = 0; i < m_components.size(); ++i)
 		{
-			component->Update();
+            m_components[i]->Update();
 		}
 	}
 
     void LateUpdate()
     {
-        for (auto& component : m_components)
+        for (size_t i = 0; i < m_components.size(); ++i)
         {
-            component->LateUpdate();
+            m_components[i]->LateUpdate();
         }
     }
 	//void Draw()

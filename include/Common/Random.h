@@ -54,4 +54,43 @@ public:
 
         return v.Normalized();
     }
+
+    /// @brief 指定された方向と角度のコーン内のランダムな方向ベクトルを生成する関数
+    /// @param direction コーンの中心方向を表すベクトル
+    /// @param angleDeg コーンの角度（度単位）(半角度)
+    /// @return コーン内のランダムな方向ベクトル
+    inline static Vector3 RandomCone(const Vector3& direction, float angleDeg)
+    {
+        Vector3 forward = direction.Normalized();
+
+        // forward と平行じゃない基準ベクトルを選ぶ
+        Vector3 referenceUp = abs(Vector3::Dot(forward, Vector3::Up())) > 0.99f
+            ? Vector3::Right()
+            : Vector3::Up();
+
+        // コーン軸に対する right / up を作る
+        Vector3 right = Vector3::Cross(referenceUp, forward).Normalized();
+        Vector3 up = Vector3::Cross(forward, right).Normalized();
+        float angleRad = angleDeg * Math::DEG2RAD;
+
+        // コーン内のランダムな方向を生成
+        float minCos = cosf(angleRad);
+        float cosTheta = Random::Range(minCos, 1.0f);
+
+        float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
+
+        float phi = Random::Range(0.0f, 2.0f * Math::PI);
+
+        float x = sinTheta * cosf(phi);
+        float y = sinTheta * sinf(phi);
+        float z = cosTheta;
+
+        // コーン軸に沿った方向ベクトルを計算
+        Vector3 randomDirection = (right * x + up * y + forward * z).Normalized();
+
+        return randomDirection;
+
+
+    }
+
 };

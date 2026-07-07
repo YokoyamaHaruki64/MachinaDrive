@@ -2,6 +2,7 @@
 
 #include "System/main.h"
 #include "System/renderer.h"
+#include "System/RendererBase.h"
 #include <io.h>
 
 
@@ -26,12 +27,14 @@ ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
 
 
 ID3D11BlendState*		Renderer::m_BlendState{};
+ID3D11BlendState*       Renderer::m_BlendStateAdd{};
 ID3D11BlendState*		Renderer::m_BlendStateATC{};
 
 XMMATRIX Renderer::m_ViewMatrix{};
 XMMATRIX Renderer::m_ProjectionMatrix{};
 
 std::vector<DrawCommand> Renderer::m_DrawCommands{};
+BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
 
 void Renderer::Init()
 {
@@ -153,6 +156,10 @@ void Renderer::Init()
 
 	blendDesc.AlphaToCoverageEnable = TRUE;
 	m_Device->CreateBlendState( &blendDesc, &m_BlendStateATC );
+
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	m_Device->CreateBlendState( &blendDesc, &m_BlendStateAdd );
 
 	float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	m_DeviceContext->OMSetBlendState(m_BlendState, blendFactor, 0xffffffff );
@@ -303,6 +310,7 @@ void Renderer::Draw()
     for (const auto& cmd : m_DrawCommands) {
         if (cmd.renderer)
         {
+            cmd.renderer->BindState();
             cmd.renderer->Draw();
         }
     }
@@ -391,6 +399,25 @@ void Renderer::SetLight( LIGHT Light )
 void Renderer::SetUV(XMFLOAT4 UV)
 {
     m_DeviceContext->UpdateSubresource(m_UVBuffer, 0, NULL, &UV, 0, 0);
+}
+
+void Renderer::SetBlendMode(BlendMode mode)
+{
+    switch (mode)
+    {
+    case BlendMode::AlphaBlend:
+        m_DeviceContext->OMSetBlendState(m_BlendState, nullptr, 0xffffffff);
+        break;
+
+    case BlendMode::Additive:
+        m_DeviceContext->OMSetBlendState(m_BlendStateAdd, nullptr, 0xffffffff);
+        break;
+
+    default:
+        break;
+    }
+
+    m_CurrentBlendMode = mode;
 }
 
 XMMATRIX Renderer::GetViewMatrix()

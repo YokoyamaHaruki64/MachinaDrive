@@ -3,6 +3,7 @@
 #include "System/main.h"
 #include "System/Component.h"
 #include "System/manager.h"
+#include "System/renderer.h"
 
 class Camera;
 
@@ -12,6 +13,7 @@ enum class RenderPass
     Transparent = 1,
     Overlay = 2
 };
+
 
 class RendererBase : public Component
 {
@@ -26,6 +28,7 @@ public:
 
 protected:
     RenderPass m_renderPass = RenderPass::Opaque; // 描画パス
+    BlendMode m_blendMode = BlendMode::AlphaBlend; // ブレンドモード
     int m_drawLayer = 0; // 描画順序
     BillboardType m_billboardType = BillboardType::None; // ビルボードの種類
 
@@ -40,6 +43,7 @@ public:
     virtual ~RendererBase();
     virtual void Draw() override = 0;
     void Submit();
+    void BindState();
 
     int GetDrawLayer() const { return m_drawLayer; }
     void SetDrawLayer(int layer) { m_drawLayer = layer; }
@@ -50,4 +54,11 @@ public:
 
     BillboardType GetBillboardType() const { return m_billboardType; }
     void SetBillboardType(BillboardType type) { m_billboardType = type; }
+
+    static const XMMATRIX CalcWorldMatrix(const Transform* transform, BillboardType billboardType);
+    static const XMMATRIX CalcWorldMatrix(
+        Vector3 position,
+        Vector3 rotation,
+        Vector3 scale,
+        BillboardType billboardType);
 };

@@ -7,7 +7,7 @@ using Microsoft::WRL::ComPtr;
 
 class SpriteRenderer : public RendererBase
 {
-private:
+protected:
     ComPtr<ID3D11Buffer> m_vertexBuffer;
 
     ComPtr<ID3D11VertexShader> m_vertexShader;
