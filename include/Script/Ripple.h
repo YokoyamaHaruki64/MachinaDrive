@@ -10,6 +10,8 @@ class Ripple : public Component
 
     float m_lifeTime = 1.0f; // 波紋の寿命
     float m_elapsedTime = 0.0f; // 経過時間
+
+    float baseScale = 0.5f; // 基本スケール
 public:
     Ripple(GameObject* owner) :Component(owner)
     {}

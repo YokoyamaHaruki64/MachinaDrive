@@ -2,6 +2,7 @@
 
 #include "System/GM_Time.h"
 #include "System/manager.h"
+#include "Common/Random.h"
 #include "Component/Transform.h"
 
 #include "Script/BoundBall.h"
@@ -9,7 +10,6 @@
 
 void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
 {
-    // Rippleエフェクトの生成
     GameObject* ripple = Manager::Instantiate(
         "Ripple",
         position,
@@ -17,16 +17,16 @@ void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
         Vector3(1.0f, 1.0f, 1.0f)
     );
 
-    // RippleのTransformを取得して、法線方向に回転させる
     Transform* rippleTransform = ripple->GetComponent<Transform>();
-    if (rippleTransform)
-    {
-        // 法線ベクトルから回転を計算
-        Vector3 up = Vector3::Up();
-        Vector3 axis = Vector3::Cross(up, normal);
-        float angle = acos(Vector3::Dot(up, normal));
-        rippleTransform->SetRotation(axis * angle);
-    }
+    if (!rippleTransform) return;
+
+    Vector3 n = normal.Normalized();
+
+    float pitch = std::asin(std::clamp(n.y, -1.0f, 1.0f));
+    float yaw = std::atan2(-n.x, -n.z);
+
+    rippleTransform->SetRotation(Vector3(pitch, yaw, 0.0f));
+
 }
 
 void BoundBall::Update()
@@ -36,7 +36,7 @@ void BoundBall::Update()
     Vector3 prevPos = pos;
 
     // 位置の更新
-    m_velocity.y -= 9.81f * dt; // 重力加速度を適用
+    m_velocity.y -= GRAVITY * dt; // 重力加速度を適用
     pos += m_velocity * dt;
 
 
@@ -73,16 +73,38 @@ void BoundBall::Update()
             Vector3 normal = wall->GetNormal();
 
             // 反射ベクトルの計算
-            m_velocity = Vector3::Reflect(m_velocity, normal, m_bounciness);
+            m_velocity = Vector3::Reflect(m_velocity, normal);
             pos = closestPoint + normal * m_radius; // 衝突後の位置を修正
 
             // Rippleエフェクトの生成
             CreateRippleEffect(normal, closestPoint);
+            m_boundCount++;
         }
 
     }
 
     transform()->SetPosition(pos);
 
+    if( m_boundCount >= MAX_BOUND_COUNT)
+    {
+        Manager::Instantiate(
+            "ExplosionEffect",
+            pos,
+            Vector3::Zero(),
+            Vector3(1.0f, 1.0f, 1.0f)
+        );
+
+        Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
+        Vector3 v = Random::OnUnitSphere() * 10.0f;
+
+        Manager::InstantiateForBeginScene(
+            "Ball",
+            p,
+            Vector3::Zero(),
+            Vector3::One())->GetComponent<BoundBall>()->SetVelocity(v);
+
+        m_owner->Destroy();
+
+    }
 
 }

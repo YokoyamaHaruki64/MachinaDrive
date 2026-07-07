@@ -25,7 +25,8 @@ void Ripple::Update()
 
     mat.Diffuse.w = 1.0f - t; // アルファ値を減少させる
     m_quad->SetMaterial(mat);
-    transform()->SetScale(Vector3(1.0f + t, 1.0f + t, 1.0f)); // スケールを増加させる
+    float s = baseScale * (1.0f + t); // スケールを増加させる
+    transform()->SetScale(Vector3(s, s, s));
 
     if( m_elapsedTime >= m_lifeTime)
     {

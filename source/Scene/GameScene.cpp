@@ -68,10 +68,10 @@ void GameScene::Init()
         Vector3(SIZE_XZ, THICKNESS, SIZE_XZ),
         Vector3::Down());
 
-    for( int i = 0; i < 5; ++i)
+    for( int i = 0; i < 12; ++i)
     {
         Vector3 pos = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
-        Vector3 vel = Random::OnUnitSphere() * 5.0f;
+        Vector3 vel = Random::OnUnitSphere() * 10.0f;
 
         Manager::InstantiateForBeginScene(
             "Ball",

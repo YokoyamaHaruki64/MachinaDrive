@@ -96,6 +96,11 @@ struct Vector3
 		return *this;
 	}
 
+    inline constexpr bool operator==(const Vector3& other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
 	// ===============================
 	// 静的関数
 	// ===============================

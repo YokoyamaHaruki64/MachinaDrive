@@ -141,7 +141,7 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
         scale
     );
     auto q = ripple->AddComponentForCreate<Quad>(
-        L"Assets\\Textures\\particle.png",
+        L"Assets\\Textures\\Ripple.png",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso");
     q->SetBlendMode(BlendMode::Additive);

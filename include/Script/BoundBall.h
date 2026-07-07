@@ -5,9 +5,12 @@
 
 class BoundBall : public Component
 {
+    static constexpr float GRAVITY = 30.0f; // 重力加速度
+    static constexpr int MAX_BOUND_COUNT = 5; // 最大バウンド回数
     Vector3 m_velocity;
     float m_radius = 0.3f; // 球の半径
-    float m_bounciness = 1.0f; // 反発係数
+    float m_bounciness = 0.9f; // 反発係数
+    int m_boundCount = 0; // バウンド回数
 
     void CreateRippleEffect(Vector3 normal, Vector3 position);
 public:
