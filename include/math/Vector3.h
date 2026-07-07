@@ -241,6 +241,25 @@ struct Vector3
 		return acosf(dot);
 	}
 
+    /// @brief 2つのベクトルの反射ベクトルを計算する関数
+    /// @param inDir 入射ベクトル
+    /// @param normal 法線ベクトル
+    /// @return 反射ベクトル
+    inline static Vector3 Reflect(const Vector3& inDir, const Vector3& normal)
+    {
+        return inDir + normal * -(2.0f * Dot(inDir, normal));
+    }
+
+    /// @brief 2つのベクトルの反射ベクトルを計算する関数（反発係数付き）
+    /// @param inDir 入射ベクトル
+    /// @param normal 法線ベクトル
+    /// @param e 反発係数（0.0fから1.0fの範囲）
+    /// @return 反射ベクトル
+    inline static Vector3 Reflect(const Vector3& inDir, const Vector3& normal,float e)
+    {
+        return inDir + normal * -(1.0f + e) * Dot(inDir, normal);
+    }
+
 
 	// ===============================
 	// メンバ関数
