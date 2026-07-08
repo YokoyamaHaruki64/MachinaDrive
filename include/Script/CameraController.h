@@ -10,8 +10,8 @@ class CameraController : public Component
     Transform* m_target = nullptr;
     Camera* m_camera = nullptr;
 
-    static constexpr float CAMERA_DISTANCE = 8.0f;
-    static constexpr float CAMERA_HEIGHT = 3.0f;
+    static constexpr float CAMERA_DISTANCE = 10.0f;
+    static constexpr float CAMERA_HEIGHT = 2.0f;
 public:
     CameraController() = default;
     explicit CameraController(GameObject* owner)

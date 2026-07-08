@@ -49,7 +49,7 @@ void BoundBall::Update()
     Vector3 prevPos = pos;
 
     // 位置の更新
-    m_velocity.y -= config.gravity * dt; // 重力加速度を適用
+    m_velocity.y += config.gravity * dt; // 重力加速度を適用
     pos += m_velocity * dt;
 
 

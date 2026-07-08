@@ -292,7 +292,7 @@ void Renderer::Begin()
 	float clearColor[4] = {
 		0 / 255.0f,
 		0 / 255.0f,
-		0 / 255.0f,
+		16.0f / 255.0f,
 		1.0f 
 	};
 	m_DeviceContext->ClearRenderTargetView( m_RenderTargetView, clearColor );

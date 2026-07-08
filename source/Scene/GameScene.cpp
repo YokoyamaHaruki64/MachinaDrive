@@ -26,22 +26,22 @@ void GameScene::Init()
 
     // const float BOX_SIZE = 5.0f;
     //const float SIZE_HALF = BOX_SIZE * 0.5f;
-    const float SIZE_Y = 6.0f;
+    const float SIZE_Y = 5.5f;
     const float SIZE_XZ = 6.0f;
     const float THICKNESS = 0.1f;
 
-    const float HEIGHT_OFFSET = 2.2f;
+    const float HEIGHT_OFFSET = 2.3f;
 
     auto CreateWall = [](const Vector3& position, const Vector3& scale, const Vector3& normal)
     {
         GameObject* wall = Manager::CreateEmpty(position, Vector3::Zero(), scale);
         wall->AddComponentForCreate<Wall>()->SetNormal(normal);
-        auto cube = wall->AddComponentForCreate<Cube>(L"Assets/Textures/DarkMatReal.png");
+        auto cube = wall->AddComponentForCreate<Cube>(L"Assets/Textures/White.png");
         cube->SetRenderPass(RenderPass::Transparent);
         cube->SetBlendMode(BlendMode::AlphaBlend);
         cube->SetMaterial({
             {0.2f, 0.2f, 0.2f, 1.0f}, // Ambient
-            {1.0f, 1.0f, 1.0f, 0.1f}, // Diffuse
+            {1.0f, 1.0f, 1.0f, 0.01f}, // Diffuse
             {1.0f, 1.0f, 1.0f, 1.0f}, // Specular
             {0.0f, 0.0f, 0.0f, 1.0f}, // Emission
             32.0f,                    // Shininess

@@ -14,19 +14,18 @@ public:
         Z
     };
 private:
-    Curve<float> m_timeCurve = Curve<float>(0.0f, 1.0f);
     CurveVector3 m_positionCurve = CurveVector3(
     {
-        {0.0f,0.0f,0.0f,3.0f},
-        {0.0f,1.0f,0.0f,3.0f}
+        {0.0f,0.0f,0.0f,0.3f},
+        {1.0f,1.0f,1.0f,0.0f}
     },
     {
-        {0.0f,0.0f,0.0f,3.0f},
-        {0.0f,1.0f,0.0f,3.0f}
+        {0.0f,0.0f,0.0f,0.0f},
+        {1.0f,1.0f,1.0f,0.0f}
     },
     {
-        {0.0f,0.0f,0.0f,3.0f},
-        {0.0f,1.0f,0.0f,3.0f}
+        {0.0f,0.0f,0.0f,1.0f},
+        {0.0f,1.0f,0.0f,1.0f}
     });
 
 
@@ -53,13 +52,12 @@ public:
 
     void SetAxis(Axis axis){ m_axis = axis; }
     void SetLifeTime(float lifeTime) { m_lifeTime = lifeTime; }
-    void SetTimeCurve(const Curve<float>& timeCurve) { m_timeCurve = timeCurve; }
     void SetPositionCurve(const CurveVector3& positionCurve) { m_positionCurve = positionCurve; }
     void SetAngle(float angle) { this->angle = angle; }
     void SetSurface(const Vector3& normal)
     {
         Vector3::CreateRightUp(normal, m_surfaceRight, m_surfaceUp);
-        UpdatePosition(m_timeCurve.Evaluate(m_elapsedTime / m_lifeTime));
+        UpdatePosition(m_elapsedTime / m_lifeTime);
     }
 
 };

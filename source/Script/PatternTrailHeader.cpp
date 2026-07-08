@@ -21,8 +21,6 @@ void PatternTrailHeader::Update()
 
     // 経過時間を正規化
     float t = m_elapsedTime / m_lifeTime;
-    // 時間そのものをカーブで補間
-    t = m_timeCurve.Evaluate(t);
 
     UpdatePosition(t);
 }
