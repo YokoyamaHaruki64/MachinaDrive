@@ -155,6 +155,7 @@
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
+    <ClCompile Include="source\Script\FireworksEffect.cpp" />
     <ClCompile Include="source\Script\PatternTrail.cpp" />
     <ClCompile Include="source\Script\PatternTrailHeader.cpp" />
     <ClCompile Include="source\Script\PatternTrailManager.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
+    <ClInclude Include="include\Script\FireworksEffect.h" />
     <ClInclude Include="include\Script\PatternTrail.h" />
     <ClInclude Include="include\Script\PatternTrailManager.h" />
     <ClInclude Include="include\Script\Player.h" />

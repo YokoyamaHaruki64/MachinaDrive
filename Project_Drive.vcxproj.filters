@@ -141,6 +141,9 @@
     <ClCompile Include="source\Script\PatternTrailManager.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\FireworksEffect.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -267,6 +270,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\PatternTrailManager.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\FireworksEffect.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>

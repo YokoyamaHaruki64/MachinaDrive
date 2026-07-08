@@ -106,6 +106,12 @@ void BoundBall::Update()
         Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
         Vector3 v = Random::OnUnitSphere() * 10.0f;
 
+        Manager::Instantiate(
+            "Firework",
+            pos,
+            Vector3::Zero(),
+            Vector3(1.0f, 1.0f, 1.0f)
+        );
         m_ballManager->DecrementBallCount();
         m_owner->Destroy();
         return;

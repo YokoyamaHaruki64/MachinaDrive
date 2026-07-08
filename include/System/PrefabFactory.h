@@ -13,6 +13,7 @@
 #include "Script/ExplosionEffect.h"
 #include "Script/Ripple.h"
 #include "Script/BoundBall.h"
+#include "Script/FireworksEffect.h"
 
 GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
@@ -148,4 +149,19 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
     q->SetRenderPass(RenderPass::Transparent);
     ripple->AddComponentForCreate<Ripple>();
     return ripple;
+}
+
+GameObject* FireworksEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+{
+    GameObject* fireworks = new GameObject(
+        position,
+        rotation,
+        scale
+    );
+    auto p = fireworks->AddComponentForCreate<ParticleEmitter>();
+    fireworks->AddComponentForCreate<ParticleRenderer>(
+        p,
+        L"Assets/Textures/particle.png");
+    fireworks->AddComponentForCreate<FireworksEffect>();
+    return fireworks;
 }

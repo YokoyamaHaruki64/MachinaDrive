@@ -188,7 +188,7 @@ void ParticleRenderer::Draw()
         Renderer::SetWorldMatrix(CalcWorldMatrix(
             p.position,
             p.rotation,
-            settings.size * p.scale,
+            Vector3::Multiply(settings.size, transform()->GetScale()) * p.scale,
             m_billboardType));
 
         // マテリアルの設定
