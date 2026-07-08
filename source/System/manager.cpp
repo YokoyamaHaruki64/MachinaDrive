@@ -15,6 +15,10 @@
 #include "Script/RotateCube.h"
 #include "Script/CameraController.h"
 
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
 
@@ -70,6 +74,36 @@ void Manager::Init()
 	Renderer::Init();
 	Input::Init();
 
+    // ImGuiの初期化
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplWin32_Init(GetWindow());
+    ImGui_ImplDX11_Init(Renderer::GetDevice(), Renderer::GetDeviceContext());
+    ImGui::SetCurrentContext(ImGui::GetCurrentContext());
+    ImGuiIO& io = ImGui::GetIO();
+
+    // 入力
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Tab / 矢印 / Space / Enter
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // ゲームパッド
+    io.ConfigWindowsMoveFromTitleBarOnly = true; // 中身をドラッグして誤移動しにくくする
+
+    io.IniFilename = "config/imgui.ini"; // 設定ファイルの保存先を指定
+
+    // スタイル
+    ImGui::StyleColorsDark();
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowRounding = 3.0f;
+    style.FrameRounding = 4.0f;
+    style.PopupRounding = 4.0f;
+    style.ScrollbarRounding = 6.0f;
+    style.WindowBorderSize = 2.0f;
+    style.FrameBorderSize = 0.0f;
+    style.ItemSpacing = ImVec2(8, 6);
+    style.WindowPadding = ImVec2(10, 10);
+
+
+
     m_nextScene = std::make_unique<TitleScene>();
     InitScene();
 }
@@ -85,12 +119,22 @@ void Manager::Uninit()
         gameObject->OnDestroy();
 	}
     m_GameObjects.clear();
+
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void Manager::Update()
 {
 	Input::Update();
-
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    ImGui::Begin("Debug Window");
+    ImGui::Text("FPS: %.1f", 1.0f / ImGui::GetIO().DeltaTime);
+    ImGui::Button("Button");
+    ImGui::End();
     PendingGameObjectsProcess();
 
     if (m_nextScene)
@@ -161,6 +205,10 @@ void Manager::Draw()
 	//}
 
 	Renderer::Draw();
+
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 	Renderer::End();
 
 }
