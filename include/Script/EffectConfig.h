@@ -54,6 +54,42 @@ public:
         Curve<float> scaleCurve = Curve<float>(1.0f, 0.0f);
     };
 
+    struct ImpactBurstConfig
+    {
+        int burstCount = 200;         // パーティクルの数
+        float lifetimeMin = 0.3f;     // パーティクルの最小寿命
+        float lifetimeMax = 0.8f;     // パーティクルの最大寿命
+        float speedMin = 3.0f;        // パーティクルの最小速度
+        float speedMax = 8.0f;        // パーティクルの最大速度
+        float coneAngle = 24.0f;      // コーン型発射時の角度
+        float drag = 0.0f;            // パーティクルの空気抵抗
+        float gravity = 0.0f;         // パーティクルの重力加速度
+        float size = 0.4f; // パーティクルのサイズ
+        CurveColor colorCurve = {
+            {// R
+                {0.0f,0.0f},
+                {0.2f,0.5f},
+                {0.5f,1.0f},
+            },
+            {// G
+                {0.0f,0.0f},
+                {0.5f,0.5f},
+                {1.0f,1.0f},
+            },
+            {// B
+                {1.0f,0.0f},
+                {1.0f,0.5f},
+                {0.5f,1.0f},
+            },
+            {// A
+                { 1.0f, 1.0f },
+                { 0.5f, 0.5f },
+                { 0.2f, 0.0f }
+            }
+        };
+        Curve<float> scaleCurve = Curve<float>(1.0f, 0.0f);
+    };
+
     EffectConfig() = delete;
     explicit EffectConfig(GameObject* owner)
         : Component(owner)
@@ -66,6 +102,7 @@ public:
     const PatternTrailConfig& GetPatternTrailConfig() const { return m_patternTrailConfig; }
     const BoundBallConfig& GetBoundBallConfig() const { return m_boundBallConfig; }
     const FireWorkConfig& GetFireWorkConfig() const { return m_fireWorkConfig; }
+    const ImpactBurstConfig& GetImpactBurstConfig() const { return m_impactBurstConfig; }
 
 private:
 
@@ -75,9 +112,11 @@ private:
     BoundBallConfig m_defaultBoundBallConfig;       // デフォルト設定を保持するメンバ変数
     FireWorkConfig m_fireWorkConfig;
     FireWorkConfig m_defaultFireWorkConfig;         // デフォルト設定を保持するメンバ変数
-
+    ImpactBurstConfig m_impactBurstConfig;
+    ImpactBurstConfig m_defaultImpactBurstConfig;   // デフォルト設定を保持するメンバ変数
 
     void BoundBallConfigImGui();
     void TrailConfigImGui();
     void FireWorkConfigImGui();
+    void ImpactBurstConfigImGui();
 };

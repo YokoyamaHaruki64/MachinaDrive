@@ -30,6 +30,11 @@ void EffectConfig::Update()
             FireWorkConfigImGui();
             ImGui::EndTabItem();
         }
+        if( ImGui::BeginTabItem("ImpactBurstConfig"))
+        {
+            ImpactBurstConfigImGui();
+            ImGui::EndTabItem();
+        }
 
         ImGui::EndTabBar();
     }
@@ -53,39 +58,24 @@ void EffectConfig::BoundBallConfigImGui()
 void EffectConfig::TrailConfigImGui()
 {
     // ImGuiで設定を表示
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Position Curve"))
-    {
-        ImGui::EditCurveVector3("Position", m_patternTrailConfig.positionCurve);
-        ImGui::TreePop();
-    }
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Color Curve"))
-    {
-        ImGui::EditCurveColor("Color", m_patternTrailConfig.colorCurve);
-        ImGui::TreePop();
-    }
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Width Curve"))
-    {
-        ImGui::EditCurveFloat("Width", m_patternTrailConfig.widthCurve);
-        ImGui::TreePop();
-    }
-    ImGui::Separator();
     ImGui::PushItemWidth(100);
-    ImGui::DragInt("Amount", &m_patternTrailConfig.trailCount, 1, 1, 128);
+    ImGui::DragInt("Amount", &m_patternTrailConfig.trailCount, 0, 1, 128);
     ImGui::DragFloat("Interval", &m_patternTrailConfig.spawnInterval, 0.01f, 0.1f, 5.0f);
     ImGui::DragFloat("Width", &m_patternTrailConfig.width, 0.01f, 0.01f, 1.0f);
     ImGui::DragFloat("Length", &m_patternTrailConfig.length, 0.01f, 0.1f, 5.0f);
     ImGui::DragFloat("Life", &m_patternTrailConfig.lifeTime, 0.01f, 0.1f, 10.0f);
     ImGui::PopItemWidth();
+
+    ImGui::EditCurveVector3("Position", m_patternTrailConfig.positionCurve);
+    ImGui::EditCurveColor("Color", m_patternTrailConfig.colorCurve);
+    ImGui::EditCurveFloat("Width", m_patternTrailConfig.widthCurve);
 }
 
 void EffectConfig::FireWorkConfigImGui()
 {
     ImGui::PushItemWidth(100);
 
-    ImGui::DragInt("Burst Count", &m_fireWorkConfig.burstCount, 1, 1, 10000);
+    ImGui::DragInt("Burst Count", &m_fireWorkConfig.burstCount, 0, 1, 10000);
     ImGui::DragFloat("Drag", &m_fireWorkConfig.drag, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Gravity", &m_fireWorkConfig.gravity, 0.1f, -FLT_MAX, FLT_MAX);
     ImGui::DragFloat("Size", &m_fireWorkConfig.size, 0.01f, 0.01f, 10.0f);
@@ -107,16 +97,36 @@ void EffectConfig::FireWorkConfigImGui()
     ImGui::PopItemWidth();
     ImGui::PopItemWidth();
 
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Color Curve"))
-    {
-        ImGui::EditCurveColor("Color", m_fireWorkConfig.colorCurve);
-        ImGui::TreePop();
-    }
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Scale Curve"))
-    {
-        ImGui::EditCurveFloat("Scale", m_fireWorkConfig.scaleCurve);
-        ImGui::TreePop();
-    }
+    ImGui::EditCurveColor("Color", m_fireWorkConfig.colorCurve);
+    ImGui::EditCurveFloat("Scale", m_fireWorkConfig.scaleCurve);
+}
+
+void EffectConfig::ImpactBurstConfigImGui()
+{
+    ImGui::PushItemWidth(100);
+    ImGui::DragInt("Burst Count", &m_impactBurstConfig.burstCount, 0, 1, 10000);
+    ImGui::DragFloat("Drag", &m_impactBurstConfig.drag, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat("Gravity", &m_impactBurstConfig.gravity, 0.1f, -FLT_MAX, FLT_MAX);
+    ImGui::DragFloat("Size", &m_impactBurstConfig.size, 0.01f, 0.01f, 10.0f);
+    ImGui::DragFloat("Cone Angle", &m_impactBurstConfig.coneAngle, 0.1f, 0.0f, 180.0f);
+
+    ImGui::PushItemWidth(200);
+
+    ImGui::DragFloat2("Life Range", &m_impactBurstConfig.lifetimeMin, 0.1f, 0.1f, FLT_MAX);
+    float min = m_impactBurstConfig.lifetimeMin;
+    float max = m_impactBurstConfig.lifetimeMax;
+    if (min > max) m_impactBurstConfig.lifetimeMin = max;
+    if (max < min) m_impactBurstConfig.lifetimeMax = min;
+
+    ImGui::DragFloat2("Speed Range", &m_impactBurstConfig.speedMin, 0.1f, 0.1f, FLT_MAX);
+    min = m_impactBurstConfig.speedMin;
+    max = m_impactBurstConfig.speedMax;
+    if (min > max) m_impactBurstConfig.speedMin = max;
+    if (max < min) m_impactBurstConfig.speedMax = min;
+
+    ImGui::PopItemWidth();
+    ImGui::PopItemWidth();
+
+    ImGui::EditCurveColor("Color", m_impactBurstConfig.colorCurve);
+    ImGui::EditCurveFloat("Scale", m_impactBurstConfig.scaleCurve);
 }
