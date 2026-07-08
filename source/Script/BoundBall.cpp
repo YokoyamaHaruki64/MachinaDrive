@@ -4,10 +4,12 @@
 #include "System/manager.h"
 #include "Common/Random.h"
 #include "Component/Transform.h"
+#include "Component/ParticleSystem.h"
 
 #include "Script/BoundBall.h"
 #include "Script/Wall.h"
 #include "Script/BallManager.h"
+
 
 void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
 {
@@ -87,6 +89,19 @@ void BoundBall::Update()
 
             // Rippleエフェクトの生成
             CreateRippleEffect(normal, closestPoint);
+            auto e = Manager::Instantiate(
+                "ImpactBurst",
+                closestPoint,
+                Vector3::Zero(),
+                Vector3(1.0f, 1.0f, 1.0f)
+            );
+            auto emi = e->GetComponent<ParticleEmitter>();
+            if (emi)
+            {
+                auto settings = emi->GetSettings();
+                settings.direction = normal * -1.0f;
+                emi->SetSettings(settings);
+            }
             m_boundCount++;
         }
 

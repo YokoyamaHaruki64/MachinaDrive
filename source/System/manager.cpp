@@ -69,6 +69,7 @@ void Manager::Init()
     RegisterFactory("Ball", BoundBallPrefabFactory);
     RegisterFactory("Ripple", RipplePrefabFactory);
     RegisterFactory("Firework", FireworksEffectPrefabFactory);
+    RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
 	Renderer::Init();
 	Input::Init();

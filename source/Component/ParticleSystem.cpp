@@ -29,7 +29,10 @@ void ParticleEmitter::Update()
             }
 
             m_burstFinished = (m_burstEmitted >= m_settings.burstCount);
-            if( m_burstFinished && m_settings.finishedDestroy)
+            if( m_burstFinished &&
+                m_settings.finishedDestroy &&
+                m_particles.empty())
+
             {
                 m_owner->Destroy();
             }

@@ -14,6 +14,7 @@ void FireworksEffect::OnStart()
     settings.burst = true;
     settings.burstCount = 1000;
     settings.burstTime = 0.0f;
+    settings.finishedDestroy = true;
     settings.lifetimeMin = 0.5f;
     settings.lifetimeMax = 1.5f;
     settings.colorOverLifetime =

@@ -144,6 +144,9 @@
     <ClCompile Include="source\Script\FireworksEffect.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ImpactBurst.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="include\Script\FireworksEffect.h">
       <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ImpactBurst.h">
+      <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
