@@ -137,7 +137,7 @@ void Manager::Update()
     ImGui::Begin("Debug Window");
     ImGui::Text("FPS: %.1f", 1.0f / ImGui::GetIO().DeltaTime);
     ImGui::Button("Button");
-    ImGui::CurveColor("Curve Editor", testCurve);
+    ImGui::EditCurveColor("Curve Editor", testCurve);
     ImGui::End();
     PendingGameObjectsProcess();
 

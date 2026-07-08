@@ -44,17 +44,17 @@ struct ImGuiCurveEditorConfig
 
 namespace ImGui
 {
-    bool CurveFloat(
+    bool EditCurveFloat(
         const char* label,
         Curve<float>& curve,
         const ImGuiCurveEditorConfig& config = ImGuiCurveEditorConfig());
 
-    bool CurveVector3(
+    bool EditCurveVector3(
         const char* label,
         ::CurveVector3& curve,
         const ImGuiCurveEditorConfig& config = ImGuiCurveEditorConfig());
 
-    bool CurveColor(
+    bool EditCurveColor(
         const char* label,
         ::CurveColor& curve,
         const ImGuiCurveEditorConfig& config = ImGuiCurveEditorConfig());

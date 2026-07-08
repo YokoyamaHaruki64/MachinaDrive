@@ -2,12 +2,15 @@
 
 #include "System/Component.h"
 
+class PatternTrailManager;
+
 class PatternTrail : public Component
 {
     std::vector<GameObject*> m_trailHeaders;
+    Vector3 m_normal = Vector3::Up();
+    PatternTrailManager* m_manager = nullptr;
 
     bool m_isCreated = false;
-    Vector3 m_normal = Vector3::Up();
 public:
     PatternTrail() = delete;
     explicit PatternTrail(GameObject* owner)
@@ -15,6 +18,7 @@ public:
     {
     }
     virtual ~PatternTrail() {}
+    virtual void OnStart() override;
     virtual void Update() override;
 
     void CreateTrailPattern(

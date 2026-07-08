@@ -5,9 +5,16 @@
 #include "Script/PatternTrail.h"
 #include "Script/PatternTrailHeader.h"
 #include "Script/BallManager.h"
+#include "Script/PatternTrailManager.h"
 #include "Component/TrailRenderer.h"
 #include "Component/Transform.h"
 #include "Component/Primitive.h"
+
+void PatternTrail::OnStart()
+{
+    m_manager = Manager::GetFirstObjectByComponent<PatternTrailManager>()->GetComponent<PatternTrailManager>();
+}
+
 void PatternTrail::Update()
 {
     // 破棄されたトレイルヘッダーを削除
@@ -42,6 +49,8 @@ void PatternTrail::CreateTrailPattern(
     const Vector3& normal,
     int trailCount)
 {
+    auto& settings = m_manager->GetSettings();
+
     float angleStep = 360.0f / static_cast<float>(trailCount);
     Vector3 right;
     Vector3 up;
@@ -58,16 +67,18 @@ void PatternTrail::CreateTrailPattern(
         offset *= 0.1f;
 
         GameObject* trail = Manager::CreateEmpty(position + offset);
-        auto th = trail->AddComponent<PatternTrailHeader>(PatternTrailHeader::Axis::Y);
-        th->SetAngle(angle);
-        th->SetSurface(normal);
+        auto th = trail->AddComponent<PatternTrailHeader>();
+        th->Init(m_manager, normal, PatternTrailHeader::Axis::Y, angle);
 
         auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/Trail.png");
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);
-        tr->SetWidthCurve(Curve<float>(0.3f, 0.1f));
-        tr->SetTrailLifetime(0.5f);
+
+        tr->SetWidthCurve(settings.widthCurve);
+        tr->SetTrailLifetime(settings.lifeTime);
+        tr->SetColorCurve(settings.colorCurve);
+        tr->SetWidth(settings.width);
 
         m_trailHeaders.push_back(trail);
     }

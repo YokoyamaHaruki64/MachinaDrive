@@ -3,12 +3,20 @@
 #include "System/GM_Time.h"
 
 #include "Script/PatternTrailHeader.h"
+#include "Script/PatternTrailManager.h"
+#include "Component/TrailRenderer.h"
 #include "Component/Transform.h"
 
 
-void PatternTrailHeader::OnStart()
+void PatternTrailHeader::Init(PatternTrailManager* manager, const Vector3& normal, Axis axis, float angle)
 {
     m_startPos = m_owner->GetTransform()->GetPosition();
+    auto settings = manager->GetSettings();
+    m_lifeTime = settings.lifeTime;
+    m_manager = manager;
+    m_axis = axis;
+    m_angle = angle;
+    SetSurface(normal);
 }
 
 void PatternTrailHeader::Update()
@@ -25,14 +33,18 @@ void PatternTrailHeader::Update()
     UpdatePosition(t);
 }
 
+
 void PatternTrailHeader::UpdatePosition(float t)
 {
+    // 現在の設定を取得
+    auto& settings = m_manager->GetSettings();
+
     // カーブから位置を取得(二次元のみ)
-    Vector3 localPos = m_positionCurve.Evaluate(1.0f - t);
+    Vector3 localPos = settings.positionCurve.Evaluate(1.0f - t);
     localPos.z = 0.0f; // Z軸は無視
 
     // ローカル位置をワールド位置に変換
-    float rad = angle * Math::DEG2RAD;
+    float rad = m_angle * Math::DEG2RAD;
     float cosAngle = std::cos(rad);
     float sinAngle = std::sin(rad);
     Vector3 curvePos = Vector3(
@@ -41,6 +53,7 @@ void PatternTrailHeader::UpdatePosition(float t)
         0.0f
     );
 
+    // ワールド位置を計算
     Vector3 worldPos = m_startPos +
         m_surfaceRight * curvePos.x +
         m_surfaceUp * curvePos.y;

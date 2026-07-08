@@ -180,12 +180,11 @@ void TrailRenderer::Draw()
         float ageRate = m_segments[i].elapsedTime / m_trailLifetime;
 
         // Curve 
-        float width = m_widthCurve.Evaluate(ageRate);
+        float curvedWidth = m_widthCurve.Evaluate(ageRate);
         Color color = m_colorCurve.Evaluate(ageRate);
 
-        Vector3 leftPos = pos + side * width * 0.5f;
-        Vector3 rightPos = pos - side * width * 0.5f;
-
+        Vector3 leftPos = pos + side * curvedWidth * m_width * 0.5f;
+        Vector3 rightPos = pos - side * curvedWidth * m_width * 0.5f;
         // テクスチャ座標の計算
         float v = static_cast<float>(i) / static_cast<float>(segmentCount - 1);
 
