@@ -34,20 +34,22 @@ void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
 
 void BoundBall::OnStart()
 {
-    m_lifetime = Random::Range(LIFETIME_MIN, LIFETIME_MAX);
-    m_elapsedTime = 0.0f;
     m_ballManager = Manager::GetFirstObjectByComponent<BallManager>()->GetComponent<BallManager>();
+    BallManager::BoundBallConfig config = m_ballManager->GetBoundBallConfig();
+    m_lifetime = Random::Range(config.lifetimeMin, config.lifetimeMax);
+    m_elapsedTime = 0.0f;
 }
 
 void BoundBall::Update()
 {
+    BallManager::BoundBallConfig config = m_ballManager->GetBoundBallConfig();
     float dt = Time::GetDeltaTime();
     m_elapsedTime += dt;
     Vector3 pos = transform()->GetPosition();
     Vector3 prevPos = pos;
 
     // 位置の更新
-    m_velocity.y -= GRAVITY * dt; // 重力加速度を適用
+    m_velocity.y -= config.gravity * dt; // 重力加速度を適用
     pos += m_velocity * dt;
 
 
@@ -79,13 +81,13 @@ void BoundBall::Update()
         float distSq = Vector3::DistanceSqr(pos, closestPoint);
 
         // 距離<半径で衝突
-        if (distSq < m_radius * m_radius)
+        if (distSq < RADIUS * RADIUS)
         {
             Vector3 normal = wall->GetNormal();
 
             // 反射ベクトルの計算
             m_velocity = Vector3::Reflect(m_velocity, normal);
-            pos = closestPoint + normal * m_radius; // 衝突後の位置を修正
+            pos = closestPoint + normal * RADIUS; // 衝突後の位置を修正
 
             // Rippleエフェクトの生成
             CreateRippleEffect(normal, closestPoint);

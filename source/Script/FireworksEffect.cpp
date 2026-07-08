@@ -17,12 +17,29 @@ void FireworksEffect::OnStart()
     settings.finishedDestroy = true;
     settings.lifetimeMin = 0.5f;
     settings.lifetimeMax = 1.5f;
-    settings.colorOverLifetime =
-    {
-        { Color(1.0f, 0.2f, 0.1f, 1.0f), 0.0f },
-        { Color(0.6f, 0.5f, 0.2f, 0.5f), 0.5f },
-        { Color(0.5f, 1.0f, 0.5f, 0.0f), 1.0f }
+    settings.colorOverLifetime = {
+    {// R
+        {1.0f,0.0f},
+        {0.6f,0.5f},
+        {0.5f,1.0f},
+    },
+    {// G
+        {0.2f,0.0f},
+        {0.5f,0.5f},
+        {1.0f,1.0f},
+    },
+    {// B
+        {1.0f,0.0f},
+        {0.5f,0.5f},
+        {0.0f,1.0f},
+    },
+    {// A
+        { 1.0f, 1.0f },
+        { 0.5f, 0.5f },
+        { 0.2f, 0.0f }
+    }
     };
+
     settings.scaleOverLifetime =
     {
         { 1.0f, 0.0f },

@@ -39,11 +39,8 @@ private:
             { 1.0f, 0.0f },
             { 0.5f, 1.0f }
         });
-    Curve<Color> m_colorCurve =
-        Curve<Color>({
-            { Color::White(), 0.0f },
-            { Color(1.0f, 1.0f, 1.0f, 0.0f), 1.0f }
-        });
+    CurveColor m_colorCurve =
+        CurveColor(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f));
 
     float m_trailLifetime = 1.0f; // トレイルの寿命（秒）
     float m_minSegmentDistance = 0.1f; // 新しいセグメントを追加する最小距離
@@ -62,7 +59,7 @@ public:
     );
     virtual ~TrailRenderer() {}
     void SetWidthCurve(const Curve<float>& curve) { m_widthCurve = curve; }
-    void SetColorCurve(const Curve<Color>& curve) { m_colorCurve = curve; }
+    void SetColorCurve(const CurveColor& curve) { m_colorCurve = curve; }
     virtual void Draw() override;
 
     void SetFaceMode(TrailFaceMode mode) { m_faceMode = mode; }

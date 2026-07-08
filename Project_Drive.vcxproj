@@ -150,6 +150,7 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_curve_custom.cpp" />
     <ClCompile Include="source\ImGui\imgui_demo.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
@@ -228,6 +229,7 @@
     <ClInclude Include="include\Component\Transform.h" />
     <ClInclude Include="include\ImGui\imconfig.h" />
     <ClInclude Include="include\ImGui\imgui.h" />
+    <ClInclude Include="include\ImGui\imgui_curve_custom.h" />
     <ClInclude Include="include\ImGui\imgui_impl_dx11.h" />
     <ClInclude Include="include\ImGui\imgui_impl_win32.h" />
     <ClInclude Include="include\ImGui\imgui_internal.h" />

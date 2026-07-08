@@ -18,6 +18,7 @@
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
+#include "imgui_curve_custom.h"
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
@@ -106,8 +107,6 @@ void Manager::Init()
     style.ItemSpacing = ImVec2(8, 6);
     style.WindowPadding = ImVec2(10, 10);
 
-
-
     m_nextScene = std::make_unique<TitleScene>();
     InitScene();
 }
@@ -128,7 +127,7 @@ void Manager::Uninit()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 }
-
+static CurveColor testCurve;
 void Manager::Update()
 {
 	Input::Update();
@@ -138,6 +137,7 @@ void Manager::Update()
     ImGui::Begin("Debug Window");
     ImGui::Text("FPS: %.1f", 1.0f / ImGui::GetIO().DeltaTime);
     ImGui::Button("Button");
+    ImGui::CurveColor("Curve Editor", testCurve);
     ImGui::End();
     PendingGameObjectsProcess();
 

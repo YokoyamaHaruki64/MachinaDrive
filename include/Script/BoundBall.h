@@ -7,18 +7,12 @@ class BallManager;
 
 class BoundBall : public Component
 {
-    static constexpr float GRAVITY = 30.0f; // 重力加速度
     static constexpr int MAX_BOUND_COUNT = 10; // 最大バウンド回数
-
-    static constexpr float LIFETIME_MIN = 2; // 最小寿命
-    static constexpr float LIFETIME_MAX = 4; // 最大寿命
-
+    static constexpr float RADIUS = 0.3f; // 球の半径
     Vector3 m_velocity;
     BallManager* m_ballManager = nullptr; // ボールマネージャーへの参照
-    float m_radius = 0.3f;      // 球の半径
-    float m_bounciness = 1.0f;  // 反発係数
-    int m_boundCount = 0;       // バウンド回数
 
+    int m_boundCount = 0;       // バウンド回数
     float m_lifetime = 0.0f;    // 寿命
     float m_elapsedTime = 0.0f; // 経過時間
 

@@ -18,12 +18,30 @@ void ImpactBurst::OnStart()
 
     settings.lifetimeMin = 0.3f;
     settings.lifetimeMax = 0.8f;
-    settings.colorOverLifetime =
-    {
-        { Color(0.0f, 0.2f, 1.0f, 1.0f), 0.0f },
-        { Color(0.2f, 0.5f, 1.0f, 0.5f), 0.5f },
-        { Color(0.5f, 1.0f, 0.5f, 0.2f), 1.0f }
-    };
+
+    settings.colorOverLifetime = {
+        {// R
+            {0.0f,0.0f},
+            {0.2f,0.5f},
+            {0.5f,1.0f},
+        },
+        {// G
+            {0.0f,0.0f},
+            {0.5f,0.5f},
+            {1.0f,1.0f},
+        },
+        {// B
+            {1.0f,0.0f},
+            {1.0f,0.5f},
+            {0.5f,1.0f},
+        },
+        {// A
+            { 1.0f, 1.0f },
+            { 0.5f, 0.5f },
+            { 0.2f, 0.0f }
+        }
+   };
+
     settings.scaleOverLifetime =
     {
         { 1.0f, 0.0f },

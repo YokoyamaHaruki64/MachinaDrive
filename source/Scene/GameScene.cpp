@@ -41,7 +41,7 @@ void GameScene::Init()
         cube->SetBlendMode(BlendMode::AlphaBlend);
         cube->SetMaterial({
             {0.2f, 0.2f, 0.2f, 1.0f}, // Ambient
-            {1.0f, 1.0f, 1.0f, 0.02f}, // Diffuse
+            {1.0f, 1.0f, 1.0f, 0.1f}, // Diffuse
             {1.0f, 1.0f, 1.0f, 1.0f}, // Specular
             {0.0f, 0.0f, 0.0f, 1.0f}, // Emission
             32.0f,                    // Shininess

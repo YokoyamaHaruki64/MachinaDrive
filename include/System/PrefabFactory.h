@@ -122,10 +122,15 @@ GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotat
         Curve<float>(
             1.0f,
             1.0f);
-    settings.colorOverLifetime =
-        Curve<Color>(
-            Color(0.1f, 0.3f, 0.4f, 1.0f),
-            Color(0.1f, 0.3f, 0.2f, 0.0f));
+    //settings.colorOverLifetime =
+    //    Curve<Color>(
+    //        Color(0.1f, 0.3f, 0.4f, 1.0f),
+    //        Color(0.1f, 0.3f, 0.2f, 0.0f));
+
+    settings.colorOverLifetime = CurveColor(
+        Color(0.1f, 0.3f, 0.4f, 1.0f),
+        Color(0.1f, 0.3f, 0.2f, 0.0f)
+    );
     p->SetSettings(settings);
 
     boundBall->AddComponentForCreate<ParticleRenderer>(

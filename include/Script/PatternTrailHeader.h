@@ -15,21 +15,21 @@ public:
     };
 private:
     Curve<float> m_timeCurve = Curve<float>(0.0f, 1.0f);
-    Curve<Vector3> m_positionCurve =
+    CurveVector3 m_positionCurve = CurveVector3(
     {
-        {
-            Vector3::Zero(),
-            0.0f,
-            Vector3::Zero(),
-            Vector3(1.0f, 0.0f, 0.0f)
-        },
-        {
-            Vector3(1.0f, 1.0f, 0.0f),
-            1.0f,
-            Vector3(1.0f, 1.0f, 0.0f),
-            Vector3(1.0f, 1.0f, 0.0f)
-        }
-    };
+        {0.0f,0.0f,0.0f,3.0f},
+        {0.0f,1.0f,0.0f,3.0f}
+    },
+    {
+        {0.0f,0.0f,0.0f,3.0f},
+        {0.0f,1.0f,0.0f,3.0f}
+    },
+    {
+        {0.0f,0.0f,0.0f,3.0f},
+        {0.0f,1.0f,0.0f,3.0f}
+    });
+
+
     Axis m_axis = Axis::Y;
     Vector3 m_startPos;
     Vector3 m_surfaceRight;
@@ -54,7 +54,7 @@ public:
     void SetAxis(Axis axis){ m_axis = axis; }
     void SetLifeTime(float lifeTime) { m_lifeTime = lifeTime; }
     void SetTimeCurve(const Curve<float>& timeCurve) { m_timeCurve = timeCurve; }
-    void SetPositionCurve(const Curve<Vector3>& positionCurve) { m_positionCurve = positionCurve; }
+    void SetPositionCurve(const CurveVector3& positionCurve) { m_positionCurve = positionCurve; }
     void SetAngle(float angle) { this->angle = angle; }
     void SetSurface(const Vector3& normal)
     {

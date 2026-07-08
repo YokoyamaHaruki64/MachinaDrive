@@ -57,8 +57,8 @@ public:
         Vector3 size = Vector3(1.0f, 1.0f, 1.0f);    // パーティクルの初期サイズ(単位:px)
         Curve<float> scaleOverLifetime =                // サイズを変化させるカーブ
             Curve<float>(1.0f, 0.0f);
-        Curve<Color> colorOverLifetime =                // 色を変化させるカーブ
-            Curve<Color>(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f));    
+        CurveColor colorOverLifetime =
+            CurveColor(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f)); // 色を変化させるカーブ
 
         // 速度共通
         bool randomizeSpeed = true; // true:初速をランダム化する

@@ -11,27 +11,37 @@
 
 #include "Script/PatternTrail.h"
 
+#include "imgui.h"
+
 void BallManager::OnStart()
 {
     m_walls = Manager::GetObjectsByComponent<Wall>();
-
-    //for( int i = 0 ;i < 16; ++i)
-    //{
-    //    CreateBoll_Random();
-    //}
 }
 
 void BallManager::Update()
 {
-    //m_elapsedTime += Time::GetDeltaTime();
-    //if (m_elapsedTime >= m_spawnInterval)
-    //{
-    //    m_elapsedTime -= m_spawnInterval;
-    //    if (m_ballCount < MAX_BALL_COUNT)
-    //    {
-    //        CreateBoll_Random();
-    //    }
-    //}
+    ImGui::Begin("BallConfig");
+    ImGui::DragFloat("Bounciness", &m_boundBallConfig.bounciness, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Lifetime Min", &m_boundBallConfig.lifetimeMin, 0.1f, 0.1f, FLT_MAX);
+    ImGui::DragFloat("Lifetime Max", &m_boundBallConfig.lifetimeMax, 0.1f, 0.1f, FLT_MAX);
+    ImGui::DragFloat("Gravity", &m_boundBallConfig.gravity, 0.1f, FLT_MIN, FLT_MAX);
+
+    if( ImGui::Button("Random"))
+    {
+        CreateBoll_Random();
+    }
+    ImGui::SameLine();
+    if( ImGui::Button("Center"))
+    {
+        CreateBoll(Vector3::Zero(), Vector3::Up());
+    }
+
+    if( m_boundBallConfig.lifetimeMin > m_boundBallConfig.lifetimeMax)
+    {
+        std::swap(m_boundBallConfig.lifetimeMin, m_boundBallConfig.lifetimeMax);
+    }
+
+    ImGui::End();
 }
 
 void BallManager::CreateBoll(Vector3 position,Vector3 normal)
