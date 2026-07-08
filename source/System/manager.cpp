@@ -134,11 +134,6 @@ void Manager::Update()
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Debug Window");
-    ImGui::Text("FPS: %.1f", 1.0f / ImGui::GetIO().DeltaTime);
-    ImGui::Button("Button");
-    ImGui::EditCurveColor("Curve Editor", testCurve);
-    ImGui::End();
     PendingGameObjectsProcess();
 
     if (m_nextScene)

@@ -20,28 +20,6 @@ void BallManager::OnStart()
 
 void BallManager::Update()
 {
-    ImGui::Begin("BallConfig");
-    ImGui::DragFloat("Bounciness", &m_boundBallConfig.bounciness, 0.01f, 0.0f, 1.0f);
-    ImGui::DragFloat("Lifetime Min", &m_boundBallConfig.lifetimeMin, 0.1f, 0.1f, FLT_MAX);
-    ImGui::DragFloat("Lifetime Max", &m_boundBallConfig.lifetimeMax, 0.1f, 0.1f, FLT_MAX);
-    ImGui::DragFloat("Gravity", &m_boundBallConfig.gravity, 0.1f, FLT_MIN, FLT_MAX);
-
-    if( ImGui::Button("Random"))
-    {
-        CreateBoll_Random();
-    }
-    ImGui::SameLine();
-    if( ImGui::Button("Center"))
-    {
-        CreateBoll(Vector3::Zero(), Vector3::Up());
-    }
-
-    if( m_boundBallConfig.lifetimeMin > m_boundBallConfig.lifetimeMax)
-    {
-        std::swap(m_boundBallConfig.lifetimeMin, m_boundBallConfig.lifetimeMax);
-    }
-
-    ImGui::End();
 }
 
 void BallManager::CreateBoll(Vector3 position,Vector3 normal)

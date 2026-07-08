@@ -3,17 +3,17 @@
 #include "System/GM_Time.h"
 
 #include "Script/PatternTrailHeader.h"
-#include "Script/PatternTrailManager.h"
+#include "Script/EffectConfig.h"
+
 #include "Component/TrailRenderer.h"
 #include "Component/Transform.h"
 
-
-void PatternTrailHeader::Init(PatternTrailManager* manager, const Vector3& normal, Axis axis, float angle)
+void PatternTrailHeader::Init(EffectConfig* config, const Vector3& normal, Axis axis, float angle)
 {
     m_startPos = m_owner->GetTransform()->GetPosition();
-    auto settings = manager->GetSettings();
+    auto settings = config->GetPatternTrailConfig();
     m_lifeTime = settings.lifeTime;
-    m_manager = manager;
+    m_config = config;
     m_axis = axis;
     m_angle = angle;
     SetSurface(normal);
@@ -37,7 +37,7 @@ void PatternTrailHeader::Update()
 void PatternTrailHeader::UpdatePosition(float t)
 {
     // 現在の設定を取得
-    auto& settings = m_manager->GetSettings();
+    auto& settings = m_config->GetPatternTrailConfig();
 
     // カーブから位置を取得(二次元のみ)
     Vector3 localPos = settings.positionCurve.Evaluate(1.0f - t);

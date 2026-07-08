@@ -198,6 +198,7 @@
     <ClCompile Include="source\Script\Bullet.cpp" />
     <ClCompile Include="source\Script\BoundBall.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
+    <ClCompile Include="source\Script\EffectConfig.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
     <ClCompile Include="source\Script\FireworksEffect.cpp" />
@@ -248,6 +249,7 @@
     <ClInclude Include="include\Script\Bullet.h" />
     <ClInclude Include="include\Script\BoundBall.h" />
     <ClInclude Include="include\Script\CameraController.h" />
+    <ClInclude Include="include\Script\EffectConfig.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
     <ClInclude Include="include\Script\FireworksEffect.h" />

@@ -9,6 +9,7 @@
 
 #include "Script/Wall.h"
 #include "Script/PatternTrail.h"
+#include "Script/EffectConfig.h"
 
 #include "imgui.h"
 #include "imgui_curve_custom.h"
@@ -16,50 +17,18 @@
 void PatternTrailManager::OnStart()
 {
     m_walls = Manager::GetObjectsByComponent<Wall>();
+    m_config = Manager::GetFirstObjectByComponent<EffectConfig>()->GetComponent<EffectConfig>();
 }
 
 void PatternTrailManager::Update()
 {
     m_elapsedTime += Time::GetDeltaTime();
-    if (m_elapsedTime >= m_spawnInterval)
+    if (m_elapsedTime >= m_config->GetPatternTrailConfig().spawnInterval)
     {
-        m_elapsedTime -= m_spawnInterval;
+        m_elapsedTime -= m_config->GetPatternTrailConfig().spawnInterval;
         CreatePatternTrail_Random();
     }
 
-    // ImGuiで設定を表示
-    ImGui::Begin("PatternTrail Settings");
-
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if( ImGui::TreeNode("Position Curve"))
-    {
-        ImGui::EditCurveVector3("Position", m_settings.positionCurve);
-        ImGui::TreePop();
-    }
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if( ImGui::TreeNode("Color Curve"))
-    {
-        ImGui::EditCurveColor("Color", m_settings.colorCurve);
-        ImGui::TreePop();
-    }
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if( ImGui::TreeNode("Width Curve"))
-    {
-        ImGui::EditCurveFloat("Width", m_settings.widthCurve);
-        ImGui::TreePop();
-    }
-    ImGui::Separator();
-    ImGui::PushItemWidth(100);
-    ImGui::DragInt("Amount", &m_trailCount, 1, 1, 128);
-    ImGui::SameLine();
-    ImGui::DragFloat("Interval", &m_spawnInterval, 0.01f, 0.1f, 5.0f);
-    ImGui::DragFloat("Width", &m_settings.width, 0.01f, 0.01f, 1.0f);
-    ImGui::SameLine();
-    ImGui::DragFloat("Length", &m_settings.length, 0.01f, 0.1f, 5.0f);
-    ImGui::DragFloat("Life", &m_settings.lifeTime, 0.01f, 0.1f, 10.0f);
-    ImGui::PopItemWidth();
-
-    ImGui::End();
 }
 
 void PatternTrailManager::CreatePatternTrail_Random()
@@ -127,5 +96,5 @@ void PatternTrailManager::CreatePatternTrail_Random()
     // PatternTrailを生成
     GameObject* patternTrailObj = Manager::CreateEmpty(randomPos);
     auto patternTrailComp = patternTrailObj->AddComponent<PatternTrail>();
-    patternTrailComp->CreateTrailPattern(randomPos, normal, m_trailCount);
+    patternTrailComp->CreateTrailPattern(randomPos, normal, m_config->GetPatternTrailConfig().trailCount);
 }

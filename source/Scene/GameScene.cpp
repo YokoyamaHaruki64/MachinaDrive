@@ -14,8 +14,7 @@
 #include "Script/Wall.h"
 #include "Script/BallManager.h"
 #include "Script/PatternTrailManager.h"
-
-#include "Common/Random.h"
+#include "Script/EffectConfig.h"
 
 void GameScene::Init()
 {
@@ -79,6 +78,9 @@ void GameScene::Init()
         Vector3(0.0f, -HEIGHT_OFFSET + SIZE_Y - THICKNESS * 0.5f, 0.0f),
         Vector3(SIZE_XZ, THICKNESS, SIZE_XZ),
         Vector3::Down());
+
+    GameObject* config = Manager::CreateEmpty(Vector3::Zero());
+    config->AddComponentForCreate<EffectConfig>();
 
     GameObject* ballManager = Manager::CreateEmpty(Vector3::Zero());
     ballManager->AddComponentForCreate<BallManager>();

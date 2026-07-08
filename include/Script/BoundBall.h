@@ -4,6 +4,7 @@
 #include "math/Vector3.h"
 
 class BallManager;
+class EffectConfig;
 
 class BoundBall : public Component
 {
@@ -11,6 +12,7 @@ class BoundBall : public Component
     static constexpr float RADIUS = 0.3f; // 球の半径
     Vector3 m_velocity;
     BallManager* m_ballManager = nullptr; // ボールマネージャーへの参照
+    EffectConfig* m_config = nullptr; // エフェクト設定への参照    
 
     int m_boundCount = 0;       // バウンド回数
     float m_lifetime = 0.0f;    // 寿命

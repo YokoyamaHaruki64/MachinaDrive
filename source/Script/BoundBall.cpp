@@ -9,6 +9,7 @@
 #include "Script/BoundBall.h"
 #include "Script/Wall.h"
 #include "Script/BallManager.h"
+#include "Script/EffectConfig.h"
 
 
 void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
@@ -35,14 +36,15 @@ void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
 void BoundBall::OnStart()
 {
     m_ballManager = Manager::GetFirstObjectByComponent<BallManager>()->GetComponent<BallManager>();
-    BallManager::BoundBallConfig config = m_ballManager->GetBoundBallConfig();
-    m_lifetime = Random::Range(config.lifetimeMin, config.lifetimeMax);
+    m_config = Manager::GetFirstObjectByComponent<EffectConfig>()->GetComponent<EffectConfig>();
+    auto& c = m_config->GetBoundBallConfig();
+    m_lifetime = Random::Range(c.lifetimeMin, c.lifetimeMax);
     m_elapsedTime = 0.0f;
 }
 
 void BoundBall::Update()
 {
-    BallManager::BoundBallConfig config = m_ballManager->GetBoundBallConfig();
+    auto& config = m_config->GetBoundBallConfig();
     float dt = Time::GetDeltaTime();
     m_elapsedTime += dt;
     Vector3 pos = transform()->GetPosition();
@@ -113,13 +115,6 @@ void BoundBall::Update()
         m_velocity.LengthSqr() < 10.0f ||
         m_boundCount >= MAX_BOUND_COUNT)
     {
-        //Manager::Instantiate(
-        //    "ExplosionEffect",
-        //    pos,
-        //    Vector3::Zero(),
-        //    Vector3(1.0f, 1.0f, 1.0f)
-        //);
-
         Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
         Vector3 v = Random::OnUnitSphere() * 10.0f;
 
@@ -132,7 +127,6 @@ void BoundBall::Update()
         m_ballManager->DecrementBallCount();
         m_owner->Destroy();
         return;
-
     }
     transform()->SetPosition(pos);
 

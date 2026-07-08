@@ -4,7 +4,7 @@
 #include "math/Vector3.h"
 #include "math/Curve.h"
 
-class PatternTrailManager;
+class EffectConfig;
 class TrailRenderer;
 
 class PatternTrailHeader : public Component
@@ -18,7 +18,7 @@ public:
     };
 private:
 
-    PatternTrailManager* m_manager = nullptr;
+    EffectConfig* m_config = nullptr;
     TrailRenderer* m_trailRenderer = nullptr;
 
     Axis m_axis = Axis::Y;
@@ -46,5 +46,5 @@ public:
     virtual ~PatternTrailHeader() {}
     virtual void Update();
 
-    void Init(PatternTrailManager* manager, const Vector3& normal, Axis axis, float angle);
+    void Init(EffectConfig* config, const Vector3& normal, Axis axis, float angle);
 };

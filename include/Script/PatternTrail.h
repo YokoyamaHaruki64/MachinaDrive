@@ -2,13 +2,13 @@
 
 #include "System/Component.h"
 
-class PatternTrailManager;
+class EffectConfig;
 
 class PatternTrail : public Component
 {
     std::vector<GameObject*> m_trailHeaders;
     Vector3 m_normal = Vector3::Up();
-    PatternTrailManager* m_manager = nullptr;
+    EffectConfig* m_config = nullptr;
 
     bool m_isCreated = false;
 public:

@@ -5,14 +5,14 @@
 #include "Script/PatternTrail.h"
 #include "Script/PatternTrailHeader.h"
 #include "Script/BallManager.h"
-#include "Script/PatternTrailManager.h"
+#include "Script/EffectConfig.h"
 #include "Component/TrailRenderer.h"
 #include "Component/Transform.h"
 #include "Component/Primitive.h"
 
 void PatternTrail::OnStart()
 {
-    m_manager = Manager::GetFirstObjectByComponent<PatternTrailManager>()->GetComponent<PatternTrailManager>();
+    m_config = Manager::GetFirstObjectByComponent<EffectConfig>()->GetComponent<EffectConfig>();
 }
 
 void PatternTrail::Update()
@@ -49,7 +49,7 @@ void PatternTrail::CreateTrailPattern(
     const Vector3& normal,
     int trailCount)
 {
-    auto& settings = m_manager->GetSettings();
+    auto& settings = m_config->GetPatternTrailConfig();
 
     float angleStep = 360.0f / static_cast<float>(trailCount);
     Vector3 right;
@@ -68,7 +68,7 @@ void PatternTrail::CreateTrailPattern(
 
         GameObject* trail = Manager::CreateEmpty(position + offset);
         auto th = trail->AddComponent<PatternTrailHeader>();
-        th->Init(m_manager, normal, PatternTrailHeader::Axis::Y, angle);
+        th->Init(m_config, normal, PatternTrailHeader::Axis::Y, angle);
 
         auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/Trail.png");
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);

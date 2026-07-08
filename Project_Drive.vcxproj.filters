@@ -177,6 +177,9 @@
     <ClCompile Include="source\ImGui\imgui_curve_custom.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\EffectConfig.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -337,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="include\ImGui\imgui_curve_custom.h">
       <Filter>ヘッダー ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\EffectConfig.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
