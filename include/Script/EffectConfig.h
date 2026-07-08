@@ -40,6 +40,19 @@ public:
         float gravity = -9.8f;    // 重力加速度
     };
 
+    struct FireWorkConfig
+    {
+        int burstCount = 1000;         // パーティクルの数
+        float lifetimeMin = 0.5f;     // パーティクルの最小寿命
+        float lifetimeMax = 1.5f;     // パーティクルの最大寿命
+        float speedMin = 3.0f;        // パーティクルの最小速度
+        float speedMax = 6.0f;        // パーティクルの最大速度
+        float drag = 3.0f;            // パーティクルの空気抵抗
+        float gravity = -3.0f;        // パーティクルの重力加速度
+        float size = 0.4f;            // パーティクルのサイズ
+        CurveColor colorCurve = CurveColor(Color::Red(), Color::Yellow());
+        Curve<float> scaleCurve = Curve<float>(1.0f, 0.0f);
+    };
 
     EffectConfig() = delete;
     explicit EffectConfig(GameObject* owner)
@@ -52,15 +65,19 @@ public:
 
     const PatternTrailConfig& GetPatternTrailConfig() const { return m_patternTrailConfig; }
     const BoundBallConfig& GetBoundBallConfig() const { return m_boundBallConfig; }
+    const FireWorkConfig& GetFireWorkConfig() const { return m_fireWorkConfig; }
 
 private:
 
     PatternTrailConfig m_patternTrailConfig;
     PatternTrailConfig m_defaultPatternTrailConfig; // デフォルト設定を保持するメンバ変数
     BoundBallConfig m_boundBallConfig;
-    BoundBallConfig m_defaultBoundBallConfig; // デフォルト設定を保持するメンバ変数
+    BoundBallConfig m_defaultBoundBallConfig;       // デフォルト設定を保持するメンバ変数
+    FireWorkConfig m_fireWorkConfig;
+    FireWorkConfig m_defaultFireWorkConfig;         // デフォルト設定を保持するメンバ変数
+
 
     void BoundBallConfigImGui();
     void TrailConfigImGui();
-
+    void FireWorkConfigImGui();
 };
