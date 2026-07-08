@@ -161,6 +161,7 @@ private:
     float m_emitTimer{ 0.0f };
     float m_emitInterval{ 0.1f };
     int m_burstEmitted{ 0 }; // バースト時の生成済みパーティクル数
+    int m_activeParticles{ 0 }; // 現在アクティブなパーティクル数
     bool m_burstFinished{ false }; // バーストが完了したかどうか
 
     void EmitOne();

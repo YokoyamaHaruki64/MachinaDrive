@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include "imgui_curve_custom.h"
+
 #include "System/GM_time.h"
 
 void EffectConfig::OnStart()
@@ -44,6 +45,7 @@ void EffectConfig::BoundBallConfigImGui()
 {
     // ImGuiで設定を表示
     ImGui::PushItemWidth(100);
+
     ImGui::DragFloat("Bounciness", &m_boundBallConfig.bounciness, 0.01f, 0.0f, 1.0f);
     ImGui::SetNextItemWidth(200);
     ImGui::DragFloat2("Life Range", &m_boundBallConfig.lifetimeMin, 0.1f, 0.1f, FLT_MAX);
@@ -59,6 +61,10 @@ void EffectConfig::TrailConfigImGui()
 {
     // ImGuiで設定を表示
     ImGui::PushItemWidth(100);
+
+    ImGui::PushItemWidth(60);
+
+
     ImGui::DragInt("Amount", &m_patternTrailConfig.trailCount, 0, 1, 128);
     ImGui::DragFloat("Interval", &m_patternTrailConfig.spawnInterval, 0.01f, 0.1f, 5.0f);
     ImGui::DragFloat("Width", &m_patternTrailConfig.width, 0.01f, 0.01f, 1.0f);
@@ -104,6 +110,7 @@ void EffectConfig::FireWorkConfigImGui()
 void EffectConfig::ImpactBurstConfigImGui()
 {
     ImGui::PushItemWidth(100);
+
     ImGui::DragInt("Burst Count", &m_impactBurstConfig.burstCount, 0, 1, 10000);
     ImGui::DragFloat("Drag", &m_impactBurstConfig.drag, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Gravity", &m_impactBurstConfig.gravity, 0.1f, -FLT_MAX, FLT_MAX);

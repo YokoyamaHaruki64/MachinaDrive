@@ -53,6 +53,8 @@ void PatternTrailHeader::UpdatePosition(float t)
         0.0f
     );
 
+    curvePos *= settings.length; // 長さを適用
+
     // ワールド位置を計算
     Vector3 worldPos = m_startPos +
         m_surfaceRight * curvePos.x +

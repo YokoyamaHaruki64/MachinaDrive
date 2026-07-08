@@ -29,14 +29,15 @@ void ParticleEmitter::Update()
             }
 
             m_burstFinished = (m_burstEmitted >= m_settings.burstCount);
-            if( m_burstFinished &&
-                m_settings.finishedDestroy &&
-                m_particles.empty())
-
-            {
-                m_owner->Destroy();
-            }
         }
+        if (m_burstFinished &&
+            m_settings.finishedDestroy &&
+            m_activeParticles == 0)
+
+        {
+            m_owner->Destroy();
+        }
+
     }
     else
     {
@@ -61,7 +62,7 @@ void ParticleEmitter::EmitOne()
         if (!p.active)
         {
             ActivateParticle(p);
-            break; // 1つのパーティクルを生成したらループを抜ける
+            return;
         }
     }
 
@@ -80,6 +81,7 @@ void ParticleEmitter::ActivateParticle(Particle& p)
     p.lifetime = Random::Range(m_settings.lifetimeMin, m_settings.lifetimeMax);
     p.scale = m_settings.scaleOverLifetime.Evaluate(0.0f);
     p.color = m_settings.colorOverLifetime.Evaluate(0.0f);
+    m_activeParticles++;
 
     // 位置の初期化
     switch (m_settings.spawnType)
@@ -157,6 +159,7 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
     if (p.age >= p.lifetime)
     {
         p.active = false; // パーティクルの寿命が尽きたら非アクティブにする
+        m_activeParticles--;
     }
     else
     {

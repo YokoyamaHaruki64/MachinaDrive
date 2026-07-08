@@ -47,13 +47,21 @@ void BoundBall::Update()
     auto& config = m_config->GetBoundBallConfig();
     float dt = Time::GetDeltaTime();
     m_elapsedTime += dt;
+    m_rippleEffectCooldown -= dt;
     Vector3 pos = transform()->GetPosition();
     Vector3 prevPos = pos;
+
 
     // 位置の更新
     m_velocity.y += config.gravity * dt; // 重力加速度を適用
     pos += m_velocity * dt;
 
+    // 最初は壁との衝突判定を行わない
+    if (m_elapsedTime <= 0.1f)
+    {
+        transform()->SetPosition(pos);
+        return;
+    }
 
     // 壁との衝突判定(簡易)
     auto walls = Manager::GetObjectsByComponent<Wall>();
@@ -88,32 +96,35 @@ void BoundBall::Update()
             Vector3 normal = wall->GetNormal();
 
             // 反射ベクトルの計算
-            m_velocity = Vector3::Reflect(m_velocity, normal);
+            m_velocity = Vector3::Reflect(m_velocity, normal, config.bounciness);
             pos = closestPoint + normal * RADIUS; // 衝突後の位置を修正
 
             // Rippleエフェクトの生成
-            CreateRippleEffect(normal, closestPoint);
-            auto e = Manager::Instantiate(
-                "ImpactBurst",
-                closestPoint,
-                Vector3::Zero(),
-                Vector3(1.0f, 1.0f, 1.0f)
-            );
-            auto emi = e->GetComponent<ParticleEmitter>();
-            if (emi)
+            if (m_rippleEffectCooldown <= 0.0f)
             {
-                auto settings = emi->GetSettings();
-                settings.direction = normal * -1.0f;
-                emi->SetSettings(settings);
+                CreateRippleEffect(normal, closestPoint);
+                auto e = Manager::Instantiate(
+                    "ImpactBurst",
+                    closestPoint,
+                    Vector3::Zero(),
+                    Vector3(1.0f, 1.0f, 1.0f)
+                );
+                m_rippleEffectCooldown = RIPPLE_EFFECT_COOLDOWN;
+
+                auto emi = e->GetComponent<ParticleEmitter>();
+                if (emi)
+                {
+                    auto settings = emi->GetSettings();
+                    settings.direction = normal * -1.0f;
+                    emi->SetSettings(settings);
+                }
             }
-            m_boundCount++;
         }
 
     }
 
     if (m_elapsedTime >= m_lifetime ||
-        m_velocity.LengthSqr() < 10.0f ||
-        m_boundCount >= MAX_BOUND_COUNT)
+        m_velocity.LengthSqr() < 1.0f)
     {
         Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
         Vector3 v = Random::OnUnitSphere() * 10.0f;

@@ -127,9 +127,9 @@ void Manager::Uninit()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 }
-static CurveColor testCurve;
 void Manager::Update()
 {
+    
 	Input::Update();
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();

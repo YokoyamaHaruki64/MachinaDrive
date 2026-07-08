@@ -8,15 +8,15 @@ class EffectConfig;
 
 class BoundBall : public Component
 {
-    static constexpr int MAX_BOUND_COUNT = 10; // 最大バウンド回数
     static constexpr float RADIUS = 0.3f; // 球の半径
+    static constexpr float RIPPLE_EFFECT_COOLDOWN = 0.2f; // Rippleエフェクトのクールダウン時間
     Vector3 m_velocity;
     BallManager* m_ballManager = nullptr; // ボールマネージャーへの参照
     EffectConfig* m_config = nullptr; // エフェクト設定への参照    
 
-    int m_boundCount = 0;       // バウンド回数
     float m_lifetime = 0.0f;    // 寿命
     float m_elapsedTime = 0.0f; // 経過時間
+    float m_rippleEffectCooldown = 0.0f; // Rippleエフェクトのクールダウン時間
 
     void CreateRippleEffect(Vector3 normal, Vector3 position);
 public:
