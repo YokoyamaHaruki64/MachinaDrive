@@ -29,6 +29,7 @@ public:
 protected:
     RenderPass m_renderPass = RenderPass::Opaque; // 描画パス
     BlendMode m_blendMode = BlendMode::AlphaBlend; // ブレンドモード
+    CullMode m_cullMode = CullMode::Back; // カリングモード
     int m_drawLayer = 0; // 描画順序
     BillboardType m_billboardType = BillboardType::None; // ビルボードの種類
 
@@ -69,6 +70,9 @@ public:
 
     BlendMode GetBlendMode() const { return m_blendMode; }
     void SetBlendMode(BlendMode mode) { m_blendMode = mode; }
+
+    CullMode GetCullMode() const { return m_cullMode; }
+    void SetCullMode(CullMode mode) { m_cullMode = mode; }
 
     static const XMMATRIX CalcWorldMatrix(const Transform* transform, BillboardType billboardType);
     static const XMMATRIX CalcWorldMatrix(

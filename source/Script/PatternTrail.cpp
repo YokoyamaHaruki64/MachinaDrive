@@ -17,18 +17,6 @@ void PatternTrail::OnStart()
 
 void PatternTrail::Update()
 {
-    // 破棄されたトレイルヘッダーを削除
-    for( int i = 0; i < m_trailHeaders.size(); ++i)
-    {
-        GameObject* trail = m_trailHeaders[i];
-        if( !trail || trail->IsDestroyed())
-        {
-            // スワップポップで削除
-            std::swap(m_trailHeaders[i], m_trailHeaders.back());
-            m_trailHeaders.pop_back();
-            --i;
-        }
-    }
 
     // 生成後、TrailHeaderが全て破棄されたら、自身も破棄
     if (m_trailHeaders.empty() && m_isCreated)
@@ -42,6 +30,23 @@ void PatternTrail::Update()
 
         m_owner->Destroy();
     }
+}
+
+void PatternTrail::LateUpdate()
+{
+    // 破棄されたトレイルヘッダーを削除
+    for (int i = 0; i < m_trailHeaders.size(); ++i)
+    {
+        GameObject* trail = m_trailHeaders[i];
+        if (!trail || trail->IsDestroyed())
+        {
+            // スワップポップで削除
+            std::swap(m_trailHeaders[i], m_trailHeaders.back());
+            m_trailHeaders.pop_back();
+            --i;
+        }
+    }
+
 }
 
 void PatternTrail::CreateTrailPattern(

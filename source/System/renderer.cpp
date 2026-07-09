@@ -25,6 +25,9 @@ ID3D11Buffer*           Renderer::m_UVBuffer{};
 ID3D11DepthStencilState* Renderer::m_DepthStateEnable{};
 ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
 
+ID3D11RasterizerState* Renderer::m_RasterizerState{};
+ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
+
 
 ID3D11BlendState*		Renderer::m_BlendState{};
 ID3D11BlendState*       Renderer::m_BlendStateAdd{};
@@ -35,7 +38,7 @@ XMMATRIX Renderer::m_ProjectionMatrix{};
 
 std::vector<DrawCommand> Renderer::m_DrawCommands{};
 BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
-
+CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
 void Renderer::Init()
 {
 	HRESULT hr = S_OK;
@@ -129,12 +132,14 @@ void Renderer::Init()
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID; 
 	rasterizerDesc.CullMode = D3D11_CULL_BACK; 
 	rasterizerDesc.DepthClipEnable = TRUE; 
-	rasterizerDesc.MultisampleEnable = FALSE; 
+	rasterizerDesc.MultisampleEnable = FALSE;
 
-	ID3D11RasterizerState *rs;
-	m_Device->CreateRasterizerState( &rasterizerDesc, &rs );
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState);
 
-	m_DeviceContext->RSSetState( rs );
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateNoCull);
+
+    m_DeviceContext->RSSetState(m_RasterizerState);
 
 
 
@@ -429,6 +434,22 @@ void Renderer::SetBlendMode(BlendMode mode)
     }
 
     m_CurrentBlendMode = mode;
+}
+
+void Renderer::SetRasterizerState(CullMode cull)
+{
+    switch (cull)
+    {
+    case CullMode::None:
+        m_DeviceContext->RSSetState(m_RasterizerStateNoCull);
+        break;
+    case CullMode::Back:
+        m_DeviceContext->RSSetState(m_RasterizerState);
+        break;
+    default:
+        break;
+    }
+    m_CurrentCullMode = cull;
 }
 
 XMMATRIX Renderer::GetViewMatrix()

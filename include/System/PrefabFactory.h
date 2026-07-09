@@ -153,6 +153,7 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
         "BuildedShader\\unlitTexturePS.cso");
     q->SetBlendMode(BlendMode::Additive);
     q->SetRenderPass(RenderPass::Transparent);
+    q->SetCullMode(CullMode::None);
     ripple->AddComponentForCreate<Ripple>();
     return ripple;
 }

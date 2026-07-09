@@ -20,6 +20,7 @@ public:
     virtual ~PatternTrail() {}
     virtual void OnStart() override;
     virtual void Update() override;
+    virtual void LateUpdate() override;
 
     void CreateTrailPattern(
         const Vector3& position,
