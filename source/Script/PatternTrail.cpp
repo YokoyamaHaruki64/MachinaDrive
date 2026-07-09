@@ -69,7 +69,7 @@ void PatternTrail::CreateTrailPattern(
         float cos = std::cos(rad);
         float sin = std::sin(rad);
         Vector3 offset = right * cos + up * sin;
-        offset *= 0.1f;
+        offset *= 0.05f;
 
         GameObject* trail = Manager::CreateEmpty(position + offset);
         auto th = trail->AddComponent<PatternTrailHeader>();

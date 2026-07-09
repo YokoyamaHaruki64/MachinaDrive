@@ -20,8 +20,8 @@ public:
             {1.0f,1.0f,1.0f,0.0f}
         },
         {
-            {0.0f,0.0f,0.0f,1.0f},
-            {0.0f,1.0f,0.0f,1.0f}
+            {0.0f,0.0f,0.0f,0.0f},
+            {0.0f,1.0f,0.0f,0.0f}
         });
 
         CurveColor colorCurve = CurveColor(Color::Magenta(), Color(1.0f, 0.0f, 1.0f, 0.0f));

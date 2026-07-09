@@ -29,6 +29,8 @@ private:
     float m_angle = 0.0f;
     float m_lifeTime = 0.0f;
     float m_elapsedTime = 0.0f;
+    float m_trailLifeTime = 0.0f;
+    bool m_finished = false;
 
     void UpdatePosition(float t);
     void SetSurface(const Vector3& normal)

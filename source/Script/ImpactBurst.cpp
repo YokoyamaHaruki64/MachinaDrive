@@ -15,7 +15,7 @@ void ImpactBurst::OnStart()
     settings = emitter->GetSettings();
 
     settings.burst = true;
-    settings.burstTime = 0.1f;
+    settings.burstTime = 0.0f;
     settings.finishedDestroy = true;
     // directionは外部から設定される
     settings.velocityType = ParticleEmitter::VelocityType::Cone;

@@ -13,6 +13,7 @@ void PatternTrailHeader::Init(EffectConfig* config, const Vector3& normal, Axis 
     m_startPos = m_owner->GetTransform()->GetPosition();
     auto settings = config->GetPatternTrailConfig();
     m_lifeTime = 1.0f / (settings.speed == 0.0f ? 0.01f : settings.speed); // 0除算回避
+    m_trailLifeTime = settings.trailLifeTime;
     m_config = config;
     m_axis = axis;
     m_angle = angle;
@@ -22,16 +23,28 @@ void PatternTrailHeader::Init(EffectConfig* config, const Vector3& normal, Axis 
 void PatternTrailHeader::Update()
 {
     m_elapsedTime += Time::GetDeltaTime();
-    if(m_elapsedTime >= m_lifeTime)
+    if( m_finished )
     {
-        m_owner->Destroy();
+        if( m_elapsedTime >= m_trailLifeTime )
+        {
+            m_owner->Destroy();
+        }
     }
+    else
+    {
+        // 経過時間を正規化
+        float t = m_elapsedTime / m_lifeTime;
 
-    // 経過時間を正規化
-    float t = m_elapsedTime / m_lifeTime;
+        UpdatePosition(t);
 
-    UpdatePosition(t);
+        if (m_elapsedTime >= m_lifeTime)
+        {
+            m_finished = true;
+            m_elapsedTime = 0.0f;
+        }
+    }
 }
+
 
 
 void PatternTrailHeader::UpdatePosition(float t)
