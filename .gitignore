@@ -3,3 +3,7 @@ Assets/
 BuildedShader/
 Project_Drive/
 config/imgui.ini
+config/BoundBallConfig.ini
+config/FireWorkConfig.ini
+config/ImpactBurstConfig.ini
+config/PatternTrailConfig.ini

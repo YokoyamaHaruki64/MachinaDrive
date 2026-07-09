@@ -234,6 +234,37 @@ public:
         );
     }
 
+    void Serialize(std::ostream& os) const
+    {
+        os << m_keys.size() << std::endl;
+        for (const Key& key : m_keys)
+        {
+            os << key.value << " " << key.time << " " << key.inControl << " " << key.outControl << std::endl;
+        }
+    }
+
+    bool Deserialize(std::istream& is)
+    {
+        if (!is) false;
+
+        std::size_t keyCount;
+        is >> keyCount;
+        if (!is) return false;
+        std::vector<Key> tempKeys;
+        tempKeys.reserve(keyCount);
+
+        for (std::size_t i = 0; i < keyCount; ++i)
+        {
+            Key key;
+            is >> key.value >> key.time >> key.inControl >> key.outControl;
+            if (!is) return false;
+            tempKeys.push_back(key);
+        }
+        m_keys = std::move(tempKeys);
+        NormalizeKeys();
+        return true;
+    }
+
 private:
     void NormalizeKeys()
     {
@@ -332,6 +363,22 @@ public:
             z.Evaluate(t)
         );
     }
+
+    void Serialize(std::ostream& os) const
+    {
+        x.Serialize(os);
+        y.Serialize(os);
+        z.Serialize(os);
+    }
+
+    bool Deserialize(std::istream& is)
+    {
+        if (!x.Deserialize(is)) return false;
+        if (!y.Deserialize(is)) return false;
+        if (!z.Deserialize(is)) return false;
+
+        return true;
+    }
 };
 
 class CurveColor
@@ -384,5 +431,22 @@ public:
             b.Evaluate(t),
             a.Evaluate(t)
         );
+    }
+
+    void Serialize(std::ostream& os) const
+    {
+        r.Serialize(os);
+        g.Serialize(os);
+        b.Serialize(os);
+        a.Serialize(os);
+    }
+
+    bool Deserialize(std::istream& is)
+    {
+        if (!r.Deserialize(is)) return false;
+        if (!g.Deserialize(is)) return false;
+        if (!b.Deserialize(is)) return false;
+        if (!a.Deserialize(is)) return false;
+        return true;
     }
 };

@@ -3,6 +3,7 @@
 #include "System/component.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
+#include "imgui.h"
 
 class EffectConfig : public Component
 {
@@ -30,6 +31,9 @@ public:
         float width = 0.1f;         // パターントレイルの幅
         float lifeTime = 1.0f;      // パターントレイルの寿命
         float length = 1.0f;        // パターントレイルの長さ
+
+        void SaveToFile();
+        bool LoadFromFile();
     };
 
     struct BoundBallConfig
@@ -38,6 +42,9 @@ public:
         float lifetimeMin = 2.0f; // 最小寿命
         float lifetimeMax = 4.0f; // 最大寿命
         float gravity = -9.8f;    // 重力加速度
+
+        void SaveToFile();
+        bool LoadFromFile();
     };
 
     struct FireWorkConfig
@@ -52,6 +59,9 @@ public:
         float size = 0.4f;            // パーティクルのサイズ
         CurveColor colorCurve = CurveColor(Color::Red(), Color::Yellow());
         Curve<float> scaleCurve = Curve<float>(1.0f, 0.0f);
+
+        void SaveToFile();
+        bool LoadFromFile();
     };
 
     struct ImpactBurstConfig
@@ -59,7 +69,7 @@ public:
         int burstCount = 200;         // パーティクルの数
         float lifetimeMin = 0.3f;     // パーティクルの最小寿命
         float lifetimeMax = 0.8f;     // パーティクルの最大寿命
-        float speedMin = 3.0f;        // パーティクルの最小速度
+        float speedMin = 0.0f;        // パーティクルの最小速度
         float speedMax = 8.0f;        // パーティクルの最大速度
         float coneAngle = 24.0f;      // コーン型発射時の角度
         float drag = 0.0f;            // パーティクルの空気抵抗
@@ -88,6 +98,9 @@ public:
             }
         };
         Curve<float> scaleCurve = Curve<float>(1.0f, 0.0f);
+
+        void SaveToFile();
+        bool LoadFromFile();
     };
 
     EffectConfig() = delete;
@@ -104,7 +117,11 @@ public:
     const FireWorkConfig& GetFireWorkConfig() const { return m_fireWorkConfig; }
     const ImpactBurstConfig& GetImpactBurstConfig() const { return m_impactBurstConfig; }
 
+    static bool LoadLine(std::ifstream& ifs, const std::string& expectedLine);
+
 private:
+
+    static constexpr ImVec2 BUTTON_SIZE = ImVec2(80, 0);
 
     PatternTrailConfig m_patternTrailConfig;
     PatternTrailConfig m_defaultPatternTrailConfig; // デフォルト設定を保持するメンバ変数
@@ -119,4 +136,8 @@ private:
     void TrailConfigImGui();
     void FireWorkConfigImGui();
     void ImpactBurstConfigImGui();
+
+    void AllSaveToFile();
+    void AllLoadFromFile();
+
 };
