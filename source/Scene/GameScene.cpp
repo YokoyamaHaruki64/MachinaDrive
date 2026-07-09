@@ -8,6 +8,7 @@
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
+#include "Component/PostEffect.h"
 
 #include "Script/CameraController.h"
 
@@ -87,4 +88,7 @@ void GameScene::Init()
 
     GameObject* patternTrailManager = Manager::CreateEmpty(Vector3::Zero());
     patternTrailManager->AddComponentForCreate<PatternTrailManager>();
+
+    Manager::AddPostEffect(std::make_unique<Bloom>());
+
 }

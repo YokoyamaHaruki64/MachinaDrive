@@ -180,6 +180,9 @@
     <ClCompile Include="source\Script\EffectConfig.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\PostEffect.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -344,6 +347,9 @@
     <ClInclude Include="include\Script\EffectConfig.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Component\PostEffect.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\common.hlsl">
@@ -365,6 +371,15 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="shader\Dice_VS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\FullScreen_VS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\Bloom_PS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\BloomBlur_PS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

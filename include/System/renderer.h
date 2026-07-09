@@ -46,6 +46,7 @@ enum class BlendMode : uint8_t
 {
     AlphaBlend = 0,
     Additive = 1,
+    None = 2,
 };
 enum class CullMode : uint8_t
 {
@@ -62,8 +63,15 @@ private:
 	static ID3D11Device*           m_Device;
 	static ID3D11DeviceContext*    m_DeviceContext;
 	static IDXGISwapChain*         m_SwapChain;
-	static ID3D11RenderTargetView* m_RenderTargetView;
+    static ID3D11Texture2D*        m_BackBufferTexture;
 	static ID3D11DepthStencilView* m_DepthStencilView;
+
+    // バッファ用のテクスチャとビュー
+    static ID3D11Texture2D* m_bufferTexture[2];
+    static ID3D11RenderTargetView* m_bufferRTV[2];
+    static ID3D11ShaderResourceView* m_bufferSRV[2];
+    static int srcBufferIndex;
+    static int dstBufferIndex;
 
 	static ID3D11Buffer*			m_WorldBuffer;
 	static ID3D11Buffer*			m_ViewBuffer;
@@ -122,4 +130,11 @@ public:
 
     static void SubmitDrawCommand(DrawCommand cmd);
 
+    static void SetDstRTV()
+    {
+        m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[dstBufferIndex], m_DepthStencilView);
+    }
+    static ID3D11ShaderResourceView* GetSrcSRV() { return m_bufferSRV[srcBufferIndex]; }
+
+    static void SwapBuffers() { std::swap(srcBufferIndex, dstBufferIndex); }
 };

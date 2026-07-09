@@ -6,14 +6,10 @@
 #include "System/input.h"
 #include "System/renderer.h"
 #include "Scene/Scene.h"
-#include "Scene/TitleScene.h"
+#include "Scene/GameScene.h"
 
 #include "Component/Camera.h"
-#include "Component/Primitive.h"
-#include "Component/SpriteRenderer.h"
-
-#include "Script/RotateCube.h"
-#include "Script/CameraController.h"
+#include "Component/PostEffect.h"
 
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
@@ -22,6 +18,7 @@
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
+std::vector<std::unique_ptr<PostEffect>> Manager::m_postEffects;          // ポストエフェクトのリスト
 
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
@@ -45,7 +42,7 @@ void Manager::InitScene()
             gameObject->OnDestroy();
         }
         m_GameObjects.clear();
-
+        m_postEffects.clear();
         m_currentScene.reset();
     }
 
@@ -78,6 +75,7 @@ void Manager::Init()
 
 	Renderer::Init();
 	Input::Init();
+    PostEffect::Init();
 
     // ImGuiの初期化
     IMGUI_CHECKVERSION();
@@ -107,7 +105,7 @@ void Manager::Init()
     style.ItemSpacing = ImVec2(8, 6);
     style.WindowPadding = ImVec2(10, 10);
 
-    m_nextScene = std::make_unique<TitleScene>();
+    m_nextScene = std::make_unique<GameScene>();
     InitScene();
 }
 
@@ -204,6 +202,13 @@ void Manager::Draw()
 	//}
 
 	Renderer::Draw();
+
+    PostEffect::PostEffectPass_Begin();
+    for (int i = 0; i < m_postEffects.size(); ++i)
+    {
+        m_postEffects[i]->Apply();
+    }
+    PostEffect::PostEffectPass_End();
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

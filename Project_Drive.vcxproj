@@ -140,6 +140,7 @@
     <ClCompile Include="source\Component\Camera.cpp" />
     <ClCompile Include="source\Component\modelRenderer.cpp" />
     <ClCompile Include="source\Component\ParticleSystem.cpp" />
+    <ClCompile Include="source\Component\PostEffect.cpp" />
     <ClCompile Include="source\Component\Primitive.cpp" />
     <ClCompile Include="source\Component\Conponent.cpp" />
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\ParticleSystem.h" />
+    <ClInclude Include="include\Component\PostEffect.h" />
     <ClInclude Include="include\Component\Primitive.h" />
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
@@ -275,6 +277,22 @@
     <ClInclude Include="include\System\RendererBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shader\BloomBlur_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\Bloom_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="shader\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -307,6 +325,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\FullScreen_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
