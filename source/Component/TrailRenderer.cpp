@@ -118,7 +118,7 @@ TrailRenderer::TrailRenderer(
     }
 
     m_renderPass = RenderPass::Transparent; // トレイルは透明パスで描画
-    m_blendMode = BlendMode::Additive;      // アルファブレンドを使用
+    m_blendMode = BlendMode::AlphaBlend;      // アルファブレンドを使用
 }
 
 void TrailRenderer::Draw()

@@ -70,15 +70,17 @@ void PatternTrail::CreateTrailPattern(
         auto th = trail->AddComponent<PatternTrailHeader>();
         th->Init(m_config, normal, PatternTrailHeader::Axis::Y, angle);
 
-        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/Trail.png");
+        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/White.png");
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);
+        tr->SetBlendMode(BlendMode::Additive);
 
         tr->SetWidthCurve(settings.widthCurve);
-        tr->SetTrailLifetime(settings.lifeTime);
+        tr->SetTrailLifetime(settings.trailLifeTime);
         tr->SetColorCurve(settings.colorCurve);
         tr->SetWidth(settings.width);
+
 
         m_trailHeaders.push_back(trail);
     }

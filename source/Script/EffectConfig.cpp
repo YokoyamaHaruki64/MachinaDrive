@@ -165,7 +165,8 @@ void EffectConfig::TrailConfigImGui()
     ImGui::DragFloat("Interval", &m_patternTrailConfig.spawnInterval, 0.01f, 0.1f, 5.0f);
     ImGui::DragFloat("Width", &m_patternTrailConfig.width, 0.01f, 0.01f, 1.0f);
     ImGui::DragFloat("Length", &m_patternTrailConfig.length, 0.01f, 0.1f, 5.0f);
-    ImGui::DragFloat("Life", &m_patternTrailConfig.lifeTime, 0.01f, 0.1f, 10.0f);
+    ImGui::DragFloat("Speed", &m_patternTrailConfig.speed, 0.01f, 0.1f, 10.0f);
+    ImGui::DragFloat("Trail Life", &m_patternTrailConfig.trailLifeTime, 0.01f, 0.1f, 10.0f);
     ImGui::PopItemWidth();
 
     ImGui::EditCurveVector3("Position", m_patternTrailConfig.positionCurve);
@@ -324,7 +325,8 @@ void EffectConfig::PatternTrailConfig::SaveToFile()
     ofs << "TrailCount " << trailCount << std::endl;
     ofs << "SpawnInterval " << spawnInterval << std::endl;
     ofs << "Width " << width << std::endl;
-    ofs << "LifeTime " << lifeTime << std::endl;
+    ofs << "Speed " << speed << std::endl;
+    ofs << "TrailLifeTime " << trailLifeTime << std::endl;
     ofs << "Length " << length << std::endl;
 }
 
@@ -352,8 +354,11 @@ bool EffectConfig::PatternTrailConfig::LoadFromFile()
     if (!LoadLine(ifs, "Width")) return false;
     ifs >> temp.width;
 
-    if (!LoadLine(ifs, "LifeTime")) return false;
-    ifs >> temp.lifeTime;
+    if (!LoadLine(ifs, "Speed")) return false;
+    ifs >> temp.speed;
+
+    if (!LoadLine(ifs, "TrailLifeTime")) return false;
+    ifs >> temp.trailLifeTime;
 
     if (!LoadLine(ifs, "Length")) return false;
     ifs >> temp.length;

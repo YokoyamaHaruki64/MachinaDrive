@@ -29,7 +29,8 @@ public:
         int trailCount = 32;        // パターントレイルの数
         float spawnInterval = 1.0f; // パターントレイルの生成間隔
         float width = 0.1f;         // パターントレイルの幅
-        float lifeTime = 1.0f;      // パターントレイルの寿命
+        float speed = 1.0f;         // パターントレイルの速度
+        float trailLifeTime = 1.0f; // パターントレイルの寿命
         float length = 1.0f;        // パターントレイルの長さ
 
         void SaveToFile();

@@ -12,7 +12,7 @@ void PatternTrailHeader::Init(EffectConfig* config, const Vector3& normal, Axis 
 {
     m_startPos = m_owner->GetTransform()->GetPosition();
     auto settings = config->GetPatternTrailConfig();
-    m_lifeTime = settings.lifeTime;
+    m_lifeTime = 1.0f / (settings.speed == 0.0f ? 0.01f : settings.speed); // 0除算回避
     m_config = config;
     m_axis = axis;
     m_angle = angle;
