@@ -28,6 +28,12 @@ void EffectConfig::Update()
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNode("Global"))
     {
+        float timeScale = Time::GetTimeScale();
+        if (ImGui::DragFloat("TimeScale", &timeScale, 0.01f, 0.0f, 10.0f))
+        {
+            Time::SetTimeScale(timeScale);
+        }
+
         if (ImGui::Button("Save", BUTTON_SIZE))
         {
             AllSaveToFile();
@@ -203,7 +209,7 @@ void EffectConfig::FireWorkConfigImGui()
 
     ImGui::PushItemWidth(100);
 
-    ImGui::DragInt("Burst Count", &m_fireWorkConfig.burstCount, 0, 1, 10000);
+    ImGui::DragInt("Burst Count", &m_fireWorkConfig.burstCount, 1, 1, 10000);
     ImGui::DragFloat("Drag", &m_fireWorkConfig.drag, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Gravity", &m_fireWorkConfig.gravity, 0.1f, -FLT_MAX, FLT_MAX);
     ImGui::DragFloat("Size", &m_fireWorkConfig.size, 0.01f, 0.01f, 10.0f);
@@ -258,7 +264,7 @@ void EffectConfig::ImpactBurstConfigImGui()
 
     ImGui::PushItemWidth(100);
 
-    ImGui::DragInt("Burst Count", &m_impactBurstConfig.burstCount, 0, 1, 10000);
+    ImGui::DragInt("Burst Count", &m_impactBurstConfig.burstCount, 1, 1, 10000);
     ImGui::DragFloat("Drag", &m_impactBurstConfig.drag, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Gravity", &m_impactBurstConfig.gravity, 0.1f, -FLT_MAX, FLT_MAX);
     ImGui::DragFloat("Size", &m_impactBurstConfig.size, 0.01f, 0.01f, 10.0f);

@@ -4,8 +4,8 @@
 Texture2D srcTexture : register(t0);
 SamplerState g_SamplerState : register(s0);
 
-static const float threshold = 0.9f;
-static const float blurRadius = 1.5f;
+static const float threshold = 0.8f;
+static const float blurRadius = 1.0f;
 
 float3 ExtractBright(float3 color)
 {
@@ -17,33 +17,33 @@ float4 main(PS_IN input) : SV_TARGET
 {
     uint width, height;
     srcTexture.GetDimensions(width, height);
+    float2 texelSize = 1.0f / float2(width, height);
 
-    static const float weights[5] =
+    static const float weights[9] =
     {
-        0.227027f,
-        0.194595f,
-        0.121622f,
-        0.054054f,
-        0.016216f
+        0.1630f,
+        0.1514f,
+        0.1205f,
+        0.0820f,
+        0.0477f,
+        0.0238f,
+        0.0101f,
+        0.0037f,
+        0.0011f
     };
 
-    float2 texelSize = 1.0f / float2(width, height);
-    float3 bloom = 0.0f;
+    float3 bloom = 0;
 
     [unroll]
-    for (int x = -4; x <= 4; ++x)
+    for (int x = -8; x <= 8; ++x)
     {
-        float2 offset =
-            float2(x * texelSize.x * blurRadius, 0.0f);
+        float2 uv = input.TexCoord +
+        float2(x * texelSize.x, 0);
 
-        float3 color = srcTexture.Sample(
-            g_SamplerState,
-            input.TexCoord + offset
-        ).rgb;
-
-        bloom += ExtractBright(color) * weights[abs(x)];
+        bloom += ExtractBright(
+        srcTexture.Sample(g_SamplerState, uv).rgb
+        ) * weights[abs(x)];
     }
-
     return float4(bloom, 1.0f);
 }
 

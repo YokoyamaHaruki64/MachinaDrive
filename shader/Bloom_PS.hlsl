@@ -5,8 +5,8 @@ Texture2D bloomTexture : register(t1);
 
 SamplerState g_SamplerState : register(s0);
 
-static const float blurRadius = 1.5f;
-static const float intensity = 1.5f;
+static const float blurRadius = 1.0f;
+static const float intensity = 2.0f;
 
 float4 main(PS_IN input) : SV_TARGET
 {
@@ -14,14 +14,17 @@ float4 main(PS_IN input) : SV_TARGET
     uint width, height;
     bloomTexture.GetDimensions(width, height);
 
-
-    static const float weights[5] =
+    static const float weights[9] =
     {
-        0.227027f,
-        0.194595f,
-        0.121622f,
-        0.054054f,
-        0.016216f
+        0.1630f,
+        0.1514f,
+        0.1205f,
+        0.0820f,
+        0.0477f,
+        0.0238f,
+        0.0101f,
+        0.0037f,
+        0.0011f
     };
 
     float2 texelSize = 1.0f / float2(width, height);
@@ -34,7 +37,7 @@ float4 main(PS_IN input) : SV_TARGET
     float3 bloom = 0.0f;
 
     [unroll]
-    for (int y = -4; y <= 4; ++y)
+    for (int y = -8; y <= 8; ++y)
     {
         float2 offset =
             float2(0.0f, y * texelSize.y * blurRadius);
