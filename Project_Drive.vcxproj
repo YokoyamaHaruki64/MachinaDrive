@@ -210,6 +210,7 @@
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Ripple.cpp" />
+    <ClCompile Include="source\Script\Score.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
+    <ClInclude Include="include\Script\Score.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
     <ClInclude Include="include\Script\PatternTrailHeader.h" />
     <ClInclude Include="include\Script\Wall.h" />

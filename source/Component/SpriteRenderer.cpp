@@ -116,7 +116,8 @@ SpriteRenderer::SpriteRenderer(
     {
         MessageBoxA(nullptr, "頂点バッファの作成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
     }
-        
+
+    m_renderPass = RenderPass::Overlay; // スプライトはオーバーレイパスで描画
 }
 
 void SpriteRenderer::Draw()

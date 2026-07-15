@@ -6,7 +6,7 @@
 #include "System/input.h"
 #include "System/renderer.h"
 #include "Scene/Scene.h"
-#include "Scene/GameScene.h"
+#include "Scene/TitleScene.h"
 
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
@@ -105,7 +105,7 @@ void Manager::Init()
     style.ItemSpacing = ImVec2(8, 6);
     style.WindowPadding = ImVec2(10, 10);
 
-    m_nextScene = std::make_unique<GameScene>();
+    m_nextScene = std::make_unique<TitleScene>();
     InitScene();
 }
 

@@ -12,6 +12,7 @@
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
 #include "Script/RotateCube.h"
+#include "Script/Score.h"
 
 
 void GameScene::Init()
@@ -73,6 +74,9 @@ void GameScene::Init()
 
         tree->GetComponent<Quad>()->SetRenderPass(RenderPass::Transparent);
     }
+
+    GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
+    scoreObj->AddComponentForCreate<Score>();
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 }
