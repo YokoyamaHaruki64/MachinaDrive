@@ -143,6 +143,7 @@
     <ClCompile Include="source\Component\PostEffect.cpp" />
     <ClCompile Include="source\Component\Primitive.cpp" />
     <ClCompile Include="source\Component\Conponent.cpp" />
+    <ClCompile Include="source\Component\Skydome.cpp" />
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
     <ClCompile Include="source\ImGui\imgui.cpp">
@@ -228,6 +229,7 @@
     <ClInclude Include="include\Component\ParticleSystem.h" />
     <ClInclude Include="include\Component\PostEffect.h" />
     <ClInclude Include="include\Component\Primitive.h" />
+    <ClInclude Include="include\Component\Skydome.h" />
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />

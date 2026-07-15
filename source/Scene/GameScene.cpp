@@ -8,6 +8,7 @@
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
+#include "Component/Skydome.h"
 
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
@@ -74,6 +75,9 @@ void GameScene::Init()
 
         tree->GetComponent<Quad>()->SetRenderPass(RenderPass::Transparent);
     }
+
+    GameObject* skydome = Manager::CreateEmpty();
+    skydome->AddComponentForCreate<Skydome>();
 
     GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
     scoreObj->AddComponentForCreate<Score>();
