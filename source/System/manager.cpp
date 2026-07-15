@@ -10,6 +10,7 @@
 
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
+#include "Component/audio.h"
 
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
@@ -76,6 +77,7 @@ void Manager::Init()
 	Renderer::Init();
 	Input::Init();
     PostEffect::Init();
+    Audio::InitMaster();
 
     // ImGuiの初期化
     IMGUI_CHECKVERSION();
@@ -112,8 +114,6 @@ void Manager::Init()
 
 void Manager::Uninit()
 {
-	Renderer::Uninit();
-	Input::Uninit();
     PendingGameObjectsProcess();
 	for (auto& gameObject : m_GameObjects)
 	{
@@ -124,6 +124,10 @@ void Manager::Uninit()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    Renderer::Uninit();
+    Input::Uninit();
+    Audio::UninitMaster();
+
 }
 void Manager::Update()
 {

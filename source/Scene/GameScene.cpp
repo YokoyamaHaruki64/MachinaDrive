@@ -9,6 +9,8 @@
 #include "Component/Camera.h"
 #include "Component/Primitive.h"
 #include "Component/Skydome.h"
+#include "Component/PostEffect.h"
+#include "Component/audio.h"
 
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
@@ -83,4 +85,6 @@ void GameScene::Init()
     scoreObj->AddComponentForCreate<Score>();
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
+
+    Manager::CreateEmpty()->AddComponentForCreate<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
 }

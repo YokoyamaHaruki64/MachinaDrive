@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Component\audio.cpp" />
     <ClCompile Include="source\Component\Camera.cpp" />
     <ClCompile Include="source\Component\modelRenderer.cpp" />
     <ClCompile Include="source\Component\ParticleSystem.cpp" />
@@ -224,6 +225,7 @@
   <ItemGroup>
     <ClInclude Include="include\Common\Color.h" />
     <ClInclude Include="include\Common\Random.h" />
+    <ClInclude Include="include\Component\audio.h" />
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\ParticleSystem.h" />

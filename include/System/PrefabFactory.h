@@ -30,6 +30,7 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
         ModelRenderer::InverseAxis::Y); // Y軸反転
 
     player->AddComponentForCreate<Player>();
+    player->AddComponentForCreate<Audio>("Assets\\Sounds\\wan.wav");
 
     return player;
 }

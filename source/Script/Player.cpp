@@ -8,10 +8,16 @@
 #include "Scene/ResultScene.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
+#include "Component/audio.h"
 #include "math/MathCommon.h"
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
 
+
+void Player::OnStart()
+{
+    m_jumpSE = m_owner->GetComponent<Audio>();
+}
 
 void Player::Update()
 {
@@ -48,6 +54,10 @@ void Player::Update()
 	{
 		m_velocity.y += jumpForce; // ジャンプ
 		m_isGrounded = false; // ジャンプしたので地面から離れる
+        if( m_jumpSE)
+        {
+            m_jumpSE->Play(); // ジャンプ音を再生
+        }
 	}
 
     if( Input::GetKeyPress(Input::KK_SHIFT))
