@@ -18,21 +18,21 @@ void GameScene::Init()
 {
     // シーン初期化
     GameObject* camera = Manager::CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
-    camera->AddComponentForBeginScene<Camera>(Camera::MainCamera);
-    camera->AddComponentForBeginScene<CameraController>();
+    camera->AddComponentForCreate<Camera>(Camera::MainCamera);
+    camera->AddComponentForCreate<CameraController>();
 
     GameObject* field = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    field->AddComponentForBeginScene<Plane>(
+    field->AddComponentForCreate<Plane>(
         L"Assets\\Textures\\glass2.png",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso");
 
     GameObject* obj = Manager::CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    obj->AddComponentForBeginScene<Cube>(
+    obj->AddComponentForCreate<Cube>(
         L"Assets\\Textures\\DarkMatReal.png",
         "BuildedShader\\Dice_VS.cso",
         "BuildedShader\\Dice_PS.cso");
-    obj->AddComponentForBeginScene<RotateCube>();
+    obj->AddComponentForCreate<RotateCube>();
 
     Manager::InstantiateForBeginScene(
         "Player",
@@ -71,6 +71,8 @@ void GameScene::Init()
             Vector3::Zero(),
             Vector3::One() * 5.0f);
 
-        tree->GetComponent<Quad>()->SetRendererPass(RenderPass::Transparent);
+        tree->GetComponent<Quad>()->SetRenderPass(RenderPass::Transparent);
     }
+
+    Manager::AddPostEffect(std::make_unique<Bloom>());
 }

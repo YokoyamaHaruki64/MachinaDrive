@@ -32,8 +32,8 @@ using namespace DirectX;
 #pragma comment (lib, "winmm.lib")
 
 
-#define SCREEN_WIDTH	(1280)
-#define SCREEN_HEIGHT	(720)
+#define SCREEN_WIDTH	(1600)
+#define SCREEN_HEIGHT	(900)
 
 
 HWND GetWindow();

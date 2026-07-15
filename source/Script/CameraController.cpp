@@ -27,25 +27,24 @@ void CameraController::OnStart()
 
 void CameraController::LateUpdate()
 {
-    if (m_target == nullptr)
-    {
-        return; // ターゲットが設定されていない場合は更新しない
-    }
-
-    m_camera->SetTarget(m_target->GetPosition());
-
-    if(Input::GetKeyPress(Input::KK_Q))
+    // 回転処理
+    if (Input::GetKeyPress(Input::KK_Q))
     {
         transform()->Rotate(Vector3(0.0f, -0.02f, 0.0f)); // 左回転
     }
-    if(Input::GetKeyPress(Input::KK_E))
+    if (Input::GetKeyPress(Input::KK_E))
     {
         transform()->Rotate(Vector3(0.0f, 0.02f, 0.0f)); // 右回転
     }
-    
+
+    // カメラのターゲットを設定
+    if (m_target == nullptr)
+        m_camera->SetTarget(Vector3::Zero()); // ターゲットがない場合は原点を向く
+    else
+        m_camera->SetTarget(m_target->GetPosition());
 
     // カメラの位置をターゲットから一定の距離と高さに設定
-    Vector3 cameraPos = m_target->GetPosition() + Vector3(
+    Vector3 cameraPos = m_camera->GetTarget() + Vector3(
         -sinf(transform()->GetRotation().y) * CAMERA_DISTANCE,
         CAMERA_HEIGHT,
         -cosf(transform()->GetRotation().y) * CAMERA_DISTANCE

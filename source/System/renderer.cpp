@@ -11,8 +11,14 @@ D3D_FEATURE_LEVEL       Renderer::m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 ID3D11Device*           Renderer::m_Device{};
 ID3D11DeviceContext*    Renderer::m_DeviceContext{};
 IDXGISwapChain*         Renderer::m_SwapChain{};
-ID3D11RenderTargetView* Renderer::m_RenderTargetView{};
+ID3D11Texture2D*        Renderer::m_BackBufferTexture{};
 ID3D11DepthStencilView* Renderer::m_DepthStencilView{};
+
+ID3D11Texture2D*            Renderer::m_bufferTexture[2]{};
+ID3D11RenderTargetView*     Renderer::m_bufferRTV[2]{};
+ID3D11ShaderResourceView*   Renderer::m_bufferSRV[2]{};
+int Renderer::srcBufferIndex = 0;
+int Renderer::dstBufferIndex = 1;
 
 ID3D11Buffer*			Renderer::m_WorldBuffer{};
 ID3D11Buffer*			Renderer::m_ViewBuffer{};
@@ -25,6 +31,9 @@ ID3D11Buffer*           Renderer::m_UVBuffer{};
 ID3D11DepthStencilState* Renderer::m_DepthStateEnable{};
 ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
 
+ID3D11RasterizerState* Renderer::m_RasterizerState{};
+ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
+
 
 ID3D11BlendState*		Renderer::m_BlendState{};
 ID3D11BlendState*       Renderer::m_BlendStateAdd{};
@@ -35,7 +44,7 @@ XMMATRIX Renderer::m_ProjectionMatrix{};
 
 std::vector<DrawCommand> Renderer::m_DrawCommands{};
 BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
-
+CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
 void Renderer::Init()
 {
 	HRESULT hr = S_OK;
@@ -70,16 +79,32 @@ void Renderer::Init()
 										&m_FeatureLevel,
 										&m_DeviceContext );
 
+    m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&m_BackBufferTexture);
 
+    // 実際のバックバッファ設定を取得
+    D3D11_TEXTURE2D_DESC backBufferDesc{};
+    m_BackBufferTexture->GetDesc(&backBufferDesc);
 
+	// バッファテクスチャ作成
+    D3D11_TEXTURE2D_DESC bufferTexDesc{};
+    bufferTexDesc.Width = backBufferDesc.Width;
+    bufferTexDesc.Height = backBufferDesc.Height;
+    bufferTexDesc.MipLevels = 1;
+    bufferTexDesc.ArraySize = 1;
+    bufferTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    bufferTexDesc.SampleDesc = backBufferDesc.SampleDesc;
+    bufferTexDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-
-
-	// レンダーターゲットビュー作成
-	ID3D11Texture2D* renderTarget{};
-	m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&renderTarget );
-	m_Device->CreateRenderTargetView( renderTarget, NULL, &m_RenderTargetView );
-	renderTarget->Release();
+    for (int i = 0; i < 2; ++i) {
+        m_Device->CreateTexture2D(&bufferTexDesc, NULL, &m_bufferTexture[i]);
+        m_Device->CreateRenderTargetView(m_bufferTexture[i], NULL, &m_bufferRTV[i]);
+        m_Device->CreateShaderResourceView(m_bufferTexture[i], NULL, &m_bufferSRV[i]);
+    }
+	//ID3D11Texture2D* renderTarget{};
+	//m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&renderTarget );
+	//m_Device->CreateRenderTargetView( renderTarget, NULL, &m_RenderTargetView );
+	//renderTarget->Release();
 
 
 	// デプスステンシルバッファ作成
@@ -106,10 +131,7 @@ void Renderer::Init()
 	depthStencile->Release();
 
 
-	m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
-
-
-
+	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
 
 
 	// ビューポート設定
@@ -129,12 +151,14 @@ void Renderer::Init()
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID; 
 	rasterizerDesc.CullMode = D3D11_CULL_BACK; 
 	rasterizerDesc.DepthClipEnable = TRUE; 
-	rasterizerDesc.MultisampleEnable = FALSE; 
+	rasterizerDesc.MultisampleEnable = FALSE;
 
-	ID3D11RasterizerState *rs;
-	m_Device->CreateRasterizerState( &rasterizerDesc, &rs );
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState);
 
-	m_DeviceContext->RSSetState( rs );
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateNoCull);
+
+    m_DeviceContext->RSSetState(m_RasterizerState);
 
 
 
@@ -277,10 +301,17 @@ void Renderer::Uninit()
 
 
 	m_DeviceContext->ClearState();
-	m_RenderTargetView->Release();
+	m_BackBufferTexture->Release();
 	m_SwapChain->Release();
 	m_DeviceContext->Release();
 	m_Device->Release();
+
+    for( int i = 0; i < 2; ++i )
+    {
+        m_bufferTexture[i]->Release();
+        m_bufferRTV[i]->Release();
+        m_bufferSRV[i]->Release();
+    }
 
 }
 
@@ -290,12 +321,15 @@ void Renderer::Uninit()
 void Renderer::Begin()
 {
 	float clearColor[4] = {
-		169.0f / 255.0f,
-		255.0f / 255.0f,
-		255.0f / 255.0f,
+		0 / 255.0f,
+		0 / 255.0f,
+		16.0f / 255.0f,
 		1.0f 
 	};
-	m_DeviceContext->ClearRenderTargetView( m_RenderTargetView, clearColor );
+    for( int i = 0; i < 2; ++i )
+    {
+        m_DeviceContext->ClearRenderTargetView( m_bufferRTV[i], clearColor );
+    }
 	m_DeviceContext->ClearDepthStencilView( m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
@@ -330,8 +364,14 @@ void Renderer::Draw()
     m_DrawCommands.clear();
 }
 
+
+
 void Renderer::End()
 {
+    // RTVのデータをバックバッファにコピーする
+    m_DeviceContext->CopyResource(m_BackBufferTexture, m_bufferTexture[srcBufferIndex]);
+
+    // バッファを入れ替える
 	m_SwapChain->Present( 1, 0 );
 }
 
@@ -424,11 +464,30 @@ void Renderer::SetBlendMode(BlendMode mode)
         m_DeviceContext->OMSetBlendState(m_BlendStateAdd, nullptr, 0xffffffff);
         break;
 
+    case BlendMode::None:
+        m_DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+        break;
     default:
         break;
     }
 
     m_CurrentBlendMode = mode;
+}
+
+void Renderer::SetRasterizerState(CullMode cull)
+{
+    switch (cull)
+    {
+    case CullMode::None:
+        m_DeviceContext->RSSetState(m_RasterizerStateNoCull);
+        break;
+    case CullMode::Back:
+        m_DeviceContext->RSSetState(m_RasterizerState);
+        break;
+    default:
+        break;
+    }
+    m_CurrentCullMode = cull;
 }
 
 XMMATRIX Renderer::GetViewMatrix()

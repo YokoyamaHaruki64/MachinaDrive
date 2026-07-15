@@ -16,13 +16,21 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
     uint64_t sortKey = 0;
     sortKey |= static_cast<uint64_t>(m_renderPass) << 56; // 描画パスを上位8ビットに配置
 
+    uint64_t blendModeBits = static_cast<uint64_t>(m_blendMode) & 0x0F; // ブレンドモードを4ビットに制限
+    uint64_t cullModeBits = static_cast<uint64_t>(m_cullMode) & 0x0F;   // カリングモードを4ビットに制限
+
+    auto SetBlendAndCullBits = [&sortKey, blendModeBits, cullModeBits](int start) {
+        sortKey |= blendModeBits << (start + 4);    // ブレンドモードを44～47ビットに配置
+        sortKey |= cullModeBits << start;           // カリングモードを40～43ビットに配置
+        };
+
     // 描画パスに応じてソートキーを構築
     switch (m_renderPass)
     {
     case RenderPass::Opaque:
         // 不透明オブジェクトは描画順序でソートする
         sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
-        sortKey |= static_cast<uint64_t>(m_blendMode) << 40; // ブレンドモードを40～47ビットに配置
+        SetBlendAndCullBits(40);
         break;
 
     case RenderPass::Transparent:
@@ -47,12 +55,12 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
 
             sortKey |= static_cast<uint64_t>(m_drawLayer) << 48;    // 描画順序を48～55ビットに配置
             sortKey |= static_cast<uint64_t>(invDepth) << 16;       // 距離を16～47ビットに配置
-            sortKey |= static_cast<uint64_t>(m_blendMode) << 8;        // ブレンドモードを8～15ビットに配置
+            SetBlendAndCullBits(8);
         }
         break;
     case RenderPass::Overlay:
         sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
-        sortKey |= static_cast<uint64_t>(m_blendMode) << 40; // ブレンドモードを40～47ビットに配置
+        SetBlendAndCullBits(40);
         break;
     default:
         break;
@@ -86,6 +94,10 @@ void RendererBase::BindState()
     if( m_blendMode != Renderer::GetCurrentBlendMode())
     {
         Renderer::SetBlendMode(m_blendMode);
+    }
+    if( m_cullMode != Renderer::GetCurrentCullMode())
+    {
+        Renderer::SetRasterizerState(m_cullMode);
     }
 
 }

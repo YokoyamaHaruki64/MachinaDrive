@@ -57,8 +57,8 @@ public:
         Vector3 size = Vector3(1.0f, 1.0f, 1.0f);    // パーティクルの初期サイズ(単位:px)
         Curve<float> scaleOverLifetime =                // サイズを変化させるカーブ
             Curve<float>(1.0f, 0.0f);
-        Curve<Color> colorOverLifetime =                // 色を変化させるカーブ
-            Curve<Color>(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f));    
+        CurveColor colorOverLifetime =
+            CurveColor(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f)); // 色を変化させるカーブ
 
         // 速度共通
         bool randomizeSpeed = true; // true:初速をランダム化する
@@ -161,6 +161,7 @@ private:
     float m_emitTimer{ 0.0f };
     float m_emitInterval{ 0.1f };
     int m_burstEmitted{ 0 }; // バースト時の生成済みパーティクル数
+    int m_activeParticles{ 0 }; // 現在アクティブなパーティクル数
     bool m_burstFinished{ false }; // バーストが完了したかどうか
 
     void EmitOne();

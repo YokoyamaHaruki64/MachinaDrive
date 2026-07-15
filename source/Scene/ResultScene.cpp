@@ -14,12 +14,12 @@ void ResultScene::Init()
 {
     // シーン初期化
     GameObject* titleBG = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f));
-    titleBG->AddComponentForBeginScene<SpriteRenderer>(L"Assets/Textures/ResultBG.png");
+    titleBG->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/ResultBG.png");
     titleBG->GetTransform()->SetScale(Vector3(SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f));
 
     const float LOGO_SCALE = 300.0f;
     GameObject* logo = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f, 0.0f));
-    logo->AddComponentForBeginScene<SpriteRenderer>(L"Assets/Textures/TitleLogo.png");
+    logo->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/TitleLogo.png");
     logo->GetTransform()->SetScale(Vector3(LOGO_SCALE * 3.0f, LOGO_SCALE * 2.0f, 1.0f)); // 3:2画像
 
     GameObject* resultUI =
@@ -28,7 +28,7 @@ void ResultScene::Init()
                     SCREEN_HEIGHT - SCREEN_HEIGHT / 4.0f,
                     0.0f));
 
-    resultUI->AddComponentForBeginScene<SpriteRenderer>(L"Assets/Textures/ResultUI.png");
-    resultUI->AddComponentForBeginScene<ResultUI>();
+    resultUI->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/ResultUI.png");
+    resultUI->AddComponentForCreate<ResultUI>();
     resultUI->GetTransform()->SetScale(Vector3(800.0f, 200.0f, 1.0f));
 }
