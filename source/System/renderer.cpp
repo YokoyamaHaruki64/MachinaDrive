@@ -1,6 +1,8 @@
-﻿
+﻿#include "pch.h"
+
 #include "System/main.h"
 #include "System/renderer.h"
+#include "System/RendererBase.h"
 #include <io.h>
 
 
@@ -9,26 +11,40 @@ D3D_FEATURE_LEVEL       Renderer::m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 ID3D11Device*           Renderer::m_Device{};
 ID3D11DeviceContext*    Renderer::m_DeviceContext{};
 IDXGISwapChain*         Renderer::m_SwapChain{};
-ID3D11RenderTargetView* Renderer::m_RenderTargetView{};
+ID3D11Texture2D*        Renderer::m_BackBufferTexture{};
 ID3D11DepthStencilView* Renderer::m_DepthStencilView{};
+
+ID3D11Texture2D*            Renderer::m_bufferTexture[2]{};
+ID3D11RenderTargetView*     Renderer::m_bufferRTV[2]{};
+ID3D11ShaderResourceView*   Renderer::m_bufferSRV[2]{};
+int Renderer::srcBufferIndex = 0;
+int Renderer::dstBufferIndex = 1;
 
 ID3D11Buffer*			Renderer::m_WorldBuffer{};
 ID3D11Buffer*			Renderer::m_ViewBuffer{};
 ID3D11Buffer*			Renderer::m_ProjectionBuffer{};
 ID3D11Buffer*			Renderer::m_MaterialBuffer{};
 ID3D11Buffer*			Renderer::m_LightBuffer{};
+ID3D11Buffer*           Renderer::m_UVBuffer{};
 
 
 ID3D11DepthStencilState* Renderer::m_DepthStateEnable{};
 ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
 
+ID3D11RasterizerState* Renderer::m_RasterizerState{};
+ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
+
 
 ID3D11BlendState*		Renderer::m_BlendState{};
+ID3D11BlendState*       Renderer::m_BlendStateAdd{};
 ID3D11BlendState*		Renderer::m_BlendStateATC{};
 
+XMMATRIX Renderer::m_ViewMatrix{};
+XMMATRIX Renderer::m_ProjectionMatrix{};
 
-
-
+std::vector<DrawCommand> Renderer::m_DrawCommands{};
+BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
+CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
 void Renderer::Init()
 {
 	HRESULT hr = S_OK;
@@ -63,16 +79,32 @@ void Renderer::Init()
 										&m_FeatureLevel,
 										&m_DeviceContext );
 
+    m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&m_BackBufferTexture);
 
+    // 実際のバックバッファ設定を取得
+    D3D11_TEXTURE2D_DESC backBufferDesc{};
+    m_BackBufferTexture->GetDesc(&backBufferDesc);
 
+	// バッファテクスチャ作成
+    D3D11_TEXTURE2D_DESC bufferTexDesc{};
+    bufferTexDesc.Width = backBufferDesc.Width;
+    bufferTexDesc.Height = backBufferDesc.Height;
+    bufferTexDesc.MipLevels = 1;
+    bufferTexDesc.ArraySize = 1;
+    bufferTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    bufferTexDesc.SampleDesc = backBufferDesc.SampleDesc;
+    bufferTexDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-
-
-	// レンダーターゲットビュー作成
-	ID3D11Texture2D* renderTarget{};
-	m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&renderTarget );
-	m_Device->CreateRenderTargetView( renderTarget, NULL, &m_RenderTargetView );
-	renderTarget->Release();
+    for (int i = 0; i < 2; ++i) {
+        m_Device->CreateTexture2D(&bufferTexDesc, NULL, &m_bufferTexture[i]);
+        m_Device->CreateRenderTargetView(m_bufferTexture[i], NULL, &m_bufferRTV[i]);
+        m_Device->CreateShaderResourceView(m_bufferTexture[i], NULL, &m_bufferSRV[i]);
+    }
+	//ID3D11Texture2D* renderTarget{};
+	//m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&renderTarget );
+	//m_Device->CreateRenderTargetView( renderTarget, NULL, &m_RenderTargetView );
+	//renderTarget->Release();
 
 
 	// デプスステンシルバッファ作成
@@ -99,10 +131,7 @@ void Renderer::Init()
 	depthStencile->Release();
 
 
-	m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
-
-
-
+	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
 
 
 	// ビューポート設定
@@ -122,12 +151,14 @@ void Renderer::Init()
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID; 
 	rasterizerDesc.CullMode = D3D11_CULL_BACK; 
 	rasterizerDesc.DepthClipEnable = TRUE; 
-	rasterizerDesc.MultisampleEnable = FALSE; 
+	rasterizerDesc.MultisampleEnable = FALSE;
 
-	ID3D11RasterizerState *rs;
-	m_Device->CreateRasterizerState( &rasterizerDesc, &rs );
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState);
 
-	m_DeviceContext->RSSetState( rs );
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateNoCull);
+
+    m_DeviceContext->RSSetState(m_RasterizerState);
 
 
 
@@ -149,6 +180,10 @@ void Renderer::Init()
 
 	blendDesc.AlphaToCoverageEnable = TRUE;
 	m_Device->CreateBlendState( &blendDesc, &m_BlendStateATC );
+
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	m_Device->CreateBlendState( &blendDesc, &m_BlendStateAdd );
 
 	float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	m_DeviceContext->OMSetBlendState(m_BlendState, blendFactor, 0xffffffff );
@@ -223,7 +258,10 @@ void Renderer::Init()
 	m_DeviceContext->VSSetConstantBuffers( 4, 1, &m_LightBuffer );
 	m_DeviceContext->PSSetConstantBuffers( 4, 1, &m_LightBuffer );
 
-
+    bufferDesc.ByteWidth = sizeof(XMFLOAT4);
+    m_Device->CreateBuffer(&bufferDesc, NULL, &m_UVBuffer);
+    m_DeviceContext->VSSetConstantBuffers(6, 1, &m_UVBuffer);
+    m_DeviceContext->PSSetConstantBuffers(6, 1, &m_UVBuffer);    
 
 
 
@@ -243,7 +281,8 @@ void Renderer::Init()
 	material.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
 
-
+    // UV初期化
+    SetUV(XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
 
 
 }
@@ -258,13 +297,21 @@ void Renderer::Uninit()
 	m_ProjectionBuffer->Release();
 	m_LightBuffer->Release();
 	m_MaterialBuffer->Release();
+    m_UVBuffer->Release();
 
 
 	m_DeviceContext->ClearState();
-	m_RenderTargetView->Release();
+	m_BackBufferTexture->Release();
 	m_SwapChain->Release();
 	m_DeviceContext->Release();
 	m_Device->Release();
+
+    for( int i = 0; i < 2; ++i )
+    {
+        m_bufferTexture[i]->Release();
+        m_bufferRTV[i]->Release();
+        m_bufferSRV[i]->Release();
+    }
 
 }
 
@@ -274,19 +321,57 @@ void Renderer::Uninit()
 void Renderer::Begin()
 {
 	float clearColor[4] = {
-		169.0f / 255.0f,
-		255.0f / 255.0f,
-		255.0f / 255.0f,
+		0 / 255.0f,
+		0 / 255.0f,
+		16.0f / 255.0f,
 		1.0f 
 	};
-	m_DeviceContext->ClearRenderTargetView( m_RenderTargetView, clearColor );
+    for( int i = 0; i < 2; ++i )
+    {
+        m_DeviceContext->ClearRenderTargetView( m_bufferRTV[i], clearColor );
+    }
 	m_DeviceContext->ClearDepthStencilView( m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void Renderer::Draw()
+{
+    // DrawCommandをsortKeyでソートする
+    std::sort(m_DrawCommands.begin(), m_DrawCommands.end(), [](const DrawCommand& a, const DrawCommand& b) {
+        return a.sortKey < b.sortKey;
+    });
+
+    // DrawCommandを順番に描画する
+    for (const auto& cmd : m_DrawCommands) {
+
+        // ソートキーの上位8ビットでRenderPassを切り替える
+        if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Opaque) )
+        {
+            SetDepthEnable(true);
+        }
+        else if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Transparent) )
+        {
+            SetDepthEnable(false);
+        }
+
+        if (cmd.renderer)
+        {
+            cmd.renderer->BindState();
+            cmd.renderer->Draw();
+        }
+    }
+
+    // DrawCommandをクリアする
+    m_DrawCommands.clear();
 }
 
 
 
 void Renderer::End()
 {
+    // RTVのデータをバックバッファにコピーする
+    m_DeviceContext->CopyResource(m_BackBufferTexture, m_bufferTexture[srcBufferIndex]);
+
+    // バッファを入れ替える
 	m_SwapChain->Present( 1, 0 );
 }
 
@@ -335,6 +420,7 @@ void Renderer::SetWorldMatrix(XMMATRIX WorldMatrix)
 
 void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 {
+    m_ViewMatrix = ViewMatrix;
 	XMFLOAT4X4 viewf;
 	XMStoreFloat4x4(&viewf, XMMatrixTranspose(ViewMatrix));
 	m_DeviceContext->UpdateSubresource(m_ViewBuffer, 0, NULL, &viewf, 0, 0);
@@ -342,6 +428,7 @@ void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 
 void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 {
+    m_ProjectionMatrix = ProjectionMatrix;
 	XMFLOAT4X4 projectionf;
 	XMStoreFloat4x4(&projectionf, XMMatrixTranspose(ProjectionMatrix));
 	m_DeviceContext->UpdateSubresource(m_ProjectionBuffer, 0, NULL, &projectionf, 0, 0);
@@ -358,6 +445,59 @@ void Renderer::SetMaterial( MATERIAL Material )
 void Renderer::SetLight( LIGHT Light )
 {
 	m_DeviceContext->UpdateSubresource(m_LightBuffer, 0, NULL, &Light, 0, 0);
+}
+
+void Renderer::SetUV(XMFLOAT4 UV)
+{
+    m_DeviceContext->UpdateSubresource(m_UVBuffer, 0, NULL, &UV, 0, 0);
+}
+
+void Renderer::SetBlendMode(BlendMode mode)
+{
+    switch (mode)
+    {
+    case BlendMode::AlphaBlend:
+        m_DeviceContext->OMSetBlendState(m_BlendState, nullptr, 0xffffffff);
+        break;
+
+    case BlendMode::Additive:
+        m_DeviceContext->OMSetBlendState(m_BlendStateAdd, nullptr, 0xffffffff);
+        break;
+
+    case BlendMode::None:
+        m_DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+        break;
+    default:
+        break;
+    }
+
+    m_CurrentBlendMode = mode;
+}
+
+void Renderer::SetRasterizerState(CullMode cull)
+{
+    switch (cull)
+    {
+    case CullMode::None:
+        m_DeviceContext->RSSetState(m_RasterizerStateNoCull);
+        break;
+    case CullMode::Back:
+        m_DeviceContext->RSSetState(m_RasterizerState);
+        break;
+    default:
+        break;
+    }
+    m_CurrentCullMode = cull;
+}
+
+XMMATRIX Renderer::GetViewMatrix()
+{
+    return m_ViewMatrix;
+}
+
+XMMATRIX Renderer::GetProjectionMatrix()
+{
+    return m_ProjectionMatrix;
 }
 
 void Renderer::CreateVertexShader( ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName )
@@ -413,6 +553,11 @@ void Renderer::CreatePixelShader( ID3D11PixelShader** PixelShader, const char* F
 	m_Device->CreatePixelShader(buffer, fsize, NULL, PixelShader);
 
 	delete[] buffer;
+}
+
+void Renderer::SubmitDrawCommand(DrawCommand cmd)
+{
+    m_DrawCommands.push_back(cmd);
 }
 
 

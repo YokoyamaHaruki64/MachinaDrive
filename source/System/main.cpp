@@ -1,7 +1,11 @@
-﻿
+﻿#include "pch.h"
 
 #include "System/main.h"
 #include "System/manager.h"
+#include "System/GM_Time.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+#include "imgui.h"
 #include <thread>
 
 
@@ -10,6 +14,7 @@ const char* WINDOW_NAME = "DX11ゲーム";
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 HWND g_Window;
@@ -88,11 +93,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		else
 		{
 			dwCurrentTime = timeGetTime();
-
-			if((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
+            DWORD deltaTime = dwCurrentTime - dwExecLastTime;
+			if( deltaTime >= (1000 / 60))
 			{
 				dwExecLastTime = dwCurrentTime;
-
+                Time::Update(deltaTime / 1000.0f);
 				Manager::Update();
 				Manager::Draw();
 			}
@@ -115,6 +120,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+        return true;
 
 	switch(uMsg)
 	{

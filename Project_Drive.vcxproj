@@ -102,10 +102,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)inlcude\Script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,10 +123,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)inlcude\Script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,38 +137,168 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Component\audio.cpp" />
     <ClCompile Include="source\Component\Camera.cpp" />
     <ClCompile Include="source\Component\modelRenderer.cpp" />
+    <ClCompile Include="source\Component\ParticleSystem.cpp" />
+    <ClCompile Include="source\Component\PostEffect.cpp" />
     <ClCompile Include="source\Component\Primitive.cpp" />
     <ClCompile Include="source\Component\Conponent.cpp" />
+    <ClCompile Include="source\Component\Skydome.cpp" />
+    <ClCompile Include="source\Component\SpriteRenderer.cpp" />
+    <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\ImGui\imgui.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_curve_custom.cpp" />
+    <ClCompile Include="source\ImGui\imgui_demo.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_draw.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_impl_dx11.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_impl_win32.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_tables.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\imgui_widgets.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\Scene\GameScene.cpp" />
+    <ClCompile Include="source\Scene\ResultScene.cpp" />
+    <ClCompile Include="source\Scene\TitleScene.cpp" />
+    <ClCompile Include="source\Script\BallManager.cpp" />
+    <ClCompile Include="source\Script\Bullet.cpp" />
+    <ClCompile Include="source\Script\BoundBall.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
+    <ClCompile Include="source\Script\EffectConfig.cpp" />
+    <ClCompile Include="source\Script\Enemy.cpp" />
+    <ClCompile Include="source\Script\ExplosionEffect.cpp" />
+    <ClCompile Include="source\Script\FireworksEffect.cpp" />
+    <ClCompile Include="source\Script\ImpactBurst.cpp" />
+    <ClCompile Include="source\Script\PatternTrail.cpp" />
+    <ClCompile Include="source\Script\PatternTrailHeader.cpp" />
+    <ClCompile Include="source\Script\PatternTrailManager.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
+    <ClCompile Include="source\Script\ResultUI.cpp" />
+    <ClCompile Include="source\Script\Ripple.cpp" />
+    <ClCompile Include="source\Script\Score.cpp" />
+    <ClCompile Include="source\Script\TitleUI.cpp" />
+    <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
     <ClCompile Include="source\System\main.cpp" />
     <ClCompile Include="source\System\GameObject.cpp" />
     <ClCompile Include="source\System\manager.cpp" />
     <ClCompile Include="source\System\renderer.cpp" />
+    <ClCompile Include="source\System\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Common\Color.h" />
+    <ClInclude Include="include\Common\Random.h" />
+    <ClInclude Include="include\Component\audio.h" />
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
+    <ClInclude Include="include\Component\ParticleSystem.h" />
+    <ClInclude Include="include\Component\PostEffect.h" />
     <ClInclude Include="include\Component\Primitive.h" />
+    <ClInclude Include="include\Component\Skydome.h" />
+    <ClInclude Include="include\Component\SpriteRenderer.h" />
+    <ClInclude Include="include\Component\TrailRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />
+    <ClInclude Include="include\ImGui\imconfig.h" />
+    <ClInclude Include="include\ImGui\imgui.h" />
+    <ClInclude Include="include\ImGui\imgui_curve_custom.h" />
+    <ClInclude Include="include\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="include\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="include\ImGui\imgui_internal.h" />
+    <ClInclude Include="include\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="include\ImGui\imstb_textedit.h" />
+    <ClInclude Include="include\ImGui\imstb_truetype.h" />
+    <ClInclude Include="include\math\Curve.h" />
     <ClInclude Include="include\math\MathCommon.h" />
     <ClInclude Include="include\math\Vector3.h" />
+    <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\Scene\GameScene.h" />
+    <ClInclude Include="include\Scene\ResultScene.h" />
+    <ClInclude Include="include\Scene\Scene.h" />
+    <ClInclude Include="include\Scene\TitleScene.h" />
+    <ClInclude Include="include\Script\BallManager.h" />
+    <ClInclude Include="include\Script\Bullet.h" />
+    <ClInclude Include="include\Script\BoundBall.h" />
     <ClInclude Include="include\Script\CameraController.h" />
+    <ClInclude Include="include\Script\EffectConfig.h" />
+    <ClInclude Include="include\Script\Enemy.h" />
+    <ClInclude Include="include\Script\ExplosionEffect.h" />
+    <ClInclude Include="include\Script\FireworksEffect.h" />
+    <ClInclude Include="include\Script\ImpactBurst.h" />
+    <ClInclude Include="include\Script\PatternTrail.h" />
+    <ClInclude Include="include\Script\PatternTrailManager.h" />
     <ClInclude Include="include\Script\Player.h" />
+    <ClInclude Include="include\Script\ResultUI.h" />
+    <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
+    <ClInclude Include="include\Script\Score.h" />
+    <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\PatternTrailHeader.h" />
+    <ClInclude Include="include\Script\Wall.h" />
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
+    <ClInclude Include="include\System\GM_Time.h" />
     <ClInclude Include="include\System\input.h" />
     <ClInclude Include="include\System\main.h" />
     <ClInclude Include="include\System\manager.h" />
     <ClInclude Include="include\System\PrefabFactory.h" />
     <ClInclude Include="include\System\renderer.h" />
+    <ClInclude Include="include\System\RendererBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shader\BloomBlur_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\Bloom_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="shader\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -195,6 +331,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\FullScreen_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>

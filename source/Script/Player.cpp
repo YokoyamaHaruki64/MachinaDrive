@@ -1,10 +1,23 @@
-﻿#include "Script/Player.h"
+﻿#include "pch.h"
+
+#include "Script/Player.h"
 
 #include "System/input.h"
+#include "System/manager.h"
+#include "System/GM_Time.h"
+#include "Scene/ResultScene.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
+#include "Component/audio.h"
 #include "math/MathCommon.h"
+#include "Script/Bullet.h"
+#include "Script/Enemy.h"
 
+
+void Player::OnStart()
+{
+    m_jumpSE = m_owner->GetComponent<Audio>();
+}
 
 void Player::Update()
 {
@@ -18,7 +31,6 @@ void Player::Update()
 	const float moveSpeed = 50.0f;
 	const float jumpForce = 5.0f;
 	const float friction = 10.0f;
-	const float dt = 1.0f / 60.0f; // 仮のデルタタイム（60FPS想定）
 
 	Vector3 inputDirection{ 0.0f, 0.0f, 0.0f };
 	if (Input::GetKeyPress(Input::KK_W))
@@ -42,23 +54,46 @@ void Player::Update()
 	{
 		m_velocity.y += jumpForce; // ジャンプ
 		m_isGrounded = false; // ジャンプしたので地面から離れる
+        if( m_jumpSE)
+        {
+            m_jumpSE->Play(); // ジャンプ音を再生
+        }
 	}
 
-	m_velocity += inputDirection.Normalized() * moveSpeed * dt; // 加速度
+    if( Input::GetKeyPress(Input::KK_SHIFT))
+    {
+        inputDirection *= 2.0f; // ダッシュ
+    }
 
-	m_velocity.y -= 9.81f * dt;					    // 重力
-	m_velocity.x -= m_velocity.x * friction * dt;	// 摩擦
-	m_velocity.z -= m_velocity.z * friction * dt;	// 摩擦
+    if( Input::GetKeyTrigger(Input::KK_F))
+    {
+        GameObject* bullet = Manager::Instantiate("Bullet",
+            transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f)
+            , Vector3::Zero(), Vector3::One()); // 弾の生成
+        bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f); // 弾の速度設定
+    }
 
-    m_transform->Translate(m_velocity * dt); // 位置の更新
+    m_velocity += inputDirection.Normalized() * moveSpeed * Time::GetDeltaTime(); // 入力に基づく加速度
+
+	m_velocity.y -= 9.81f * Time::GetDeltaTime();					    // 重力
+	m_velocity.x -= m_velocity.x * friction * Time::GetDeltaTime();	// 摩擦
+	m_velocity.z -= m_velocity.z * friction * Time::GetDeltaTime();	// 摩擦
+
+    transform()->Translate(m_velocity * Time::GetDeltaTime()); // 位置の更新
     float targetRotationY = atan2f(m_velocity.x, m_velocity.z); // 移動方向に向く
-    const Vector3& myRot = m_transform->GetRotation();
-    m_transform->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * dt), myRot.z)); // 回転の更新
+    const Vector3& myRot = transform()->GetRotation();
+    transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * Time::GetDeltaTime()), myRot.z)); // 回転の更新
 
-	if(m_transform->GetPosition().y < 0.0f)
+	if(transform()->GetPosition().y < 0.0f)
 	{
-        m_transform->SetPosition(Vector3(m_transform->GetPosition().x, 0.0f, m_transform->GetPosition().z)); // 地面に接地
+        transform()->SetPosition(Vector3(transform()->GetPosition().x, 0.0f, transform()->GetPosition().z)); // 地面に接地
 		m_velocity.y = 0.0f; // 垂直方向の速度をリセット
 		m_isGrounded = true;
 	}
+
+    auto enemies = Manager::GetObjectsByComponent<Enemy>();
+    if(enemies.empty())
+    {
+        Manager::ChangeScene<ResultScene>();
+    }
 }

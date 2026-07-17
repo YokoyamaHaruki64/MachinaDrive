@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 
  File   : [Vector3.h]
  Desc   : 3次元ベクトルの構造体の宣言
@@ -95,6 +95,11 @@ struct Vector3
 		z /= scalar;
 		return *this;
 	}
+
+    inline constexpr bool operator==(const Vector3& other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
 
 	// ===============================
 	// 静的関数
@@ -240,6 +245,71 @@ struct Vector3
 		float dot = Dot(a.Normalized(), b.Normalized());
 		return acosf(dot);
 	}
+
+    /// @brief 2つのベクトルの反射ベクトルを計算する関数
+    /// @param inDir 入射ベクトル
+    /// @param normal 法線ベクトル
+    /// @return 反射ベクトル
+    inline static Vector3 Reflect(const Vector3& inDir, const Vector3& normal)
+    {
+        return inDir + normal * -(2.0f * Dot(inDir, normal));
+    }
+
+    /// @brief 2つのベクトルの反射ベクトルを計算する関数（反発係数付き）
+    /// @param inDir 入射ベクトル
+    /// @param normal 法線ベクトル
+    /// @param e 反発係数（0.0fから1.0fの範囲）
+    /// @return 反射ベクトル
+    inline static Vector3 Reflect(const Vector3& inDir, const Vector3& normal,float e)
+    {
+        return inDir + normal * -(1.0f + e) * Dot(inDir, normal);
+    }
+
+    /// @brief 法線ベクトルから右方向のベクトルを生成する関数
+    /// @param normal 法線ベクトル
+    /// @return 右方向のベクトル
+    inline static Vector3 CreateRight(const Vector3& normal)
+    {
+        Vector3 n = normal.Normalized();
+        bool isParallel = Vector3::Dot(n, Vector3::Up()) > 0.999f;
+        bool isAntiParallel = Vector3::Dot(n, Vector3::Up()) < -0.999f;
+        Vector3 refUp = isParallel || isAntiParallel ? Vector3::Forward() : Vector3::Up();
+        Vector3 right = Vector3::Cross(refUp, n).Normalized();
+
+        return isParallel ? right * -1.0f : right; // 上方向と平行な場合は右方向を反転させる
+    }
+
+    /// @brief 法線ベクトルから上方向のベクトルを生成する関数
+    /// @param normal 法線ベクトル
+    /// @return 上方向のベクトル
+    inline static Vector3 CreateUp(const Vector3& normal)
+    {
+        Vector3 n = normal.Normalized();
+        bool isParallel = Vector3::Dot(n, Vector3::Up()) > 0.999f;
+        bool isAntiParallel = Vector3::Dot(n, Vector3::Up()) < -0.999f;
+        Vector3 refUp = isParallel || isAntiParallel ? Vector3::Forward() : Vector3::Up();
+        Vector3 right = Vector3::Cross(refUp, n).Normalized();
+        Vector3 up = Vector3::Cross(n, right).Normalized();
+        return isParallel ? up * -1.0f : up; // 上方向と平行な場合は上方向を反転させる
+    }
+
+    /// @brief 法線ベクトルから右方向と上方向のベクトルを生成する関数
+    /// @param normal 法線ベクトル
+    /// @param outRight 生成された右方向のベクトル
+    /// @param outUp 生成された上方向のベクトル
+    inline static void CreateRightUp(const Vector3& normal, Vector3& outRight, Vector3& outUp)
+    {
+        Vector3 n = normal.Normalized();
+        bool isParallel = Vector3::Dot(n, Vector3::Up()) > 0.999f;
+        bool isAntiParallel = Vector3::Dot(n, Vector3::Up()) < -0.999f;
+        Vector3 refUp = isParallel || isAntiParallel ? Vector3::Forward() : Vector3::Up();
+        outRight = Vector3::Cross(refUp, n).Normalized();
+        outUp = Vector3::Cross(n, outRight).Normalized();
+        if( isParallel )
+        {
+            outRight *= -1.0f; // 上方向と平行な場合は右方向を反転させる
+        }
+    }
 
 	// ===============================
 	// メンバ関数

@@ -4,10 +4,11 @@
 #include <wrl/client.h>
 #include "math/Vector3.h"
 #include "System/GameObject.h"
+#include "System/RendererBase.h"
 using Microsoft::WRL::ComPtr;
 
 
-class Primitive : public Component
+class PrimitiveRenderer : public RendererBase
 {
 protected:
     ComPtr<ID3D11Buffer> m_vertexBuffer;
@@ -20,7 +21,13 @@ protected:
     ComPtr<ID3D11ShaderResourceView> m_texture;
     int m_textureWidth = 0;
     int m_textureHeight = 0;
+    int m_vertexCount = 0;
     int m_indexCount = 0;
+
+    float m_uvOffsetX = 0.0f;
+    float m_uvOffsetY = 0.0f;
+    float m_uvWidth = 1.0f;
+    float m_uvHeight = 1.0f;
 
     void LoadTexture(const wchar_t* textureFile);
     void CreateVertexShaderAndInputLayout(const char* vertexShaderFile);
@@ -31,13 +38,33 @@ protected:
     static const char* DEFAULT_VERTEX_SHADER_FILE;
     static const char* DEFAULT_PIXEL_SHADER_FILE;
 public:
-    Primitive() = delete;
-    Primitive(GameObject* owner) : Component(owner) {}
-    virtual ~Primitive() {}
+    PrimitiveRenderer() = delete;
+    PrimitiveRenderer(GameObject* owner) : RendererBase(owner) {}
+    virtual ~PrimitiveRenderer() {}
     void Draw() override;
+
+    void SetUVRect(float offsetX, float offsetY, float width, float height)
+    {
+        m_uvOffsetX = offsetX;
+        m_uvOffsetY = offsetY;
+        m_uvWidth = width;
+        m_uvHeight = height;
+    }
+
+    void SetUVOffset(float offsetX, float offsetY)
+    {
+        m_uvOffsetX = offsetX;
+        m_uvOffsetY = offsetY;
+    }
+
+    void SetUVSize(float width, float height)
+    {
+        m_uvWidth = width;
+        m_uvHeight = height;
+    }
 };
 
-class Quad : public Primitive
+class Quad : public PrimitiveRenderer
 {
 private:
     static constexpr int QUAD_INDEX_COUNT = 6;
@@ -48,10 +75,9 @@ public:
         const wchar_t* textureFile,
         const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
         const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE);
-    
 };
 
-class Plane : public Primitive
+class Plane : public PrimitiveRenderer
 {
 private:
     static constexpr int PLANE_INDEX_COUNT = 6;
@@ -65,7 +91,7 @@ public:
     
 };
 
-class Cube : public Primitive
+class Cube : public PrimitiveRenderer
 {
 private:
     static constexpr int CUBE_INDEX_COUNT = 36;

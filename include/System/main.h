@@ -11,6 +11,9 @@
 #include <d3d11.h>
 #pragma comment (lib, "d3d11.lib")
 
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+
 
 #include <DirectXMath.h>
 using namespace DirectX;
@@ -29,8 +32,8 @@ using namespace DirectX;
 #pragma comment (lib, "winmm.lib")
 
 
-#define SCREEN_WIDTH	(1280)
-#define SCREEN_HEIGHT	(720)
+#define SCREEN_WIDTH	(1600)
+#define SCREEN_HEIGHT	(900)
 
 
 HWND GetWindow();

@@ -13,12 +13,23 @@ protected:
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
 
+    bool m_isDestroy = false;
 public:
     GameObject();
     GameObject(
         const Vector3& position,
         const Vector3& rotation = Vector3::Zero(),
         const Vector3& scale = Vector3::One());
+
+    void Destroy()
+    {
+        m_isDestroy = true;
+    }
+
+    bool IsDestroyed() const
+    {
+        return m_isDestroy;
+    }
 
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)
@@ -30,7 +41,7 @@ public:
 	}
 
     template <typename T, typename... Args>
-    T* AddComponentForBeginScene(Args&&... args)
+    T* AddComponentForCreate(Args&&... args)
     {
         m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
         T* componentPtr = static_cast<T*>(m_components.back().get());
@@ -68,37 +79,39 @@ public:
         {
             component->OnDestroy();
         }
+
     }
 
     void OnStart()
     {
-        for (auto& component : m_components)
+        for( size_t i = 0; i < m_components.size(); ++i)
         {
-            component->OnStart();
+            m_components[i]->OnStart();
         }
     }
 
 	void Update()
 	{
-		for (auto& component : m_components)
+        for (size_t i = 0; i < m_components.size(); ++i)
 		{
-			component->Update();
+            m_components[i]->Update();
 		}
 	}
+
     void LateUpdate()
     {
-        for (auto& component : m_components)
+        for (size_t i = 0; i < m_components.size(); ++i)
         {
-            component->LateUpdate();
+            m_components[i]->LateUpdate();
         }
     }
-	void Draw()
-	{
-		for (auto& component : m_components)
-		{
-			component->Draw();
-		}
-	}
+	//void Draw()
+	//{
+	//	for (auto& component : m_components)
+	//	{
+	//		component->Draw();
+	//	}
+	//}
 
 };
 

@@ -37,8 +37,24 @@ struct LIGHT
 };
 
 
+struct DrawCommand
+{
+    uint64_t sortKey;
+    class RendererBase* renderer;
+};
+enum class BlendMode : uint8_t
+{
+    AlphaBlend = 0,
+    Additive = 1,
+    None = 2,
+};
+enum class CullMode : uint8_t
+{
+    None = 0,
+    Back = 1,
+};
 
-class Renderer
+class Renderer 
 {
 private:
 
@@ -47,28 +63,46 @@ private:
 	static ID3D11Device*           m_Device;
 	static ID3D11DeviceContext*    m_DeviceContext;
 	static IDXGISwapChain*         m_SwapChain;
-	static ID3D11RenderTargetView* m_RenderTargetView;
+    static ID3D11Texture2D*        m_BackBufferTexture;
 	static ID3D11DepthStencilView* m_DepthStencilView;
+
+    // バッファ用のテクスチャとビュー
+    static ID3D11Texture2D* m_bufferTexture[2];
+    static ID3D11RenderTargetView* m_bufferRTV[2];
+    static ID3D11ShaderResourceView* m_bufferSRV[2];
+    static int srcBufferIndex;
+    static int dstBufferIndex;
 
 	static ID3D11Buffer*			m_WorldBuffer;
 	static ID3D11Buffer*			m_ViewBuffer;
 	static ID3D11Buffer*			m_ProjectionBuffer;
 	static ID3D11Buffer*			m_MaterialBuffer;
 	static ID3D11Buffer*			m_LightBuffer;
-
+    static ID3D11Buffer*            m_UVBuffer;
 
 	static ID3D11DepthStencilState* m_DepthStateEnable;
 	static ID3D11DepthStencilState* m_DepthStateDisable;
 
+    static ID3D11RasterizerState* m_RasterizerState;
+    static ID3D11RasterizerState* m_RasterizerStateNoCull;
+
 	static ID3D11BlendState*		m_BlendState;
+    static ID3D11BlendState*        m_BlendStateAdd;
 	static ID3D11BlendState*		m_BlendStateATC;
 
+    static XMMATRIX m_ViewMatrix;
+    static XMMATRIX m_ProjectionMatrix;
 
+    static std::vector<DrawCommand> m_DrawCommands;
+
+    static BlendMode m_CurrentBlendMode;
+    static CullMode m_CurrentCullMode;
 
 public:
 	static void Init();
 	static void Uninit();
 	static void Begin();
+    static void Draw();
 	static void End();
 
 	static void SetDepthEnable(bool Enable);
@@ -79,14 +113,28 @@ public:
 	static void SetProjectionMatrix(XMMATRIX ProjectionMatrix);
 	static void SetMaterial(MATERIAL Material);
 	static void SetLight(LIGHT Light);
+    static void SetUV(XMFLOAT4 UV);
+    static void SetBlendMode(BlendMode mode);
+    static void SetRasterizerState(CullMode cull);
 
 	static ID3D11Device* GetDevice( void ){ return m_Device; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_DeviceContext; }
 
-
+    static XMMATRIX GetViewMatrix();
+    static XMMATRIX GetProjectionMatrix();
+    static BlendMode GetCurrentBlendMode() { return m_CurrentBlendMode; }
+    static CullMode GetCurrentCullMode() { return m_CurrentCullMode; }
 
 	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);
 	static void CreatePixelShader(ID3D11PixelShader** PixelShader, const char* FileName);
 
+    static void SubmitDrawCommand(DrawCommand cmd);
 
+    static void SetDstRTV()
+    {
+        m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[dstBufferIndex], m_DepthStencilView);
+    }
+    static ID3D11ShaderResourceView* GetSrcSRV() { return m_bufferSRV[srcBufferIndex]; }
+
+    static void SwapBuffers() { std::swap(srcBufferIndex, dstBufferIndex); }
 };

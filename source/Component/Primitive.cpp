@@ -1,12 +1,14 @@
-﻿#include "Component/Primitive.h"
+﻿#include "pch.h"
+
+#include "Component/Primitive.h"
 
 #include "System/renderer.h"
 #include "Component/Transform.h"
 
-const char* Primitive::DEFAULT_VERTEX_SHADER_FILE = "BuildedShader/unlitTextureVS.cso";
-const char* Primitive::DEFAULT_PIXEL_SHADER_FILE = "BuildedShader/unlitTexturePS.cso";
+const char* PrimitiveRenderer::DEFAULT_VERTEX_SHADER_FILE = "BuildedShader/unlitTextureVS.cso";
+const char* PrimitiveRenderer::DEFAULT_PIXEL_SHADER_FILE = "BuildedShader/unlitTexturePS.cso";
 
-void Primitive::LoadTexture(const wchar_t* textureFile)
+void PrimitiveRenderer::LoadTexture(const wchar_t* textureFile)
 {
     if(textureFile == nullptr)
     {
@@ -48,8 +50,10 @@ void Primitive::LoadTexture(const wchar_t* textureFile)
     HRESULT hr = LoadFromWICFile(textureFile, WIC_FLAGS_NONE, &metadata, image);
     if (FAILED(hr))
     {
-        MessageBoxA(nullptr, "テクスチャの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-        return;
+        MessageBoxW(nullptr,
+            (L"テクスチャの読み込みに失敗しました: " + std::wstring(textureFile)).c_str(),
+            L"エラー",
+            MB_OK | MB_ICONERROR);
     }
     CreateShaderResourceView(
         Renderer::GetDevice(),
@@ -63,7 +67,7 @@ void Primitive::LoadTexture(const wchar_t* textureFile)
 
 }
 
-void Primitive::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
+void PrimitiveRenderer::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
 {
    Renderer::CreateVertexShader(
         m_vertexShader.GetAddressOf(),
@@ -71,20 +75,20 @@ void Primitive::CreateVertexShaderAndInputLayout(const char* vertexShaderFile)
         vertexShaderFile);
 }
 
-void Primitive::CreatePixelShader(const char* pixelShaderFile)
+void PrimitiveRenderer::CreatePixelShader(const char* pixelShaderFile)
 {
     Renderer::CreatePixelShader(
         m_pixelShader.GetAddressOf(),
         pixelShaderFile);
 }
 
-void Primitive::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize)
+void PrimitiveRenderer::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize)
 {
     D3D11_BUFFER_DESC bd = {};
-    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.Usage = D3D11_USAGE_DYNAMIC; // 動的に更新可能なバッファ
     bd.ByteWidth = static_cast<UINT>(vertexDataSize);
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // CPUから書き込み可能
 
     D3D11_SUBRESOURCE_DATA initData = {};
     initData.pSysMem = vertexData;
@@ -97,7 +101,7 @@ void Primitive::CreateVertexBuffer(const void* vertexData, size_t vertexDataSize
     }
 }
 
-void Primitive::CreateIndexBuffer(const unsigned int* indexData, size_t indexDataSize)
+void PrimitiveRenderer::CreateIndexBuffer(const unsigned int* indexData, size_t indexDataSize)
 {
     D3D11_BUFFER_DESC bd = {};
     bd.Usage = D3D11_USAGE_DEFAULT;
@@ -114,40 +118,24 @@ void Primitive::CreateIndexBuffer(const unsigned int* indexData, size_t indexDat
     }
 }
 
-void Primitive::Draw()
+
+
+void PrimitiveRenderer::Draw()
 {
+
     // 入力レイアウトとシェーダーの設定
     Renderer::GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
     Renderer::GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     Renderer::GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
     // ワールド行列の設定
-    Transform* t = transform();
-    if (t)
-    {
-        XMMATRIX worldMatrix =
-            XMMatrixScaling(
-                t->GetScale().x,
-                t->GetScale().y,
-                t->GetScale().z)
-            *
-            XMMatrixRotationRollPitchYaw(
-                t->GetRotation().x,
-                t->GetRotation().y,
-                t->GetRotation().z)
-            *
-            XMMatrixTranslation(
-                t->GetPosition().x,
-                t->GetPosition().y,
-                t->GetPosition().z);
+    Renderer::SetWorldMatrix(CalcWorldMatrix());
 
-        Renderer::SetWorldMatrix(worldMatrix);
-    }
     // マテリアルの設定
-    MATERIAL material{};
-    material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    material.TextureEnable = true;
-    Renderer::SetMaterial(material);
+    Renderer::SetMaterial(m_material);
+
+    // UVの設定
+    Renderer::SetUV(XMFLOAT4(m_uvWidth, m_uvHeight, m_uvOffsetX, m_uvOffsetY));
 
     // 頂点バッファの設定
     UINT stride = sizeof(VERTEX_3D);
@@ -158,38 +146,43 @@ void Primitive::Draw()
     Renderer::GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
     // シェーダーリソースビューの設定
     Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
-    // 描画コール
+    // 描画
     Renderer::GetDeviceContext()->DrawIndexed(m_indexCount, 0, 0);
 }
 
 Quad::Quad(GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 
     VERTEX_3D vertex[4] = {};
+    float aspectRatio = static_cast<float>(m_textureWidth) / static_cast<float>(m_textureHeight);
+    float halfWidth = 0.5f; // 半分の幅
+    float halfHeight = 0.5f * (1 / aspectRatio); // 半分の高さ（アスペクト比を考慮）
 
-    vertex[0].Position = XMFLOAT3(-0.5f,0.5f,0.0f);
+    vertex[0].Position = XMFLOAT3(-halfWidth, halfHeight, 0.0f);
     vertex[0].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
     vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
 
-    vertex[1].Position = XMFLOAT3(0.5f, 0.5f, 0.0f);
+    vertex[1].Position = XMFLOAT3(halfWidth, halfHeight, 0.0f);
     vertex[1].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
     vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[1].TexCoord = XMFLOAT2(1.0f, 0.0f);
 
-    vertex[2].Position = XMFLOAT3(-0.5f, -0.5f, 0.0f);
+    vertex[2].Position = XMFLOAT3(-halfWidth, -halfHeight, 0.0f);
     vertex[2].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
     vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
 
-    vertex[3].Position = XMFLOAT3(0.5f, -0.5f, 0.0f);
+    vertex[3].Position = XMFLOAT3(halfWidth, -halfHeight, 0.0f);
     vertex[3].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
     vertex[3].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[3].TexCoord = XMFLOAT2(1.0f, 1.0f);
+
+    m_vertexCount = 4;
 
     // 頂点バッファの設定
     CreateVertexBuffer(vertex, sizeof(vertex));
@@ -208,37 +201,42 @@ Plane::Plane(
     GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 
     VERTEX_3D vertex[4];
 
     const float TEX_REPEAT = 30.0f; // テクスチャの繰り返し回数
+    float aspectRatio = static_cast<float>(m_textureWidth) / static_cast<float>(m_textureHeight);
+    float halfWidth = 5.0f; // 半分の幅
+    float halfHeight = 5.0f * (1 / aspectRatio); // 半分の高さ（アスペクト比を考慮）
 
     // 頂点データの設定 (左上)
-    vertex[0].Position = XMFLOAT3(-50.0f, 0.0f, 50.0f);
+    vertex[0].Position = XMFLOAT3(-halfWidth, 0.0f, halfHeight);
     vertex[0].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
     vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
 
     // 頂点データの設定 (右上)
-    vertex[1].Position = XMFLOAT3(50.0f, 0.0f, 50.0f);
+    vertex[1].Position = XMFLOAT3(halfWidth, 0.0f, halfHeight);
     vertex[1].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
     vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[1].TexCoord = XMFLOAT2(TEX_REPEAT, 0.0f);
 
     // 頂点データの設定 (左下)
-    vertex[2].Position = XMFLOAT3(-50.0f, 0.0f, -50.0f);
+    vertex[2].Position = XMFLOAT3(-halfWidth, 0.0f, -halfHeight);
     vertex[2].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
     vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[2].TexCoord = XMFLOAT2(0.0f, TEX_REPEAT);
 
     // 頂点データの設定 (右下)
-    vertex[3].Position = XMFLOAT3(50.0f, 0.0f, -50.0f);
+    vertex[3].Position = XMFLOAT3(halfWidth, 0.0f, -halfHeight);
     vertex[3].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
     vertex[3].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     vertex[3].TexCoord = XMFLOAT2(TEX_REPEAT, TEX_REPEAT);
+
+    m_vertexCount = 4;
 
     // 頂点バッファの設定
     CreateVertexBuffer(vertex, sizeof(vertex));
@@ -257,7 +255,7 @@ Cube::Cube(
     GameObject* owner,
     const wchar_t* textureFile,
     const char* vertexShaderFile,
-    const char* pixelShaderFile) : Primitive(owner)
+    const char* pixelShaderFile) : PrimitiveRenderer(owner)
 {
     LoadTexture(textureFile);
 
@@ -335,6 +333,8 @@ Cube::Cube(
     {
         vertex[i].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     }
+
+    m_vertexCount = 24;
 
     // 頂点バッファの設定
     CreateVertexBuffer(vertex, sizeof(vertex));
