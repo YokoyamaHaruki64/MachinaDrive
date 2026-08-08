@@ -147,6 +147,13 @@
     <ClCompile Include="source\Component\Skydome.cpp" />
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\Graphics\Shader\InputLayoutBuilder.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderCompiler.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderFactory.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderLoader.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderManager.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderParser.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp" />
     <ClCompile Include="source\ImGui\imgui.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
@@ -235,6 +242,17 @@
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />
+    <ClInclude Include="include\Graphics\GraphicInc.h" />
+    <ClInclude Include="include\Graphics\Shader\InputLayoutBuilder.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderCompiler.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderFactory.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderInc.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderLoader.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderManager.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderParser.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderProgram.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderReflector.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderToken.h" />
     <ClInclude Include="include\ImGui\imconfig.h" />
     <ClInclude Include="include\ImGui\imgui.h" />
     <ClInclude Include="include\ImGui\imgui_curve_custom.h" />
@@ -246,7 +264,11 @@
     <ClInclude Include="include\ImGui\imstb_truetype.h" />
     <ClInclude Include="include\math\Curve.h" />
     <ClInclude Include="include\math\MathCommon.h" />
+    <ClInclude Include="include\math\Matrix3x3.h" />
+    <ClInclude Include="include\math\Matrix4x4.h" />
+    <ClInclude Include="include\math\Vector2.h" />
     <ClInclude Include="include\math\Vector3.h" />
+    <ClInclude Include="include\math\Vector4.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\Scene\GameScene.h" />
     <ClInclude Include="include\Scene\ResultScene.h" />

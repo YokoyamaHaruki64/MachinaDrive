@@ -4,6 +4,7 @@
 #include "System/Component.h"
 #include "System/manager.h"
 #include "System/renderer.h"
+#include "Graphics/GraphicInc.h"
 
 class Camera;
 

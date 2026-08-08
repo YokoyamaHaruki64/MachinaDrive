@@ -79,7 +79,7 @@ void PatternTrail::CreateTrailPattern(
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);
-        tr->SetBlendMode(BlendMode::Additive);
+        tr->SetBlendMode(BlendMode::Add);
 
         tr->SetWidthCurve(settings.widthCurve);
         tr->SetTrailLifetime(settings.trailLifeTime);

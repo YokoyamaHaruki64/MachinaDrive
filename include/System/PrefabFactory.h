@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "System/GameObject.h"
+#include "Graphics/GraphicInc.h"
 
 #include "Component/Transform.h"
 #include "Component/modelRenderer.h"
@@ -152,7 +153,7 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
         L"Assets\\Textures\\Ripple.png",
         "BuildedShader\\unlitTextureVS.cso",
         "BuildedShader\\unlitTexturePS.cso");
-    q->SetBlendMode(BlendMode::Additive);
+    q->SetBlendMode(BlendMode::Add);
     q->SetRenderPass(RenderPass::Transparent);
     q->SetCullMode(CullMode::None);
     ripple->AddComponentForCreate<Ripple>();

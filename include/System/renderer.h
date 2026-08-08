@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "System/main.h"
+#include "Graphics/GraphicInc.h"
 
 
 
@@ -41,17 +42,6 @@ struct DrawCommand
 {
     uint64_t sortKey;
     class RendererBase* renderer;
-};
-enum class BlendMode : uint8_t
-{
-    AlphaBlend = 0,
-    Additive = 1,
-    None = 2,
-};
-enum class CullMode : uint8_t
-{
-    None = 0,
-    Back = 1,
 };
 
 class Renderer 

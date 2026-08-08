@@ -460,7 +460,7 @@ void Renderer::SetBlendMode(BlendMode mode)
         m_DeviceContext->OMSetBlendState(m_BlendState, nullptr, 0xffffffff);
         break;
 
-    case BlendMode::Additive:
+    case BlendMode::Add:
         m_DeviceContext->OMSetBlendState(m_BlendStateAdd, nullptr, 0xffffffff);
         break;
 

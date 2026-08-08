@@ -52,6 +52,18 @@
     <Filter Include="ヘッダー ファイル\ImGui">
       <UniqueIdentifier>{3120703e-bad0-4b9c-8c06-4bca0cd4fec5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics">
+      <UniqueIdentifier>{4e7a6772-334f-4365-84fb-135a7ed4ea84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics\Shader">
+      <UniqueIdentifier>{b14fdd35-f13e-4e52-80b3-461490a33ef8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics">
+      <UniqueIdentifier>{6b08a1ff-fb06-47d8-aa08-9a1d8fc97602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics\Shader">
+      <UniqueIdentifier>{28b5e3a0-8bcd-43b2-ab95-7b35896afe4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Script\CameraController.cpp">
@@ -182,6 +194,36 @@
     </ClCompile>
     <ClCompile Include="source\Component\PostEffect.cpp">
       <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\audio.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\Skydome.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Score.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\InputLayoutBuilder.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderCompiler.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderFactory.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderLoader.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderManager.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderParser.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -349,6 +391,60 @@
     </ClInclude>
     <ClInclude Include="include\Component\PostEffect.h">
       <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\audio.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\Skydome.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\Score.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GraphicInc.h">
+      <Filter>ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\InputLayoutBuilder.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderCompiler.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderFactory.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderInc.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderLoader.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderManager.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderParser.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderProgram.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderReflector.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Shader\ShaderToken.h">
+      <Filter>ヘッダー ファイル\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Matrix4x4.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Vector2.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Vector4.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Matrix3x3.h">
+      <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

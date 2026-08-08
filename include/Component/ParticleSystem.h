@@ -10,6 +10,8 @@
 #include "math/Curve.h"
 #include "Common/Color.h"
 
+#include "Graphics/GraphicInc.h"
+
 class ParticleEmitter : public Component
 {
 public:
@@ -185,7 +187,7 @@ public:
         : Quad(owner,textureFile,vertexShaderFile, pixelShaderFile),
         m_emitter(emitter)
     {
-        m_blendMode = BlendMode::Additive;
+        m_blendMode = BlendMode::Add;
         m_billboardType = BillboardType::CameraFacing;
         m_renderPass = RenderPass::Transparent;
     }
