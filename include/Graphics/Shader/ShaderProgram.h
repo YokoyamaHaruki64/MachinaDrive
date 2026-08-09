@@ -71,6 +71,10 @@ public:
     {
         return m_vertexShader != nullptr && m_pixelShader != nullptr;
     }
+
+    const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
+    const std::vector<ShaderTextureInfo>& GetTextureInfo() const { return m_textureInfo; }
+    const std::vector<ShaderSamplerInfo>& GetSamplerInfo() const { return m_samplerInfo; }
 };
 
 class GraphicsShader
