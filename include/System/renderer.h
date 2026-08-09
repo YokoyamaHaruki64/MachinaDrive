@@ -3,6 +3,8 @@
 #include "System/main.h"
 #include "Graphics/GraphicInc.h"
 
+#include <array>
+
 
 
 struct VERTEX_3D
@@ -38,10 +40,19 @@ struct LIGHT
 };
 
 
-struct DrawCommand
+class Material;
+class GraphicsShaderPass;
+
+// 1回の描画を表す、フレーム内限定の提出データ。
+// 現在は RendererBase 互換経路を使用し、Material 描画経路を段階的に追加する。
+struct DrawItem
 {
-    uint64_t sortKey;
-    class RendererBase* renderer;
+    uint64_t sortKey{};
+    class RendererBase* renderer{};
+    const Material* material{};
+    const GraphicsShaderPass* shaderPass{};
+    uint32_t meshID{};
+    uint64_t submitOrder{};
 };
 
 class Renderer 
@@ -83,7 +94,8 @@ private:
     static XMMATRIX m_ViewMatrix;
     static XMMATRIX m_ProjectionMatrix;
 
-    static std::vector<DrawCommand> m_DrawCommands;
+    static std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> m_DrawQueues;
+    static uint64_t m_SubmitOrder;
 
     static BlendMode m_CurrentBlendMode;
     static CullMode m_CurrentCullMode;
@@ -118,7 +130,8 @@ public:
 	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);
 	static void CreatePixelShader(ID3D11PixelShader** PixelShader, const char* FileName);
 
-    static void SubmitDrawCommand(DrawCommand cmd);
+    static void SubmitDrawItem(RenderPhase phase, DrawItem item);
+    static void SubmitDrawCommand(RenderPhase phase, DrawItem item);
 
     static void SetDstRTV()
     {

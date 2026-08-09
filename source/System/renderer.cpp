@@ -42,7 +42,8 @@ ID3D11BlendState*		Renderer::m_BlendStateATC{};
 XMMATRIX Renderer::m_ViewMatrix{};
 XMMATRIX Renderer::m_ProjectionMatrix{};
 
-std::vector<DrawCommand> Renderer::m_DrawCommands{};
+std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> Renderer::m_DrawQueues{};
+uint64_t Renderer::m_SubmitOrder{};
 BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
 CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
 void Renderer::Init()
@@ -335,33 +336,37 @@ void Renderer::Begin()
 
 void Renderer::Draw()
 {
-    // DrawCommandをsortKeyでソートする
-    std::sort(m_DrawCommands.begin(), m_DrawCommands.end(), [](const DrawCommand& a, const DrawCommand& b) {
-        return a.sortKey < b.sortKey;
-    });
+    for (size_t phaseIndex = 0; phaseIndex < m_DrawQueues.size(); ++phaseIndex)
+    {
+        const RenderPhase phase = static_cast<RenderPhase>(phaseIndex);
+        if (phase == RenderPhase::PostProcess)
+            continue;
 
-    // DrawCommandを順番に描画する
-    for (const auto& cmd : m_DrawCommands) {
-
-        // ソートキーの上位8ビットでRenderPassを切り替える
-        if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Opaque) )
+        auto& queue = m_DrawQueues[phaseIndex];
+        std::sort(queue.begin(), queue.end(), [](const DrawItem& a, const DrawItem& b)
         {
+            if (a.sortKey != b.sortKey)
+                return a.sortKey < b.sortKey;
+            return a.submitOrder < b.submitOrder;
+        });
+
+        // 互換経路は旧 RendererBase と同じ深度動作を維持する。
+        if (phase == RenderPhase::Opaque)
             SetDepthEnable(true);
-        }
-        else if( cmd.sortKey >> 56 == static_cast<uint64_t>(RenderPass::Transparent) )
-        {
+        else if (phase == RenderPhase::Transparent)
             SetDepthEnable(false);
-        }
 
-        if (cmd.renderer)
+        for (const DrawItem& item : queue)
         {
-            cmd.renderer->BindState();
-            cmd.renderer->Draw();
+            if (item.renderer)
+            {
+                item.renderer->BindState();
+                item.renderer->Draw();
+            }
         }
-    }
 
-    // DrawCommandをクリアする
-    m_DrawCommands.clear();
+        queue.clear();
+    }
 }
 
 
@@ -555,9 +560,18 @@ void Renderer::CreatePixelShader( ID3D11PixelShader** PixelShader, const char* F
 	delete[] buffer;
 }
 
-void Renderer::SubmitDrawCommand(DrawCommand cmd)
+void Renderer::SubmitDrawItem(RenderPhase phase, DrawItem item)
 {
-    m_DrawCommands.push_back(cmd);
+    if (phase == RenderPhase::PostProcess || phase >= RenderPhase::Count)
+        return;
+
+    item.submitOrder = m_SubmitOrder++;
+    m_DrawQueues[static_cast<size_t>(phase)].push_back(item);
+}
+
+void Renderer::SubmitDrawCommand(RenderPhase phase, DrawItem item)
+{
+    SubmitDrawItem(phase, item);
 }
 
 

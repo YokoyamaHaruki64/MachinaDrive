@@ -14,7 +14,12 @@ const XMMATRIX RendererBase::CalcWorldMatrix()
 uint64_t RendererBase::BuildSortKey(const Camera* camera) const
 {
     uint64_t sortKey = 0;
-    sortKey |= static_cast<uint64_t>(m_renderPass) << 56; // 描画パスを上位8ビットに配置
+
+    // 符号付きの描画レイヤーを、ソート用の符号なし範囲へ正規化する。
+    constexpr int kMinDrawLayer = -32768;
+    constexpr int kMaxDrawLayer = 32767;
+    const uint64_t drawLayer = static_cast<uint64_t>(
+        Math::Clamp(m_drawLayer, kMinDrawLayer, kMaxDrawLayer) - kMinDrawLayer);
 
     uint64_t blendModeBits = static_cast<uint64_t>(m_blendMode) & 0x0F; // ブレンドモードを4ビットに制限
     uint64_t cullModeBits = static_cast<uint64_t>(m_cullMode) & 0x0F;   // カリングモードを4ビットに制限
@@ -29,7 +34,7 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
     {
     case RenderPass::Opaque:
         // 不透明オブジェクトは描画順序でソートする
-        sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
+        sortKey |= drawLayer << 48; // 描画順序を48～63ビットに配置
         SetBlendAndCullBits(40);
         break;
 
@@ -53,13 +58,13 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
             uint32_t invDepth =
                 std::numeric_limits<uint32_t>::max() - depth;
 
-            sortKey |= static_cast<uint64_t>(m_drawLayer) << 48;    // 描画順序を48～55ビットに配置
+            sortKey |= drawLayer << 48;                              // 描画順序を48～63ビットに配置
             sortKey |= static_cast<uint64_t>(invDepth) << 16;       // 距離を16～47ビットに配置
             SetBlendAndCullBits(8);
         }
         break;
     case RenderPass::Overlay:
-        sortKey |= static_cast<uint64_t>(m_drawLayer) << 48; // 描画順序を48～55ビットに配置
+        sortKey |= drawLayer << 48; // 描画順序を48～63ビットに配置
         SetBlendAndCullBits(40);
         break;
     default:
@@ -67,6 +72,20 @@ uint64_t RendererBase::BuildSortKey(const Camera* camera) const
     }
 
     return sortKey;
+}
+
+RenderPhase RendererBase::ToRenderPhase(RenderPass pass)
+{
+    switch (pass)
+    {
+    case RenderPass::Transparent:
+        return RenderPhase::Transparent;
+    case RenderPass::Overlay:
+        return RenderPhase::Overlay;
+    case RenderPass::Opaque:
+    default:
+        return RenderPhase::Opaque;
+    }
 }
 
 RendererBase::RendererBase(GameObject* owner) : Component(owner)
@@ -81,9 +100,10 @@ RendererBase::~RendererBase()
 
 void RendererBase::Submit()
 {
-    uint64_t sortKey = BuildSortKey(Camera::GetMainCamera());
-    DrawCommand cmd = { sortKey, this };
-    Renderer::SubmitDrawCommand(cmd);
+    DrawItem item{};
+    item.sortKey = BuildSortKey(Camera::GetMainCamera());
+    item.renderer = this;
+    Renderer::SubmitDrawCommand(ToRenderPhase(m_renderPass), item);
 }
 
 void RendererBase::BindState()

@@ -47,6 +47,7 @@ protected:
 
 private:
     uint64_t BuildSortKey(const Camera* camera) const;
+    static RenderPhase ToRenderPhase(RenderPass pass);
 
 public:
     RendererBase() = default;
