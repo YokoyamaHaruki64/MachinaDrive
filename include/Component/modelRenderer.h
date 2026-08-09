@@ -14,7 +14,7 @@ struct MODEL_MATERIAL
 	char						Name[256];
 	MATERIAL					Material;
 	char						TextureName[256];
-	ID3D11ShaderResourceView*	Texture;
+	TextureHandle					Texture;
 
 };
 

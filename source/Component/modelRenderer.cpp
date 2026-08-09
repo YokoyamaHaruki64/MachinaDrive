@@ -8,6 +8,7 @@
 #include "Component/modelRenderer.h"
 
 #include "System/renderer.h"
+#include "Graphics/TextureManager.h"
 #include "System/GameObject.h"
 #include "Component/Transform.h"
 
@@ -83,9 +84,9 @@ void ModelRenderer::Draw()
 		// 旧Material定数バッファとテクスチャを互換経路へ設定する。
 		Renderer::SetMaterial(material.Material);
 
-		if(material.Texture)
+		if(material.Texture.IsValid())
 		{
-			ID3D11ShaderResourceView* texture = material.Texture;
+			ID3D11ShaderResourceView* texture = TextureManager::GetShaderResourceView(material.Texture);
 			Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, &texture);
 		}
 
@@ -117,11 +118,6 @@ void ModelRenderer::UnloadAll()
 	{
 		pair.second->Mesh.VertexBuffer->Release();
 		pair.second->Mesh.IndexBuffer->Release();
-
-		for (MODEL_MATERIAL& material : pair.second->MaterialSlots)
-		{
-			if (material.Texture) material.Texture->Release();
-		}
 
 		delete pair.second;
 	}
@@ -177,20 +173,16 @@ void ModelRenderer::LoadModel( const char *FileName, ModelAsset *Model)
 			Model->Mesh.SubMeshes[i] = { modelObj.SubsetArray[i].StartIndex, modelObj.SubsetArray[i].IndexNum, i };
 
 			Model->MaterialSlots[i] = modelObj.SubsetArray[i].Material;
-			Model->MaterialSlots[i].Texture = nullptr;
-
-			// テクスチャ読み込み
-			TexMetadata metadata;
-			ScratchImage image;
-			wchar_t wc[256];
-			mbstowcs(wc, modelObj.SubsetArray[i].Material.TextureName, sizeof(wc));
-			LoadFromWICFile(wc, WIC_FLAGS_NONE, &metadata, image);
-			CreateShaderResourceView(Renderer::GetDevice(), image.GetImages(), image.GetImageCount(), metadata, &Model->MaterialSlots[i].Texture);
-
-			if (Model->MaterialSlots[i].Texture)
+			const char* texturePath = modelObj.SubsetArray[i].Material.TextureName;
+			if (texturePath[0] != '\0')
+			{
+				Model->MaterialSlots[i].Texture = TextureManager::LoadTexture(std::string(texturePath));
 				Model->MaterialSlots[i].Material.TextureEnable = true;
+			}
 			else
+			{
 				Model->MaterialSlots[i].Material.TextureEnable = false;
+			}
 
 		}
 	}

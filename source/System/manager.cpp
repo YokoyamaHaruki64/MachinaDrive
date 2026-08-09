@@ -5,6 +5,7 @@
 #include "System/PrefabFactory.h"
 #include "System/input.h"
 #include "System/renderer.h"
+#include "Graphics/TextureManager.h"
 #include "Scene/Scene.h"
 #include "Scene/TitleScene.h"
 
@@ -75,6 +76,7 @@ void Manager::Init()
     RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
 	Renderer::Init();
+    TextureManager::Init();
 	Input::Init();
     PostEffect::Init();
     Audio::InitMaster();
@@ -124,6 +126,7 @@ void Manager::Uninit()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    TextureManager::Uninit();
     Renderer::Uninit();
     Input::Uninit();
     Audio::UninitMaster();

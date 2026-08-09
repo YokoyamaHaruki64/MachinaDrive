@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Graphics/Material.h"
 #include "Graphics/Shader/ShaderProgram.h"
+#include "Graphics/TextureManager.h"
 #include "System/renderer.h"
 
 #include <cstddef>
@@ -55,10 +56,9 @@ bool Material::SetProperty(PropertyID id, const PropertyValue& value)
     return false;
 }
 
-bool Material::SetTexture(PropertyID id, ID3D11ShaderResourceView* texture)
+bool Material::SetTexture(PropertyID id, TextureHandle texture)
 {
-    m_textures[id] = texture;
-    return true;
+    return SetProperty(id, texture);
 }
 
 void Material::Bind(size_t passIndex)
@@ -74,8 +74,9 @@ void Material::Bind(size_t passIndex)
         if (!shaderProperty)
             continue;
 
-        const auto view = m_textures.find(shaderProperty->id);
-        ID3D11ShaderResourceView* resource = view == m_textures.end() ? nullptr : view->second.Get();
+        const MaterialProperty* materialProperty = FindPropertyValue(shaderProperty->id);
+        const TextureHandle* texture = materialProperty ? std::get_if<TextureHandle>(&materialProperty->value) : nullptr;
+        ID3D11ShaderResourceView* resource = TextureManager::GetShaderResourceView(texture ? *texture : TextureHandle{});
         if (binding.vsSlot >= 0) Renderer::GetDeviceContext()->VSSetShaderResources(binding.vsSlot, 1, &resource);
         if (binding.psSlot >= 0) Renderer::GetDeviceContext()->PSSetShaderResources(binding.psSlot, 1, &resource);
     }

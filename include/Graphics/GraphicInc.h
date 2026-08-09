@@ -25,12 +25,14 @@ Author : Yokoyama Haruki
 using PropertyID = UINT;
 using ShaderID = UINT;
 using MaterialID = UINT;
+using TextureID = int;
 
 struct TextureHandle
 {
-    int id{ -1 }; // テクスチャID、-1は無効なテクスチャを表す
+    TextureID id{ -1 }; // テクスチャID、-1は無効なテクスチャを表す
     TextureHandle() = default;
-    explicit TextureHandle(int id) : id(id) {}
+    explicit TextureHandle(TextureID id) : id(id) {}
+    bool IsValid() const { return id >= 0; }
 };
 
 enum class RenderPhase : uint8_t
