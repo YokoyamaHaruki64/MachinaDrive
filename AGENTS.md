@@ -1,6 +1,12 @@
 # Project_Drive 開発ガイド
 
-詳細な構造と実行フローは [ARCHITECTURE.md](ARCHITECTURE.md) を参照する。
+詳細な構造と実行フローは [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照する。
+
+## 資料運用
+
+- 恒久的に残す設計・仕様資料は `docs/` に置く。
+- 引継ぎ、作業メモ、調査途中、TODOなどの一時資料は `.codex-work/` に置き、Gitで管理しない。
+- 一時資料で確定した内容は、必要に応じて `docs/` の該当資料へ反映する。
 
 ## 開発環境
 

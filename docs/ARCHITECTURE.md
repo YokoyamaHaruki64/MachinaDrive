@@ -95,3 +95,5 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、`Manager::Init(
 実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は `Assets\\Models`、`Assets\\Textures`、`Assets\\Sounds`、`BuildedShader`、`config` である。
 
 HLSL は Shader Model 5.0 を対象とし、`common.hlsl` は共有定義で単体コンパイルしない。各実行用シェーダーはプロジェクト設定で `.cso` へコンパイルされ、C++ 側はそのファイルをロードする。
+
+Material描画システムでは、既存Rendererとの衝突を避けるため、Material Properties用の定数バッファは `b7`、Material Propertiesから宣言する `Texture2D` は `t16` 以降を使用する。Propertiesのメモリ配置はC++構造体のサイズではなく、コンパイル後のHLSLリフレクションが返す変数のoffsetとsizeを正とする。
