@@ -90,6 +90,8 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、`Manager::Init(
 
 描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
 
+Material描画へ移行する際のPhase別キュー、DrawItem、ソート規約は [MATERIAL_RENDERING_DESIGN.md](MATERIAL_RENDERING_DESIGN.md) を参照する。
+
 ## リソースとシェーダー
 
 実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は `Assets\\Models`、`Assets\\Textures`、`Assets\\Sounds`、`BuildedShader`、`config` である。
