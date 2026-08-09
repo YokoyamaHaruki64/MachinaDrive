@@ -15,21 +15,23 @@
 
 
 
-std::unordered_map<std::string, MODEL*> ModelRenderer::m_ModelPool;
+std::unordered_map<std::string, ModelAsset*> ModelRenderer::m_ModelPool;
 
 
 void ModelRenderer::Load(const char* modelFileName, const char* vertexShaderFileName, const char* pixelShaderFileName)
 {
+    // Renderer単位のシェーダーを先に作成し、形状データはプールから共有する。
     Renderer::CreateVertexShader(m_VertexShader.GetAddressOf(), m_InputLayout.GetAddressOf(), vertexShaderFileName);
     Renderer::CreatePixelShader(m_PixelShader.GetAddressOf(), pixelShaderFileName);
 
+    // 同一モデルはGPUバッファとMaterial slotを再利用する。
     if (m_ModelPool.find(modelFileName) != m_ModelPool.end())
     {
         m_Model = m_ModelPool[modelFileName];
         return;
     }
 
-    m_Model = new MODEL;
+    m_Model = new ModelAsset;
     LoadModel(modelFileName, m_Model);
 
     m_ModelPool[modelFileName] = m_Model;
@@ -40,13 +42,13 @@ void ModelRenderer::Draw()
 {
     Transform* t = transform();
 
-	// 頂点バッファ設定
+	// 互換経路では、従来どおりinterleaved頂点バッファをslot 0へ設定する。
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-	Renderer::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_Model->VertexBuffer, &stride, &offset);
+	Renderer::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_Model->Mesh.VertexBuffer, &stride, &offset);
 
-	// インデックスバッファ設定
-	Renderer::GetDeviceContext()->IASetIndexBuffer(m_Model->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	// 形状全体で共有するインデックスバッファとトポロジを設定する。
+	Renderer::GetDeviceContext()->IASetIndexBuffer(m_Model->Mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// プリミティブトポロジ設定
 	Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -73,17 +75,22 @@ void ModelRenderer::Draw()
     // UV設定
     Renderer::SetUV(XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
 
-	for( unsigned int i = 0; i < m_Model->SubsetNum; i++ )
+	// SubMeshは描画範囲だけを持ち、実際のMaterialはslotから解決する。
+	for (const SubMesh& subMesh : m_Model->Mesh.SubMeshes)
 	{
-		// マテリアル設定
-		Renderer::SetMaterial(m_Model->SubsetArray[i].Material.Material );
+		const MODEL_MATERIAL& material = m_Model->MaterialSlots[subMesh.MaterialSlot];
 
-		// テクスチャ設定
-		if(m_Model->SubsetArray[i].Material.Texture)
-			Renderer::GetDeviceContext()->PSSetShaderResources( 0, 1, &m_Model->SubsetArray[i].Material.Texture );
+		// 旧Material定数バッファとテクスチャを互換経路へ設定する。
+		Renderer::SetMaterial(material.Material);
 
-		// ポリゴン描画
-		Renderer::GetDeviceContext()->DrawIndexed(m_Model->SubsetArray[i].IndexNum, m_Model->SubsetArray[i].StartIndex, 0 );
+		if(material.Texture)
+		{
+			ID3D11ShaderResourceView* texture = material.Texture;
+			Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, &texture);
+		}
+
+		// SubMeshのindex範囲だけを描画する。
+		Renderer::GetDeviceContext()->DrawIndexed(subMesh.IndexNum, subMesh.StartIndex, 0);
 	}
 
 }
@@ -95,7 +102,7 @@ void ModelRenderer::Preload(const char *FileName)
 		return;
 	}
 
-	MODEL* model = new MODEL;
+	ModelAsset* model = new ModelAsset;
 	LoadModel(FileName, model);
 
 	m_ModelPool[FileName] = model;
@@ -105,18 +112,16 @@ void ModelRenderer::Preload(const char *FileName)
 
 void ModelRenderer::UnloadAll()
 {
-	for (std::pair<const std::string, MODEL*> pair : m_ModelPool)
+	// ModelAssetが所有するGPUリソースとMaterial slotのテクスチャを解放する。
+	for (std::pair<const std::string, ModelAsset*> pair : m_ModelPool)
 	{
-		pair.second->VertexBuffer->Release();
-		pair.second->IndexBuffer->Release();
+		pair.second->Mesh.VertexBuffer->Release();
+		pair.second->Mesh.IndexBuffer->Release();
 
-		for (unsigned int i = 0; i < pair.second->SubsetNum; i++)
+		for (MODEL_MATERIAL& material : pair.second->MaterialSlots)
 		{
-			if (pair.second->SubsetArray[i].Material.Texture)
-				pair.second->SubsetArray[i].Material.Texture->Release();
+			if (material.Texture) material.Texture->Release();
 		}
-
-		delete[] pair.second->SubsetArray;
 
 		delete pair.second;
 	}
@@ -124,15 +129,12 @@ void ModelRenderer::UnloadAll()
 	m_ModelPool.clear();
 }
 
-void ModelRenderer::LoadModel( const char *FileName, MODEL *Model)
+void ModelRenderer::LoadModel( const char *FileName, ModelAsset *Model)
 {
-
 	MODEL_OBJ modelObj;
 	LoadObj( FileName, &modelObj );
 
-
-
-	// 頂点バッファ生成
+	// CPUで読み込んだOBJ頂点を、共有MeshのGPU頂点バッファへ転送する。
 	{
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory( &bd, sizeof(bd) );
@@ -145,11 +147,11 @@ void ModelRenderer::LoadModel( const char *FileName, MODEL *Model)
 		ZeroMemory( &sd, sizeof(sd) );
 		sd.pSysMem = modelObj.VertexArray;
 
-		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->VertexBuffer );
+		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->Mesh.VertexBuffer );
 	}
 
 
-	// インデックスバッファ生成
+	// すべてのSubMeshで共有するインデックスバッファを生成する。
 	{
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory( &bd, sizeof(bd) );
@@ -162,22 +164,20 @@ void ModelRenderer::LoadModel( const char *FileName, MODEL *Model)
 		ZeroMemory( &sd, sizeof(sd) );
 		sd.pSysMem = modelObj.IndexArray;
 
-		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->IndexBuffer );
+		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->Mesh.IndexBuffer );
 	}
 
-	// サブセット設定
+	// OBJの各サブセットを、描画範囲とMaterial slotへ分離して保存する。
 	{
-		Model->SubsetArray = new SUBSET[ modelObj.SubsetNum ];
-		Model->SubsetNum = modelObj.SubsetNum;
+		Model->Mesh.SubMeshes.resize(modelObj.SubsetNum);
+		Model->MaterialSlots.resize(modelObj.SubsetNum);
 
 		for( unsigned int i = 0; i < modelObj.SubsetNum; i++ )
 		{
-			Model->SubsetArray[i].StartIndex = modelObj.SubsetArray[i].StartIndex;
-			Model->SubsetArray[i].IndexNum = modelObj.SubsetArray[i].IndexNum;
+			Model->Mesh.SubMeshes[i] = { modelObj.SubsetArray[i].StartIndex, modelObj.SubsetArray[i].IndexNum, i };
 
-			Model->SubsetArray[i].Material.Material = modelObj.SubsetArray[i].Material.Material;
-
-			Model->SubsetArray[i].Material.Texture = nullptr;
+			Model->MaterialSlots[i] = modelObj.SubsetArray[i].Material;
+			Model->MaterialSlots[i].Texture = nullptr;
 
 			// テクスチャ読み込み
 			TexMetadata metadata;
@@ -185,12 +185,12 @@ void ModelRenderer::LoadModel( const char *FileName, MODEL *Model)
 			wchar_t wc[256];
 			mbstowcs(wc, modelObj.SubsetArray[i].Material.TextureName, sizeof(wc));
 			LoadFromWICFile(wc, WIC_FLAGS_NONE, &metadata, image);
-			CreateShaderResourceView(Renderer::GetDevice(), image.GetImages(), image.GetImageCount(), metadata, &Model->SubsetArray[i].Material.Texture);
+			CreateShaderResourceView(Renderer::GetDevice(), image.GetImages(), image.GetImageCount(), metadata, &Model->MaterialSlots[i].Texture);
 
-			if (Model->SubsetArray[i].Material.Texture)
-				Model->SubsetArray[i].Material.Material.TextureEnable = true;
+			if (Model->MaterialSlots[i].Texture)
+				Model->MaterialSlots[i].Material.TextureEnable = true;
 			else
-				Model->SubsetArray[i].Material.Material.TextureEnable = false;
+				Model->MaterialSlots[i].Material.TextureEnable = false;
 
 		}
 	}

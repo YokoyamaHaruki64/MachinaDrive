@@ -19,12 +19,20 @@ struct MODEL_MATERIAL
 };
 
 
-// 描画サブセット構造体
-struct SUBSET
+// 描画サブセット。形状範囲とMaterial slotの対応だけを持つ。
+struct SubMesh
 {
 	unsigned int	StartIndex;
 	unsigned int	IndexNum;
-	MODEL_MATERIAL	Material;
+	uint32_t		MaterialSlot;
+};
+
+// OBJロード中だけ使用する旧形式のサブセット。
+struct SUBSET
+{
+    unsigned int StartIndex;
+    unsigned int IndexNum;
+    MODEL_MATERIAL Material;
 };
 
 
@@ -41,13 +49,20 @@ struct MODEL_OBJ
 	unsigned int	SubsetNum;
 };
 
-struct MODEL
+// GPU上の共有可能な形状データ
+struct Mesh
 {
 	ID3D11Buffer*	VertexBuffer;
 	ID3D11Buffer*	IndexBuffer;
+	std::vector<SubMesh> SubMeshes;
+	uint32_t MeshID{};
+};
 
-	SUBSET*			SubsetArray;
-	unsigned int	SubsetNum;
+// 形状とMaterial slotを分離したモデルアセット
+struct ModelAsset
+{
+	Mesh Mesh{};
+	std::vector<MODEL_MATERIAL> MaterialSlots{};
 };
 
 class Transform;
@@ -62,13 +77,13 @@ public:
     };
 private:
 
-	static std::unordered_map<std::string, MODEL*> m_ModelPool;
+	static std::unordered_map<std::string, ModelAsset*> m_ModelPool;
 
-	static void LoadModel(const char *FileName, MODEL *Model);
+	static void LoadModel(const char *FileName, ModelAsset *Model);
 	static void LoadObj( const char *FileName, MODEL_OBJ *ModelObj );
 	static void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned int *MaterialNum );
 
-	MODEL* m_Model{};
+	ModelAsset* m_Model{};
     ComPtr<ID3D11VertexShader> m_VertexShader{};
     ComPtr<ID3D11PixelShader> m_PixelShader{};
     ComPtr<ID3D11InputLayout> m_InputLayout{};
