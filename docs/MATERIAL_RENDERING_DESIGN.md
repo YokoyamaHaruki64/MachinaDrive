@@ -81,6 +81,10 @@ OBJの移行初期は Position、Normal、TexCoord0 をストリーム化する�
 
 `Material` は共有アセットである `GraphicsShader` を非所有参照として保持し、Propertiesの値、Properties用定数バッファ、Texture、Samplerを所有する。Shader自体の寿命は `ShaderManager` が管理する。
 
+`MaterialManager` はstaticな唯一所有者として `std::unique_ptr<Material>` を保持し、利用側へは非所有の `Material*` を貸し出す。ModelAssetとDrawItemはこのポインタを参照する。オブジェクト固有の値が必要な場合は、共有Materialを変更せず、新しいMaterialを生成して割り当てる。`CreateInstance()` のような複製専用APIは設けない。
+
+Materialの破棄は、Materialが非所有参照するShaderより先に行う。終了順は `MaterialManager`、`TextureManager`、`ShaderManager` とする。
+
 ファイル由来のテクスチャは static な `TextureManager` がプールして所有する。`Material` を含む利用側は `TextureHandle` だけを保持し、Bind時に `TextureManager` へSRVを問い合わせる。同じ正規化済みパスのロードは同一Handleを返す。無効なHandleやロード失敗時は、可視性を優先して1x1のマゼンタのフォールバックテクスチャをBindする。
 
 RenderTargetやPostEffectの中間SRVはアセットではないため、`TextureManager` には登録せず、従来どおり `Renderer` または各PostEffectが所有する。

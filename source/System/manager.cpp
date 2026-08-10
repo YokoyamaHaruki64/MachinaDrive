@@ -6,6 +6,7 @@
 #include "System/input.h"
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
+#include "Graphics/MaterialManager.h"
 #include "Scene/Scene.h"
 #include "Scene/TitleScene.h"
 
@@ -77,6 +78,7 @@ void Manager::Init()
 
 	Renderer::Init();
     TextureManager::Init();
+    MaterialManager::Init();
 	Input::Init();
     PostEffect::Init();
     Audio::InitMaster();
@@ -126,6 +128,7 @@ void Manager::Uninit()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    MaterialManager::Uninit();
     TextureManager::Uninit();
     Renderer::Uninit();
     Input::Uninit();

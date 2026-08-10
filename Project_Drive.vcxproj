@@ -148,6 +148,7 @@
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
     <ClCompile Include="source\Graphics\Material.cpp" />
+    <ClCompile Include="source\Graphics\MaterialManager.cpp" />
     <ClCompile Include="source\Graphics\TextureManager.cpp" />
     <ClCompile Include="source\Graphics\Shader\InputLayoutBuilder.cpp" />
     <ClCompile Include="source\Graphics\Shader\ShaderCompiler.cpp" />
@@ -324,6 +325,7 @@
     <ClInclude Include="include\Component\Transform.h" />
     <ClInclude Include="include\Graphics\GraphicInc.h" />
     <ClInclude Include="include\Graphics\Material.h" />
+    <ClInclude Include="include\Graphics\MaterialManager.h" />
     <ClInclude Include="include\Graphics\TextureManager.h" />
     <ClInclude Include="include\Graphics\Shader\InputLayoutBuilder.h" />
     <ClInclude Include="include\Graphics\Shader\ShaderCompiler.h" />

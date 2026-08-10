@@ -207,6 +207,9 @@
     <ClCompile Include="source\Graphics\Material.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="source\Graphics\MaterialManager.cpp">
+      <Filter>ソース ファイル\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="source\Graphics\TextureManager.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
@@ -411,6 +414,9 @@
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\Material.h">
+      <Filter>ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\MaterialManager.h">
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\TextureManager.h">
