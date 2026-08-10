@@ -62,7 +62,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
     parser.ExtractProperties(properties);
 
     // Passに追加するコードの生成
-    std::string additionalCode = "cbuffer Properties : register(b7)\n{\n";
+    std::string additionalCode = "#define MATERIAL_PROPERTIES_DEFINED\ncbuffer Properties : register(b3)\n{\n";
     // プロパティの定数バッファの内容を生成
     for (auto& prop : properties)
     {

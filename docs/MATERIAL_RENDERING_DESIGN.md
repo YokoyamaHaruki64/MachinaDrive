@@ -96,11 +96,11 @@ const GraphicsShaderPass& Material::GetShaderPass(size_t passIndex) const;
 void Material::Bind(size_t passIndex);
 ```
 
-RendererはPassをBindした後、同じPass番号でMaterialをBindする。PassはShader・InputLayout・RenderStateを、Materialは反射結果に基づく `b7` のProperties定数バッファとTexture/Samplerを設定する。
+RendererはPassをBindした後、同じPass番号でMaterialをBindする。PassはShader・InputLayout・RenderStateを、Materialは反射結果に基づく `b3` のProperties定数バッファとTexture/Samplerを設定する。
 
 描画実行時は直前にBindした `GraphicsShaderPass`、Material、Meshをキャッシュし、同一であれば再Bindしない。
 
-`GraphicsShaderPass` は頂点・ピクセルシェーダー、InputLayout、Pass固有の `RenderState` を適用する。`Material` は反射情報に従い、Material Properties用定数バッファ、Texture、Samplerを各シェーダーステージへ設定する。Meshは頂点・インデックスバッファとトポロジを設定する。
+`GraphicsShaderPass` は頂点・ピクセルシェーダー、InputLayout、Pass固有の `RenderState` を適用する。`Material` は反射情報に従い、`b3` のMaterial Properties用定数バッファ、Texture、Samplerを各シェーダーステージへ設定する。Meshは頂点・インデックスバッファとトポロジを設定する。
 
 深度状態は `RenderState::depthTestMode` と `RenderState::depthWriteMode` を個別に反映する。既存の `Renderer::SetDepthEnable()` は深度書込みを止める用途も含むため、新しい経路ではこれに依存せず、必要なD3D深度ステンシルステートを作成・キャッシュする。
 

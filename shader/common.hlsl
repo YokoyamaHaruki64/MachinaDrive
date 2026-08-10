@@ -1,22 +1,16 @@
 
 
 
-cbuffer WorldBuffer : register(b0)
-{
-	matrix World;
-}
-cbuffer ViewBuffer : register(b1)
+cbuffer PerFrame : register(b0)
 {
 	matrix View;
-}
-cbuffer ProjectionBuffer : register(b2)
-{
 	matrix Projection;
+	float4 CameraPositionAndTime;
 }
 
-cbuffer CameraBuffer : register(b5)
+cbuffer PerObject : register(b1)
 {
-	float4 CameraPosition;
+	matrix World;
 }
 
 
@@ -33,10 +27,12 @@ struct MATERIAL
 	float2 Dummy;
 };
 
-cbuffer MaterialBuffer : register(b3)
+#ifndef MATERIAL_PROPERTIES_DEFINED
+cbuffer Properties : register(b3)
 {
 	MATERIAL Material;
 }
+#endif
 
 
 
@@ -50,7 +46,7 @@ struct LIGHT
 	float4 Ambient;
 };
 
-cbuffer LightBuffer : register(b4)
+cbuffer Lighting : register(b2)
 {
 	LIGHT Light;
 }
