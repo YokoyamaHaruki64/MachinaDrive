@@ -20,9 +20,9 @@ using namespace DirectX;
 
 #include "DirectXTex.h"
 #if _DEBUG
-#pragma comment (lib, "Library/DirectXTex_Debug.lib")
+#pragma comment (lib, "External/Library/DirectXTex_Debug.lib")
 #else
-#pragma comment (lib, "Library/DirectXTex_Release.lib")
+#pragma comment (lib, "External/Library/DirectXTex_Release.lib")
 #endif
 
 

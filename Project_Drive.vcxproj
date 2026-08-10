@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;$(ProjectDir)External\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -123,7 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;$(ProjectDir)External\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -232,6 +232,84 @@
     <ClCompile Include="source\System\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\Include\Assimp\aabb.h" />
+    <ClInclude Include="External\Include\Assimp\ai_assert.h" />
+    <ClInclude Include="External\Include\Assimp\anim.h" />
+    <ClInclude Include="External\Include\Assimp\AssertHandler.h" />
+    <ClInclude Include="External\Include\Assimp\Base64.hpp" />
+    <ClInclude Include="External\Include\Assimp\BaseImporter.h" />
+    <ClInclude Include="External\Include\Assimp\Bitmap.h" />
+    <ClInclude Include="External\Include\Assimp\BlobIOSystem.h" />
+    <ClInclude Include="External\Include\Assimp\ByteSwapper.h" />
+    <ClInclude Include="External\Include\Assimp\camera.h" />
+    <ClInclude Include="External\Include\Assimp\cexport.h" />
+    <ClInclude Include="External\Include\Assimp\cfileio.h" />
+    <ClInclude Include="External\Include\Assimp\cimport.h" />
+    <ClInclude Include="External\Include\Assimp\ColladaMetaData.h" />
+    <ClInclude Include="External\Include\Assimp\color4.h" />
+    <ClInclude Include="External\Include\Assimp\commonMetaData.h" />
+    <ClInclude Include="External\Include\Assimp\config.h" />
+    <ClInclude Include="External\Include\Assimp\CreateAnimMesh.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultIOStream.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultIOSystem.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultLogger.hpp" />
+    <ClInclude Include="External\Include\Assimp\defs.h" />
+    <ClInclude Include="External\Include\Assimp\Exceptional.h" />
+    <ClInclude Include="External\Include\Assimp\Exporter.hpp" />
+    <ClInclude Include="External\Include\Assimp\fast_atof.h" />
+    <ClInclude Include="External\Include\Assimp\GenericProperty.h" />
+    <ClInclude Include="External\Include\Assimp\GltfMaterial.h" />
+    <ClInclude Include="External\Include\Assimp\Hash.h" />
+    <ClInclude Include="External\Include\Assimp\Importer.hpp" />
+    <ClInclude Include="External\Include\Assimp\importerdesc.h" />
+    <ClInclude Include="External\Include\Assimp\IOStream.hpp" />
+    <ClInclude Include="External\Include\Assimp\IOStreamBuffer.h" />
+    <ClInclude Include="External\Include\Assimp\IOSystem.hpp" />
+    <ClInclude Include="External\Include\Assimp\light.h" />
+    <ClInclude Include="External\Include\Assimp\LineSplitter.h" />
+    <ClInclude Include="External\Include\Assimp\LogAux.h" />
+    <ClInclude Include="External\Include\Assimp\Logger.hpp" />
+    <ClInclude Include="External\Include\Assimp\LogStream.hpp" />
+    <ClInclude Include="External\Include\Assimp\material.h" />
+    <ClInclude Include="External\Include\Assimp\MathFunctions.h" />
+    <ClInclude Include="External\Include\Assimp\matrix3x3.h" />
+    <ClInclude Include="External\Include\Assimp\matrix4x4.h" />
+    <ClInclude Include="External\Include\Assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="External\Include\Assimp\mesh.h" />
+    <ClInclude Include="External\Include\Assimp\metadata.h" />
+    <ClInclude Include="External\Include\Assimp\NullLogger.hpp" />
+    <ClInclude Include="External\Include\Assimp\ObjMaterial.h" />
+    <ClInclude Include="External\Include\Assimp\ParsingUtils.h" />
+    <ClInclude Include="External\Include\Assimp\pbrmaterial.h" />
+    <ClInclude Include="External\Include\Assimp\postprocess.h" />
+    <ClInclude Include="External\Include\Assimp\Profiler.h" />
+    <ClInclude Include="External\Include\Assimp\ProgressHandler.hpp" />
+    <ClInclude Include="External\Include\Assimp\qnan.h" />
+    <ClInclude Include="External\Include\Assimp\quaternion.h" />
+    <ClInclude Include="External\Include\Assimp\RemoveComments.h" />
+    <ClInclude Include="External\Include\Assimp\scene.h" />
+    <ClInclude Include="External\Include\Assimp\SceneCombiner.h" />
+    <ClInclude Include="External\Include\Assimp\SGSpatialSort.h" />
+    <ClInclude Include="External\Include\Assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="External\Include\Assimp\SmallVector.h" />
+    <ClInclude Include="External\Include\Assimp\SmoothingGroups.h" />
+    <ClInclude Include="External\Include\Assimp\SpatialSort.h" />
+    <ClInclude Include="External\Include\Assimp\StandardShapes.h" />
+    <ClInclude Include="External\Include\Assimp\StreamReader.h" />
+    <ClInclude Include="External\Include\Assimp\StreamWriter.h" />
+    <ClInclude Include="External\Include\Assimp\StringComparison.h" />
+    <ClInclude Include="External\Include\Assimp\StringUtils.h" />
+    <ClInclude Include="External\Include\Assimp\Subdivision.h" />
+    <ClInclude Include="External\Include\Assimp\texture.h" />
+    <ClInclude Include="External\Include\Assimp\TinyFormatter.h" />
+    <ClInclude Include="External\Include\Assimp\types.h" />
+    <ClInclude Include="External\Include\Assimp\vector2.h" />
+    <ClInclude Include="External\Include\Assimp\vector3.h" />
+    <ClInclude Include="External\Include\Assimp\version.h" />
+    <ClInclude Include="External\Include\Assimp\Vertex.h" />
+    <ClInclude Include="External\Include\Assimp\XmlParser.h" />
+    <ClInclude Include="External\Include\Assimp\XMLTools.h" />
+    <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="include\Common\Color.h" />
     <ClInclude Include="include\Common\Random.h" />
     <ClInclude Include="include\Component\audio.h" />
@@ -390,6 +468,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="External\Include\Assimp\color4.inl" />
+    <None Include="External\Include\Assimp\material.inl" />
+    <None Include="External\Include\Assimp\matrix3x3.inl" />
+    <None Include="External\Include\Assimp\matrix4x4.inl" />
+    <None Include="External\Include\Assimp\quaternion.inl" />
+    <None Include="External\Include\Assimp\SmoothingGroups.inl" />
+    <None Include="External\Include\Assimp\vector2.inl" />
+    <None Include="External\Include\Assimp\vector3.inl" />
     <None Include="include\System\DirectXTex.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
