@@ -18,13 +18,11 @@
 #include "Graphics/Shader/ShaderReflector.h"
 #include "Graphics/Shader/ShaderInc.h"
 
-class GraphicsDevice;
 class GraphicsShaderPass;
 
 class ShaderFactory
 {
 private:
-    const GraphicsDevice& m_graphicsDevice;
     ShaderCompiler m_shaderCompiler;
     InputLayoutBuilder m_inputLayoutBuilder;
 
@@ -40,12 +38,14 @@ private:
 
     bool compileVertexShader(
         const std::string& hlslCode,
+        const std::string& sourceName,
         const std::string& entryPoint,
         const std::string& shaderModel,
         ID3DBlob** outVertexShaderBlob);
 
     bool compilePixelShader(
         const std::string& hlslCode,
+        const std::string& sourceName,
         const std::string& entryPoint,
         const std::string& shaderModel,
         ID3DBlob** outPixelShaderBlob);
@@ -58,16 +58,11 @@ private:
 
 public:
 
-    ShaderFactory(const GraphicsDevice& graphicsDevice)
-        :
-        m_graphicsDevice(graphicsDevice),
-        m_shaderCompiler(),
-        m_inputLayoutBuilder(graphicsDevice)
-    {
-    }
+    ShaderFactory() = default;
 
     bool CreateGraphicsShaderPass(
         const std::string& hlslCode,
+        const std::string& sourceName,
         const std::string& vertexEntryPoint,
         const std::string& vertexShaderModel,
         const std::string& pixelEntryPoint,

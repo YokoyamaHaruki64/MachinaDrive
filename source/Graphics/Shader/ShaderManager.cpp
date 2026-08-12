@@ -1,77 +1,78 @@
-﻿/*=============================================================================
-
-File   : [ShaderManager.cpp]
-Desc   : シェーダーの管理を行うクラスの実装
-
-------------------------------------------------------------------------------
-
-Date   : 2026/03/10
-Author : Yokoyama Haruki
-
-===============================================================================*/
-
+﻿#include "pch.h"
 #include "Graphics/Shader/ShaderManager.h"
-#include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/Shader/ShaderLoader.h"
+#include "Graphics/Shader/ShaderProgram.h"
 
-GraphicsShader* ShaderManager::GetShaderByFilePath(const std::string& filePath) const
+std::vector<std::unique_ptr<GraphicsShader>> ShaderManager::m_shaders;
+std::unique_ptr<ShaderLoader> ShaderManager::m_shaderLoader;
+GraphicsShader* ShaderManager::m_defaultShader{};
+ShaderID ShaderManager::m_shaderIDs{};
+
+bool ShaderManager::Init()
 {
-    for (const auto& shader : m_shaders)
+    // Renderer初期化後にLoaderを生成し、DefaultLitを全Materialの既定Shaderとして一度だけ読み込む。
+    m_shaderLoader = std::make_unique<ShaderLoader>();
+    m_defaultShader = LoadShaderFromFile(DEFAULT_SHADER_FILE_PATH);
+
+    return m_defaultShader != nullptr;
+}
+
+void ShaderManager::Uninit()
+{
+    // MaterialManagerより後に呼ばれ、Materialから参照されるShaderを安全に破棄する。
+    m_defaultShader = nullptr;
+    m_shaders.clear();
+    m_shaderLoader.reset();
+    m_shaderIDs = 0;
+}
+
+GraphicsShader* ShaderManager::GetShaderByFilePath(const std::string& filePath)
+{
+    for (const std::unique_ptr<GraphicsShader>& shader : m_shaders)
     {
         if (shader->GetFilePath() == filePath)
-        {
             return shader.get();
-        }
     }
+
     return nullptr;
 }
 
-GraphicsShader* ShaderManager::GetShaderByID(ShaderID id) const
+GraphicsShader* ShaderManager::GetShaderByID(ShaderID id)
 {
-    for (const auto& shader : m_shaders)
+    for (const std::unique_ptr<GraphicsShader>& shader : m_shaders)
     {
         if (shader->GetID() == id)
-        {
             return shader.get();
-        }
     }
+
     return nullptr;
-}
-
-GraphicsShader* ShaderManager::AddShader(GraphicsShader* shader)
-{
-    if (shader == nullptr || shader->IsValid() == false)
-        return nullptr;
-
-    m_shaders.emplace_back(std::unique_ptr<GraphicsShader>(shader));
-    return shader;
-
 }
 
 GraphicsShader* ShaderManager::LoadShaderFromFile(const std::string& filePath)
 {
-    // 既に同じファイルパスのシェーダーが存在する場合は、それを返す
-    GraphicsShader* existingShader = GetShaderByFilePath(filePath);
-    if (existingShader != nullptr)
-    {
+    // 同じパスのShaderは共有し、再コンパイルや重複所有を避ける。
+    if (GraphicsShader* existingShader = GetShaderByFilePath(filePath))
         return existingShader;
-    }
 
-    // 新しいシェーダーをロードする
-    ShaderID newShaderID = GenerateShaderID();
-    GraphicsShader* newShader = m_shaderLoader.LoadShaderFromFile(filePath, newShaderID);
-    if (newShader == nullptr)
-    {
+    if (!m_shaderLoader)
         return nullptr;
-    }
-    // シェーダーを管理リストに追加する
-    AddShader(newShader);
-    return newShader;
-}
 
+    const ShaderID shaderID = m_shaderIDs++;
+    std::unique_ptr<GraphicsShader> shader(m_shaderLoader->LoadShaderFromFile(filePath, shaderID));
+    if (!shader || !shader->IsValid())
+        return nullptr;
+
+    GraphicsShader* result = shader.get();
+    m_shaders.push_back(std::move(shader));
+    return result;
+}
 
 void ShaderManager::RemoveShaderByFilePath(const std::string& filePath)
 {
+    // DefaultLitは常に有効な既定Shaderとして残す。
+    if (filePath == DEFAULT_SHADER_FILE_PATH)
+        return;
+
     m_shaders.erase(
         std::remove_if(m_shaders.begin(), m_shaders.end(),
             [&filePath](const std::unique_ptr<GraphicsShader>& shader)

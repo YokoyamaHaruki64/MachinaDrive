@@ -76,6 +76,7 @@ bool ShaderFactory::createPixelShader(
 
 bool ShaderFactory::compileVertexShader(
     const std::string& hlslCode,
+    const std::string& sourceName,
     const std::string& entryPoint,
     const std::string& shaderModel,
     ID3DBlob** outVertexShaderBlob)
@@ -83,6 +84,7 @@ bool ShaderFactory::compileVertexShader(
 
     return (m_shaderCompiler.CompileShader(
         hlslCode,
+        sourceName,
         entryPoint,
         shaderModel,
         outVertexShaderBlob
@@ -91,12 +93,14 @@ bool ShaderFactory::compileVertexShader(
 
 bool ShaderFactory::compilePixelShader(
     const std::string& hlslCode,
+    const std::string& sourceName,
     const std::string& entryPoint,
     const std::string& shaderModel,
     ID3DBlob** outPixelShaderBlob)
 {
     return (m_shaderCompiler.CompileShader(
         hlslCode,
+        sourceName,
         entryPoint,
         shaderModel,
         outPixelShaderBlob
@@ -156,6 +160,7 @@ void ShaderFactory::mergeShaderReflectionResults(
 
 bool ShaderFactory::CreateGraphicsShaderPass(
     const std::string& hlslCode,
+    const std::string& sourceName,
     const std::string& vertexEntryPoint,
     const std::string& vertexShaderModel,
     const std::string& pixelEntryPoint,
@@ -171,6 +176,7 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     ComPtr<ID3DBlob> vertexShaderBlob;
     if (!compileVertexShader(
         hlslCode,
+        sourceName,
         vertexEntryPoint,
         vertexShaderModel,
         vertexShaderBlob.GetAddressOf()))
@@ -182,6 +188,7 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     ComPtr<ID3DBlob> pixelShaderBlob;
     if (!compilePixelShader(
         hlslCode,
+        sourceName,
         pixelEntryPoint,
         pixelShaderModel,
         pixelShaderBlob.GetAddressOf()))

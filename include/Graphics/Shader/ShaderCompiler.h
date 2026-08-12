@@ -26,6 +26,7 @@ public:
 
     bool CompileShader(
         const std::string& hlslCode,
+        const std::string& sourceName,
         const std::string& entryPoint,
         const std::string& shaderModel,
         ID3DBlob** outShaderBlob);

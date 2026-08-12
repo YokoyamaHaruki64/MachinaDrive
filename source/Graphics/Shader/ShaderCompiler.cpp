@@ -19,6 +19,7 @@ using Microsoft::WRL::ComPtr;
 
 bool ShaderCompiler::CompileShader(
     const std::string& hlslCode,
+    const std::string& sourceName,
     const std::string& entryPoint,
     const std::string& shaderModel,
     ID3DBlob** outShaderBlob)
@@ -28,7 +29,7 @@ bool ShaderCompiler::CompileShader(
     HRESULT hr = D3DCompile(
         hlslCode.data(),
         hlslCode.size(),
-        nullptr, // ソース名はエラーメッセージに表示されるだけなので、今回は指定しない
+        sourceName.c_str(), // 標準インクルードが相対パスを解決する基準として利用する
         nullptr, // マクロ定義は今回は使用しない
         D3D_COMPILE_STANDARD_FILE_INCLUDE, // #includeディレクティブを処理するためのフラグ
         entryPoint.c_str(),

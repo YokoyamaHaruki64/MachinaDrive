@@ -223,6 +223,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         GraphicsShaderPass shaderPass;
         if (!m_shaderFactory.CreateGraphicsShaderPass(
             hlslCode,
+            filePath,
             vertexShaderEntry,
             shaderModelVS,
             pixelShaderEntry,

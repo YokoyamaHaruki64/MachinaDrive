@@ -20,19 +20,13 @@
 #include <d3d11.h>
 #include <d3d11shader.h>
 
-class GraphicsDevice;
-
 class InputLayoutBuilder
 {
-    const GraphicsDevice& m_graphicsDevice;
     DXGI_FORMAT getFormat(const D3D11_SIGNATURE_PARAMETER_DESC& param);
     VertexStreamType getVertexAttribute(const D3D11_SIGNATURE_PARAMETER_DESC& param);
 
 public:
-    InputLayoutBuilder(const GraphicsDevice& graphicsDevice)
-        : m_graphicsDevice(graphicsDevice)
-    {
-    }
+    InputLayoutBuilder() = default;
 
     bool CreateInputLayout(
         ID3DBlob* shaderBlob,

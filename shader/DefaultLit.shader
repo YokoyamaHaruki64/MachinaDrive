@@ -21,7 +21,7 @@ Shader "DefaultLit"
         #pragma shader_model 5.0
 
         HLSL_BEGIN
-        #include "shader/common.hlsl"
+        #include "common.hlsl"
 
         struct VSInput
         {

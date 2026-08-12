@@ -19,8 +19,6 @@
 #include "Graphics/Shader/ShaderFactory.h"
 #include "Graphics/GraphicInc.h"
 
-class GraphicsDevice;
-class ShaderFactory;
 class GraphicsShader;
 
 class ShaderLoader
@@ -34,11 +32,7 @@ private:
         const GraphicsShaderPass& shaderPass) const;
 
 public:
-    ShaderLoader() = delete;
-    ShaderLoader(const GraphicsDevice& graphicsDevice)
-        : m_shaderFactory(graphicsDevice)
-    {
-    }
+    ShaderLoader() = default;
 
     GraphicsShader* LoadShaderFromFile(const std::string& filePath, ShaderID shaderID);
 

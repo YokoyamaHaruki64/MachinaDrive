@@ -7,6 +7,7 @@
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
 #include "Graphics/MaterialManager.h"
+#include "Graphics/Shader/ShaderManager.h"
 #include "Scene/Scene.h"
 #include "Scene/TitleScene.h"
 
@@ -77,6 +78,7 @@ void Manager::Init()
     RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
 	Renderer::Init();
+    ShaderManager::Init();
     TextureManager::Init();
     MaterialManager::Init();
 	Input::Init();
@@ -130,6 +132,7 @@ void Manager::Uninit()
     ImGui::DestroyContext();
     MaterialManager::Uninit();
     TextureManager::Uninit();
+    ShaderManager::Uninit();
     Renderer::Uninit();
     Input::Uninit();
     Audio::UninitMaster();
