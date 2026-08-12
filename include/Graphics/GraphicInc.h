@@ -22,10 +22,28 @@ Author : Yokoyama Haruki
 #include "math/Matrix4x4.h"
 #include "Common/Color.h"
 
-using PropertyID = UINT;
+using ShaderPropertyID = UINT;
 using ShaderID = UINT;
 using MaterialID = UINT;
+using MaterialPropertyID = uint64_t;
 using TextureID = int;
+
+static constexpr UINT INVALID_PROPERTY_OFFSET = UINT_MAX;
+
+constexpr MaterialPropertyID MakeMaterialPropertyID(MaterialID materialID, ShaderPropertyID shaderPropertyID)
+{
+    return (static_cast<MaterialPropertyID>(materialID) << 32) | shaderPropertyID;
+}
+
+constexpr MaterialID GetMaterialID(MaterialPropertyID materialPropertyID)
+{
+    return static_cast<MaterialID>(materialPropertyID >> 32);
+}
+
+constexpr ShaderPropertyID GetShaderPropertyID(MaterialPropertyID materialPropertyID)
+{
+    return static_cast<ShaderPropertyID>(materialPropertyID);
+}
 
 struct TextureHandle
 {

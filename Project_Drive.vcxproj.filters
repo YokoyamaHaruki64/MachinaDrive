@@ -231,6 +231,9 @@
     <ClCompile Include="source\Graphics\Shader\ShaderParser.cpp">
       <Filter>ソース ファイル\Graphics\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="source\Graphics\Shader\ShaderProgram.cpp">
+      <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
     <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp">
       <Filter>ソース ファイル\Graphics\Shader</Filter>
     </ClCompile>

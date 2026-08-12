@@ -107,8 +107,7 @@ void ShaderFactory::mergeShaderReflectionResults(
     const ShaderReflector::ReflectionResult& vertexReflectionResult,
     const ShaderReflector::ReflectionResult& pixelReflectionResult,
     std::vector<ConstantBufferInfo>& outConstantBufferInfo,
-    std::vector<ShaderTextureInfo>& outTextureInfo,
-    std::vector<ShaderSamplerInfo>& outSamplerInfo)
+    std::vector<ShaderTextureInfo>& outTextureInfo)
 {
     // 定数バッファのマージ
     outConstantBufferInfo = vertexReflectionResult.constantBuffers;
@@ -153,79 +152,6 @@ void ShaderFactory::mergeShaderReflectionResults(
         }
     }
 
-    // サンプラーのマージ
-    outSamplerInfo = vertexReflectionResult.samplers;
-    for (const auto& samplerInfo : pixelReflectionResult.samplers)
-    {
-        auto it = std::find_if(outSamplerInfo.begin(), outSamplerInfo.end(),
-            [&samplerInfo](const ShaderSamplerInfo& existingSamplerInfo)
-            {
-                return existingSamplerInfo.name == samplerInfo.name;
-            });
-        if (it != outSamplerInfo.end())
-        {
-            it->vsSlot = (it->vsSlot != -1) ? it->vsSlot : samplerInfo.vsSlot;
-            it->psSlot = (it->psSlot != -1) ? it->psSlot : samplerInfo.psSlot;
-        }
-        else
-        {
-            outSamplerInfo.push_back(samplerInfo);
-        }
-    }
-}
-
-bool ShaderFactory::createConstantBuffers(const std::vector<ConstantBufferInfo>& constantBufferInfo, std::vector<ComPtr<ID3D11Buffer>>& outConstantBuffers)
-{
-    outConstantBuffers.reserve(constantBufferInfo.size());
-
-    for (const auto& cbInfo : constantBufferInfo)
-    {
-        D3D11_BUFFER_DESC bufferDesc = {};
-        bufferDesc.ByteWidth = cbInfo.size;
-        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        ComPtr<ID3D11Buffer> constantBuffer;
-        HRESULT hr = Renderer::GetDevice()->CreateBuffer(&bufferDesc, nullptr, constantBuffer.GetAddressOf());
-        if (FAILED(hr))
-        {
-            MessageBoxW(NULL, L"Failed to create constant buffer.", L"Error", MB_OK | MB_ICONERROR);
-            return false;
-        }
-        outConstantBuffers.push_back(constantBuffer);
-    }
-    return true;
-}
-
-bool ShaderFactory::createSamplerStates(const std::vector<ShaderSamplerInfo>& samplerInfo, std::vector<ComPtr<ID3D11SamplerState>>& outSamplerStates)
-{
-    outSamplerStates.reserve(samplerInfo.size());
-
-    for (const auto& sampler : samplerInfo)
-    {
-        D3D11_SAMPLER_DESC samplerDesc = {};
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.MipLODBias = 0.0f;
-        samplerDesc.MaxAnisotropy = 1;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-        samplerDesc.BorderColor[0] = 0.0f;
-        samplerDesc.BorderColor[1] = 0.0f;
-        samplerDesc.BorderColor[2] = 0.0f;
-        samplerDesc.BorderColor[3] = 0.0f;
-        samplerDesc.MinLOD = 0.0f;
-        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-        ComPtr<ID3D11SamplerState> samplerState;
-        HRESULT hr = Renderer::GetDevice()->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
-        if (FAILED(hr))
-        {
-            MessageBoxW(NULL, L"Failed to create sampler state.", L"Error", MB_OK | MB_ICONERROR);
-            return false;
-        }
-        outSamplerStates.push_back(samplerState);
-    }
-    return true;
 }
 
 bool ShaderFactory::CreateGraphicsShaderPass(
@@ -315,13 +241,11 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     // 頂点シェーダーとピクセルシェーダーのリフレクション結果をマージする
     std::vector<ConstantBufferInfo> constantBufferInfo;
     std::vector<ShaderTextureInfo> textureInfo;
-    std::vector<ShaderSamplerInfo> samplerInfo;
     mergeShaderReflectionResults(
         vertexReflectionResult,
         pixelReflectionResult,
         constantBufferInfo,
-        textureInfo,
-        samplerInfo);
+        textureInfo);
 
     // ===========================
     // シェーダーパスの生成
@@ -333,8 +257,7 @@ bool ShaderFactory::CreateGraphicsShaderPass(
         renderState,
         std::move(inputSlot),
         std::move(constantBufferInfo),
-        std::move(textureInfo),
-        std::move(samplerInfo)
+        std::move(textureInfo)
     );
 
     return true;

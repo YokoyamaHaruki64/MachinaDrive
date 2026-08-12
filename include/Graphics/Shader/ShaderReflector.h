@@ -32,8 +32,7 @@ class ShaderReflector
 
     void getShaderInfo(
         std::vector<ConstantBufferInfo>& outConstantBuffers,
-        std::vector<ShaderTextureInfo>& outTextures,
-        std::vector<ShaderSamplerInfo>& outSamplers);
+        std::vector<ShaderTextureInfo>& outTextures);
 
     void getConstantBufferInfo(std::vector<ConstantBufferInfo>& outConstantBuffers);
 
@@ -47,7 +46,6 @@ public:
     {
         std::vector<ConstantBufferInfo> constantBuffers{};
         std::vector<ShaderTextureInfo> textures{};
-        std::vector<ShaderSamplerInfo> samplers{};
     };
 
     ShaderReflector(ID3DBlob* shaderBlob, ShaderStage shaderStage)

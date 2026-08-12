@@ -14,6 +14,8 @@ Author : Yokoyama Haruki
 
 #include <memory>
 #include <string>
+#include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <d3d11.h>
@@ -38,7 +40,6 @@ private:
     std::vector<InputSlotBinding> m_bindings;
     std::vector<ConstantBufferInfo> m_constantBufferInfo{};
     std::vector<ShaderTextureInfo> m_textureInfo{};
-    std::vector<ShaderSamplerInfo> m_samplerInfo{};
 
 public:
 
@@ -51,8 +52,7 @@ public:
         RenderState renderState,
         std::vector<InputSlotBinding> bindings,
         std::vector<ConstantBufferInfo> constantBufferInfo,
-        std::vector<ShaderTextureInfo> textureInfo,
-        std::vector<ShaderSamplerInfo> samplerInfo
+        std::vector<ShaderTextureInfo> textureInfo
     )
         :
         m_vertexShader(std::move(vertexShader)),
@@ -61,8 +61,7 @@ public:
         m_renderState(renderState),
         m_bindings(std::move(bindings)),
         m_constantBufferInfo(std::move(constantBufferInfo)),
-        m_textureInfo(std::move(textureInfo)),
-        m_samplerInfo(std::move(samplerInfo))
+        m_textureInfo(std::move(textureInfo))
     {
     }
 
@@ -74,7 +73,6 @@ public:
 
     const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
     const std::vector<ShaderTextureInfo>& GetTextureInfo() const { return m_textureInfo; }
-    const std::vector<ShaderSamplerInfo>& GetSamplerInfo() const { return m_samplerInfo; }
 };
 
 class GraphicsShader
@@ -86,6 +84,7 @@ class GraphicsShader
 
     std::vector<GraphicsShaderPass> m_shaderPasses{};
     std::vector<ShaderPropertyDesc> m_properties{};
+    std::unordered_map<std::string, ShaderPropertyID> m_propertyIDsByName{};
 
 public:
     GraphicsShader(
@@ -101,12 +100,16 @@ public:
         m_shaderPasses(std::move(shaderPasses)),
         m_properties(std::move(properties))
     {
+        for (const ShaderPropertyDesc& property : m_properties)
+            m_propertyIDsByName.emplace(property.name, property.id);
     }
     const ShaderID& GetID() const { return m_id; }
     const std::string& GetShaderName() const { return m_shaderName; }
     const std::string& GetFilePath() const { return m_filePath; }
     const std::vector<GraphicsShaderPass>& GetShaderPasses() const { return m_shaderPasses; }
     const std::vector<ShaderPropertyDesc>& GetProperties() const { return m_properties; }
+    const ShaderPropertyDesc* GetProperty(ShaderPropertyID id) const;
+    const ShaderPropertyDesc* GetProperty(std::string_view name) const;
 
     bool IsValid() const
     {

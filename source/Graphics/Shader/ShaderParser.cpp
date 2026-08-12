@@ -602,7 +602,7 @@ bool ShaderParser::ExtractProperties(std::vector<ShaderPropertyDesc>& outPropert
     // プロパティブロックの内容を行ごとに分割
     std::istringstream stream(blockContent);
     std::string line;
-    PropertyID propertyID = 0; // プロパティIDの初期値
+    ShaderPropertyID propertyID = 0; // プロパティIDの初期値
     while (std::getline(stream, line))
     {
         /*

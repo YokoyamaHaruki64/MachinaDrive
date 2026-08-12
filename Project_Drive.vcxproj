@@ -156,6 +156,7 @@
     <ClCompile Include="source\Graphics\Shader\ShaderLoader.cpp" />
     <ClCompile Include="source\Graphics\Shader\ShaderManager.cpp" />
     <ClCompile Include="source\Graphics\Shader\ShaderParser.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderProgram.cpp" />
     <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp" />
     <ClCompile Include="source\ImGui\imgui.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>

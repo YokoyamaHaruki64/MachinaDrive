@@ -1,4 +1,4 @@
-# Material描画・Phase別キュー設計
+﻿# Material描画・Phase別キュー設計
 
 ## 目的
 
@@ -30,7 +30,7 @@ Renderer
 | --- | --- |
 | `sortKey` | Phase内の描画順を表す64ビットキー |
 | `renderer` | ワールド行列設定と実Drawを担う提出元 |
-| `material` | Properties定数バッファ、Texture、SamplerのBind対象 |
+| `material` | Properties定数バッファとTextureのBind対象 |
 | `meshID` | 頂点・インデックスバッファ組を識別する不変ID |
 | `shaderPass` | Shader、InputLayout、Pass固有RenderStateのBind対象 |
 | `submitOrder` | 同一キー時の順序を保証する連番 |
@@ -79,7 +79,7 @@ OBJの移行初期は Position、Normal、TexCoord0 をストリーム化する�
 
 ### MaterialのShader所有とBind API
 
-`Material` は共有アセットである `GraphicsShader` を非所有参照として保持し、Propertiesの値、Properties用定数バッファ、Texture、Samplerを所有する。Shader自体の寿命は `ShaderManager` が管理する。
+`Material` は共有アセットである `GraphicsShader` を非所有参照として保持し、Properties用のバイト列、Properties用定数バッファ、Resource値を所有する。Shader自体の寿命は `ShaderManager` が管理する。
 
 `MaterialManager` はstaticな唯一所有者として `std::unique_ptr<Material>` を保持し、利用側へは非所有の `Material*` を貸し出す。ModelAssetとDrawItemはこのポインタを参照する。オブジェクト固有の値が必要な場合は、共有Materialを変更せず、新しいMaterialを生成して割り当てる。`CreateInstance()` のような複製専用APIは設けない。
 
@@ -96,11 +96,19 @@ const GraphicsShaderPass& Material::GetShaderPass(size_t passIndex) const;
 void Material::Bind(size_t passIndex);
 ```
 
-RendererはPassをBindした後、同じPass番号でMaterialをBindする。PassはShader・InputLayout・RenderStateを、Materialは反射結果に基づく `b3` のProperties定数バッファとTexture/Samplerを設定する。
+RendererはPassをBindした後、同じPass番号でMaterialをBindする。PassはShader・InputLayout・RenderStateを、Materialは確定済みレイアウトに基づく `b3` のProperties定数バッファとTextureを設定する。共通SamplerはMaterialやPassではなくRendererが所有し、`common.hlsl` の `LinearSampler`（s0）および `ShadowSampler`（s1）として全Shaderから利用する。
 
 描画実行時は直前にBindした `GraphicsShaderPass`、Material、Meshをキャッシュし、同一であれば再Bindしない。
 
-`GraphicsShaderPass` は頂点・ピクセルシェーダー、InputLayout、Pass固有の `RenderState` を適用する。`Material` は反射情報に従い、`b3` のMaterial Properties用定数バッファ、Texture、Samplerを各シェーダーステージへ設定する。Meshは頂点・インデックスバッファとトポロジを設定する。
+`GraphicsShaderPass` は頂点・ピクセルシェーダー、InputLayout、Pass固有の `RenderState` を適用する。`Material` は確定済みのPropertyレイアウトに従い、`b3` のMaterial Properties用定数バッファとTextureを各シェーダーステージへ設定する。Meshは頂点・インデックスバッファとトポロジを設定する。
+
+### ShaderPropertyとMaterialPropertyID
+
+Shaderのロード時に、Parserが得た宣言とHLSLリフレクションを対応付け、`ShaderPropertyDesc` を確定する。Descは `ShaderPropertyID`、名前、型、既定値、Storage種別、定数バッファ内のoffsetとsizeを持つ。`ConstantBuffer` 種別はProperties用バイト列へ書き込み、`Resource` 種別は定数バッファ外の値として保持する。現在の `Texture2D` は `Resource` 種別であり、将来のTextureCube、Texture2DArray、StructuredBufferなども同じ分類で拡張する。
+
+`Material` はProperties用バイト列とResource値だけを実データとして持つ。`MaterialProperty` のような値の重複保持は行わない。`MaterialPropertyID` は上位32 bitを `MaterialID`、下位32 bitを `ShaderPropertyID` とする64 bit値であり、Materialをまたいでも一意に対象Propertyを特定できる。Materialは自身の `MaterialID` を検証した後、下位bitの `ShaderPropertyID` からDescを解決する。
+
+型付きSetterとGetterは名前または `MaterialPropertyID` を受け取る。Setterは設定した値を、Getterは復元した値を返す。無効ID、別MaterialのID、型不一致、Storage不一致の場合はMessageBoxで通知し、型ごとのエラー値を返す。ConstantBuffer値はバイト列から復元し、Resource値はResource用の配列から取得する。
 
 深度状態は `RenderState::depthTestMode` と `RenderState::depthWriteMode` を個別に反映する。既存の `Renderer::SetDepthEnable()` は深度書込みを止める用途も含むため、新しい経路ではこれに依存せず、必要なD3D深度ステンシルステートを作成・キャッシュする。
 
@@ -121,7 +129,7 @@ RendererはPassをBindした後、同じPass番号でMaterialをBindする。Pas
 1. `renderer.h/.cpp` に `DrawItem` とPhase別キューを導入し、既存 `RendererBase` の互換提出を通す。
 2. Phase別ソートと `submitOrder` による安定した実行順を実装する。
 3. `GraphicsShaderPass` のBindと `RenderState` の適用・キャッシュを実装する。
-4. `Material` のProperties・Texture・SamplerのBindを実装する。
+4. `Material` のProperties・TextureのBindを実装し、共通SamplerはRendererからBindする。
 5. `ModelRenderer` がサブセット × PassごとのDrawItemを提出するよう移行する。
 6. `MeshID` を導入し、不透明・Shadowのバッチングを有効化する。
 

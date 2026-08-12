@@ -14,6 +14,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "Graphics/Shader/ShaderFactory.h"
 #include "Graphics/GraphicInc.h"
@@ -27,6 +28,10 @@ class ShaderLoader
 private:
 
     ShaderFactory m_shaderFactory;
+
+    bool ResolvePropertyLayout(
+        std::vector<ShaderPropertyDesc>& properties,
+        const GraphicsShaderPass& shaderPass) const;
 
 public:
     ShaderLoader() = delete;

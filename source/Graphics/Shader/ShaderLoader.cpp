@@ -21,6 +21,60 @@ Author : Yokoyama Haruki
 #include <fstream>
 #include <windows.h>
 
+bool ShaderLoader::ResolvePropertyLayout(
+    std::vector<ShaderPropertyDesc>& properties,
+    const GraphicsShaderPass& shaderPass) const
+{
+    // PassのReflectionからProperties定数バッファを探す。
+    const ConstantBufferInfo* propertiesBuffer = nullptr;
+    for (const ConstantBufferInfo& constantBuffer : shaderPass.GetConstantBufferInfo())
+    {
+        if (constantBuffer.name == "Properties")
+        {
+            propertiesBuffer = &constantBuffer;
+            break;
+        }
+    }
+
+    // Propertiesを参照しないPassでは、コンパイラが定数バッファを除去する場合がある。
+    if (!propertiesBuffer)
+        return true;
+
+    for (ShaderPropertyDesc& property : properties)
+    {
+        // TextureなどのResourceは定数バッファ内にレイアウトを持たない。
+        if (property.storage != MaterialPropertyStorage::ConstantBuffer)
+            continue;
+
+        const ShaderParameterDesc* parameter = nullptr;
+        for (const ShaderParameterDesc& candidate : propertiesBuffer->parameters)
+        {
+            if (candidate.name == property.name)
+            {
+                parameter = &candidate;
+                break;
+            }
+        }
+
+        // 宣言した定数PropertyがReflectionに存在しない場合、Pass間のレイアウトを保証できない。
+        if (!parameter)
+            return false;
+
+        // 複数Passでは全Passのoffset・sizeが一致することを読み込み時に検証する。
+        if (property.offset != INVALID_PROPERTY_OFFSET &&
+            (property.offset != parameter->offset || property.size != parameter->size))
+        {
+            return false;
+        }
+
+        // 最初にPropertiesを参照したPassのReflection結果をShader共通レイアウトとして確定する。
+        property.offset = parameter->offset;
+        property.size = parameter->size;
+    }
+
+    return true;
+}
+
 GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, ShaderID shaderID)
 {
     // ファイルからシェーダーコードを読み込む
@@ -61,7 +115,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
     std::vector<ShaderPropertyDesc> properties;
     parser.ExtractProperties(properties);
 
-    // Passに追加するコードの生成
+    // Parserの宣言から、Material Properties用のHLSL宣言を生成する。
     std::string additionalCode = "#define MATERIAL_PROPERTIES_DEFINED\ncbuffer Properties : register(b3)\n{\n";
     // プロパティの定数バッファの内容を生成
     for (auto& prop : properties)
@@ -73,7 +127,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
     }
     additionalCode += "}\n";
 
-    // Texture2Dの宣言を生成
+    // Resource Propertyはb3に含めず、予約済みのテクスチャスロットへ個別に宣言する。
     int textureRegisterIndex = RESERVE_TEXTURE_SLOT_COUNT;
     for( auto& prop : properties)
     {
@@ -111,7 +165,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
             return nullptr;
         }
 
-        // 追加コードをHLSLコードの先頭に挿入
+        // 生成したPropertiesとResourceの宣言をHLSL本体の前へ挿入する。
         hlslCode = additionalCode + hlslCode;
 
         // 頂点シェーダーとピクセルシェーダーのエントリーポイントを抽出
@@ -183,6 +237,13 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         // シェーダーが有効か確認
         if (!shaderPass.IsValid())
         {
+            return nullptr;
+        }
+
+        // Parserの宣言とReflectionのGPUレイアウトを対応付け、全Passでの一致も検証する。
+        if (!ResolvePropertyLayout(properties, shaderPass))
+        {
+            MessageBoxW(NULL, L"Properties layout differs between shader passes.", L"Error", MB_OK | MB_ICONERROR);
             return nullptr;
         }
 

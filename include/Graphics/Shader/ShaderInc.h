@@ -50,13 +50,6 @@ struct ShaderTextureInfo
     int psSlot{ -1 };
 };
 
-struct ShaderSamplerInfo
-{
-    std::string name{};
-    int vsSlot{ -1 };
-    int psSlot{ -1 };
-};
-
 struct ConstantBufferInfo
 {
     std::string name{};
@@ -64,15 +57,6 @@ struct ConstantBufferInfo
     int psSlot{ -1 };
     UINT size{ 0 };
     std::vector<ShaderParameterDesc> parameters{};
-};
-
-struct StructuredBufferInfo
-{
-    std::string name{};
-    int vsSlot{ -1 };
-    int psSlot{ -1 };
-    UINT size{ 0 };
-    UINT stride{ 0 };
 };
 
 enum class PropertyType
@@ -89,6 +73,19 @@ enum class PropertyType
     Color,
     Texture2D
 };
+
+enum class MaterialPropertyStorage
+{
+    ConstantBuffer,
+    Resource,
+};
+
+inline MaterialPropertyStorage GetMaterialPropertyStorage(PropertyType type)
+{
+    return type == PropertyType::Texture2D
+        ? MaterialPropertyStorage::Resource
+        : MaterialPropertyStorage::ConstantBuffer;
+}
 
 inline const char* GetPropertyTypeStringForHLSL(PropertyType type)
 {
@@ -145,14 +142,17 @@ inline const char* GetPropertyTypeStringForHLSL(PropertyType type)
 
 struct ShaderPropertyDesc
 {
-    PropertyID id;
+    ShaderPropertyID id;
     std::string name;
     std::string displayName;
-    const PropertyType type;
+    PropertyType type{ PropertyType::Unknown };
+    MaterialPropertyStorage storage{ MaterialPropertyStorage::ConstantBuffer };
     PropertyValue defaultValue;
+    UINT offset{ INVALID_PROPERTY_OFFSET };
+    UINT size{ 0 };
 
     ShaderPropertyDesc(
-        PropertyID id,
+        ShaderPropertyID id,
         const std::string& name,
         const std::string& displayName,
         PropertyType type,
@@ -162,15 +162,10 @@ struct ShaderPropertyDesc
         name(name),
         displayName(displayName),
         type(type),
+        storage(GetMaterialPropertyStorage(type)),
         defaultValue(defaultValue)
     {
     }
-};
-
-struct MaterialProperty
-{
-    PropertyID id;
-    PropertyValue value;
 };
 
 #endif // _SHADER_INFO_H_

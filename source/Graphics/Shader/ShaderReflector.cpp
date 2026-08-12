@@ -46,8 +46,7 @@ bool ShaderReflector::ReflectShader(ReflectionResult& outResult)
     // 定数バッファ、テクスチャ、サンプラーのスロット,名前,ステージを取得する
     getShaderInfo(
         outResult.constantBuffers,
-        outResult.textures,
-        outResult.samplers);
+        outResult.textures);
 
     // 定数バッファの詳細情報を取得する
     getConstantBufferInfo(outResult.constantBuffers);
@@ -58,8 +57,7 @@ bool ShaderReflector::ReflectShader(ReflectionResult& outResult)
 
 void ShaderReflector::getShaderInfo(
     std::vector<ConstantBufferInfo>& outConstantBuffers,
-    std::vector<ShaderTextureInfo>& outTextures,
-    std::vector<ShaderSamplerInfo>& outSamplers)
+    std::vector<ShaderTextureInfo>& outTextures)
 {
     // スロット情報を取得する
     for (UINT i = 0; i < m_shaderDesc.BoundResources; i++)
@@ -89,15 +87,6 @@ void ShaderReflector::getShaderInfo(
         }
         break;
 
-        case D3D_SIT_SAMPLER:
-        {
-            ShaderSamplerInfo samplerInfo;
-            samplerInfo.name = bind.Name;
-            samplerInfo.vsSlot = VERTEX_SLOT(bind.BindPoint);
-            samplerInfo.psSlot = PIXEL_SLOT(bind.BindPoint);
-            outSamplers.push_back(samplerInfo);
-        }
-        break;
         default:
             break;
         }

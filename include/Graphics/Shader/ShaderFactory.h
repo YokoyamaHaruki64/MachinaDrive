@@ -54,16 +54,7 @@ private:
         const ShaderReflector::ReflectionResult& vertexReflectionResult,
         const ShaderReflector::ReflectionResult& pixelReflectionResult,
         std::vector<ConstantBufferInfo>& outConstantBufferInfo,
-        std::vector<ShaderTextureInfo>& outTextureInfo,
-        std::vector<ShaderSamplerInfo>& outSamplerInfo);
-
-    bool createConstantBuffers(
-        const std::vector<ConstantBufferInfo>& constantBufferInfo,
-        std::vector<ComPtr<ID3D11Buffer>>& outConstantBuffers);
-
-    bool createSamplerStates(
-        const std::vector<ShaderSamplerInfo>& samplerInfo,
-        std::vector<ComPtr<ID3D11SamplerState>>& outSamplerStates);
+        std::vector<ShaderTextureInfo>& outTextureInfo);
 
 public:
 
