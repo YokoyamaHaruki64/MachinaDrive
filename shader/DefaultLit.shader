@@ -23,8 +23,6 @@ Shader "DefaultLit"
         HLSL_BEGIN
         #include "shader/common.hlsl"
 
-        SamplerState MainSampler : register(s16);
-
         struct VSInput
         {
             float3 position : POSITION0;
@@ -56,7 +54,7 @@ Shader "DefaultLit"
         {
             const float3 normal = normalize(input.normal);
             const float lightAmount = Light.Enable ? saturate(dot(normal, -Light.Direction.xyz)) : 1.0f;
-            const float4 textureColor = _MainTex.Sample(MainSampler, input.texCoord);
+            const float4 textureColor = _MainTex.Sample(LinearSampler, input.texCoord);
             const float3 lighting = Light.Ambient.rgb + Light.Diffuse.rgb * lightAmount;
             return float4((_BaseColor.rgb * input.color.rgb * textureColor.rgb * lighting) + _Emission.rgb,
                 _BaseColor.a * input.color.a * textureColor.a);

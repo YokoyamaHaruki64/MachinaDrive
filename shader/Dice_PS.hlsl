@@ -1,7 +1,6 @@
 #include "Common.hlsl"
 
 Texture2D MainTex : register(t0);
-SamplerState MainSampler : register(s0);
 
 static const float EPSILON = 0.001;
 
@@ -151,7 +150,7 @@ float4 main(PS_IN input) : SV_Target
 
     float2 uv = GetDiceUV(surfaceID, input.TexCoord);
 
-    float4 tex = MainTex.Sample(MainSampler, uv);
+    float4 tex = MainTex.Sample(LinearSampler, uv);
 
     // 1面だけ黒部分を赤
     if (surfaceID == 1 && all(tex.rgb < EPSILON))

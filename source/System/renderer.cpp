@@ -20,11 +20,10 @@ ID3D11ShaderResourceView*   Renderer::m_bufferSRV[2]{};
 int Renderer::srcBufferIndex = 0;
 int Renderer::dstBufferIndex = 1;
 
-ID3D11Buffer*			Renderer::m_WorldBuffer{};
-ID3D11Buffer*			Renderer::m_ViewBuffer{};
-ID3D11Buffer*			Renderer::m_ProjectionBuffer{};
+ID3D11Buffer*			Renderer::m_PerFrameBuffer{};
+ID3D11Buffer*			Renderer::m_PerObjectBuffer{};
 ID3D11Buffer*			Renderer::m_MaterialBuffer{};
-ID3D11Buffer*			Renderer::m_LightBuffer{};
+ID3D11Buffer*			Renderer::m_LightingBuffer{};
 ID3D11Buffer*           Renderer::m_UVBuffer{};
 
 
@@ -38,9 +37,13 @@ ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
 ID3D11BlendState*		Renderer::m_BlendState{};
 ID3D11BlendState*       Renderer::m_BlendStateAdd{};
 ID3D11BlendState*		Renderer::m_BlendStateATC{};
+ID3D11SamplerState*		Renderer::m_LinearSampler{};
+ID3D11SamplerState*		Renderer::m_ShadowSampler{};
 
 XMMATRIX Renderer::m_ViewMatrix{};
 XMMATRIX Renderer::m_ProjectionMatrix{};
+PerFrame Renderer::m_PerFrame{};
+PerObject Renderer::m_PerObject{};
 
 std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> Renderer::m_DrawQueues{};
 uint64_t Renderer::m_SubmitOrder{};
@@ -211,53 +214,61 @@ void Renderer::Init()
 
 
 
-	// サンプラーステート設定
+	// common.hlsl の共通サンプラーを生成する。
 	D3D11_SAMPLER_DESC samplerDesc{};
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MaxAnisotropy = 4;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	ID3D11SamplerState* samplerState{};
-	m_Device->CreateSamplerState( &samplerDesc, &samplerState );
+	m_Device->CreateSamplerState(&samplerDesc, &m_LinearSampler);
+	m_DeviceContext->VSSetSamplers(0, 1, &m_LinearSampler);
+	m_DeviceContext->PSSetSamplers(0, 1, &m_LinearSampler);
 
-	m_DeviceContext->PSSetSamplers( 0, 1, &samplerState );
+	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	samplerDesc.BorderColor[0] = 1.0f;
+	samplerDesc.BorderColor[1] = 1.0f;
+	samplerDesc.BorderColor[2] = 1.0f;
+	samplerDesc.BorderColor[3] = 1.0f;
+	m_Device->CreateSamplerState(&samplerDesc, &m_ShadowSampler);
+	m_DeviceContext->VSSetSamplers(1, 1, &m_ShadowSampler);
+	m_DeviceContext->PSSetSamplers(1, 1, &m_ShadowSampler);
 
 
 
-	// 定数バッファ生成
+	// common.hlsl の b0〜b3 に対応する定数バッファを生成する。
 	D3D11_BUFFER_DESC bufferDesc{};
-	bufferDesc.ByteWidth = sizeof(XMFLOAT4X4);
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = sizeof(float);
 
-	m_Device->CreateBuffer( &bufferDesc, NULL, &m_WorldBuffer );
-	m_DeviceContext->VSSetConstantBuffers( 0, 1, &m_WorldBuffer);
+	bufferDesc.ByteWidth = sizeof(PerFrame);
+	m_Device->CreateBuffer(&bufferDesc, nullptr, &m_PerFrameBuffer);
+	m_DeviceContext->VSSetConstantBuffers(0, 1, &m_PerFrameBuffer);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &m_PerFrameBuffer);
 
-	m_Device->CreateBuffer( &bufferDesc, NULL, &m_ViewBuffer );
-	m_DeviceContext->VSSetConstantBuffers( 1, 1, &m_ViewBuffer );
-
-	m_Device->CreateBuffer( &bufferDesc, NULL, &m_ProjectionBuffer );
-	m_DeviceContext->VSSetConstantBuffers( 2, 1, &m_ProjectionBuffer );
-
-
-	bufferDesc.ByteWidth = sizeof(MATERIAL);
-
-	m_Device->CreateBuffer( &bufferDesc, NULL, &m_MaterialBuffer );
-	m_DeviceContext->VSSetConstantBuffers( 3, 1, &m_MaterialBuffer );
-	m_DeviceContext->PSSetConstantBuffers( 3, 1, &m_MaterialBuffer );
-
+	bufferDesc.ByteWidth = sizeof(PerObject);
+	m_Device->CreateBuffer(&bufferDesc, nullptr, &m_PerObjectBuffer);
+	m_DeviceContext->VSSetConstantBuffers(1, 1, &m_PerObjectBuffer);
+	m_DeviceContext->PSSetConstantBuffers(1, 1, &m_PerObjectBuffer);
 
 	bufferDesc.ByteWidth = sizeof(LIGHT);
+	m_Device->CreateBuffer(&bufferDesc, nullptr, &m_LightingBuffer);
+	m_DeviceContext->VSSetConstantBuffers(2, 1, &m_LightingBuffer);
+	m_DeviceContext->PSSetConstantBuffers(2, 1, &m_LightingBuffer);
 
-	m_Device->CreateBuffer( &bufferDesc, NULL, &m_LightBuffer );
-	m_DeviceContext->VSSetConstantBuffers( 4, 1, &m_LightBuffer );
-	m_DeviceContext->PSSetConstantBuffers( 4, 1, &m_LightBuffer );
+	// b3 は新 Material の Properties として利用する。旧 API は移行完了まで同じスロットを更新する。
+	bufferDesc.ByteWidth = sizeof(MATERIAL);
+	m_Device->CreateBuffer(&bufferDesc, nullptr, &m_MaterialBuffer);
+	m_DeviceContext->VSSetConstantBuffers(3, 1, &m_MaterialBuffer);
+	m_DeviceContext->PSSetConstantBuffers(3, 1, &m_MaterialBuffer);
 
     bufferDesc.ByteWidth = sizeof(XMFLOAT4);
     m_Device->CreateBuffer(&bufferDesc, NULL, &m_UVBuffer);
@@ -265,6 +276,11 @@ void Renderer::Init()
     m_DeviceContext->PSSetConstantBuffers(6, 1, &m_UVBuffer);    
 
 
+
+	// 行列は単位行列で初期化し、初回描画前に不定値を渡さないようにする。
+	SetWorldMatrix(XMMatrixIdentity());
+	SetViewMatrix(XMMatrixIdentity());
+	SetProjectionMatrix(XMMatrixIdentity());
 
 	// ライト初期化
 	LIGHT light{};
@@ -293,12 +309,13 @@ void Renderer::Init()
 void Renderer::Uninit()
 {
 
-	m_WorldBuffer->Release();
-	m_ViewBuffer->Release();
-	m_ProjectionBuffer->Release();
-	m_LightBuffer->Release();
+	m_PerFrameBuffer->Release();
+	m_PerObjectBuffer->Release();
+	m_LightingBuffer->Release();
 	m_MaterialBuffer->Release();
     m_UVBuffer->Release();
+	m_LinearSampler->Release();
+	m_ShadowSampler->Release();
 
 
 	m_DeviceContext->ClearState();
@@ -418,25 +435,22 @@ void Renderer::SetWorldViewProjection2D()
 
 void Renderer::SetWorldMatrix(XMMATRIX WorldMatrix)
 {
-	XMFLOAT4X4 worldf;
-	XMStoreFloat4x4(&worldf, XMMatrixTranspose(WorldMatrix));
-	m_DeviceContext->UpdateSubresource(m_WorldBuffer, 0, NULL, &worldf, 0, 0);
+	XMStoreFloat4x4(&m_PerObject.World, XMMatrixTranspose(WorldMatrix));
+	m_DeviceContext->UpdateSubresource(m_PerObjectBuffer, 0, nullptr, &m_PerObject, 0, 0);
 }
 
 void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 {
     m_ViewMatrix = ViewMatrix;
-	XMFLOAT4X4 viewf;
-	XMStoreFloat4x4(&viewf, XMMatrixTranspose(ViewMatrix));
-	m_DeviceContext->UpdateSubresource(m_ViewBuffer, 0, NULL, &viewf, 0, 0);
+	XMStoreFloat4x4(&m_PerFrame.View, XMMatrixTranspose(ViewMatrix));
+	m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
 }
 
 void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 {
     m_ProjectionMatrix = ProjectionMatrix;
-	XMFLOAT4X4 projectionf;
-	XMStoreFloat4x4(&projectionf, XMMatrixTranspose(ProjectionMatrix));
-	m_DeviceContext->UpdateSubresource(m_ProjectionBuffer, 0, NULL, &projectionf, 0, 0);
+	XMStoreFloat4x4(&m_PerFrame.Projection, XMMatrixTranspose(ProjectionMatrix));
+	m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
 
 }
 
@@ -449,7 +463,7 @@ void Renderer::SetMaterial( MATERIAL Material )
 
 void Renderer::SetLight( LIGHT Light )
 {
-	m_DeviceContext->UpdateSubresource(m_LightBuffer, 0, NULL, &Light, 0, 0);
+	m_DeviceContext->UpdateSubresource(m_LightingBuffer, 0, nullptr, &Light, 0, 0);
 }
 
 void Renderer::SetUV(XMFLOAT4 UV)

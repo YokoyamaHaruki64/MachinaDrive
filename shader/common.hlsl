@@ -5,13 +5,17 @@ cbuffer PerFrame : register(b0)
 {
 	matrix View;
 	matrix Projection;
-	float4 CameraPositionAndTime;
+	float3 CameraPosition;
+	float Time;
 }
 
 cbuffer PerObject : register(b1)
 {
 	matrix World;
 }
+
+SamplerState LinearSampler : register(s0);
+SamplerComparisonState ShadowSampler : register(s1);
 
 
 

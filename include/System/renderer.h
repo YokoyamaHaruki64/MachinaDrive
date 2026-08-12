@@ -40,6 +40,23 @@ struct LIGHT
 };
 
 
+// common.hlsl の PerFrame（b0）と同じメモリ配置を表す。
+struct PerFrame
+{
+	XMFLOAT4X4	View;
+	XMFLOAT4X4	Projection;
+	XMFLOAT3	CameraPosition;
+	float		Time;
+};
+
+
+// common.hlsl の PerObject（b1）と同じメモリ配置を表す。
+struct PerObject
+{
+	XMFLOAT4X4	World;
+};
+
+
 class Material;
 class GraphicsShaderPass;
 
@@ -74,11 +91,10 @@ private:
     static int srcBufferIndex;
     static int dstBufferIndex;
 
-	static ID3D11Buffer*			m_WorldBuffer;
-	static ID3D11Buffer*			m_ViewBuffer;
-	static ID3D11Buffer*			m_ProjectionBuffer;
+	static ID3D11Buffer*			m_PerFrameBuffer;
+	static ID3D11Buffer*			m_PerObjectBuffer;
 	static ID3D11Buffer*			m_MaterialBuffer;
-	static ID3D11Buffer*			m_LightBuffer;
+	static ID3D11Buffer*			m_LightingBuffer;
     static ID3D11Buffer*            m_UVBuffer;
 
 	static ID3D11DepthStencilState* m_DepthStateEnable;
@@ -90,9 +106,13 @@ private:
 	static ID3D11BlendState*		m_BlendState;
     static ID3D11BlendState*        m_BlendStateAdd;
 	static ID3D11BlendState*		m_BlendStateATC;
+	static ID3D11SamplerState*		m_LinearSampler;
+	static ID3D11SamplerState*		m_ShadowSampler;
 
     static XMMATRIX m_ViewMatrix;
     static XMMATRIX m_ProjectionMatrix;
+    static PerFrame m_PerFrame;
+    static PerObject m_PerObject;
 
     static std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> m_DrawQueues;
     static uint64_t m_SubmitOrder;

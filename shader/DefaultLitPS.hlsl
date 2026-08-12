@@ -1,7 +1,6 @@
 #include "Common.hlsl"
 
 Texture2D MainTex : register(t0);
-SamplerState MainSampler : register(s0);
 
 
 
@@ -14,7 +13,7 @@ float4 main(PS_IN input) : SV_Target
     uv.x += sin(uv.y * 10.0 * 6.28318) * 0.2;
 
     
-    float4 tex = MainTex.Sample(MainSampler, uv);
+    float4 tex = MainTex.Sample(LinearSampler, uv);
     float3 returnColor = 
     input.Diffuse.rgb * 
     tex.rgb *

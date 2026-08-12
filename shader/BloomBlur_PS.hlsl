@@ -2,7 +2,6 @@
 #include "common.hlsl"
 
 Texture2D srcTexture : register(t0);
-SamplerState g_SamplerState : register(s0);
 
 static const float threshold = 0.8f;
 static const float blurRadius = 1.0f;
@@ -41,7 +40,7 @@ float4 main(PS_IN input) : SV_TARGET
         float2(x * texelSize.x, 0);
 
         bloom += ExtractBright(
-        srcTexture.Sample(g_SamplerState, uv).rgb
+        srcTexture.Sample(LinearSampler, uv).rgb
         ) * weights[abs(x)];
     }
     return float4(bloom, 1.0f);
