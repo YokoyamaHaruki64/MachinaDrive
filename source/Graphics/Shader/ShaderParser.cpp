@@ -17,26 +17,39 @@ Author : Yokoyama Haruki
 const std::unordered_map<std::string,ShaderParser::TypeParser> ShaderParser::typeTable =
 {
     { "float", { PropertyType::Float, ShaderParser::parseFloat } },
+    { "Float", { PropertyType::Float, ShaderParser::parseFloat } },
     { "int", { PropertyType::Int, ShaderParser::parseInt } },
+    { "Int", { PropertyType::Int, ShaderParser::parseInt } },
     { "bool", { PropertyType::Bool, ShaderParser::parseBool } },
+    { "Bool", { PropertyType::Bool, ShaderParser::parseBool } },
 
     { "Vector2", { PropertyType::Vector2, ShaderParser::parseFloat2 } },
     { "float2", { PropertyType::Vector2, ShaderParser::parseFloat2 } },
+    { "Float2", { PropertyType::Vector2, ShaderParser::parseFloat2 } },
 
     { "Vector3", { PropertyType::Vector3, ShaderParser::parseFloat3 } },
     { "float3", { PropertyType::Vector3, ShaderParser::parseFloat3 } },
+    { "Float3", { PropertyType::Vector3, ShaderParser::parseFloat3 } },
 
     { "Vector4", { PropertyType::Vector4, ShaderParser::parseFloat4 } },
     { "float4", { PropertyType::Vector4, ShaderParser::parseFloat4 } },
+    { "Float4", { PropertyType::Vector4, ShaderParser::parseFloat4 } },
 
+    { "matrix3x3", { PropertyType::Matrix3x3, ShaderParser::parseMatrix3x3 } },
     { "Matrix3x3", { PropertyType::Matrix3x3, ShaderParser::parseMatrix3x3 } },
     { "float3x3", { PropertyType::Matrix3x3, ShaderParser::parseMatrix3x3 } },
+    { "Float3x3", { PropertyType::Matrix3x3, ShaderParser::parseMatrix3x3 } },
 
+    { "matrix4x4", { PropertyType::Matrix4x4, ShaderParser::parseMatrix4x4 } },
     { "Matrix4x4", { PropertyType::Matrix4x4, ShaderParser::parseMatrix4x4 } },
     { "float4x4", { PropertyType::Matrix4x4, ShaderParser::parseMatrix4x4 } },
+    { "Float4x4", { PropertyType::Matrix4x4, ShaderParser::parseMatrix4x4 } },
 
     { "Color", { PropertyType::Color, ShaderParser::parseColor } },
-    { "2D", { PropertyType::Texture2D, ShaderParser::parseTexture } }
+    { "color", { PropertyType::Color, ShaderParser::parseColor } },
+
+    { "Texture2D", { PropertyType::Texture2D, ShaderParser::parseTexture } },
+    { "2D", { PropertyType::Texture2D, ShaderParser::parseTexture } },
 };
 
 bool ShaderParser::removeComments()
