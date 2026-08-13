@@ -66,8 +66,8 @@ struct DrawItem
 {
     uint64_t sortKey{};
     class RendererBase* renderer{};
-    const Material* material{};
-    const GraphicsShaderPass* shaderPass{};
+    Material* material{};
+    size_t materialPassIndex{};
     uint32_t meshID{};
     uint64_t submitOrder{};
 };
@@ -97,11 +97,11 @@ private:
 	static ID3D11Buffer*			m_LightingBuffer;
     static ID3D11Buffer*            m_UVBuffer;
 
-	static ID3D11DepthStencilState* m_DepthStateEnable;
-	static ID3D11DepthStencilState* m_DepthStateDisable;
+    static std::array<ID3D11DepthStencilState*, 14> m_DepthStates;
 
     static ID3D11RasterizerState* m_RasterizerState;
     static ID3D11RasterizerState* m_RasterizerStateNoCull;
+    static ID3D11RasterizerState* m_RasterizerStateFront;
 
 	static ID3D11BlendState*		m_BlendState;
     static ID3D11BlendState*        m_BlendStateAdd;
@@ -119,6 +119,9 @@ private:
 
     static BlendMode m_CurrentBlendMode;
     static CullMode m_CurrentCullMode;
+
+    static void CreateDepthStencilStates();
+    static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);
 
 public:
 	static void Init();
@@ -138,6 +141,7 @@ public:
     static void SetUV(XMFLOAT4 UV);
     static void SetBlendMode(BlendMode mode);
     static void SetRasterizerState(CullMode cull);
+    static void BindRenderState(const RenderState& renderState);
 
 	static ID3D11Device* GetDevice( void ){ return m_Device; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_DeviceContext; }

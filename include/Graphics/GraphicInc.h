@@ -85,11 +85,15 @@ enum class DepthTestMode : uint8_t
     GreaterEqual = 4,
     Equal = 5,
     NotEqual = 6,
+
+    Count,
 };
 enum class DepthWriteMode : uint8_t
 {
     None = 0,
     Write = 1,
+
+    Count,
 };
 
 struct RenderState

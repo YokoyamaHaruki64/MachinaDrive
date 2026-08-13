@@ -71,6 +71,9 @@ public:
         return m_vertexShader != nullptr && m_pixelShader != nullptr;
     }
 
+    void Bind() const;
+
+    const RenderState& GetRenderState() const { return m_renderState; }
     const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
     const std::vector<ShaderTextureInfo>& GetTextureInfo() const { return m_textureInfo; }
 };

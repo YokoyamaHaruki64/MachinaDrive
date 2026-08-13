@@ -3,6 +3,7 @@
 #include "System/main.h"
 #include "System/renderer.h"
 #include "System/RendererBase.h"
+#include "Graphics/Material.h"
 #include <io.h>
 
 
@@ -27,11 +28,13 @@ ID3D11Buffer*			Renderer::m_LightingBuffer{};
 ID3D11Buffer*           Renderer::m_UVBuffer{};
 
 
-ID3D11DepthStencilState* Renderer::m_DepthStateEnable{};
-ID3D11DepthStencilState* Renderer::m_DepthStateDisable{};
+std::array<ID3D11DepthStencilState*,
+    static_cast<size_t>(DepthTestMode::Count) * static_cast<size_t>(DepthWriteMode::Count)>
+    Renderer::m_DepthStates{};
 
 ID3D11RasterizerState* Renderer::m_RasterizerState{};
 ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
+ID3D11RasterizerState* Renderer::m_RasterizerStateFront{};
 
 
 ID3D11BlendState*		Renderer::m_BlendState{};
@@ -49,6 +52,37 @@ std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> Rende
 uint64_t Renderer::m_SubmitOrder{};
 BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
 CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
+
+namespace
+{
+    constexpr size_t GetDepthStateIndex(DepthTestMode testMode, DepthWriteMode writeMode)
+    {
+        return static_cast<size_t>(testMode) * 2 + static_cast<size_t>(writeMode);
+    }
+
+    D3D11_COMPARISON_FUNC ToD3DComparisonFunc(DepthTestMode mode)
+    {
+        switch (mode)
+        {
+        case DepthTestMode::Less:
+            return D3D11_COMPARISON_LESS;
+        case DepthTestMode::LessEqual:
+            return D3D11_COMPARISON_LESS_EQUAL;
+        case DepthTestMode::Greater:
+            return D3D11_COMPARISON_GREATER;
+        case DepthTestMode::GreaterEqual:
+            return D3D11_COMPARISON_GREATER_EQUAL;
+        case DepthTestMode::Equal:
+            return D3D11_COMPARISON_EQUAL;
+        case DepthTestMode::NotEqual:
+            return D3D11_COMPARISON_NOT_EQUAL;
+        case DepthTestMode::None:
+        default:
+            return D3D11_COMPARISON_ALWAYS;
+        }
+    }
+}
+
 void Renderer::Init()
 {
 	HRESULT hr = S_OK;
@@ -162,6 +196,9 @@ void Renderer::Init()
     rasterizerDesc.CullMode = D3D11_CULL_NONE;
     m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateNoCull);
 
+    rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateFront);
+
     m_DeviceContext->RSSetState(m_RasterizerState);
 
 
@@ -196,20 +233,11 @@ void Renderer::Init()
 
 
 
-	// デプスステンシルステート設定
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = TRUE;
-	depthStencilDesc.DepthWriteMask	= D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	depthStencilDesc.StencilEnable = FALSE;
+    // Shaderで指定できる全14通りを事前生成し、描画中のステート生成をなくす。
+    CreateDepthStencilStates();
 
-	m_Device->CreateDepthStencilState( &depthStencilDesc, &m_DepthStateEnable );//深度有効ステート
-
-	//depthStencilDesc.DepthEnable = FALSE;
-	depthStencilDesc.DepthWriteMask	= D3D11_DEPTH_WRITE_MASK_ZERO;
-	m_Device->CreateDepthStencilState( &depthStencilDesc, &m_DepthStateDisable );//深度無効ステート
-
-	m_DeviceContext->OMSetDepthStencilState( m_DepthStateEnable, NULL );
+    // 既存描画と同じLessEqual/書込み有効を初期ステートとして設定する。
+    BindRenderState(RenderState{});
 
 
 
@@ -317,6 +345,16 @@ void Renderer::Uninit()
 	m_LinearSampler->Release();
 	m_ShadowSampler->Release();
 
+    for (ID3D11DepthStencilState* depthState : m_DepthStates)
+    {
+        if (depthState)
+            depthState->Release();
+    }
+
+    m_RasterizerState->Release();
+    m_RasterizerStateNoCull->Release();
+    m_RasterizerStateFront->Release();
+
 
 	m_DeviceContext->ClearState();
 	m_BackBufferTexture->Release();
@@ -375,9 +413,19 @@ void Renderer::Draw()
 
         for (const DrawItem& item : queue)
         {
+            if (item.material)
+            {
+                // Materialが所有するShaderとPassの描画設定を、描画直前に一括で反映する。
+                item.material->Bind(item.materialPassIndex);
+            }
+            else if (item.renderer)
+            {
+                // Material未移行のRendererは、従来どおり個別ステートを設定する。
+                item.renderer->BindState();
+            }
+
             if (item.renderer)
             {
-                item.renderer->BindState();
                 item.renderer->Draw();
             }
         }
@@ -402,10 +450,9 @@ void Renderer::End()
 
 void Renderer::SetDepthEnable( bool Enable )
 {
-	if( Enable )
-		m_DeviceContext->OMSetDepthStencilState( m_DepthStateEnable, NULL );
-	else
-		m_DeviceContext->OMSetDepthStencilState( m_DepthStateDisable, NULL );
+    // 旧APIのfalseは、深度テストを残して書込みだけを止める従来挙動を維持する。
+    const DepthWriteMode writeMode = Enable ? DepthWriteMode::Write : DepthWriteMode::None;
+    BindRenderState({ RenderPhase::Opaque, m_CurrentBlendMode, m_CurrentCullMode, DepthTestMode::LessEqual, writeMode });
 
 }
 
@@ -503,10 +550,56 @@ void Renderer::SetRasterizerState(CullMode cull)
     case CullMode::Back:
         m_DeviceContext->RSSetState(m_RasterizerState);
         break;
+    case CullMode::Front:
+        m_DeviceContext->RSSetState(m_RasterizerStateFront);
+        break;
     default:
         break;
     }
     m_CurrentCullMode = cull;
+}
+
+void Renderer::BindRenderState(const RenderState& renderState)
+{
+    SetBlendMode(renderState.blendMode);
+    SetRasterizerState(renderState.cullMode);
+
+    ID3D11DepthStencilState* depthState = GetDepthStencilState(
+        renderState.depthTestMode,
+        renderState.depthWriteMode);
+    m_DeviceContext->OMSetDepthStencilState(depthState, 0);
+}
+
+ID3D11DepthStencilState* Renderer::GetDepthStencilState(
+    DepthTestMode testMode,
+    DepthWriteMode writeMode)
+{
+    const size_t stateIndex = GetDepthStateIndex(testMode, writeMode);
+    return m_DepthStates[stateIndex];
+}
+
+void Renderer::CreateDepthStencilStates()
+{
+    for (size_t testMode = 0; testMode < static_cast<size_t>(DepthTestMode::Count); ++testMode)
+    {
+        for (size_t writeMode = 0; writeMode < static_cast<size_t>(DepthWriteMode::Count); ++writeMode)
+        {
+            const DepthTestMode currentTestMode = static_cast<DepthTestMode>(testMode);
+            const DepthWriteMode currentWriteMode = static_cast<DepthWriteMode>(writeMode);
+
+            D3D11_DEPTH_STENCIL_DESC description{};
+            description.DepthEnable = currentTestMode != DepthTestMode::None;
+            description.DepthWriteMask = currentWriteMode == DepthWriteMode::Write
+                ? D3D11_DEPTH_WRITE_MASK_ALL
+                : D3D11_DEPTH_WRITE_MASK_ZERO;
+            description.DepthFunc = ToD3DComparisonFunc(currentTestMode);
+            description.StencilEnable = FALSE;
+
+            // 生成したStateは列挙値から決まる固定添字へ保存し、Bind時は再生成しない。
+            const size_t stateIndex = GetDepthStateIndex(currentTestMode, currentWriteMode);
+            m_Device->CreateDepthStencilState(&description, &m_DepthStates[stateIndex]);
+        }
+    }
 }
 
 XMMATRIX Renderer::GetViewMatrix()

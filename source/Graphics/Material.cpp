@@ -570,6 +570,9 @@ void Material::Bind(size_t passIndex)
     const GraphicsShaderPass& shaderPass = GetShaderPass(passIndex);
     ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
 
+    // Passが決めたShader・頂点入力・RenderStateを先に反映する。
+    shaderPass.Bind();
+
     // Propertiesの定数値を先にb3へ反映する。
     BindProperties(shaderPass);
 
