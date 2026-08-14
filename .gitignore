@@ -1,8 +1,9 @@
-.vs/
+﻿.vs/
 .codex-work/
 Assets/
 BuildedShader/
 Project_Drive/
+x64/
 config/imgui.ini
 config/BoundBallConfig.ini
 config/FireWorkConfig.ini
