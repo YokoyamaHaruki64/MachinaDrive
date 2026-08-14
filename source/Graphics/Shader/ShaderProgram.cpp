@@ -24,6 +24,18 @@ const ShaderPropertyDesc* GraphicsShader::GetProperty(ShaderPropertyID id) const
     return &m_properties[id];
 }
 
+const GraphicsShaderPass* GraphicsShader::GetShaderPass(std::string_view tag) const
+{
+    const std::optional<size_t> index = GetShaderPassIndex(tag);
+    return index ? &m_shaderPasses[*index] : nullptr;
+}
+
+std::optional<size_t> GraphicsShader::GetShaderPassIndex(std::string_view tag) const
+{
+    const auto found = m_passIndicesByTag.find(std::string(tag));
+    return found == m_passIndicesByTag.end() ? std::nullopt : std::optional<size_t>(found->second);
+}
+
 const ShaderPropertyDesc* GraphicsShader::GetProperty(std::string_view name) const
 {
     // 名前指定APIでは、Shader生成時に作成した名前→IDテーブルを使って線形探索を避ける。

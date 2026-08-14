@@ -84,7 +84,7 @@ private:
     static ID3D11Texture2D*        m_BackBufferTexture;
 	static ID3D11DepthStencilView* m_DepthStencilView;
 
-    // バッファ用のテクスチャとビュー
+    // 画面描画用のPing-PongバッファはRendererが所有する。
     static ID3D11Texture2D* m_bufferTexture[2];
     static ID3D11RenderTargetView* m_bufferRTV[2];
     static ID3D11ShaderResourceView* m_bufferSRV[2];
@@ -160,10 +160,8 @@ public:
     static void SubmitDrawItem(RenderPhase phase, DrawItem item);
     static void SubmitDrawCommand(RenderPhase phase, DrawItem item);
 
-    static void SetDstRTV()
-    {
-        m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[dstBufferIndex], m_DepthStencilView);
-    }
+    static bool SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil = false);
+    static void SetDstRTV();
     static ID3D11ShaderResourceView* GetSrcSRV() { return m_bufferSRV[srcBufferIndex]; }
 
     static void SwapBuffers() { std::swap(srcBufferIndex, dstBufferIndex); }

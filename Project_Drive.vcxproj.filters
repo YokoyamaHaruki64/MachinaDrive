@@ -730,6 +730,9 @@
     <FxCompile Include="shader\common.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="shader\postprocess_common.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
     <FxCompile Include="shader\unlitTexturePS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
@@ -761,6 +764,9 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="shader\DefaultLit.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\PostProcessBloom.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\UnlitAdditive.shader">

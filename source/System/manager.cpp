@@ -22,7 +22,7 @@
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
-std::vector<std::unique_ptr<PostEffect>> Manager::m_postEffects;          // ポストエフェクトのリスト
+std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポストエフェクトのリスト
 
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
@@ -82,7 +82,7 @@ void Manager::Init()
     ShaderManager::Init();
     MaterialManager::Init();
 	Input::Init();
-    PostEffect::Init();
+    PostProcess::Init();
     Audio::InitMaster();
 
     // ImGuiの初期化
@@ -130,7 +130,11 @@ void Manager::Uninit()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
+    m_postEffects.clear();
     MaterialManager::Uninit();
+    PostProcess::Uninit();
     TextureManager::Uninit();
     ShaderManager::Uninit();
     Renderer::Uninit();
@@ -216,12 +220,10 @@ void Manager::Draw()
 
 	Renderer::Draw();
 
-    PostEffect::PostEffectPass_Begin();
     for (int i = 0; i < m_postEffects.size(); ++i)
     {
         m_postEffects[i]->Apply();
     }
-    PostEffect::PostEffectPass_End();
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

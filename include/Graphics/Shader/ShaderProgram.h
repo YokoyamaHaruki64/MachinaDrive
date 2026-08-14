@@ -13,6 +13,7 @@ Author : Yokoyama Haruki
 #define _SHADER_PROGRAM_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -31,6 +32,7 @@ using Microsoft::WRL::ComPtr;
 class GraphicsShaderPass
 {
 private:
+    std::string m_tag{};
     ComPtr<ID3D11VertexShader> m_vertexShader{ nullptr };
     ComPtr<ID3D11PixelShader> m_pixelShader{ nullptr };
     ComPtr<ID3D11InputLayout> m_inputLayout{ nullptr };
@@ -72,7 +74,9 @@ public:
     }
 
     void Bind() const;
+    void SetTag(std::string tag) { m_tag = std::move(tag); }
 
+    const std::string& GetTag() const { return m_tag; }
     const RenderState& GetRenderState() const { return m_renderState; }
     const std::vector<InputSlotBinding>& GetInputSlotBindings() const { return m_bindings; }
     const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
@@ -87,6 +91,7 @@ class GraphicsShader
     std::string m_filePath{};
 
     std::vector<GraphicsShaderPass> m_shaderPasses{};
+    std::unordered_map<std::string, size_t> m_passIndicesByTag{};
     std::vector<ShaderPropertyDesc> m_properties{};
     std::unordered_map<std::string, ShaderPropertyID> m_propertyIDsByName{};
 
@@ -106,11 +111,20 @@ public:
     {
         for (const ShaderPropertyDesc& property : m_properties)
             m_propertyIDsByName.emplace(property.name, property.id);
+
+        for (size_t index = 0; index < m_shaderPasses.size(); ++index)
+        {
+            const std::string& tag = m_shaderPasses[index].GetTag();
+            if (!tag.empty())
+                m_passIndicesByTag.emplace(tag, index);
+        }
     }
     const ShaderID& GetID() const { return m_id; }
     const std::string& GetShaderName() const { return m_shaderName; }
     const std::string& GetFilePath() const { return m_filePath; }
     const std::vector<GraphicsShaderPass>& GetShaderPasses() const { return m_shaderPasses; }
+    const GraphicsShaderPass* GetShaderPass(std::string_view tag) const;
+    std::optional<size_t> GetShaderPassIndex(std::string_view tag) const;
     const std::vector<ShaderPropertyDesc>& GetProperties() const { return m_properties; }
     const ShaderPropertyDesc* GetProperty(ShaderPropertyID id) const;
     const ShaderPropertyDesc* GetProperty(std::string_view name) const;

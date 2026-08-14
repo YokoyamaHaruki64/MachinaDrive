@@ -102,6 +102,7 @@ public:
     ~ShaderParser() = default;
 
     bool ExtractBlock(const std::string& blockName, std::string& outBlock, int blockOffset = 0) const;
+    bool ExtractPassBlock(std::string& outBlock, std::string& outTag, int passOffset = 0) const;
     bool ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffset = 0) const;
     bool ExtractStateCommand(RenderState& outStateCommand, int braceOffset = 0) const;
     bool ExtractShaderName(std::string& outName) const;

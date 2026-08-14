@@ -79,4 +79,5 @@ public:
     TextureHandle GetTexture(std::string_view name) const;
 
     void Bind(size_t passIndex);
+    bool Bind(std::string_view passTag);
 };

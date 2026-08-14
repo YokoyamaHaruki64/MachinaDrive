@@ -19,7 +19,7 @@ class Manager
 private:
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
-    static std::vector<std::unique_ptr<PostEffect>> m_postEffects;          // ポストエフェクトのリスト
+    static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
 
     static std::unordered_map<std::string,
@@ -154,12 +154,12 @@ public:
         return result; // 見つからない場合は空のベクターを返す
     }
 
-    static void AddPostEffect(std::unique_ptr<PostEffect> postEffect)
+    static void AddPostEffect(std::unique_ptr<PostProcess> postEffect)
     {
         m_postEffects.push_back(std::move(postEffect));
     }
 
-    static void RemovePostEffect(PostEffect* postEffect)
+    static void RemovePostEffect(PostProcess* postEffect)
     {
         for (size_t i = 0; i < m_postEffects.size(); ++i)
         {

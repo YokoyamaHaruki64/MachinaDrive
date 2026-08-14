@@ -593,3 +593,13 @@ void Material::Bind(size_t passIndex)
             deviceContext->PSSetShaderResources(binding.psSlot, 1, &resource);
     }
 }
+
+bool Material::Bind(std::string_view passTag)
+{
+    const std::optional<size_t> passIndex = m_shader->GetShaderPassIndex(passTag);
+    if (!passIndex)
+        return false;
+
+    Bind(*passIndex);
+    return true;
+}

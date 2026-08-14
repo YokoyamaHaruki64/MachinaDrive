@@ -80,6 +80,7 @@ namespace TokenSize
     static constexpr size_t PRAGMA_DIRECTIVE = sizeof(ShaderToken::PRAGMA_DIRECTIVE) - 1;
     static constexpr size_t PRAGMA_VERTEX_SHADER = sizeof(ShaderToken::PRAGMA_VERTEX_SHADER) - 1;
     static constexpr size_t PRAGMA_PIXEL_SHADER = sizeof(ShaderToken::PRAGMA_PIXEL_SHADER) - 1;
+    static constexpr size_t PASS = sizeof(ShaderToken::PASS) - 1;
 }
 
 #endif // _SHADER_TOKEN_H_

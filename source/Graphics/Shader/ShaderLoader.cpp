@@ -19,6 +19,7 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/ShaderInc.h"
 
 #include <fstream>
+#include <unordered_set>
 #include <windows.h>
 
 bool ShaderLoader::ResolvePropertyLayout(
@@ -56,9 +57,9 @@ bool ShaderLoader::ResolvePropertyLayout(
             }
         }
 
-        // 宣言した定数PropertyがReflectionに存在しない場合、Pass間のレイアウトを保証できない。
+        // Pass内で未使用のPropertyはコンパイラに除去される。ほかのPassで得たレイアウトを維持する。
         if (!parameter)
-            return false;
+            continue;
 
         // 複数Passでは全Passのoffset・sizeが一致することを読み込み時に検証する。
         if (property.offset != INVALID_PROPERTY_OFFSET &&
@@ -142,8 +143,10 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
 
     // Passブロックを抽出
     std::string passBlock;
+    std::string passTag;
     int passIndex = 0;
-    while (parser.ExtractBlock(ShaderToken::PASS, passBlock,passIndex++))
+    std::unordered_set<std::string> passTags;
+    while (parser.ExtractPassBlock(passBlock, passTag, passIndex++))
     {
         // Passブロックの解析
         ShaderParser passParser(passBlock);
@@ -240,6 +243,14 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         {
             return nullptr;
         }
+
+        if (!passTag.empty() && !passTags.emplace(passTag).second)
+        {
+            MessageBoxA(nullptr, "Shader pass tags must be unique.", "Shader Loader Error", MB_OK | MB_ICONERROR);
+            return nullptr;
+        }
+
+        shaderPass.SetTag(passTag);
 
         // Parserの宣言とReflectionのGPUレイアウトを対応付け、全Passでの一致も検証する。
         if (!ResolvePropertyLayout(properties, shaderPass))

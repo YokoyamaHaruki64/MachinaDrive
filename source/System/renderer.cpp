@@ -4,6 +4,7 @@
 #include "System/renderer.h"
 #include "System/RendererBase.h"
 #include "Graphics/Material.h"
+#include "Graphics/TextureManager.h"
 #include <io.h>
 
 
@@ -175,7 +176,8 @@ void Renderer::Init()
     bufferTexDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 2; ++i)
+    {
         m_Device->CreateTexture2D(&bufferTexDesc, NULL, &m_bufferTexture[i]);
         m_Device->CreateRenderTargetView(m_bufferTexture[i], NULL, &m_bufferRTV[i]);
         m_Device->CreateShaderResourceView(m_bufferTexture[i], NULL, &m_bufferSRV[i]);
@@ -414,13 +416,12 @@ void Renderer::Uninit()
 	m_DeviceContext->Release();
 	m_Device->Release();
 
-    for( int i = 0; i < 2; ++i )
+    for (int i = 0; i < 2; ++i)
     {
         m_bufferTexture[i]->Release();
         m_bufferRTV[i]->Release();
         m_bufferSRV[i]->Release();
     }
-
 }
 
 
@@ -436,7 +437,7 @@ void Renderer::Begin()
 	};
     for( int i = 0; i < 2; ++i )
     {
-        m_DeviceContext->ClearRenderTargetView( m_bufferRTV[i], clearColor );
+        m_DeviceContext->ClearRenderTargetView(m_bufferRTV[i], clearColor );
     }
 	m_DeviceContext->ClearDepthStencilView( m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
@@ -484,6 +485,47 @@ void Renderer::Draw()
 
         queue.clear();
     }
+}
+
+bool Renderer::SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil)
+{
+    ID3D11RenderTargetView* renderTargetView = TextureManager::GetRenderTargetView(renderTexture);
+    UINT width{};
+    UINT height{};
+    if (!renderTargetView || !TextureManager::GetTextureSize(renderTexture, width, height))
+    {
+        MessageBoxA(nullptr, "指定されたTextureHandleはRenderTextureではありません。", "Renderer Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    // RenderTextureごとのRTV解決をRendererへ集約し、呼び出し側はHandleだけを扱う。
+    m_DeviceContext->OMSetRenderTargets(1, &renderTargetView, useDepthStencil ? m_DepthStencilView : nullptr);
+
+    // RT全体を描画対象にする標準Viewportを同時に設定する。
+    D3D11_VIEWPORT viewport{};
+    viewport.Width = static_cast<float>(width);
+    viewport.Height = static_cast<float>(height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_DeviceContext->RSSetViewports(1, &viewport);
+
+    return true;
+}
+
+void Renderer::SetDstRTV()
+{
+    m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[dstBufferIndex], m_DepthStencilView);
+
+    // Renderer所有の画面バッファへ戻す場合も、RT全体のViewportへ復帰する。
+    D3D11_TEXTURE2D_DESC description{};
+    m_bufferTexture[dstBufferIndex]->GetDesc(&description);
+
+    D3D11_VIEWPORT viewport{};
+    viewport.Width = static_cast<float>(description.Width);
+    viewport.Height = static_cast<float>(description.Height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_DeviceContext->RSSetViewports(1, &viewport);
 }
 
 

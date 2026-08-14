@@ -4,6 +4,7 @@
 
 std::unordered_map<TextureID, TextureManager::TextureResource> TextureManager::m_textures;
 std::unordered_map<std::wstring, TextureID> TextureManager::m_textureIDsByPath;
+std::unordered_map<std::string, TextureID> TextureManager::m_textureIDsByName;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureManager::m_fallbackTexture;
 TextureID TextureManager::m_nextTextureID{};
 
@@ -45,6 +46,7 @@ void TextureManager::Uninit()
 {
     m_textures.clear();
     m_textureIDsByPath.clear();
+    m_textureIDsByName.clear();
     m_fallbackTexture.Reset();
     m_nextTextureID = 0;
 }
@@ -143,10 +145,71 @@ TextureHandle TextureManager::CreateTextureFromBGRA8(const void* pixels, UINT wi
     return TextureHandle(textureID);
 }
 
+TextureHandle TextureManager::CreateRenderTexture(const std::string& name)
+{
+    return CreateRenderTexture(name, SCREEN_WIDTH, SCREEN_HEIGHT);
+}
+
+TextureHandle TextureManager::CreateRenderTexture(const std::string& name, UINT width, UINT height)
+{
+    if (name.empty() || width == 0 || height == 0 || !Init())
+        return TextureHandle{};
+
+    // 同じ名前のRTは同一Handleを返し、フレーム中に重複したGPUリソースを作らない。
+    const auto existing = m_textureIDsByName.find(name);
+    if (existing != m_textureIDsByName.end())
+    {
+        const TextureResource& resource = m_textures.at(existing->second);
+        if (resource.width != width || resource.height != height)
+            MessageBoxA(nullptr, "同名のRenderTextureに異なるサイズを指定しています。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+
+        return TextureHandle(existing->second);
+    }
+
+    D3D11_TEXTURE2D_DESC description{};
+    description.Width = width;
+    description.Height = height;
+    description.MipLevels = 1;
+    description.ArraySize = 1;
+    description.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    description.SampleDesc.Count = 1;
+    description.Usage = D3D11_USAGE_DEFAULT;
+    description.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    TextureResource resource{};
+    if (FAILED(Renderer::GetDevice()->CreateTexture2D(&description, nullptr, resource.texture.GetAddressOf())) ||
+        FAILED(Renderer::GetDevice()->CreateRenderTargetView(resource.texture.Get(), nullptr, resource.renderTargetView.GetAddressOf())) ||
+        FAILED(Renderer::GetDevice()->CreateShaderResourceView(resource.texture.Get(), nullptr, resource.shaderResourceView.GetAddressOf())))
+    {
+        MessageBoxA(nullptr, "RenderTextureの作成に失敗しました。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+        return TextureHandle{};
+    }
+
+    resource.width = width;
+    resource.height = height;
+
+    const TextureID textureID = m_nextTextureID++;
+    m_textures.emplace(textureID, std::move(resource));
+    m_textureIDsByName.emplace(name, textureID);
+    return TextureHandle(textureID);
+}
+
 ID3D11ShaderResourceView* TextureManager::GetShaderResourceView(TextureHandle texture)
 {
     const auto resource = m_textures.find(texture.id);
     return resource == m_textures.end() ? m_fallbackTexture.Get() : resource->second.shaderResourceView.Get();
+}
+
+ID3D11RenderTargetView* TextureManager::GetRenderTargetView(TextureHandle texture)
+{
+    const auto resource = m_textures.find(texture.id);
+    return resource == m_textures.end() ? nullptr : resource->second.renderTargetView.Get();
+}
+
+ID3D11Texture2D* TextureManager::GetTexture(TextureHandle texture)
+{
+    const auto resource = m_textures.find(texture.id);
+    return resource == m_textures.end() ? nullptr : resource->second.texture.Get();
 }
 
 bool TextureManager::GetTextureSize(TextureHandle texture, UINT& outWidth, UINT& outHeight)

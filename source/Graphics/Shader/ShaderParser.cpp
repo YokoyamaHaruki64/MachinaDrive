@@ -356,6 +356,60 @@ bool ShaderParser::ExtractBlock(const std::string& blockName, std::string& outBl
     return true;
 }
 
+bool ShaderParser::ExtractPassBlock(std::string& outBlock, std::string& outTag, int passOffset) const
+{
+    size_t searchPosition = 0;
+    size_t passPosition = std::string::npos;
+    for (int index = 0; index <= passOffset; ++index)
+    {
+        passPosition = m_sourceCode.find(ShaderToken::PASS, searchPosition);
+        if (passPosition == std::string::npos)
+            return false;
+
+        searchPosition = passPosition + TokenSize::PASS;
+    }
+
+    const size_t blockStart = m_sourceCode.find(ShaderToken::BLOCK_START, passPosition);
+    if (blockStart == std::string::npos)
+        return false;
+
+    std::string tag = m_sourceCode.substr(passPosition + TokenSize::PASS, blockStart - (passPosition + TokenSize::PASS));
+    tag.erase(std::remove_if(tag.begin(), tag.end(), [](unsigned char character)
+        {
+            return std::isspace(character);
+        }), tag.end());
+
+    if (!tag.empty())
+    {
+        if (tag.size() < 2 || tag.front() != '"' || tag.back() != '"')
+            return false;
+
+        outTag = tag.substr(1, tag.size() - 2);
+    }
+    else
+    {
+        outTag.clear();
+    }
+
+    int braceCount = 1;
+    size_t blockEnd = blockStart + 1;
+    while (blockEnd < m_sourceCode.size() && braceCount > 0)
+    {
+        if (m_sourceCode[blockEnd] == ShaderToken::BLOCK_START)
+            ++braceCount;
+        else if (m_sourceCode[blockEnd] == ShaderToken::BLOCK_END)
+            --braceCount;
+
+        ++blockEnd;
+    }
+
+    if (braceCount != 0)
+        return false;
+
+    outBlock = m_sourceCode.substr(blockStart + 1, blockEnd - blockStart - 2);
+    return true;
+}
+
 bool ShaderParser::ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffset) const
 {
     int braceCount = 0;
