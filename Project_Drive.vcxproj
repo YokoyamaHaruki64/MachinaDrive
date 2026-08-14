@@ -149,6 +149,7 @@
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
     <ClCompile Include="source\Graphics\Material.cpp" />
     <ClCompile Include="source\Graphics\MaterialManager.cpp" />
+    <ClCompile Include="source\Graphics\ModelLoader.cpp" />
     <ClCompile Include="source\Graphics\TextureManager.cpp" />
     <ClCompile Include="source\Graphics\Shader\InputLayoutBuilder.cpp" />
     <ClCompile Include="source\Graphics\Shader\ShaderCompiler.cpp" />
@@ -248,6 +249,9 @@
     <ClInclude Include="External\Include\Assimp\cfileio.h" />
     <ClInclude Include="External\Include\Assimp\cimport.h" />
     <ClInclude Include="External\Include\Assimp\ColladaMetaData.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\poppack1.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\pstdint.h" />
     <ClInclude Include="External\Include\Assimp\color4.h" />
     <ClInclude Include="External\Include\Assimp\commonMetaData.h" />
     <ClInclude Include="External\Include\Assimp\config.h" />
@@ -327,6 +331,8 @@
     <ClInclude Include="include\Graphics\GraphicInc.h" />
     <ClInclude Include="include\Graphics\Material.h" />
     <ClInclude Include="include\Graphics\MaterialManager.h" />
+    <ClInclude Include="include\Graphics\ModelAsset.h" />
+    <ClInclude Include="include\Graphics\ModelLoader.h" />
     <ClInclude Include="include\Graphics\TextureManager.h" />
     <ClInclude Include="include\Graphics\Shader\InputLayoutBuilder.h" />
     <ClInclude Include="include\Graphics\Shader\ShaderCompiler.h" />

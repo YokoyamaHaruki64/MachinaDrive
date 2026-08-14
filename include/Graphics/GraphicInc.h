@@ -155,16 +155,16 @@ struct PositionVertex
 struct NormalTangentVertex
 {
     Vector3 normal;
-    Vector3 tangent;
+    Vector4 tangent;
 
     // NORMAL0
     // Format : DXGI_FORMAT_R32G32B32_FLOAT
     // Offset : 0
-     
+
     // TANGENT0
     // Format : DXGI_FORMAT_R32G32B32A32_FLOAT
     // Offset : 12
-     
+
     // Stride : 28bytes
     // Slot : 1
 };

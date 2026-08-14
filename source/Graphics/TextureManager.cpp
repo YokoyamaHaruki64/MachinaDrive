@@ -22,6 +22,7 @@ bool TextureManager::CreateFallbackTexture()
 
     D3D11_SUBRESOURCE_DATA initialData{};
     initialData.pSysMem = &magentaPixel;
+    initialData.SysMemPitch = sizeof(magentaPixel);
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
     if (FAILED(Renderer::GetDevice()->CreateTexture2D(&textureDesc, &initialData, texture.GetAddressOf())))
@@ -79,6 +80,67 @@ TextureHandle TextureManager::LoadTexture(const std::wstring& filePath)
 TextureHandle TextureManager::LoadTexture(const std::string& filePath)
 {
     return LoadTexture(std::filesystem::path(filePath).wstring());
+}
+
+TextureHandle TextureManager::LoadTextureFromMemory(const void* data, size_t dataSize)
+{
+    if (!data || dataSize == 0 || !Init())
+        return TextureHandle{};
+
+    DirectX::TexMetadata metadata{};
+    DirectX::ScratchImage image{};
+    HRESULT result = DirectX::LoadFromWICMemory(data, dataSize, DirectX::WIC_FLAGS_NONE, &metadata, image);
+    if (FAILED(result))
+        result = DirectX::LoadFromDDSMemory(data, dataSize, DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+    if (FAILED(result))
+        return TextureHandle{};
+
+    TextureResource resource{};
+    if (FAILED(DirectX::CreateShaderResourceView(Renderer::GetDevice(), image.GetImages(), image.GetImageCount(), metadata, resource.shaderResourceView.GetAddressOf())))
+        return TextureHandle{};
+
+    resource.width = static_cast<UINT>(metadata.width);
+    resource.height = static_cast<UINT>(metadata.height);
+
+    const TextureID textureID = m_nextTextureID++;
+    m_textures.emplace(textureID, std::move(resource));
+    return TextureHandle(textureID);
+}
+
+TextureHandle TextureManager::CreateTextureFromBGRA8(const void* pixels, UINT width, UINT height)
+{
+    if (!pixels || width == 0 || height == 0 || !Init())
+        return TextureHandle{};
+
+    D3D11_TEXTURE2D_DESC textureDesc{};
+    textureDesc.Width = width;
+    textureDesc.Height = height;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.Usage = D3D11_USAGE_DEFAULT;
+    textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA initialData{};
+    initialData.pSysMem = pixels;
+    initialData.SysMemPitch = width * sizeof(uint32_t);
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+    if (FAILED(Renderer::GetDevice()->CreateTexture2D(&textureDesc, &initialData, texture.GetAddressOf())))
+        return TextureHandle{};
+
+    TextureResource resource{};
+    if (FAILED(Renderer::GetDevice()->CreateShaderResourceView(texture.Get(), nullptr, resource.shaderResourceView.GetAddressOf())))
+        return TextureHandle{};
+
+    resource.width = width;
+    resource.height = height;
+
+    const TextureID textureID = m_nextTextureID++;
+    m_textures.emplace(textureID, std::move(resource));
+    return TextureHandle(textureID);
 }
 
 ID3D11ShaderResourceView* TextureManager::GetShaderResourceView(TextureHandle texture)

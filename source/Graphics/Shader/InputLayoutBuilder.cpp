@@ -62,7 +62,8 @@ bool InputLayoutBuilder::CreateInputLayout(
             MessageBoxW(NULL, L"Unsupported vertex attribute in shader input signature.", L"Error", MB_OK | MB_ICONERROR);
             return false;
         }
-        binding.inputSlot = i;
+        // 同じ頂点ストリームに含まれる属性（Normal/Tangent、UV2-7）は同じslotを共有する。
+        binding.inputSlot = static_cast<UINT>(binding.streamType);
         outInputSlot.push_back(binding);
 
         // 入力レイアウトの要素を作成する
@@ -70,8 +71,8 @@ bool InputLayoutBuilder::CreateInputLayout(
         elem.SemanticName = param.SemanticName;
         elem.SemanticIndex = param.SemanticIndex;
         elem.Format = getFormat(param);
-        elem.InputSlot = i;
-        elem.AlignedByteOffset = 0;
+        elem.InputSlot = binding.inputSlot;
+        elem.AlignedByteOffset = GetVertexAttributeOffset(param, binding.streamType);
         elem.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
         layoutDesc.push_back(elem);
@@ -158,3 +159,15 @@ VertexStreamType InputLayoutBuilder::getVertexAttribute(const D3D11_SIGNATURE_PA
     return VertexStreamType::Error;
 }
 
+UINT InputLayoutBuilder::GetVertexAttributeOffset(
+    const D3D11_SIGNATURE_PARAMETER_DESC& param,
+    VertexStreamType streamType)
+{
+    if (strcmp(param.SemanticName, "TANGENT") == 0)
+        return sizeof(Vector3);
+
+    if (streamType == VertexStreamType::ExtraTexCoord)
+        return sizeof(Vector4) * (param.SemanticIndex - 2);
+
+    return 0;
+}

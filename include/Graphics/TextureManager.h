@@ -27,6 +27,8 @@ public:
 
     static TextureHandle LoadTexture(const std::wstring& filePath);
     static TextureHandle LoadTexture(const std::string& filePath);
+    static TextureHandle LoadTextureFromMemory(const void* data, size_t dataSize);
+    static TextureHandle CreateTextureFromBGRA8(const void* pixels, UINT width, UINT height);
     static ID3D11ShaderResourceView* GetShaderResourceView(TextureHandle texture);
     static bool GetTextureSize(TextureHandle texture, UINT& outWidth, UINT& outHeight);
 };

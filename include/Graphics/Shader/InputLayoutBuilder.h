@@ -24,6 +24,7 @@ class InputLayoutBuilder
 {
     DXGI_FORMAT getFormat(const D3D11_SIGNATURE_PARAMETER_DESC& param);
     VertexStreamType getVertexAttribute(const D3D11_SIGNATURE_PARAMETER_DESC& param);
+    UINT GetVertexAttributeOffset(const D3D11_SIGNATURE_PARAMETER_DESC& param, VertexStreamType streamType);
 
 public:
     InputLayoutBuilder() = default;

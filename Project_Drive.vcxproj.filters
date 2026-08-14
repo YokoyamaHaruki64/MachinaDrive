@@ -210,6 +210,9 @@
     <ClCompile Include="source\Graphics\MaterialManager.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="source\Graphics\ModelLoader.cpp">
+      <Filter>ソース ファイル\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="source\Graphics\TextureManager.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
@@ -420,6 +423,12 @@
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\MaterialManager.h">
+      <Filter>ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\ModelAsset.h">
+      <Filter>ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\ModelLoader.h">
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\TextureManager.h">
