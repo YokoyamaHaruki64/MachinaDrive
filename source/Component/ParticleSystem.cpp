@@ -184,39 +184,16 @@ void ParticleRenderer::Draw()
     {
         if (!p.active) continue;
 
-        // 入力レイアウトとシェーダーの設定
-        Renderer::GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-        Renderer::GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-        Renderer::GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
-        // ワールド行列の設定
-
-        Renderer::SetWorldMatrix(CalcWorldMatrix(
+        // Particleごとの座標と色をMaterialへ設定し、共有するQuad形状を描画する。
+        BindMesh(CalcWorldMatrix(
             p.position,
             p.rotation,
             Vector3::Multiply(settings.size, transform()->GetScale()) * p.scale,
-            m_billboardType));
+            m_billboardType),
+            p.color);
 
-        // マテリアルの設定
-        MATERIAL material{};
-        material.Diffuse = XMFLOAT4(p.color.r, p.color.g, p.color.b, p.color.a);
-        material.TextureEnable = true;
-        Renderer::SetMaterial(material);
-
-        // UVの設定
-        Renderer::SetUV(XMFLOAT4(m_uvWidth, m_uvHeight, m_uvOffsetX, m_uvOffsetY));
-
-        // 頂点バッファの設定
-        UINT stride = sizeof(VERTEX_3D);
-        UINT offset = 0;
-        Renderer::GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
-        // インデックスバッファの設定
-        Renderer::GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-        // シェーダーリソースビューの設定
-        Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
-        // 描画
-        Renderer::GetDeviceContext()->DrawIndexed(m_indexCount, 0, 0);
+        Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        Renderer::GetDeviceContext()->DrawIndexed(m_mesh.indexCount, 0, 0);
 
     }
 }

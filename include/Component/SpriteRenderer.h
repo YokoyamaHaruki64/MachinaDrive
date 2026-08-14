@@ -1,20 +1,15 @@
 ﻿#pragma once
-#include "System/RendererBase.h"
 
-#include <d3d11.h>
-#include <wrl/client.h>
-using Microsoft::WRL::ComPtr;
+#include "Graphics/Material.h"
+#include "Graphics/ModelAsset.h"
+#include "System/RendererBase.h"
 
 class SpriteRenderer : public RendererBase
 {
 protected:
-    ComPtr<ID3D11Buffer> m_vertexBuffer;
-
-    ComPtr<ID3D11VertexShader> m_vertexShader;
-    ComPtr<ID3D11PixelShader> m_pixelShader;
-    ComPtr<ID3D11InputLayout> m_inputLayout;
-
-    ComPtr<ID3D11ShaderResourceView> m_texture;
+    Mesh m_mesh{};
+    Material* m_materialInstance{};
+    TextureHandle m_texture{};
     int m_textureWidth = 0;
     int m_textureHeight = 0;
 
@@ -23,16 +18,13 @@ protected:
     float m_uvWidth = 1.0f;
     float m_uvHeight = 1.0f;
 
-    static const char* DEFAULT_VERTEX_SHADER_FILE;
-    static const char* DEFAULT_PIXEL_SHADER_FILE;
 public:
     SpriteRenderer() = delete;
     SpriteRenderer(
         GameObject* owner,
         const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE
-    );
+        const char* vertexShaderFile = nullptr,
+        const char* pixelShaderFile = nullptr);
 
     virtual ~SpriteRenderer() {}
     void Draw() override;

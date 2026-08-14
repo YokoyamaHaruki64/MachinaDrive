@@ -1,42 +1,41 @@
 ﻿#pragma once
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include "Graphics/ModelAsset.h"
+#include "Graphics/Material.h"
 #include "math/Vector3.h"
 #include "System/GameObject.h"
 #include "System/RendererBase.h"
-using Microsoft::WRL::ComPtr;
+
+#include <vector>
+
+class GraphicsShader;
 
 
 class PrimitiveRenderer : public RendererBase
 {
 protected:
-    ComPtr<ID3D11Buffer> m_vertexBuffer;
-    ComPtr<ID3D11Buffer> m_indexBuffer;
-
-    ComPtr<ID3D11VertexShader> m_vertexShader;
-    ComPtr<ID3D11PixelShader> m_pixelShader;
-    ComPtr<ID3D11InputLayout> m_inputLayout;
-
-    ComPtr<ID3D11ShaderResourceView> m_texture;
+    Mesh m_mesh{};
+    Material* m_materialInstance{};
+    TextureHandle m_texture{};
     int m_textureWidth = 0;
     int m_textureHeight = 0;
-    int m_vertexCount = 0;
-    int m_indexCount = 0;
 
     float m_uvOffsetX = 0.0f;
     float m_uvOffsetY = 0.0f;
     float m_uvWidth = 1.0f;
     float m_uvHeight = 1.0f;
 
+    void CreateMaterial(const char* shaderFilePath);
     void LoadTexture(const wchar_t* textureFile);
-    void CreateVertexShaderAndInputLayout(const char* vertexShaderFile);
-    void CreatePixelShader(const char* pixelShaderFile);
-    void CreateVertexBuffer(const void* vertexData, size_t vertexDataSize);
-    void CreateIndexBuffer(const unsigned int* indexData, size_t indexDataSize);
+    void CreateMesh(
+        const std::vector<PositionVertex>& positions,
+        const std::vector<NormalTangentVertex>& normalTangents,
+        const std::vector<PrimaryTexCoordVertex>& texCoords,
+        const std::vector<ColorVertex>& colors,
+        const unsigned int* indexData,
+        size_t indexCount);
+    void BindMesh(const XMMATRIX& worldMatrix, const Color& color) const;
 
-    static const char* DEFAULT_VERTEX_SHADER_FILE;
-    static const char* DEFAULT_PIXEL_SHADER_FILE;
 public:
     PrimitiveRenderer() = delete;
     PrimitiveRenderer(GameObject* owner) : RendererBase(owner) {}
@@ -73,8 +72,8 @@ public:
     Quad() = delete;
     Quad(GameObject* owner,
         const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE);
+        const char* vertexShaderFile = nullptr,
+        const char* pixelShaderFile = nullptr);
 };
 
 class Plane : public PrimitiveRenderer
@@ -86,8 +85,8 @@ public:
     Plane() = delete;
     Plane(GameObject* owner,
         const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE);
+        const char* vertexShaderFile = nullptr,
+        const char* pixelShaderFile = nullptr);
     
 };
 
@@ -116,8 +115,8 @@ public:
     Cube() = delete;
     Cube(GameObject* owner,
         const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE);
+        const char* vertexShaderFile = nullptr,
+        const char* pixelShaderFile = nullptr);
 
 
 };

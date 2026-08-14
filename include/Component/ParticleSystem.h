@@ -180,13 +180,12 @@ public:
     ParticleRenderer(
         GameObject* owner,
         ParticleEmitter* emitter,
-        const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE
+        const wchar_t* textureFile
         )
-        : Quad(owner,textureFile,vertexShaderFile, pixelShaderFile),
+        : Quad(owner, textureFile),
         m_emitter(emitter)
     {
+        CreateMaterial("shader/UnlitAdditive.shader");
         m_blendMode = BlendMode::Add;
         m_billboardType = BillboardType::CameraFacing;
         m_renderPass = RenderPass::Transparent;
