@@ -1,566 +1,193 @@
 ﻿#include "pch.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
-
 #include "Component/modelRenderer.h"
 
-#include "System/renderer.h"
-#include "Graphics/TextureManager.h"
-#include "System/GameObject.h"
 #include "Component/Transform.h"
+#include "Graphics/Material.h"
+#include "Graphics/ModelLoader.h"
+#include "Graphics/Shader/ShaderProgram.h"
+#include "System/renderer.h"
 
 #include "math/MathCommon.h"
 
-
+#include <unordered_set>
 
 std::unordered_map<std::string, ModelAsset*> ModelRenderer::m_ModelPool;
 
-
-void ModelRenderer::Load(const char* modelFileName, const char* vertexShaderFileName, const char* pixelShaderFileName)
+namespace
 {
-    // Renderer単位のシェーダーを先に作成し、形状データはプールから共有する。
-    Renderer::CreateVertexShader(m_VertexShader.GetAddressOf(), m_InputLayout.GetAddressOf(), vertexShaderFileName);
-    Renderer::CreatePixelShader(m_PixelShader.GetAddressOf(), pixelShaderFileName);
+    std::unordered_set<uint32_t> g_reportedMissingPositionMeshes;
 
-    // 同一モデルはGPUバッファとMaterial slotを再利用する。
-    if (m_ModelPool.find(modelFileName) != m_ModelPool.end())
+    XMMATRIX ToXMMATRIX(const Matrix4x4& matrix)
     {
-        m_Model = m_ModelPool[modelFileName];
+        return XMMATRIX(
+            matrix.m[0][0], matrix.m[0][1], matrix.m[0][2], matrix.m[0][3],
+            matrix.m[1][0], matrix.m[1][1], matrix.m[1][2], matrix.m[1][3],
+            matrix.m[2][0], matrix.m[2][1], matrix.m[2][2], matrix.m[2][3],
+            matrix.m[3][0], matrix.m[3][1], matrix.m[3][2], matrix.m[3][3]);
+    }
+
+    void DrawMesh(const ModelRenderer& renderer, const Mesh& mesh, const XMMATRIX& worldMatrix)
+    {
+        ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
+        deviceContext->IASetIndexBuffer(mesh.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+        Material* material = renderer.GetMaterial(mesh.materialSlot);
+        if (!material)
+            return;
+
+        Renderer::SetWorldMatrix(worldMatrix);
+        material->Bind(0);
+        const GraphicsShaderPass& shaderPass = material->GetShaderPass(0);
+
+        // Passが要求するStreamだけを、その入力スロットへ対応付ける。
+        bool hasAllRequiredStreams = true;
+        for (const InputSlotBinding& binding : shaderPass.GetInputSlotBindings())
+        {
+                ID3D11Buffer* vertexBuffer = mesh.GetVertexBuffer(binding.streamType);
+                const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+                if (stride == 0)
+                {
+                    hasAllRequiredStreams = false;
+                    break;
+                }
+
+                if (!vertexBuffer)
+                {
+                    if (binding.streamType == VertexStreamType::Position)
+                    {
+                        // Positionの欠落は形状を復元できないため、既定値で補完せず一度だけ通知する。
+                        if (g_reportedMissingPositionMeshes.insert(mesh.meshID).second)
+                        {
+                            MessageBoxA(nullptr, "Mesh does not contain a Position vertex stream.",
+                                "Model Renderer Error", MB_OK | MB_ICONERROR);
+                        }
+
+                        hasAllRequiredStreams = false;
+                        break;
+                    }
+
+                    vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+                    if (!vertexBuffer)
+                    {
+                        hasAllRequiredStreams = false;
+                        break;
+                    }
+                }
+
+            const UINT offset = 0;
+            deviceContext->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+        }
+
+        if (hasAllRequiredStreams)
+            deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
+    }
+
+    void DrawNode(const ModelRenderer& renderer, const ModelAsset& modelAsset, const ModelNode& node, const XMMATRIX& parentWorldMatrix)
+    {
+        // 行ベクトル系のため、ローカル変換を親変換の左側へ積算する。
+        const XMMATRIX worldMatrix = ToXMMATRIX(node.localTransform) * parentWorldMatrix;
+        for (const uint32_t meshIndex : node.meshIndices)
+        {
+            if (meshIndex < modelAsset.meshes.size())
+                DrawMesh(renderer, modelAsset.meshes[meshIndex], worldMatrix);
+        }
+
+        for (const ModelNode& child : node.children)
+            DrawNode(renderer, modelAsset, child, worldMatrix);
+    }
+}
+
+void ModelRenderer::Load(
+    const char* modelFileName,
+    const char* /*vertexShaderFileName*/,
+    const char* /*pixelShaderFileName*/)
+{
+    if (const auto foundModel = m_ModelPool.find(modelFileName); foundModel != m_ModelPool.end())
+    {
+        m_model = foundModel->second;
+        m_materialOverrides.assign(m_model->embeddedMaterials.size(), nullptr);
         return;
     }
 
-    m_Model = new ModelAsset;
-    LoadModel(modelFileName, m_Model);
+    auto* model = new ModelAsset;
+    if (!ModelLoader::Load(modelFileName, *model))
+    {
+        delete model;
+        return;
+    }
 
-    m_ModelPool[modelFileName] = m_Model;
+    m_model = model;
+    m_materialOverrides.assign(m_model->embeddedMaterials.size(), nullptr);
+    m_ModelPool.emplace(modelFileName, model);
+}
 
+Material* ModelRenderer::ResolveMaterial(uint32_t materialSlot) const
+{
+    // Renderer固有の差し替えがある場合だけ優先し、通常はModelAssetの既定Materialを使う。
+    if (materialSlot < m_materialOverrides.size() && m_materialOverrides[materialSlot])
+        return m_materialOverrides[materialSlot];
+
+    if (!m_model || materialSlot >= m_model->embeddedMaterials.size())
+        return nullptr;
+
+    return m_model->embeddedMaterials[materialSlot];
+}
+
+void ModelRenderer::SetMaterial(uint32_t materialSlot, Material* material)
+{
+    if (!m_model || materialSlot >= m_materialOverrides.size())
+        return;
+
+    // nullptrを設定すると、ファイルに埋め込まれた既定Materialへ戻す。
+    m_materialOverrides[materialSlot] = material;
+}
+
+Material* ModelRenderer::GetMaterial(uint32_t materialSlot) const
+{
+    return ResolveMaterial(materialSlot);
 }
 
 void ModelRenderer::Draw()
 {
-    Transform* t = transform();
+    if (!m_model)
+        return;
 
-	// 互換経路では、従来どおりinterleaved頂点バッファをslot 0へ設定する。
-	UINT stride = sizeof(VERTEX_3D);
-	UINT offset = 0;
-	Renderer::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_Model->Mesh.VertexBuffer, &stride, &offset);
+    ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// 形状全体で共有するインデックスバッファとトポロジを設定する。
-	Renderer::GetDeviceContext()->IASetIndexBuffer(m_Model->Mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    const XMMATRIX axisInverse = XMMatrixRotationRollPitchYaw(
+        m_inverseAxisFlags & InverseAxis::X ? Math::PI : 0.0f,
+        m_inverseAxisFlags & InverseAxis::Y ? Math::PI : 0.0f,
+        m_inverseAxisFlags & InverseAxis::Z ? Math::PI : 0.0f);
+    const XMMATRIX componentWorldMatrix = transform() ? CalcWorldMatrix() : XMMatrixIdentity();
 
-	// プリミティブトポロジ設定
-	Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    // ModelAssetのNode階層を辿り、各MeshをComponentのWorld座標へ配置して描画する。
+    DrawNode(*this, *m_model, m_model->rootNode, axisInverse * componentWorldMatrix);
+}
 
-    // シェーダー設定
-    Renderer::GetDeviceContext()->VSSetShader(m_VertexShader.Get(), nullptr, 0);
-    Renderer::GetDeviceContext()->PSSetShader(m_PixelShader.Get(), nullptr, 0);
+void ModelRenderer::Preload(const char* fileName)
+{
+    if (m_ModelPool.contains(fileName))
+        return;
 
-    // 入力レイアウト設定
-    Renderer::GetDeviceContext()->IASetInputLayout(m_InputLayout.Get());
-
-    // 定数バッファ設定
-    if (t)
+    auto* model = new ModelAsset;
+    if (!ModelLoader::Load(fileName, *model))
     {
-        XMMATRIX axisInverse = XMMatrixRotationRollPitchYaw(
-            m_InverseAxisFlags & InverseAxis::X ? Math::PI : 0.0f,
-            m_InverseAxisFlags & InverseAxis::Y ? Math::PI : 0.0f,
-            m_InverseAxisFlags & InverseAxis::Z ? Math::PI : 0.0f);
-        XMMATRIX world = axisInverse * CalcWorldMatrix();
-
-        Renderer::SetWorldMatrix(world);
+        delete model;
+        return;
     }
 
-    // UV設定
-    Renderer::SetUV(XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
-
-	// SubMeshは描画範囲だけを持ち、実際のMaterialはslotから解決する。
-	for (const SubMesh& subMesh : m_Model->Mesh.SubMeshes)
-	{
-		const MODEL_MATERIAL& material = m_Model->MaterialSlots[subMesh.MaterialSlot];
-
-		// 旧Material定数バッファとテクスチャを互換経路へ設定する。
-		Renderer::SetMaterial(material.Material);
-
-		if(material.Texture.IsValid())
-		{
-			ID3D11ShaderResourceView* texture = TextureManager::GetShaderResourceView(material.Texture);
-			Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, &texture);
-		}
-
-		// SubMeshのindex範囲だけを描画する。
-		Renderer::GetDeviceContext()->DrawIndexed(subMesh.IndexNum, subMesh.StartIndex, 0);
-	}
-
+    m_ModelPool.emplace(fileName, model);
 }
-
-void ModelRenderer::Preload(const char *FileName)
-{
-	if (m_ModelPool.count(FileName) > 0)
-	{
-		return;
-	}
-
-	ModelAsset* model = new ModelAsset;
-	LoadModel(FileName, model);
-
-	m_ModelPool[FileName] = model;
-
-}
-
 
 void ModelRenderer::UnloadAll()
 {
-	// ModelAssetが所有するGPUリソースとMaterial slotのテクスチャを解放する。
-	for (std::pair<const std::string, ModelAsset*> pair : m_ModelPool)
-	{
-		pair.second->Mesh.VertexBuffer->Release();
-		pair.second->Mesh.IndexBuffer->Release();
+    for (const auto& [fileName, model] : m_ModelPool)
+    {
+        ModelLoader::Release(*model);
+        delete model;
+    }
 
-		delete pair.second;
-	}
-
-	m_ModelPool.clear();
+    m_ModelPool.clear();
 }
-
-void ModelRenderer::LoadModel( const char *FileName, ModelAsset *Model)
-{
-	MODEL_OBJ modelObj;
-	LoadObj( FileName, &modelObj );
-
-	// CPUで読み込んだOBJ頂点を、共有MeshのGPU頂点バッファへ転送する。
-	{
-		D3D11_BUFFER_DESC bd;
-		ZeroMemory( &bd, sizeof(bd) );
-		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof( VERTEX_3D ) * modelObj.VertexNum;
-		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bd.CPUAccessFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA sd;
-		ZeroMemory( &sd, sizeof(sd) );
-		sd.pSysMem = modelObj.VertexArray;
-
-		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->Mesh.VertexBuffer );
-	}
-
-
-	// すべてのSubMeshで共有するインデックスバッファを生成する。
-	{
-		D3D11_BUFFER_DESC bd;
-		ZeroMemory( &bd, sizeof(bd) );
-		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof( unsigned int ) * modelObj.IndexNum;
-		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		bd.CPUAccessFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA sd;
-		ZeroMemory( &sd, sizeof(sd) );
-		sd.pSysMem = modelObj.IndexArray;
-
-		Renderer::GetDevice()->CreateBuffer( &bd, &sd, &Model->Mesh.IndexBuffer );
-	}
-
-	// OBJの各サブセットを、描画範囲とMaterial slotへ分離して保存する。
-	{
-		Model->Mesh.SubMeshes.resize(modelObj.SubsetNum);
-		Model->MaterialSlots.resize(modelObj.SubsetNum);
-
-		for( unsigned int i = 0; i < modelObj.SubsetNum; i++ )
-		{
-			Model->Mesh.SubMeshes[i] = { modelObj.SubsetArray[i].StartIndex, modelObj.SubsetArray[i].IndexNum, i };
-
-			Model->MaterialSlots[i] = modelObj.SubsetArray[i].Material;
-			const char* texturePath = modelObj.SubsetArray[i].Material.TextureName;
-			if (texturePath[0] != '\0')
-			{
-				Model->MaterialSlots[i].Texture = TextureManager::LoadTexture(std::string(texturePath));
-				Model->MaterialSlots[i].Material.TextureEnable = true;
-			}
-			else
-			{
-				Model->MaterialSlots[i].Material.TextureEnable = false;
-			}
-
-		}
-	}
-
-	delete[] modelObj.VertexArray;
-	delete[] modelObj.IndexArray;
-	delete[] modelObj.SubsetArray;
-
-}
-
-
-
-
-
-
-//モデル読込////////////////////////////////////////////
-void ModelRenderer::LoadObj( const char *FileName, MODEL_OBJ *ModelObj )
-{
-
-	char dir[MAX_PATH];
-	strcpy (dir, FileName );
-	PathRemoveFileSpec(dir);
-
-
-
-
-
-	XMFLOAT3	*positionArray;
-	XMFLOAT3	*normalArray;
-	XMFLOAT2	*texcoordArray;
-
-	unsigned int	positionNum = 0;
-	unsigned int	normalNum = 0;
-	unsigned int	texcoordNum = 0;
-	unsigned int	vertexNum = 0;
-	unsigned int	indexNum = 0;
-	unsigned int	in = 0;
-	unsigned int	subsetNum = 0;
-
-	MODEL_MATERIAL	*materialArray = nullptr;
-	unsigned int	materialNum = 0;
-
-	char str[256];
-	char *s;
-	char c;
-
-
-	FILE *file;
-	file = fopen( FileName, "rt" );
-	assert(file);
-
-
-
-	//要素数カウント
-	while( true )
-	{
-		fscanf( file, "%s", str );
-
-		if( feof( file ) != 0 )
-			break;
-
-		if( strcmp( str, "v" ) == 0 )
-		{
-			positionNum++;
-		}
-		else if( strcmp( str, "vn" ) == 0 )
-		{
-			normalNum++;
-		}
-		else if( strcmp( str, "vt" ) == 0 )
-		{
-			texcoordNum++;
-		}
-		else if( strcmp( str, "usemtl" ) == 0 )
-		{
-			subsetNum++;
-		}
-		else if( strcmp( str, "f" ) == 0 )
-		{
-			in = 0;
-
-			do
-			{
-				fscanf( file, "%s", str );
-				vertexNum++;
-				in++;
-				c = fgetc( file );
-			}
-			while( c != '\n' && c!= '\r' );
-
-			//四角は三角に分割
-			if( in == 4 )
-				in = 6;
-
-			indexNum += in;
-		}
-	}
-
-
-	//メモリ確保
-	positionArray = new XMFLOAT3[ positionNum ];
-	normalArray = new XMFLOAT3[ normalNum ];
-	texcoordArray = new XMFLOAT2[ texcoordNum ];
-
-
-	ModelObj->VertexArray = new VERTEX_3D[ vertexNum ];
-	ModelObj->VertexNum = vertexNum;
-
-	ModelObj->IndexArray = new unsigned int[ indexNum ];
-	ModelObj->IndexNum = indexNum;
-
-	ModelObj->SubsetArray = new SUBSET[ subsetNum ];
-	ModelObj->SubsetNum = subsetNum;
-
-
-
-
-	//要素読込
-	XMFLOAT3 *position = positionArray;
-	XMFLOAT3 *normal = normalArray;
-	XMFLOAT2 *texcoord = texcoordArray;
-
-	unsigned int vc = 0;
-	unsigned int ic = 0;
-	unsigned int sc = 0;
-
-
-	fseek( file, 0, SEEK_SET );
-
-	while( true )
-	{
-		fscanf( file, "%s", str );
-
-		if( feof( file ) != 0 )
-			break;
-
-		if( strcmp( str, "mtllib" ) == 0 )
-		{
-			//マテリアルファイル
-			fscanf( file, "%s", str );
-
-			char path[256];
-			strcpy( path, dir );
-			strcat( path, "\\" );
-			strcat( path, str );
-
-			LoadMaterial( path, &materialArray, &materialNum );
-		}
-		else if( strcmp( str, "o" ) == 0 )
-		{
-			//オブジェクト名
-			fscanf( file, "%s", str );
-		}
-		else if( strcmp( str, "v" ) == 0 )
-		{
-			//頂点座標
-			fscanf( file, "%f", &position->x );
-			fscanf( file, "%f", &position->y );
-			fscanf( file, "%f", &position->z );
-			position++;
-		}
-		else if( strcmp( str, "vn" ) == 0 )
-		{
-			//法線
-			fscanf( file, "%f", &normal->x );
-			fscanf( file, "%f", &normal->y );
-			fscanf( file, "%f", &normal->z );
-			normal++;
-		}
-		else if( strcmp( str, "vt" ) == 0 )
-		{
-			//テクスチャ座標
-			fscanf( file, "%f", &texcoord->x );
-			fscanf( file, "%f", &texcoord->y );
-			texcoord->x = 1.0f - texcoord->x;
-			texcoord->y = 1.0f - texcoord->y;
-			texcoord++;
-		}
-		else if( strcmp( str, "usemtl" ) == 0 )
-		{
-			//マテリアル
-			fscanf( file, "%s", str );
-
-			if( sc != 0 )
-				ModelObj->SubsetArray[ sc - 1 ].IndexNum = ic - ModelObj->SubsetArray[ sc - 1 ].StartIndex;
-
-			ModelObj->SubsetArray[ sc ].StartIndex = ic;
-
-
-			for( unsigned int i = 0; i < materialNum; i++ )
-			{
-				if( strcmp( str, materialArray[i].Name ) == 0 )
-				{
-					ModelObj->SubsetArray[ sc ].Material.Material = materialArray[i].Material;
-					strcpy( ModelObj->SubsetArray[ sc ].Material.TextureName, materialArray[i].TextureName );
-					strcpy( ModelObj->SubsetArray[ sc ].Material.Name, materialArray[i].Name );
-
-					break;
-				}
-			}
-
-			sc++;
-			
-		}
-		else if( strcmp( str, "f" ) == 0 )
-		{
-			//面
-			in = 0;
-
-			do
-			{
-				fscanf( file, "%s", str );
-
-				s = strtok( str, "/" );	
-				ModelObj->VertexArray[vc].Position = positionArray[ atoi( s ) - 1 ];
-				if( s[ strlen( s ) + 1 ] != '/' )
-				{
-					//テクスチャ座標が存在しない場合もある
-					s = strtok( nullptr, "/" );
-					ModelObj->VertexArray[vc].TexCoord = texcoordArray[ atoi( s ) - 1 ];
-				}
-				s = strtok( nullptr, "/" );	
-				ModelObj->VertexArray[vc].Normal = normalArray[ atoi( s ) - 1 ];
-
-				ModelObj->VertexArray[vc].Diffuse = XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
-
-				ModelObj->IndexArray[ic] = vc;
-				ic++;
-				vc++;
-
-				in++;
-				c = fgetc( file );
-			}
-			while( c != '\n' && c != '\r' );
-
-			//四角は三角に分割
-			if( in == 4 )
-			{
-				ModelObj->IndexArray[ic] = vc - 4;
-				ic++;
-				ModelObj->IndexArray[ic] = vc - 2;
-				ic++;
-			}
-		}
-	}
-
-
-	if( sc != 0 )
-		ModelObj->SubsetArray[ sc - 1 ].IndexNum = ic - ModelObj->SubsetArray[ sc - 1 ].StartIndex;
-
-
-	fclose( file );
-
-
-	delete[] positionArray;
-	delete[] normalArray;
-	delete[] texcoordArray;
-	delete[] materialArray;
-}
-
-
-
-
-//マテリアル読み込み///////////////////////////////////////////////////////////////////
-void ModelRenderer::LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned int *MaterialNum )
-{
-
-	char dir[MAX_PATH];
-	strcpy(dir, FileName);
-	PathRemoveFileSpec(dir);
-
-
-
-	char str[256];
-
-	FILE *file;
-	file = fopen( FileName, "rt" );
-	assert(file);
-
-	MODEL_MATERIAL *materialArray;
-	unsigned int materialNum = 0;
-
-	//要素数カウント
-	while( true )
-	{
-		fscanf( file, "%s", str );
-
-		if( feof( file ) != 0 )
-			break;
-
-
-		if( strcmp( str, "newmtl" ) == 0 )
-		{
-			materialNum++;
-		}
-	}
-
-
-	//メモリ確保
-	materialArray = new MODEL_MATERIAL[ materialNum ];
-
-
-	//要素読込
-	int mc = -1;
-
-	fseek( file, 0, SEEK_SET );
-
-	while( true )
-	{
-		fscanf( file, "%s", str );
-
-		if( feof( file ) != 0 )
-			break;
-
-
-		if( strcmp( str, "newmtl" ) == 0 )
-		{
-			//マテリアル名
-			mc++;
-			fscanf( file, "%s", materialArray[ mc ].Name );
-			strcpy( materialArray[ mc ].TextureName, "" );
-
-			materialArray[mc].Material.Emission.x = 0.0f;
-			materialArray[mc].Material.Emission.y = 0.0f;
-			materialArray[mc].Material.Emission.z = 0.0f;
-			materialArray[mc].Material.Emission.w = 0.0f;
-		}
-		else if( strcmp( str, "Ka" ) == 0 )
-		{
-			//アンビエント
-			fscanf( file, "%f", &materialArray[ mc ].Material.Ambient.x );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Ambient.y );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Ambient.z );
-			materialArray[ mc ].Material.Ambient.w = 1.0f;
-		}
-		else if( strcmp( str, "Kd" ) == 0 )
-		{
-			//ディフューズ
-			fscanf( file, "%f", &materialArray[ mc ].Material.Diffuse.x );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Diffuse.y );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Diffuse.z );
-			materialArray[ mc ].Material.Diffuse.w = 1.0f;
-		}
-		else if( strcmp( str, "Ks" ) == 0 )
-		{
-			//スペキュラ
-			fscanf( file, "%f", &materialArray[ mc ].Material.Specular.x );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Specular.y );
-			fscanf( file, "%f", &materialArray[ mc ].Material.Specular.z );
-			materialArray[ mc ].Material.Specular.w = 1.0f;
-		}
-		else if( strcmp( str, "Ns" ) == 0 )
-		{
-			//スペキュラ強度
-			fscanf( file, "%f", &materialArray[ mc ].Material.Shininess );
-		}
-		else if( strcmp( str, "d" ) == 0 )
-		{
-			//アルファ
-			fscanf( file, "%f", &materialArray[ mc ].Material.Diffuse.w );
-		}
-		else if( strcmp( str, "map_Kd" ) == 0 )
-		{
-			//テクスチャ
-			fscanf( file, "%s", str );
-
-			char path[256];
-			strcpy( path, dir );
-			strcat( path, "\\" );
-			strcat( path, str );
-
-			strcat( materialArray[ mc ].TextureName, path );
-		}
-	}
-
-	fclose(file);
-
-	*MaterialArray = materialArray;
-	*MaterialNum = materialNum;
-}
-

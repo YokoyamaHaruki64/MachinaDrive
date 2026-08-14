@@ -72,7 +72,7 @@ struct DrawItem
     uint64_t submitOrder{};
 };
 
-class Renderer 
+class Renderer
 {
 private:
 
@@ -96,6 +96,7 @@ private:
 	static ID3D11Buffer*			m_MaterialBuffer;
 	static ID3D11Buffer*			m_LightingBuffer;
     static ID3D11Buffer*            m_UVBuffer;
+    static std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> m_FallbackVertexBuffers;
 
     static std::array<ID3D11DepthStencilState*, 14> m_DepthStates;
 
@@ -121,6 +122,7 @@ private:
     static CullMode m_CurrentCullMode;
 
     static void CreateDepthStencilStates();
+    static void CreateFallbackVertexBuffers();
     static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);
 
 public:
@@ -145,6 +147,7 @@ public:
 
 	static ID3D11Device* GetDevice( void ){ return m_Device; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_DeviceContext; }
+    static ID3D11Buffer* GetFallbackVertexBuffer(VertexStreamType streamType);
 
     static XMMATRIX GetViewMatrix();
     static XMMATRIX GetProjectionMatrix();

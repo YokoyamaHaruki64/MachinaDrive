@@ -74,6 +74,7 @@ public:
     void Bind() const;
 
     const RenderState& GetRenderState() const { return m_renderState; }
+    const std::vector<InputSlotBinding>& GetInputSlotBindings() const { return m_bindings; }
     const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
     const std::vector<ShaderTextureInfo>& GetTextureInfo() const { return m_textureInfo; }
 };

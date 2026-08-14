@@ -26,6 +26,7 @@ ID3D11Buffer*			Renderer::m_PerObjectBuffer{};
 ID3D11Buffer*			Renderer::m_MaterialBuffer{};
 ID3D11Buffer*			Renderer::m_LightingBuffer{};
 ID3D11Buffer*           Renderer::m_UVBuffer{};
+std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> Renderer::m_FallbackVertexBuffers{};
 
 
 std::array<ID3D11DepthStencilState*,
@@ -55,6 +56,26 @@ CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
 
 namespace
 {
+    // 再生成を行わないため、一般的なモデルの頂点数を十分に上回る2^20頂点を確保する。
+    constexpr UINT FALLBACK_VERTEX_COUNT = 1u << 20;
+
+    template <typename VertexType>
+    ID3D11Buffer* CreateFallbackVertexBuffer(ID3D11Device* device, const VertexType& defaultVertex)
+    {
+        std::vector<VertexType> vertices(FALLBACK_VERTEX_COUNT, defaultVertex);
+
+        D3D11_BUFFER_DESC description{};
+        description.ByteWidth = static_cast<UINT>(sizeof(VertexType) * vertices.size());
+        description.Usage = D3D11_USAGE_IMMUTABLE;
+        description.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+        D3D11_SUBRESOURCE_DATA initialData{};
+        initialData.pSysMem = vertices.data();
+
+        ID3D11Buffer* buffer{};
+        return SUCCEEDED(device->CreateBuffer(&description, &initialData, &buffer)) ? buffer : nullptr;
+    }
+
     constexpr size_t GetDepthStateIndex(DepthTestMode testMode, DepthWriteMode writeMode)
     {
         return static_cast<size_t>(testMode) * 2 + static_cast<size_t>(writeMode);
@@ -81,6 +102,26 @@ namespace
             return D3D11_COMPARISON_ALWAYS;
         }
     }
+}
+
+void Renderer::CreateFallbackVertexBuffers()
+{
+    // Positionだけは形状を定義できないため補完せず、描画側でエラーとして扱う。
+    m_FallbackVertexBuffers[static_cast<size_t>(VertexStreamType::NormalTangent)] = CreateFallbackVertexBuffer(
+        m_Device,
+        NormalTangentVertex{ Vector3(0.0f, 1.0f, 0.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f) });
+    m_FallbackVertexBuffers[static_cast<size_t>(VertexStreamType::PrimaryTexCoord)] = CreateFallbackVertexBuffer(
+        m_Device,
+        PrimaryTexCoordVertex{ Vector4(0.0f, 0.0f, 0.0f, 0.0f) });
+    m_FallbackVertexBuffers[static_cast<size_t>(VertexStreamType::SecondaryTexCoord)] = CreateFallbackVertexBuffer(
+        m_Device,
+        SecondaryTexCoordVertex{ Vector4(0.0f, 0.0f, 0.0f, 0.0f) });
+    m_FallbackVertexBuffers[static_cast<size_t>(VertexStreamType::ExtraTexCoord)] = CreateFallbackVertexBuffer(
+        m_Device,
+        ExtraTexCoordVertex{});
+    m_FallbackVertexBuffers[static_cast<size_t>(VertexStreamType::Color)] = CreateFallbackVertexBuffer(
+        m_Device,
+        ColorVertex{ Color(1.0f, 1.0f, 1.0f, 1.0f) });
 }
 
 void Renderer::Init()
@@ -186,9 +227,9 @@ void Renderer::Init()
 
 	// ラスタライザステート設定
 	D3D11_RASTERIZER_DESC rasterizerDesc{};
-	rasterizerDesc.FillMode = D3D11_FILL_SOLID; 
-	rasterizerDesc.CullMode = D3D11_CULL_BACK; 
-	rasterizerDesc.DepthClipEnable = TRUE; 
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	rasterizerDesc.DepthClipEnable = TRUE;
 	rasterizerDesc.MultisampleEnable = FALSE;
 
     m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState);
@@ -267,6 +308,9 @@ void Renderer::Init()
 	m_DeviceContext->VSSetSamplers(1, 1, &m_ShadowSampler);
 	m_DeviceContext->PSSetSamplers(1, 1, &m_ShadowSampler);
 
+    // 任意属性を要求するShaderへ、モデルに存在しない頂点Streamの既定値を供給する。
+    CreateFallbackVertexBuffers();
+
 
 
 	// common.hlsl の b0〜b3 に対応する定数バッファを生成する。
@@ -301,7 +345,7 @@ void Renderer::Init()
     bufferDesc.ByteWidth = sizeof(XMFLOAT4);
     m_Device->CreateBuffer(&bufferDesc, NULL, &m_UVBuffer);
     m_DeviceContext->VSSetConstantBuffers(6, 1, &m_UVBuffer);
-    m_DeviceContext->PSSetConstantBuffers(6, 1, &m_UVBuffer);    
+    m_DeviceContext->PSSetConstantBuffers(6, 1, &m_UVBuffer);
 
 
 
@@ -342,6 +386,14 @@ void Renderer::Uninit()
 	m_LightingBuffer->Release();
 	m_MaterialBuffer->Release();
     m_UVBuffer->Release();
+
+    for (ID3D11Buffer* fallbackVertexBuffer : m_FallbackVertexBuffers)
+    {
+        if (fallbackVertexBuffer)
+            fallbackVertexBuffer->Release();
+    }
+    m_FallbackVertexBuffers = {};
+
 	m_LinearSampler->Release();
 	m_ShadowSampler->Release();
 
@@ -380,7 +432,7 @@ void Renderer::Begin()
 		0 / 255.0f,
 		0 / 255.0f,
 		16.0f / 255.0f,
-		1.0f 
+		1.0f
 	};
     for( int i = 0; i < 2; ++i )
     {
@@ -516,6 +568,18 @@ void Renderer::SetLight( LIGHT Light )
 void Renderer::SetUV(XMFLOAT4 UV)
 {
     m_DeviceContext->UpdateSubresource(m_UVBuffer, 0, NULL, &UV, 0, 0);
+}
+
+ID3D11Buffer* Renderer::GetFallbackVertexBuffer(VertexStreamType streamType)
+{
+    const size_t index = static_cast<size_t>(streamType);
+    if (streamType == VertexStreamType::Position || streamType == VertexStreamType::Error ||
+        index >= m_FallbackVertexBuffers.size())
+    {
+        return nullptr;
+    }
+
+    return m_FallbackVertexBuffers[index];
 }
 
 void Renderer::SetBlendMode(BlendMode mode)
@@ -680,5 +744,3 @@ void Renderer::SubmitDrawCommand(RenderPhase phase, DrawItem item)
 {
     SubmitDrawItem(phase, item);
 }
-
-
