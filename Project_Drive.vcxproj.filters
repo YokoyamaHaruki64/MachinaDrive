@@ -763,6 +763,15 @@
     <None Include="shader\DefaultLit.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="shader\UnlitAdditive.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\UnlitTexture.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\UnlitTransparent.shader">
+      <Filter>Shader</Filter>
+    </None>
     <None Include="include\System\DirectXTex.inl">
       <Filter>ヘッダー ファイル\System</Filter>
     </None>

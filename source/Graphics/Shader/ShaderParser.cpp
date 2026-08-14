@@ -13,6 +13,7 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/ShaderParser.h"
 #include "Graphics/Shader/ShaderToken.h"
 #include "Graphics/Shader/ShaderInc.h"
+#include "Graphics/TextureManager.h"
 
 const std::unordered_map<std::string,ShaderParser::TypeParser> ShaderParser::typeTable =
 {
@@ -306,8 +307,10 @@ PropertyValue ShaderParser::parseTexture(const std::string& valueStr)
     if (valueStr.empty())
         return TextureHandle(-1);
 
-    // テクスチャ名からIDを取得する処理（例: TextureManager::GetTextureID(valueStr)）
-    return TextureHandle(-1);
+    // Property記法の引用符を除去し、Shaderが宣言した相対パスを既定Textureとして解決する。
+    const bool isQuoted = valueStr.size() >= 2 && valueStr.front() == '"' && valueStr.back() == '"';
+    const std::string filePath = isQuoted ? valueStr.substr(1, valueStr.size() - 2) : valueStr;
+    return TextureManager::LoadTexture(filePath);
 }
 
 bool ShaderParser::ExtractBlock(const std::string& blockName, std::string& outBlock,int blockOffset) const

@@ -78,8 +78,8 @@ void Manager::Init()
     RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
 	Renderer::Init();
-    ShaderManager::Init();
     TextureManager::Init();
+    ShaderManager::Init();
     MaterialManager::Init();
 	Input::Init();
     PostEffect::Init();
