@@ -10,7 +10,8 @@ TextureID TextureManager::m_nextTextureID{};
 
 bool TextureManager::CreateFallbackTexture()
 {
-    const uint32_t magentaPixel = 0xFFFF00FF;
+    // Texture未設定時は見た目への影響を抑える白を使い、マゼンタはMaterial用の将来予約とする。
+    const uint32_t whitePixel = 0xFFFFFFFF;
     D3D11_TEXTURE2D_DESC textureDesc{};
     textureDesc.Width = 1;
     textureDesc.Height = 1;
@@ -22,8 +23,8 @@ bool TextureManager::CreateFallbackTexture()
     textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
     D3D11_SUBRESOURCE_DATA initialData{};
-    initialData.pSysMem = &magentaPixel;
-    initialData.SysMemPitch = sizeof(magentaPixel);
+    initialData.pSysMem = &whitePixel;
+    initialData.SysMemPitch = sizeof(whitePixel);
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
     if (FAILED(Renderer::GetDevice()->CreateTexture2D(&textureDesc, &initialData, texture.GetAddressOf())))

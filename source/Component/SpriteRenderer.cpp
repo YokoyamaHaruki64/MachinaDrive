@@ -48,7 +48,7 @@ SpriteRenderer::SpriteRenderer(
     }
     else
     {
-        // 無効なTextureHandleはマゼンタのフォールバックへ解決し、矩形サイズは1x1とする。
+        // 無効なTextureHandleは白のフォールバックへ解決し、矩形サイズは1x1とする。
         m_textureWidth = 1;
         m_textureHeight = 1;
     }

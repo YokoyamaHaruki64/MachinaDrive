@@ -58,7 +58,7 @@ Shader Property の値は `MaterialPropertyID` で一意に指定できる。こ
 
 ## Texture
 
-`TextureManager` はファイルテクスチャと実行時 RenderTexture を `TextureHandle` で一元管理する。Material は Handle のみを持ち、Bind 時に Manager から SRV を取得する。無効 Handle またはロード失敗時は、1x1 のマゼンタ・フォールバックテクスチャを使う。
+`TextureManager` はファイルテクスチャと実行時 RenderTexture を `TextureHandle` で一元管理する。Material は Handle のみを持ち、Bind 時に Manager から SRV を取得する。無効 Handle またはロード失敗時は、1x1 の白いフォールバックテクスチャを使う。マゼンタは将来の Material 自体のフォールバック表示用として予約する。
 
 `CreateRenderTexture(name, width, height)` は SRV と RTV を持つ実行時テクスチャを作成する。画面用の Ping-Pong バッファだけは Renderer が所有する。
 
@@ -102,7 +102,7 @@ aiMesh ごとに次の Vertex Stream を生成する。存在しない属性は 
 
 Normal が存在して Tangent がない場合は、UV0 と三角形の位置・法線から Tangent を生成する。Position 以外の不足 Stream は Renderer の既定頂点バッファで補えるが、Position は形状を復元できないためフォールバックしない。
 
-Material は aiMaterial ごとに `DefaultLit` 用の名前付き Material として生成する。名前はモデルパス、Material index、Assimp 側の Material 名から構成する。Diffuse／Emissive 色、Shininess、対応するテクスチャを Shader Property へ設定する。テクスチャは Assimp の埋め込みデータ（`*0` 形式を含む）を先に解決し、なければモデルファイルからの相対パスを `TextureManager` へ渡す。解決できない場合は Material Bind 時にマゼンタのフォールバックが使われる。
+Material は aiMaterial ごとに `DefaultLit` 用の名前付き Material として生成する。名前はモデルパス、Material index、Assimp 側の Material 名から構成する。Diffuse／Emissive 色、Shininess、対応するテクスチャを Shader Property へ設定する。テクスチャは Assimp の埋め込みデータ（`*0` 形式を含む）を先に解決し、なければモデルファイルからの相対パスを `TextureManager` へ渡す。解決できない場合は Material Bind 時に白いテクスチャフォールバックが使われる。
 
 Node 階層は `ModelNode` として再帰的に保存し、各 Node は参照する Mesh index とローカル変換を持つ。`ModelRenderer` は描画時に Node を再帰走査し、Node のローカル変換とコンポーネントの World 変換を合成して各 Mesh を描画する。Animation、Skeleton、Skinning はまだロード・保持しない。
 
