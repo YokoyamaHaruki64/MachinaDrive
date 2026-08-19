@@ -4,6 +4,9 @@
 #include "Component/modelRenderer.h"
 #include "Component/Camera.h"
 #include "System/manager.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 void Skydome::OnStart()
 {
@@ -13,9 +16,20 @@ void Skydome::OnStart()
         MessageBoxA(nullptr, "Skydome: Main Camera not found!", "Error", MB_OK | MB_ICONERROR);
     }
 
-    GameObject* domeObject = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(1000.0f, 1000.0f, 1000.0f));
-    domeObject->AddComponent<ModelRenderer>(
+    m_domeObject = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(1000.0f, 1000.0f, 1000.0f));
+    auto mr = m_domeObject->AddComponent<ModelRenderer>(
         "Assets\\Models\\sky.obj");
+
+    Material* skydomeMaterial = MaterialManager::Get("Skydome.Material");
+    if(!skydomeMaterial)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        {
+            skydomeMaterial = MaterialManager::Create("Skydome.Material", *shader);
+            if (skydomeMaterial)
+                skydomeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\sky.jpg"));
+        }
+    }
 }
 
 void Skydome::Update()

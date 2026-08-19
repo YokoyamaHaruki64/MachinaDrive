@@ -1,10 +1,10 @@
-Shader "UnlitAdditive"
+﻿Shader "UnlitAdditive"
 {
     Properties
     {
         _BaseColor("Base Color", Color) = (1,1,1,1)
-        _UVScale("UV Scale", Vector2) = (1,1)
-        _UVOffset("UV Offset", Vector2) = (0,0)
+        _UVScale("UV Scale", float2) = (1,1)
+        _UVOffset("UV Offset", float2) = (0,0)
         _MainTex("Main Texture", 2D) = "Assets/Textures/particle.png"
     }
 

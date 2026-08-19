@@ -1,10 +1,10 @@
-Shader "PostProcessBloom"
+﻿Shader "PostProcessBloom"
 {
     Properties
     {
-        _Threshold("Threshold", Float) = 0.8
-        _BlurRadius("Blur Radius", Float) = 1.0
-        _Intensity("Intensity", Float) = 2.0
+        _Threshold("Threshold", float) = 0.8
+        _BlurRadius("Blur Radius", float) = 1.0
+        _Intensity("Intensity", float) = 2.0
         _Bloom("Bloom Texture", 2D) = ""
     }
 

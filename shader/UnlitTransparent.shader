@@ -1,10 +1,10 @@
-Shader "UnlitTransparent"
+﻿Shader "UnlitTransparent"
 {
     Properties
     {
         _BaseColor("Base Color", Color) = (1,1,1,1)
-        _UVScale("UV Scale", Vector2) = (1,1)
-        _UVOffset("UV Offset", Vector2) = (0,0)
+        _UVScale("UV Scale", float2) = (1,1)
+        _UVOffset("UV Offset", float2) = (0,0)
         _MainTex("Main Texture", 2D) = ""
     }
 
@@ -43,13 +43,15 @@ Shader "UnlitTransparent"
             const float4 worldPosition = mul(float4(input.position, 1.0f), World);
             output.position = mul(mul(worldPosition, View), Projection);
             output.color = input.color;
-            output.texCoord = input.texCoord * _UVScale + _UVOffset;
+            output.texCoord = input.texCoord;
             return output;
         }
 
         float4 PSMain(VSOutput input) : SV_TARGET
         {
-            return _BaseColor * input.color * _MainTex.Sample(LinearSampler, input.texCoord);
+            float2 uv = input.texCoord * _UVScale.xy + _UVOffset;
+
+            return _BaseColor * input.color * _MainTex.Sample(LinearSampler,uv);
         }
         HLSL_END
     }
