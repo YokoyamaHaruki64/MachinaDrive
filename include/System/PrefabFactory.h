@@ -29,8 +29,7 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
         scale
     );
     player->AddComponentForCreate<ModelRenderer>(
-        "Assets\\Models\\Player.obj",
-        ModelRenderer::InverseAxis::Y); // Y軸反転
+        "Assets\\Models\\Player.obj");
 
     player->AddComponentForCreate<Player>();
     player->AddComponentForCreate<Audio>("Assets\\Sounds\\wan.wav");
@@ -46,8 +45,7 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
         scale
     );
     enemy->AddComponentForCreate<ModelRenderer>(
-        "Assets\\Models\\Player.obj",
-        ModelRenderer::InverseAxis::Y); // Y軸反転
+        "Assets\\Models\\Player.obj");
 
     enemy->AddComponentForCreate<Enemy>();
 
