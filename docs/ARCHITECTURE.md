@@ -1,4 +1,4 @@
-# アーキテクチャ
+﻿# アーキテクチャ
 
 ## 概要
 
@@ -82,15 +82,15 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、`Manager::Init(
 
 描画可能なコンポーネントは `RendererBase` を継承する。生成時に `Manager` のレンダラーリストへ登録され、破棄時に解除される。`Manager::Draw()` は各レンダラーの `Submit()` を呼び、`Renderer` がコマンドをソートして描画する。
 
-描画は `RenderPass` とソートキーで順序を制御する。
+描画は `RenderPhase` とソートキーで順序を制御する。
 
-- `Opaque`: 描画レイヤー、ブレンド、カリングでソートする。
+- `Opaque`: MaterialID、MeshID、描画レイヤーでソートする。
 - `Transparent`: 描画レイヤーの後、カメラ前方方向の距離を用いて奥から手前へ描画する。
-- `Overlay`: 描画レイヤーを用いて前面要素を描画する。
+- `Overlay`: 描画レイヤーを優先して前面要素を描画する。
 
 描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
 
-Material描画へ移行する際のPhase別キュー、DrawItem、ソート規約は [MATERIAL_RENDERING_DESIGN.md](MATERIAL_RENDERING_DESIGN.md) を参照する。
+Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [MATERIAL_RENDERING_DESIGN.md](MATERIAL_RENDERING_DESIGN.md) を参照する。
 
 ## リソースとシェーダー
 
