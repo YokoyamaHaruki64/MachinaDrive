@@ -31,9 +31,7 @@ namespace
 
 SpriteRenderer::SpriteRenderer(
     GameObject* owner,
-    const wchar_t* textureFile,
-    const char* /*vertexShaderFile*/,
-    const char* /*pixelShaderFile*/)
+    const wchar_t* textureFile)
     : RendererBase(owner)
 {
     GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader");
@@ -67,11 +65,11 @@ SpriteRenderer::SpriteRenderer(
     };
     const std::vector<ColorVertex> colors(4, { Color::White() });
 
-    m_mesh.SetVertexBuffer(VertexStreamType::Position, CreateSpriteVertexBuffer(positions));
-    m_mesh.SetVertexBuffer(VertexStreamType::PrimaryTexCoord, CreateSpriteVertexBuffer(texCoords));
-    m_mesh.SetVertexBuffer(VertexStreamType::Color, CreateSpriteVertexBuffer(colors));
+    m_positionBuffer = CreateSpriteVertexBuffer(positions);
+    m_texCoordBuffer = CreateSpriteVertexBuffer(texCoords);
+    m_colorBuffer = CreateSpriteVertexBuffer(colors);
 
-    m_renderPass = RenderPass::Overlay;
+    m_renderPhase = RenderPhase::Overlay;
 }
 
 void SpriteRenderer::Draw()
@@ -85,11 +83,7 @@ void SpriteRenderer::Draw()
     Renderer::SetWorldViewProjection2D();
     Renderer::SetWorldMatrix(CalcWorldMatrix());
 
-    m_materialInstance->SetColor("_BaseColor", Color(
-        m_material.Diffuse.x,
-        m_material.Diffuse.y,
-        m_material.Diffuse.z,
-        m_material.Diffuse.w));
+    m_materialInstance->SetColor("_BaseColor", m_baseColor);
     m_materialInstance->SetVector2("_UVScale", Vector2(m_uvWidth, m_uvHeight));
     m_materialInstance->SetVector2("_UVOffset", Vector2(m_uvOffsetX, m_uvOffsetY));
     m_materialInstance->SetTexture("_MainTex", m_texture);
@@ -99,7 +93,23 @@ void SpriteRenderer::Draw()
     bool hasAllRequiredStreams = true;
     for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
     {
-        ID3D11Buffer* vertexBuffer = m_mesh.GetVertexBuffer(binding.streamType);
+        ID3D11Buffer* vertexBuffer = nullptr;
+        switch (binding.streamType)
+        {
+        case VertexStreamType::Position:
+            vertexBuffer = m_positionBuffer.Get();
+            break;
+
+        case VertexStreamType::PrimaryTexCoord:
+            vertexBuffer = m_texCoordBuffer.Get();
+            break;
+
+        case VertexStreamType::Color:
+            vertexBuffer = m_colorBuffer.Get();
+            break;
+        }
+
+        // Spriteが持たないStreamは共通フォールバックで補い、Shaderごとの差異を吸収する。
         if (!vertexBuffer)
             vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
 
@@ -123,4 +133,10 @@ void SpriteRenderer::Draw()
 
     Renderer::SetViewMatrix(originalViewMatrix);
     Renderer::SetProjectionMatrix(originalProjectionMatrix);
+}
+
+Material* SpriteRenderer::GetMaterial(uint32_t slot)
+{
+    // Spriteは単一Materialのみを持つ。
+    return slot == 0 ? m_materialInstance : nullptr;
 }

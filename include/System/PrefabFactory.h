@@ -5,8 +5,12 @@
 
 #include "Component/Transform.h"
 #include "Component/modelRenderer.h"
-#include "Component/Primitive.h"
 #include "Component/ParticleSystem.h"
+#include "Graphics/Material.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 #include "Script/Player.h"
 #include "Script/Enemy.h"
@@ -26,8 +30,6 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
     );
     player->AddComponentForCreate<ModelRenderer>(
         "Assets\\Models\\Player.obj",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso",
         ModelRenderer::InverseAxis::Y); // Y軸反転
 
     player->AddComponentForCreate<Player>();
@@ -45,8 +47,6 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
     );
     enemy->AddComponentForCreate<ModelRenderer>(
         "Assets\\Models\\Player.obj",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso",
         ModelRenderer::InverseAxis::Y); // Y軸反転
 
     enemy->AddComponentForCreate<Enemy>();
@@ -62,9 +62,7 @@ GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation
         scale
     );
     bullet->AddComponentForCreate<ModelRenderer>(
-        "Assets\\Models\\bullet.obj",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso"); // Y軸反転
+        "Assets\\Models\\bullet.obj");
     bullet->AddComponentForCreate<Bullet>();
     return bullet;
 }
@@ -76,10 +74,23 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
         rotation,
         scale
     );
-    tree->AddComponentForCreate<Quad>(
-        L"Assets\\Textures\\tree.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
+    ModelRenderer* renderer = tree->AddComponentForCreate<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
+    renderer->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
+
+    // 木は同じShader・Textureを使うため、全インスタンスで専用Materialを共有する。
+    Material* material = MaterialManager::Get("Tree.Material");
+    if (!material)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader"))
+        {
+            material = MaterialManager::Create("Tree.Material", *shader);
+            if (material)
+                material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\tree.png"));
+        }
+    }
+
+    renderer->SetMaterial(0, material);
     return tree;
 }
 
@@ -90,10 +101,23 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
         rotation,
         scale
     );
-    explosion->AddComponentForCreate<Quad>(
-        L"Assets\\Textures\\explosion.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso")->SetBillboardType(RendererBase::BillboardType::CameraFacing);
+    ModelRenderer* renderer = explosion->AddComponentForCreate<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
+    renderer->SetBillboardType(RendererBase::BillboardType::CameraFacing);
+
+    // UVアニメーションがRendererごとに異なるため、ExplosionごとにMaterialを分ける。
+    static uint32_t materialInstanceIndex = 0;
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader"))
+    {
+        Material* material = MaterialManager::Create(
+            "Explosion.Material." + std::to_string(materialInstanceIndex++),
+            *shader);
+        if (material)
+        {
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\explosion.png"));
+            renderer->SetMaterial(0, material);
+        }
+    }
 
     explosion->AddComponentForCreate<ExplosionEffect>();
     return explosion;
@@ -149,13 +173,23 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    auto q = ripple->AddComponentForCreate<Quad>(
-        L"Assets\\Textures\\Ripple.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
-    q->SetBlendMode(BlendMode::Add);
-    q->SetRenderPass(RenderPass::Transparent);
-    q->SetCullMode(CullMode::None);
+    ModelRenderer* renderer = ripple->AddComponentForCreate<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
+    renderer->SetRenderPhase(RenderPhase::Transparent);
+
+    // 波紋は色を個別更新するため、インスタンスごとにMaterialを生成する。
+    static uint32_t materialInstanceIndex = 0;
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader"))
+    {
+        Material* material = MaterialManager::Create(
+            "Ripple.Material." + std::to_string(materialInstanceIndex++),
+            *shader);
+        if (material)
+        {
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\Ripple.png"));
+            renderer->SetMaterial(0, material);
+        }
+    }
     ripple->AddComponentForCreate<Ripple>();
     return ripple;
 }

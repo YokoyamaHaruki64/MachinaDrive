@@ -4,15 +4,13 @@
 
 #include "Component/Transform.h"
 #include "Graphics/Material.h"
-#include "Graphics/ModelLoader.h"
+#include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "System/renderer.h"
 
 #include "math/MathCommon.h"
 
 #include <unordered_set>
-
-std::unordered_map<std::string, ModelAsset*> ModelRenderer::m_ModelPool;
 
 namespace
 {
@@ -27,7 +25,7 @@ namespace
             matrix.m[3][0], matrix.m[3][1], matrix.m[3][2], matrix.m[3][3]);
     }
 
-    void DrawMesh(const ModelRenderer& renderer, const Mesh& mesh, const XMMATRIX& worldMatrix)
+    void DrawMesh(ModelRenderer& renderer, const Mesh& mesh, const XMMATRIX& worldMatrix)
     {
         ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
         deviceContext->IASetIndexBuffer(mesh.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
@@ -83,7 +81,7 @@ namespace
             deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
     }
 
-    void DrawNode(const ModelRenderer& renderer, const ModelAsset& modelAsset, const ModelNode& node, const XMMATRIX& parentWorldMatrix)
+    void DrawNode(ModelRenderer& renderer, const ModelAsset& modelAsset, const ModelNode& node, const XMMATRIX& parentWorldMatrix)
     {
         // 行ベクトル系のため、ローカル変換を親変換の左側へ積算する。
         const XMMATRIX worldMatrix = ToXMMATRIX(node.localTransform) * parentWorldMatrix;
@@ -98,28 +96,19 @@ namespace
     }
 }
 
-void ModelRenderer::Load(
-    const char* modelFileName,
-    const char* /*vertexShaderFileName*/,
-    const char* /*pixelShaderFileName*/)
+void ModelRenderer::Load(const char* modelFileName)
 {
-    if (const auto foundModel = m_ModelPool.find(modelFileName); foundModel != m_ModelPool.end())
-    {
-        m_model = foundModel->second;
-        m_materialOverrides.assign(m_model->embeddedMaterials.size(), nullptr);
-        return;
-    }
+    Load(modelFileName ? ModelManager::Load(modelFileName) : nullptr);
+}
 
-    auto* model = new ModelAsset;
-    if (!ModelLoader::Load(modelFileName, *model))
-    {
-        delete model;
+void ModelRenderer::Load(ModelAsset* modelAsset)
+{
+    m_model = modelAsset;
+    m_materialOverrides.clear();
+    if (!m_model)
         return;
-    }
 
-    m_model = model;
     m_materialOverrides.assign(m_model->embeddedMaterials.size(), nullptr);
-    m_ModelPool.emplace(modelFileName, model);
 }
 
 Material* ModelRenderer::ResolveMaterial(uint32_t materialSlot) const
@@ -143,9 +132,15 @@ void ModelRenderer::SetMaterial(uint32_t materialSlot, Material* material)
     m_materialOverrides[materialSlot] = material;
 }
 
-Material* ModelRenderer::GetMaterial(uint32_t materialSlot) const
+Material* ModelRenderer::GetMaterial(uint32_t materialSlot)
 {
     return ResolveMaterial(materialSlot);
+}
+
+uint32_t ModelRenderer::GetMeshID() const
+{
+    // ModelRendererは複数Meshを描けるため、提出段階では先頭Meshを代表値として使う。
+    return m_model && !m_model->meshes.empty() ? m_model->meshes.front().meshID : 0;
 }
 
 void ModelRenderer::Draw()
@@ -168,26 +163,11 @@ void ModelRenderer::Draw()
 
 void ModelRenderer::Preload(const char* fileName)
 {
-    if (m_ModelPool.contains(fileName))
-        return;
-
-    auto* model = new ModelAsset;
-    if (!ModelLoader::Load(fileName, *model))
-    {
-        delete model;
-        return;
-    }
-
-    m_ModelPool.emplace(fileName, model);
+    if (fileName)
+        ModelManager::Load(fileName);
 }
 
 void ModelRenderer::UnloadAll()
 {
-    for (const auto& [fileName, model] : m_ModelPool)
-    {
-        ModelLoader::Release(*model);
-        delete model;
-    }
-
-    m_ModelPool.clear();
+    // ModelAssetの寿命はModelManagerが一元管理する。
 }

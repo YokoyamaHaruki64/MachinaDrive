@@ -58,8 +58,9 @@ void PostProcess::Uninit()
 PostProcess::PostProcess(const char* shaderFilePath)
 {
     // PostProcessごとの値は独立したMaterialへ持たせ、Property APIを通常描画と共用する。
+    static uint32_t materialInstanceIndex = 0;
     if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderFilePath))
-        m_material = MaterialManager::Create(*shader);
+        m_material = MaterialManager::Create("PostProcess." + std::to_string(materialInstanceIndex++), *shader);
 }
 
 bool PostProcess::BindFullscreenVertices(const GraphicsShaderPass& shaderPass) const

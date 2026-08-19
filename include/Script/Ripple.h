@@ -4,11 +4,11 @@
 #include "Common/Color.h"
 #include "math/Curve.h"
 
-class Quad;
+class ModelRenderer;
 
 class Ripple : public Component
 {
-    Quad* m_quad = nullptr;
+    ModelRenderer* m_renderer = nullptr;
 
     float m_lifeTime = 1.0f; // 波紋の寿命
     float m_elapsedTime = 0.0f; // 経過時間

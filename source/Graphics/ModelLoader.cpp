@@ -68,13 +68,16 @@ namespace
     Material* CreateMaterial(
         const aiScene& scene,
         const aiMaterial& sourceMaterial,
-        const std::filesystem::path& modelDirectory)
+        const std::filesystem::path& modelDirectory,
+        const std::string& materialName)
     {
         GraphicsShader* defaultShader = ShaderManager::GetDefaultShader();
         if (!defaultShader)
             return nullptr;
 
-        Material* material = MaterialManager::Create(*defaultShader);
+        Material* material = MaterialManager::Create(materialName, *defaultShader);
+        if (!material)
+            return nullptr;
 
         // Assimpの色情報をDefaultLitのPropertyへ対応付ける。
         aiColor4D color{};
@@ -330,7 +333,17 @@ bool ModelLoader::Load(const std::string& filePath, ModelAsset& outModelAsset)
     const std::filesystem::path modelDirectory = std::filesystem::path(filePath).parent_path();
     outModelAsset.embeddedMaterials.resize(scene->mNumMaterials);
     for (unsigned int materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex)
-        outModelAsset.embeddedMaterials[materialIndex] = CreateMaterial(*scene, *scene->mMaterials[materialIndex], modelDirectory);
+    {
+        aiString sourceMaterialName;
+        scene->mMaterials[materialIndex]->Get(AI_MATKEY_NAME, sourceMaterialName);
+
+        const std::string materialName = "Model." + filePath + "." + std::to_string(materialIndex) + "." + sourceMaterialName.C_Str();
+        outModelAsset.embeddedMaterials[materialIndex] = CreateMaterial(
+            *scene,
+            *scene->mMaterials[materialIndex],
+            modelDirectory,
+            materialName);
+    }
 
     if (outModelAsset.embeddedMaterials.empty() ||
         std::any_of(outModelAsset.embeddedMaterials.begin(), outModelAsset.embeddedMaterials.end(), [](const Material* material) { return material == nullptr; }))

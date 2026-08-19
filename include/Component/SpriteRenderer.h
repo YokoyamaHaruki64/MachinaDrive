@@ -7,9 +7,13 @@
 class SpriteRenderer : public RendererBase
 {
 protected:
-    Mesh m_mesh{};
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_positionBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
+
     Material* m_materialInstance{};
     TextureHandle m_texture{};
+    Color m_baseColor{ Color::White() };
     int m_textureWidth = 0;
     int m_textureHeight = 0;
 
@@ -22,12 +26,11 @@ public:
     SpriteRenderer() = delete;
     SpriteRenderer(
         GameObject* owner,
-        const wchar_t* textureFile,
-        const char* vertexShaderFile = nullptr,
-        const char* pixelShaderFile = nullptr);
+        const wchar_t* textureFile);
 
     virtual ~SpriteRenderer() {}
     void Draw() override;
+    Material* GetMaterial(uint32_t slot = 0) override;
 
     void SetUVRect(float offsetX, float offsetY, float width, float height)
     {
@@ -51,4 +54,5 @@ public:
 
     int GetTextureWidth() const { return m_textureWidth; }
     int GetTextureHeight() const { return m_textureHeight; }
+    void SetColor(const Color& color) { m_baseColor = color; }
 };

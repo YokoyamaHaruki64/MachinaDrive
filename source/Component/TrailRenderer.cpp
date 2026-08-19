@@ -54,24 +54,29 @@ void TrailRenderer::UpdateSegments()
 
 void TrailRenderer::CreateVertexStreams()
 {
-    m_mesh.SetVertexBuffer(VertexStreamType::Position, CreateTrailVertexBuffer<PositionVertex>());
-    m_mesh.SetVertexBuffer(VertexStreamType::PrimaryTexCoord, CreateTrailVertexBuffer<PrimaryTexCoordVertex>());
-    m_mesh.SetVertexBuffer(VertexStreamType::Color, CreateTrailVertexBuffer<ColorVertex>());
+    // Trailは毎フレーム形状が変化するため、Mesh Assetではなく専用の動的Streamを所有する。
+    m_positionBuffer = CreateTrailVertexBuffer<PositionVertex>();
+    m_texCoordBuffer = CreateTrailVertexBuffer<PrimaryTexCoordVertex>();
+    m_colorBuffer = CreateTrailVertexBuffer<ColorVertex>();
 }
 
 TrailRenderer::TrailRenderer(GameObject* owner, const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader");
+    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
     if (shader)
         m_materialInstance = MaterialManager::GetDefault(*shader);
 
     m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
     CreateVertexStreams();
 
-    m_renderPass = RenderPass::Transparent;
-    m_blendMode = BlendMode::AlphaBlend;
-    m_cullMode = CullMode::None;
+    m_renderPhase = RenderPhase::Transparent;
+}
+
+Material* TrailRenderer::GetMaterial(uint32_t slot)
+{
+    // Trailは単一Materialのみを持つ。
+    return slot == 0 ? m_materialInstance : nullptr;
 }
 
 void TrailRenderer::Draw()
@@ -131,9 +136,9 @@ void TrailRenderer::Draw()
         return true;
     };
 
-    if (!updateStream(m_mesh.GetVertexBuffer(VertexStreamType::Position), positions) ||
-        !updateStream(m_mesh.GetVertexBuffer(VertexStreamType::PrimaryTexCoord), texCoords) ||
-        !updateStream(m_mesh.GetVertexBuffer(VertexStreamType::Color), colors))
+    if (!updateStream(m_positionBuffer.Get(), positions) ||
+        !updateStream(m_texCoordBuffer.Get(), texCoords) ||
+        !updateStream(m_colorBuffer.Get(), colors))
     {
         return;
     }
@@ -144,7 +149,23 @@ void TrailRenderer::Draw()
 
     for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
     {
-        ID3D11Buffer* vertexBuffer = m_mesh.GetVertexBuffer(binding.streamType);
+        ID3D11Buffer* vertexBuffer = nullptr;
+        switch (binding.streamType)
+        {
+        case VertexStreamType::Position:
+            vertexBuffer = m_positionBuffer.Get();
+            break;
+
+        case VertexStreamType::PrimaryTexCoord:
+            vertexBuffer = m_texCoordBuffer.Get();
+            break;
+
+        case VertexStreamType::Color:
+            vertexBuffer = m_colorBuffer.Get();
+            break;
+        }
+
+        // Trailが持たないStreamは共通フォールバックで補い、Shaderごとの差異を吸収する。
         if (!vertexBuffer)
             vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
 

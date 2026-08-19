@@ -8,7 +8,6 @@
 #include "Script/EffectConfig.h"
 #include "Component/TrailRenderer.h"
 #include "Component/Transform.h"
-#include "Component/Primitive.h"
 
 void PatternTrail::OnStart()
 {
@@ -79,8 +78,6 @@ void PatternTrail::CreateTrailPattern(
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);
-        tr->SetBlendMode(BlendMode::Add);
-
         tr->SetWidthCurve(settings.widthCurve);
         tr->SetTrailLifetime(settings.trailLifeTime);
         tr->SetColorCurve(settings.colorCurve);

@@ -78,9 +78,6 @@
     <ClCompile Include="source\Component\modelRenderer.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
-    <ClCompile Include="source\Component\Primitive.cpp">
-      <Filter>ソース ファイル\Component</Filter>
-    </ClCompile>
     <ClCompile Include="source\Component\Camera.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
@@ -219,6 +216,9 @@
     <ClCompile Include="source\Graphics\ModelLoader.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="source\Graphics\ModelManager.cpp">
+      <Filter>ソース ファイル\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="source\Graphics\TextureManager.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
@@ -258,9 +258,6 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\modelRenderer.h">
-      <Filter>ヘッダー ファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Component\Primitive.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\Camera.h">
@@ -423,6 +420,9 @@
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\ModelLoader.h">
+      <Filter>ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\ModelManager.h">
       <Filter>ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\TextureManager.h">

@@ -4,8 +4,6 @@
 #include "System/RendererBase.h"
 
 #include <string>
-#include <unordered_map>
-
 class ModelRenderer : public RendererBase
 {
 public:
@@ -17,8 +15,6 @@ public:
     };
 
 private:
-    static std::unordered_map<std::string, ModelAsset*> m_ModelPool;
-
     ModelAsset* m_model{};
     std::vector<Material*> m_materialOverrides{};
     uint8_t m_inverseAxisFlags{};
@@ -33,22 +29,26 @@ public:
     ModelRenderer(
         GameObject* object,
         const char* modelFileName,
-        const char* vertexShaderFileName,
-        const char* pixelShaderFileName,
         uint8_t inverseAxisFlags = 0)
         : RendererBase(object), m_inverseAxisFlags(inverseAxisFlags)
     {
-        // 旧Shader指定は、ModelAssetが所有するMaterialへの完全移行までAPI互換のため受け取る。
-        Load(modelFileName, vertexShaderFileName, pixelShaderFileName);
+        Load(modelFileName);
+    }
+    ModelRenderer(
+        GameObject* object,
+        ModelAsset* modelAsset,
+        uint8_t inverseAxisFlags = 0)
+        : RendererBase(object), m_inverseAxisFlags(inverseAxisFlags)
+    {
+        Load(modelAsset);
     }
 
-    void Load(
-        const char* modelFileName,
-        const char* vertexShaderFileName,
-        const char* pixelShaderFileName);
+    void Load(const char* modelFileName);
+    void Load(ModelAsset* modelAsset);
 
     void SetMaterial(uint32_t materialSlot, Material* material);
-    Material* GetMaterial(uint32_t materialSlot) const;
+    Material* GetMaterial(uint32_t materialSlot = 0) override;
+    uint32_t GetMeshID() const override;
 
     void Draw() override;
 };

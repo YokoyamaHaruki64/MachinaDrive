@@ -24,9 +24,7 @@ int Renderer::dstBufferIndex = 1;
 
 ID3D11Buffer*			Renderer::m_PerFrameBuffer{};
 ID3D11Buffer*			Renderer::m_PerObjectBuffer{};
-ID3D11Buffer*			Renderer::m_MaterialBuffer{};
 ID3D11Buffer*			Renderer::m_LightingBuffer{};
-ID3D11Buffer*           Renderer::m_UVBuffer{};
 std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> Renderer::m_FallbackVertexBuffers{};
 
 
@@ -315,7 +313,7 @@ void Renderer::Init()
 
 
 
-	// common.hlsl の b0〜b3 に対応する定数バッファを生成する。
+	// common.hlsl の共有定数バッファを生成する。
 	D3D11_BUFFER_DESC bufferDesc{};
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -338,18 +336,6 @@ void Renderer::Init()
 	m_DeviceContext->VSSetConstantBuffers(2, 1, &m_LightingBuffer);
 	m_DeviceContext->PSSetConstantBuffers(2, 1, &m_LightingBuffer);
 
-	// b3 は新 Material の Properties として利用する。旧 API は移行完了まで同じスロットを更新する。
-	bufferDesc.ByteWidth = sizeof(MATERIAL);
-	m_Device->CreateBuffer(&bufferDesc, nullptr, &m_MaterialBuffer);
-	m_DeviceContext->VSSetConstantBuffers(3, 1, &m_MaterialBuffer);
-	m_DeviceContext->PSSetConstantBuffers(3, 1, &m_MaterialBuffer);
-
-    bufferDesc.ByteWidth = sizeof(XMFLOAT4);
-    m_Device->CreateBuffer(&bufferDesc, NULL, &m_UVBuffer);
-    m_DeviceContext->VSSetConstantBuffers(6, 1, &m_UVBuffer);
-    m_DeviceContext->PSSetConstantBuffers(6, 1, &m_UVBuffer);
-
-
 
 	// 行列は単位行列で初期化し、初回描画前に不定値を渡さないようにする。
 	SetWorldMatrix(XMMatrixIdentity());
@@ -365,17 +351,6 @@ void Renderer::Init()
 	SetLight(light);
 
 
-
-	// マテリアル初期化
-	MATERIAL material{};
-	material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	SetMaterial(material);
-
-    // UV初期化
-    SetUV(XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
-
-
 }
 
 
@@ -386,8 +361,6 @@ void Renderer::Uninit()
 	m_PerFrameBuffer->Release();
 	m_PerObjectBuffer->Release();
 	m_LightingBuffer->Release();
-	m_MaterialBuffer->Release();
-    m_UVBuffer->Release();
 
     for (ID3D11Buffer* fallbackVertexBuffer : m_FallbackVertexBuffers)
     {
@@ -458,29 +431,10 @@ void Renderer::Draw()
             return a.submitOrder < b.submitOrder;
         });
 
-        // 互換経路は旧 RendererBase と同じ深度動作を維持する。
-        if (phase == RenderPhase::Opaque)
-            SetDepthEnable(true);
-        else if (phase == RenderPhase::Transparent)
-            SetDepthEnable(false);
-
         for (const DrawItem& item : queue)
         {
-            if (item.material)
-            {
-                // Materialが所有するShaderとPassの描画設定を、描画直前に一括で反映する。
-                item.material->Bind(item.materialPassIndex);
-            }
-            else if (item.renderer)
-            {
-                // Material未移行のRendererは、従来どおり個別ステートを設定する。
-                item.renderer->BindState();
-            }
-
             if (item.renderer)
-            {
                 item.renderer->Draw();
-            }
         }
 
         queue.clear();
@@ -595,21 +549,9 @@ void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 
 }
 
-
-
-void Renderer::SetMaterial( MATERIAL Material )
-{
-	m_DeviceContext->UpdateSubresource( m_MaterialBuffer, 0, NULL, &Material, 0, 0 );
-}
-
 void Renderer::SetLight( LIGHT Light )
 {
 	m_DeviceContext->UpdateSubresource(m_LightingBuffer, 0, nullptr, &Light, 0, 0);
-}
-
-void Renderer::SetUV(XMFLOAT4 UV)
-{
-    m_DeviceContext->UpdateSubresource(m_UVBuffer, 0, NULL, &UV, 0, 0);
 }
 
 ID3D11Buffer* Renderer::GetFallbackVertexBuffer(VertexStreamType streamType)
@@ -716,61 +658,6 @@ XMMATRIX Renderer::GetViewMatrix()
 XMMATRIX Renderer::GetProjectionMatrix()
 {
     return m_ProjectionMatrix;
-}
-
-void Renderer::CreateVertexShader( ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName )
-{
-
-	FILE* file;
-	long int fsize;
-
-	file = fopen(FileName, "rb");
-	assert(file);
-
-	fsize = _filelength(_fileno(file));
-	unsigned char* buffer = new unsigned char[fsize];
-	fread(buffer, fsize, 1, file);
-	fclose(file);
-
-	m_Device->CreateVertexShader(buffer, fsize, NULL, VertexShader);
-
-
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 4 * 6, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 10, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	UINT numElements = ARRAYSIZE(layout);
-
-	m_Device->CreateInputLayout(layout,
-		numElements,
-		buffer,
-		fsize,
-		VertexLayout);
-
-	delete[] buffer;
-}
-
-
-
-void Renderer::CreatePixelShader( ID3D11PixelShader** PixelShader, const char* FileName )
-{
-	FILE* file;
-	long int fsize;
-
-	file = fopen(FileName, "rb");
-	assert(file);
-
-	fsize = _filelength(_fileno(file));
-	unsigned char* buffer = new unsigned char[fsize];
-	fread(buffer, fsize, 1, file);
-	fclose(file);
-
-	m_Device->CreatePixelShader(buffer, fsize, NULL, PixelShader);
-
-	delete[] buffer;
 }
 
 void Renderer::SubmitDrawItem(RenderPhase phase, DrawItem item)

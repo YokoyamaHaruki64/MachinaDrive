@@ -3,8 +3,10 @@
 #include "System/main.h"
 
 #include "System/Component.h"
-#include "Component/Primitive.h"
 #include "Component/Transform.h"
+#include "Graphics/Material.h"
+#include "Graphics/ModelAsset.h"
+#include "System/RendererBase.h"
 
 #include "math/Vector3.h"
 #include "math/Curve.h"
@@ -171,25 +173,23 @@ private:
     void UpdateParticle(Particle& p, float dt);
 };
 
-class ParticleRenderer : public Quad
+class ParticleRenderer : public RendererBase
 {
 private:
-    ParticleEmitter* m_emitter;
+    ParticleEmitter* m_emitter{};
+    const Mesh* m_mesh{};
+    Material* m_materialInstance{};
+    TextureHandle m_texture{};
+
+    void BindMesh(const XMMATRIX& worldMatrix, const Color& color) const;
+
 public:
     ParticleRenderer() = delete;
     ParticleRenderer(
         GameObject* owner,
         ParticleEmitter* emitter,
-        const wchar_t* textureFile
-        )
-        : Quad(owner, textureFile),
-        m_emitter(emitter)
-    {
-        CreateMaterial("shader/UnlitAdditive.shader");
-        m_blendMode = BlendMode::Add;
-        m_billboardType = BillboardType::CameraFacing;
-        m_renderPass = RenderPass::Transparent;
-    }
+        const wchar_t* textureFile);
 
     void Draw() override;
+    Material* GetMaterial(uint32_t slot = 0) override;
 };

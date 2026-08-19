@@ -17,8 +17,8 @@ namespace
     }
 }
 
-Material::Material(const GraphicsShader& shader)
-    : m_shader(&shader), m_id(g_nextMaterialID++)
+Material::Material(std::string name, const GraphicsShader& shader)
+    : m_shader(&shader), m_id(g_nextMaterialID++), m_name(std::move(name))
 {
     // Resource値はShaderPropertyIDを添字として保持する。
     const std::vector<ShaderPropertyDesc>& shaderProperties = shader.GetProperties();

@@ -30,7 +30,10 @@ private:
             : position(pos), elapsedTime(0.0f) {}
     };
 
-    Mesh m_mesh{};
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_positionBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
+
     Material* m_materialInstance{};
     TextureHandle m_texture{};
 
@@ -53,6 +56,7 @@ public:
     explicit TrailRenderer(GameObject* owner, const wchar_t* textureFile);
     virtual ~TrailRenderer() {}
     void Draw() override;
+    Material* GetMaterial(uint32_t slot = 0) override;
 
     const Curve<float>& GetWidthCurve() const { return m_widthCurve; }
     const CurveColor& GetColorCurve() const { return m_colorCurve; }

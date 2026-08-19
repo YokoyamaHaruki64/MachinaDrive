@@ -6,6 +6,11 @@
 #include "Common/Random.h"
 #include "Component/ParticleSystem.h"
 #include "Component/Transform.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/Shader/ShaderProgram.h"
+#include "Graphics/TextureManager.h"
 
 #include "Common/Random.h"
 
@@ -177,8 +182,65 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
 }
 
 
+ParticleRenderer::ParticleRenderer(
+    GameObject* owner,
+    ParticleEmitter* emitter,
+    const wchar_t* textureFile)
+    : RendererBase(owner),
+    m_emitter(emitter)
+{
+    ModelAsset* quadModel = ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad);
+    if (quadModel && !quadModel->meshes.empty())
+        m_mesh = &quadModel->meshes.front();
+
+    static uint32_t materialInstanceIndex = 0;
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader"))
+        m_materialInstance = MaterialManager::Create("Particle." + std::to_string(materialInstanceIndex++), *shader);
+
+    m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
+    m_billboardType = BillboardType::CameraFacing;
+    m_renderPhase = RenderPhase::Transparent;
+}
+
+Material* ParticleRenderer::GetMaterial(uint32_t slot)
+{
+    // Particleは単一Materialのみを持つ。
+    return slot == 0 ? m_materialInstance : nullptr;
+}
+
+void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color) const
+{
+    if (!m_mesh || !m_materialInstance)
+        return;
+
+    Renderer::SetWorldMatrix(worldMatrix);
+    m_materialInstance->SetColor("_BaseColor", color);
+    m_materialInstance->SetTexture("_MainTex", m_texture);
+    m_materialInstance->Bind(0);
+
+    ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
+    {
+        ID3D11Buffer* vertexBuffer = m_mesh->GetVertexBuffer(binding.streamType);
+        if (!vertexBuffer)
+            vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+
+        const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+        const UINT offset = 0;
+        if (!vertexBuffer || stride == 0)
+            return;
+
+        context->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+    }
+
+    context->IASetIndexBuffer(m_mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+}
+
 void ParticleRenderer::Draw()
 {
+    if (!m_emitter || !m_mesh || !m_materialInstance)
+        return;
+
     const ParticleEmitter::EmitterSettings& settings = m_emitter->GetSettingsRef();
     for (auto& p : m_emitter->GetParticles())
     {
@@ -193,7 +255,7 @@ void ParticleRenderer::Draw()
             p.color);
 
         Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        Renderer::GetDeviceContext()->DrawIndexed(m_mesh.indexCount, 0, 0);
+        Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
 
     }
 }

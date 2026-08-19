@@ -3,6 +3,7 @@
 #include "Graphics/GraphicInc.h"
 #include "Graphics/Shader/ShaderInc.h"
 
+#include <string>
 #include <string_view>
 #include <wrl/client.h>
 
@@ -13,6 +14,7 @@ class Material
 {
     const GraphicsShader* m_shader{};
     MaterialID m_id{};
+    std::string m_name{};
     std::vector<uint8_t> m_propertyData{};
     std::vector<TextureHandle> m_resourceValues{};
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_propertiesBuffer{};
@@ -27,9 +29,10 @@ class Material
     void BindProperties(const GraphicsShaderPass& shaderPass);
 
 public:
-    explicit Material(const GraphicsShader& shader);
+    Material(std::string name, const GraphicsShader& shader);
 
     MaterialID GetID() const { return m_id; }
+    const std::string& GetName() const { return m_name; }
     MaterialPropertyID GetPropertyID(ShaderPropertyID shaderPropertyID) const;
     MaterialPropertyID GetPropertyID(std::string_view name) const;
 

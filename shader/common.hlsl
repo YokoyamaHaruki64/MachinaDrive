@@ -20,27 +20,6 @@ SamplerComparisonState ShadowSampler : register(s1);
 
 
 
-struct MATERIAL
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
-	float4 Emission;
-	float Shininess;
-	bool TextureEnable;
-	float2 Dummy;
-};
-
-#ifndef MATERIAL_PROPERTIES_DEFINED
-cbuffer Properties : register(b3)
-{
-	MATERIAL Material;
-}
-#endif
-
-
-
-
 struct LIGHT
 {
 	bool Enable;
@@ -54,16 +33,6 @@ cbuffer Lighting : register(b2)
 {
 	LIGHT Light;
 }
-
-cbuffer UVBuffer : register(b6)
-{
-    float2 UVScale;
-    float2 UVOffset;
-}
-
-
-
-
 
 struct VS_IN
 {

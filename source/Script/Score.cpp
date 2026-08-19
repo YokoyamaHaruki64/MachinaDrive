@@ -15,9 +15,7 @@ void Score::OnStart()
             transform()->GetPosition().z);
         GameObject* digitObj = Manager::CreateEmpty(pos);
         digitObj->AddComponent<SpriteRenderer>(
-            L"Assets\\Textures\\number.png",
-            "BuildedShader\\unlitTextureVS.cso",
-            "BuildedShader\\unlitTexturePS.cso")->SetUVSize(1.0f / 5.0f, 1.0f / 5.0f);
+            L"Assets\\Textures\\number.png")->SetUVSize(1.0f / 5.0f, 1.0f / 5.0f);
 
         digitObj->GetTransform()->SetScale(Vector3(100.0f, 100.0f, 1.0f));
 

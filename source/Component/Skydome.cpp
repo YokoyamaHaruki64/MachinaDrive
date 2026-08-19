@@ -15,9 +15,7 @@ void Skydome::OnStart()
 
     GameObject* domeObject = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(1000.0f, 1000.0f, 1000.0f));
     domeObject->AddComponent<ModelRenderer>(
-        "Assets\\Models\\sky.obj",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
+        "Assets\\Models\\sky.obj");
 }
 
 void Skydome::Update()

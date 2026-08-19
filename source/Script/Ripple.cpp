@@ -1,12 +1,16 @@
 ﻿#include "pch.h"
 
-#include "System/renderer.h"
 #include "System/GM_Time.h"
 
 #include "Script/Ripple.h"
-#include "Component/Primitive.h"
+#include "Component/modelRenderer.h"
 #include "Component/Transform.h"
 #include "Common/Random.h"
+#include "Graphics/Material.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 void Ripple::OnStart()
 {
@@ -14,27 +18,33 @@ void Ripple::OnStart()
     Color c = m_colorPallet[colorIndex];
     m_colorCurve = Curve<Color>(m_colorPallet[colorIndex], Color(c.r, c.g, c.b, 0.0f)); // 最後のカラーは透明にする
 
-    m_quad = GetComponent<Quad>();
-    if(!m_quad)
+    m_renderer = GetComponent<ModelRenderer>();
+    if (!m_renderer)
     {
-        m_quad = m_owner->AddComponentForCreate<Quad>(L"Assets/Texture/Ripple.png");
+        m_renderer = m_owner->AddComponentForCreate<ModelRenderer>(
+            ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
+        GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
+        if (Material* material = shader ? MaterialManager::Create("Ripple.Fallback", *shader) : nullptr)
+        {
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\Ripple.png"));
+            m_renderer->SetMaterial(0, material);
+        }
     }
-    MATERIAL mat = m_quad->GetMaterial();
-    mat.Diffuse = XMFLOAT4(c.r, c.g, c.b, c.a);
-    m_quad->SetMaterial(mat);
+
+    if (Material* material = m_renderer->GetMaterial())
+        material->SetColor("_BaseColor", c);
+
     transform()->SetScale(Vector3(baseScale, baseScale, baseScale));
 }
 
 void Ripple::Update()
 {
-    if (!m_quad) return;
+    if (!m_renderer) return;
     m_elapsedTime += Time::GetDeltaTime();
     float t = m_elapsedTime / m_lifeTime;
-    MATERIAL mat = m_quad->GetMaterial();
-
     Color c = m_colorCurve.Evaluate(t); // カラーを更新
-    mat.Diffuse = XMFLOAT4(c.r, c.g, c.b, c.a);
-    m_quad->SetMaterial(mat);
+    if (Material* material = m_renderer->GetMaterial())
+        material->SetColor("_BaseColor", c);
     float s = baseScale * (1.5f + t); // スケールを増加させる
     transform()->SetScale(Vector3(s, s, s));
 

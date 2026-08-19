@@ -17,19 +17,6 @@ struct VERTEX_3D
 
 
 
-struct MATERIAL
-{
-	XMFLOAT4	Ambient;
-	XMFLOAT4	Diffuse;
-	XMFLOAT4	Specular;
-	XMFLOAT4	Emission;
-	float		Shininess;
-	BOOL		TextureEnable;
-	float		Dummy[2];
-};
-
-
-
 struct LIGHT
 {
 	BOOL		Enable;
@@ -61,13 +48,10 @@ class Material;
 class GraphicsShaderPass;
 
 // 1回の描画を表す、フレーム内限定の提出データ。
-// 現在は RendererBase 互換経路を使用し、Material 描画経路を段階的に追加する。
 struct DrawItem
 {
     uint64_t sortKey{};
     class RendererBase* renderer{};
-    Material* material{};
-    size_t materialPassIndex{};
     uint32_t meshID{};
     uint64_t submitOrder{};
 };
@@ -93,9 +77,7 @@ private:
 
 	static ID3D11Buffer*			m_PerFrameBuffer;
 	static ID3D11Buffer*			m_PerObjectBuffer;
-	static ID3D11Buffer*			m_MaterialBuffer;
 	static ID3D11Buffer*			m_LightingBuffer;
-    static ID3D11Buffer*            m_UVBuffer;
     static std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> m_FallbackVertexBuffers;
 
     static std::array<ID3D11DepthStencilState*, 14> m_DepthStates;
@@ -138,9 +120,7 @@ public:
 	static void SetWorldMatrix(XMMATRIX WorldMatrix);
 	static void SetViewMatrix(XMMATRIX ViewMatrix);
 	static void SetProjectionMatrix(XMMATRIX ProjectionMatrix);
-	static void SetMaterial(MATERIAL Material);
 	static void SetLight(LIGHT Light);
-    static void SetUV(XMFLOAT4 UV);
     static void SetBlendMode(BlendMode mode);
     static void SetRasterizerState(CullMode cull);
     static void BindRenderState(const RenderState& renderState);
@@ -153,9 +133,6 @@ public:
     static XMMATRIX GetProjectionMatrix();
     static BlendMode GetCurrentBlendMode() { return m_CurrentBlendMode; }
     static CullMode GetCurrentCullMode() { return m_CurrentCullMode; }
-
-	static void CreateVertexShader(ID3D11VertexShader** VertexShader, ID3D11InputLayout** VertexLayout, const char* FileName);
-	static void CreatePixelShader(ID3D11PixelShader** PixelShader, const char* FileName);
 
     static void SubmitDrawItem(RenderPhase phase, DrawItem item);
     static void SubmitDrawCommand(RenderPhase phase, DrawItem item);

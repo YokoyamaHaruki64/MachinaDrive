@@ -2,6 +2,7 @@
 
 #include "System/RendererBase.h"
 #include "Component/Transform.h"
+#include "Graphics/Material.h"
 #include "System/renderer.h"
 #include "System/manager.h"
 #include "Component/Camera.h"
@@ -11,80 +12,55 @@ const XMMATRIX RendererBase::CalcWorldMatrix()
     Transform* t = transform();
     return CalcWorldMatrix(t, m_billboardType);
 }
-uint64_t RendererBase::BuildSortKey(const Camera* camera) const
+SortDescriptor RendererBase::CreateSortDescriptor(const Camera* camera)
 {
-    uint64_t sortKey = 0;
+    SortDescriptor descriptor{};
+    descriptor.phase = m_renderPhase;
+    descriptor.drawLayer = m_drawLayer;
+    descriptor.meshID = GetMeshID();
 
-    // 符号付きの描画レイヤーを、ソート用の符号なし範囲へ正規化する。
-    constexpr int kMinDrawLayer = -32768;
-    constexpr int kMaxDrawLayer = 32767;
-    const uint64_t drawLayer = static_cast<uint64_t>(
-        Math::Clamp(m_drawLayer, kMinDrawLayer, kMaxDrawLayer) - kMinDrawLayer);
+    // Materialを持たないRendererも、予約値0として共通のソート規則を利用する。
+    if (Material* material = GetMaterial())
+        descriptor.materialID = material->GetID();
 
-    uint64_t blendModeBits = static_cast<uint64_t>(m_blendMode) & 0x0F; // ブレンドモードを4ビットに制限
-    uint64_t cullModeBits = static_cast<uint64_t>(m_cullMode) & 0x0F;   // カリングモードを4ビットに制限
-
-    auto SetBlendAndCullBits = [&sortKey, blendModeBits, cullModeBits](int start) {
-        sortKey |= blendModeBits << (start + 4);    // ブレンドモードを44～47ビットに配置
-        sortKey |= cullModeBits << start;           // カリングモードを40～43ビットに配置
-        };
-
-    // 描画パスに応じてソートキーを構築
-    switch (m_renderPass)
+    if (m_renderPhase == RenderPhase::Transparent && camera)
     {
-    case RenderPass::Opaque:
-        // 不透明オブジェクトは描画順序でソートする
-        sortKey |= drawLayer << 48; // 描画順序を48～63ビットに配置
-        SetBlendAndCullBits(40);
-        break;
-
-    case RenderPass::Transparent:
-        // 描画順序と距離でソートする
-        {
-            Vector3 camForward = camera->transform()->GetForward();
-            Vector3 objToCam = transform()->GetPosition() - camera->transform()->GetPosition();
-            float distance = Vector3::Dot(objToCam, camForward); // カメラの前方向に沿った距離を計算
-
-
-            const float maxDistance = 1000.0f; // 最大距離
-            // 距離を0.0～1.0の範囲に正規化
-            float normalizedDistance = Math::Clamp(distance / maxDistance, 0.0f, 1.0f);
-            // 距離を0~uint32_tの範囲に変換
-            uint32_t depth =
-                static_cast<uint32_t>(
-                    normalizedDistance * std::numeric_limits<uint32_t>::max());
-
-            // Back-to-frontソートのために距離を反転
-            uint32_t invDepth =
-                std::numeric_limits<uint32_t>::max() - depth;
-
-            sortKey |= drawLayer << 48;                              // 描画順序を48～63ビットに配置
-            sortKey |= static_cast<uint64_t>(invDepth) << 16;       // 距離を16～47ビットに配置
-            SetBlendAndCullBits(8);
-        }
-        break;
-    case RenderPass::Overlay:
-        sortKey |= drawLayer << 48; // 描画順序を48～63ビットに配置
-        SetBlendAndCullBits(40);
-        break;
-    default:
-        break;
+        const Vector3 camForward = camera->transform()->GetForward();
+        const Vector3 objectToCamera = transform()->GetPosition() - camera->transform()->GetPosition();
+        descriptor.depth = Vector3::Dot(objectToCamera, camForward);
     }
 
-    return sortKey;
+    return descriptor;
 }
 
-RenderPhase RendererBase::ToRenderPhase(RenderPass pass)
+uint64_t RendererBase::BuildSortKey(const SortDescriptor& descriptor)
 {
-    switch (pass)
+    constexpr int kMinDrawLayer = -32768;
+    constexpr int kMaxDrawLayer = 32767;
+    constexpr float kMaxSortDistance = 1000.0f;
+
+    const uint64_t drawLayer = static_cast<uint64_t>(
+        Math::Clamp(descriptor.drawLayer, kMinDrawLayer, kMaxDrawLayer) - kMinDrawLayer);
+    const uint64_t materialID = static_cast<uint64_t>(descriptor.materialID) & 0x00FFFFFFull;
+    const uint64_t meshID = static_cast<uint64_t>(descriptor.meshID) & 0x00FFFFFFull;
+
+    switch (descriptor.phase)
     {
-    case RenderPass::Transparent:
-        return RenderPhase::Transparent;
-    case RenderPass::Overlay:
-        return RenderPhase::Overlay;
-    case RenderPass::Opaque:
+    case RenderPhase::Transparent:
+    {
+        // 透過描画は正しい合成順を優先し、Material/Meshは同一深度内の副キーとする。
+        const float normalizedDepth = Math::Clamp(descriptor.depth / kMaxSortDistance, 0.0f, 1.0f);
+        const uint64_t inverseDepth = 0xFFFFFFull - static_cast<uint64_t>(normalizedDepth * 0xFFFFFFu);
+        return (drawLayer << 48) | (inverseDepth << 24) | ((materialID & 0x0FFFu) << 12) | (meshID & 0x0FFFu);
+    }
+
+    case RenderPhase::Overlay:
+        // 2Dは描画レイヤーを優先し、同一レイヤーでState変更をまとめる。
+        return (drawLayer << 48) | (materialID << 24) | meshID;
+
     default:
-        return RenderPhase::Opaque;
+        // 不透明系はMaterialとMeshを連続させ、Shader/Resource/頂点バッファの切替を減らす。
+        return (materialID << 40) | (meshID << 16) | drawLayer;
     }
 }
 
@@ -101,25 +77,11 @@ RendererBase::~RendererBase()
 void RendererBase::Submit()
 {
     DrawItem item{};
-    item.sortKey = BuildSortKey(Camera::GetMainCamera());
+    const SortDescriptor descriptor = CreateSortDescriptor(Camera::GetMainCamera());
+    item.sortKey = BuildSortKey(descriptor);
     item.renderer = this;
-    Renderer::SubmitDrawCommand(ToRenderPhase(m_renderPass), item);
-}
-
-void RendererBase::BindState()
-{
-    // ブレンドモードや描画パスに応じたGPUステートの設定を行う
-
-    // ブレンドモードの設定
-    if( m_blendMode != Renderer::GetCurrentBlendMode())
-    {
-        Renderer::SetBlendMode(m_blendMode);
-    }
-    if( m_cullMode != Renderer::GetCurrentCullMode())
-    {
-        Renderer::SetRasterizerState(m_cullMode);
-    }
-
+    item.meshID = descriptor.meshID;
+    Renderer::SubmitDrawCommand(m_renderPhase, item);
 }
 
 const XMMATRIX RendererBase::CalcWorldMatrix(const Transform* transform, BillboardType billboardType)

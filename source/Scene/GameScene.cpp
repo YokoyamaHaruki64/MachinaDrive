@@ -7,16 +7,20 @@
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
-#include "Component/Primitive.h"
+#include "Component/modelRenderer.h"
 #include "Component/Skydome.h"
 #include "Component/PostEffect.h"
 #include "Component/audio.h"
+#include "Graphics/Material.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
 #include "Script/RotateCube.h"
 #include "Script/Score.h"
-
 
 void GameScene::Init()
 {
@@ -26,16 +30,34 @@ void GameScene::Init()
     camera->AddComponentForCreate<CameraController>();
 
     GameObject* field = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    field->AddComponentForCreate<Plane>(
-        L"Assets\\Textures\\glass2.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
+    ModelRenderer* fieldRenderer = field->AddComponentForCreate<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Plane));
+    Material* fieldMaterial = MaterialManager::Get("GameScene.Field.Material");
+    if (!fieldMaterial)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        {
+            fieldMaterial = MaterialManager::Create("GameScene.Field.Material", *shader);
+            if (fieldMaterial)
+                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\glass2.png"));
+        }
+    }
+    fieldRenderer->SetMaterial(0, fieldMaterial);
 
     GameObject* obj = Manager::CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    obj->AddComponentForCreate<Cube>(
-        L"Assets\\Textures\\DarkMatReal.png",
-        "BuildedShader\\Dice_VS.cso",
-        "BuildedShader\\Dice_PS.cso");
+    ModelRenderer* cubeRenderer = obj->AddComponentForCreate<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Cube));
+    Material* cubeMaterial = MaterialManager::Get("GameScene.Cube.Material");
+    if (!cubeMaterial)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        {
+            cubeMaterial = MaterialManager::Create("GameScene.Cube.Material", *shader);
+            if (cubeMaterial)
+                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\DarkMatReal.png"));
+        }
+    }
+    cubeRenderer->SetMaterial(0, cubeMaterial);
     obj->AddComponentForCreate<RotateCube>();
 
     Manager::InstantiateForBeginScene(
@@ -75,7 +97,7 @@ void GameScene::Init()
             Vector3::Zero(),
             Vector3::One() * 5.0f);
 
-        tree->GetComponent<Quad>()->SetRenderPass(RenderPass::Transparent);
+        tree->GetComponent<ModelRenderer>()->SetRenderPhase(RenderPhase::Transparent);
     }
 
     GameObject* skydome = Manager::CreateEmpty();

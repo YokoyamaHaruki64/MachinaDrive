@@ -7,6 +7,7 @@
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
 #include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Scene/Scene.h"
 #include "Scene/TitleScene.h"
@@ -81,6 +82,7 @@ void Manager::Init()
     TextureManager::Init();
     ShaderManager::Init();
     MaterialManager::Init();
+    ModelManager::Init();
 	Input::Init();
     PostProcess::Init();
     Audio::InitMaster();
@@ -133,6 +135,7 @@ void Manager::Uninit()
 
     // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
     m_postEffects.clear();
+    ModelManager::Uninit();
     MaterialManager::Uninit();
     PostProcess::Uninit();
     TextureManager::Uninit();
