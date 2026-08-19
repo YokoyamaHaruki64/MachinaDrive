@@ -107,7 +107,14 @@ PropertyValue ShaderParser::parsePropertyValue(const std::string& typeStr, const
     auto it = typeTable.find(typeStr);
     if (it != typeTable.end())
     {
-        return it->second.parserFunc(valueStr);
+        std::string normalizedValue = valueStr;
+        if (normalizedValue.size() >= 2 && normalizedValue.front() == '(' && normalizedValue.back() == ')')
+        {
+            // Property記法の値全体を囲む括弧だけを除去し、配列Parserへ数値列を渡す。
+            normalizedValue = normalizedValue.substr(1, normalizedValue.size() - 2);
+        }
+
+        return it->second.parserFunc(normalizedValue);
     }
     return PropertyValue();
 }

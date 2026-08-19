@@ -16,7 +16,7 @@
 
 ## コーディングとファイル追加
 
-- `.editorconfig` を正とし、変更後は対象ファイルの文字コード・改行・末尾改行・空白を確認する。共通設定は UTF-8 BOM、CRLF、最終改行あり、行末空白の削除である。
+- `.editorconfig` を正とし、変更直後に変更箇所を含む対象ファイルごとに文字コード・BOM・改行・末尾改行・行末空白を確認する。共通設定は UTF-8 BOM、CRLF、最終改行あり、行末空白の削除である。
 - C++ ソース / ヘッダー（`.cpp`、`.cxx`、`.cc`、`.c`、`.h`、`.hpp`、`.hxx`、`.inl`）は UTF-8 BOM・CRLF・スペース4個インデントとする。
 - HLSL（`.hlsl`、`.hlsli`、`.fx`、`.fxh`）は BOM なし UTF-8・CRLF・スペース4個インデントとする。fxc互換性のため BOM を付けない。
 - Visual Studio プロジェクト設定（`.vcxproj`、`.vcxproj.filters`、`.vcxproj.props`、`.props`、`.targets`）と XML、CMake、JSON、YAML、Markdown はスペース2個インデントとする。ソリューション（`.sln`、`.slnx`）はタブインデントとする。
