@@ -96,14 +96,36 @@ namespace
     }
 }
 
-void ModelRenderer::Load(const char* modelFileName)
+ModelRenderer::ModelRenderer(
+    GameObject* object,
+    const char* modelFileName,
+    uint8_t inverseAxisFlags)
+    : RendererBase(object),
+    m_inverseAxisFlags(inverseAxisFlags)
 {
-    Load(modelFileName ? ModelManager::Load(modelFileName) : nullptr);
+    SetModel(modelFileName ? ModelManager::Load(modelFileName) : nullptr);
 }
 
-void ModelRenderer::Load(ModelAsset* modelAsset)
+ModelRenderer::ModelRenderer(
+    GameObject* object,
+    ModelAsset* modelAsset,
+    uint8_t inverseAxisFlags)
+    : RendererBase(object),
+    m_inverseAxisFlags(inverseAxisFlags)
+{
+    SetModel(modelAsset);
+}
+
+void ModelRenderer::SetModel(ModelAsset* modelAsset)
 {
     m_model = modelAsset;
+
+    // ModelAssetを差し替えた時点で旧slotのoverrideを破棄し、新しい既定Material構成へ同期する。
+    InitializeMaterialOverrides();
+}
+
+void ModelRenderer::InitializeMaterialOverrides()
+{
     m_materialOverrides.clear();
     if (!m_model)
         return;
@@ -159,15 +181,4 @@ void ModelRenderer::Draw()
 
     // ModelAssetのNode階層を辿り、各MeshをComponentのWorld座標へ配置して描画する。
     DrawNode(*this, *m_model, m_model->rootNode, axisInverse * componentWorldMatrix);
-}
-
-void ModelRenderer::Preload(const char* fileName)
-{
-    if (fileName)
-        ModelManager::Load(fileName);
-}
-
-void ModelRenderer::UnloadAll()
-{
-    // ModelAssetの寿命はModelManagerが一元管理する。
 }

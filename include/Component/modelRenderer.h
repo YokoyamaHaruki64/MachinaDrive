@@ -4,6 +4,7 @@
 #include "System/RendererBase.h"
 
 #include <string>
+
 class ModelRenderer : public RendererBase
 {
 public:
@@ -19,32 +20,22 @@ private:
     std::vector<Material*> m_materialOverrides{};
     uint8_t m_inverseAxisFlags{};
 
+    void InitializeMaterialOverrides();
     Material* ResolveMaterial(uint32_t materialSlot) const;
 
 public:
-    static void Preload(const char* fileName);
-    static void UnloadAll();
-
     ModelRenderer() = delete;
     ModelRenderer(
         GameObject* object,
         const char* modelFileName,
-        uint8_t inverseAxisFlags = 0)
-        : RendererBase(object), m_inverseAxisFlags(inverseAxisFlags)
-    {
-        Load(modelFileName);
-    }
+        uint8_t inverseAxisFlags = 0);
     ModelRenderer(
         GameObject* object,
         ModelAsset* modelAsset,
-        uint8_t inverseAxisFlags = 0)
-        : RendererBase(object), m_inverseAxisFlags(inverseAxisFlags)
-    {
-        Load(modelAsset);
-    }
+        uint8_t inverseAxisFlags = 0);
 
-    void Load(const char* modelFileName);
-    void Load(ModelAsset* modelAsset);
+    ModelAsset* GetModel() const { return m_model; }
+    void SetModel(ModelAsset* modelAsset);
 
     void SetMaterial(uint32_t materialSlot, Material* material);
     Material* GetMaterial(uint32_t materialSlot = 0) override;

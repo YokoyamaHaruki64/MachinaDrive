@@ -64,7 +64,7 @@ Shader Property の値は `MaterialPropertyID` で一意に指定できる。こ
 
 ## ModelAsset と ModelRenderer
 
-`ModelManager` はファイルからロードした ModelAsset と、Quad／Plane／Cube の組み込み Primitive ModelAsset を所有する。`ModelRenderer` は ModelAsset を非所有参照で保持する。
+`ModelManager` はファイルからロードした ModelAsset と、Quad／Plane／Cube の組み込み Primitive ModelAsset を所有する。`ModelRenderer` は生成時にモデルパスまたは `ModelAsset*` を受け取り、ModelAsset を非所有参照で保持する。`GetModel()` で参照を取得し、`SetModel()` で ModelAsset を差し替えられる。`SetModel()` は旧 Material override を破棄し、新しい ModelAsset の embeddedMaterial slot 数に合わせて Material 構成を初期化する。生成後にモデルを差し替える `Load` API は設けない。
 
 ```text
 ModelAsset
@@ -86,7 +86,7 @@ Sprite と Trail は ModelAsset を持たない。Sprite は 2D 用の不変頂�
 
 `ModelLoader` は Assimp を使い、obj / fbx / gltf を中間表現を介さず `ModelAsset` へ変換する。`ModelManager::Load(filePath)` がキャッシュを確認してから Loader を呼び、同じパスの ModelAsset を共有する。
 
-ロード時には `aiProcess_ConvertToLeftHanded`、三角形化、頂点結合、スムーズ法線生成、プリミティブ種別のソートを適用する。したがって、エンジン内の座標系は左手系であり、UV 原点は左上を `(0, 0)` とする。個別のモデルだけ軸反転が必要な場合は、`ModelRenderer` の `InverseAxis` を使ってコンポーネントの描画変換へ適用する。
+ロード時には `aiProcess_ConvertToLeftHanded`、三角形化、頂点結合、スムーズ法線生成、プリミティブ種別のソートを適用する。したがって、エンジン内の座標系は左手系であり、UV 原点は左上を `(0, 0)` とする。個別のモデルだけ向きを補正する場合は、`ModelRenderer` の `InverseAxis` を使う。指定した軸には描画時に π 回転を合成するため、頂点座標や三角形の表裏は変更しない。
 
 aiMesh ごとに次の Vertex Stream を生成する。存在しない属性は Stream を作らず、描画時に Shader の要求に応じてフォールバックを使う。
 
