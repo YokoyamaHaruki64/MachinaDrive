@@ -27,7 +27,7 @@ std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポ
 
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
-bool Manager::m_isInitializingScene = false;
+Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTransitionPhase::None;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
@@ -35,19 +35,29 @@ std::unordered_map<std::string,
     std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
 
 
+void Manager::DestroyGameObjects()
+{
+    // まだ開始していない旧シーンの生成物は、そのまま所有権を破棄する。
+    m_pendingGameObjects.clear();
+
+    for (auto& gameObject : m_GameObjects)
+    {
+        gameObject->OnDestroy();
+    }
+    m_GameObjects.clear();
+
+    // OnDestroyから生成されたオブジェクトを次のシーンへ持ち越さない。
+    m_pendingGameObjects.clear();
+}
+
+
 void Manager::InitScene()
 {
     if (m_currentScene)
     {
+        m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
         m_currentScene->Uninit();
-
-        // ゲームオブジェクトの破棄処理
-        PendingGameObjectsProcess();
-        for (auto& gameObject : m_GameObjects)
-        {
-            gameObject->OnDestroy();
-        }
-        m_GameObjects.clear();
+        DestroyGameObjects();
         m_postEffects.clear();
         m_currentScene.reset();
     }
@@ -56,18 +66,12 @@ void Manager::InitScene()
     {
         m_currentScene = std::move(m_nextScene);
 
-        m_isInitializingScene = true;
+        m_sceneTransitionPhase = SceneTransitionPhase::Initializing;
         m_currentScene->Init();
-        m_isInitializingScene = false;
     }
 
+    m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
-
-    for (auto& gameObject : m_GameObjects)
-    {
-        gameObject->OnStart();
-    }
-
 }
 
 void Manager::Init()
@@ -126,12 +130,15 @@ void Manager::Init()
 
 void Manager::Uninit()
 {
-    PendingGameObjectsProcess();
-	for (auto& gameObject : m_GameObjects)
-	{
-        gameObject->OnDestroy();
-	}
-    m_GameObjects.clear();
+    m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
+    if (m_currentScene)
+    {
+        m_currentScene->Uninit();
+    }
+    DestroyGameObjects();
+    m_currentScene.reset();
+    m_nextScene.reset();
+    m_sceneTransitionPhase = SceneTransitionPhase::None;
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -147,11 +154,12 @@ void Manager::Uninit()
     Renderer::Uninit();
     Input::Uninit();
     Audio::UninitMaster();
+    m_Renderers.clear();
 
 }
 void Manager::Update()
 {
-    
+
 	Input::Update();
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -165,15 +173,25 @@ void Manager::Update()
         PendingGameObjectsProcess();
     }
 
+    if (m_currentScene)
+    {
+        m_currentScene->Update();
+    }
 
 	for (auto& gameObject : m_GameObjects)
 	{
-		gameObject->Update();
+        if (!gameObject->IsDestroyed())
+        {
+		    gameObject->Update();
+        }
 	}
 
     for (auto& gameObject : m_GameObjects)
     {
-        gameObject->LateUpdate();
+        if (!gameObject->IsDestroyed())
+        {
+            gameObject->LateUpdate();
+        }
     }
 
     // 破棄されたオブジェクトの削除
@@ -216,7 +234,12 @@ void Manager::Draw()
 	light.Direction = XMFLOAT4(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f);
 	light.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	light.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	Renderer::SetLight(light);	
+	Renderer::SetLight(light);
+
+    if (m_currentScene)
+    {
+        m_currentScene->Draw();
+    }
 
     for( auto& renderer : m_Renderers)
     {

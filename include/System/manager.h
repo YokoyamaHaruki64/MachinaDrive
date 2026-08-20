@@ -17,6 +17,13 @@ class Scene;
 class Manager
 {
 private:
+    enum class SceneTransitionPhase
+    {
+        None,
+        Destroying,
+        Initializing,
+    };
+
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
     static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
@@ -27,21 +34,31 @@ private:
 
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
-    static bool m_isInitializingScene;
+    static SceneTransitionPhase m_sceneTransitionPhase;
 
 
     static void PendingGameObjectsProcess()
     {
         std::vector<std::unique_ptr<GameObject>> pendingGameObjects = std::move(m_pendingGameObjects);
+        const size_t firstPendingIndex = m_GameObjects.size();
 
         for (auto& pendingObj : pendingGameObjects)
         {
             m_GameObjects.emplace_back(std::move(pendingObj));
-            m_GameObjects.back()->OnStart();
+        }
+
+        // 検索時に同じ生成バッチの全オブジェクトが見える状態で開始する。
+        for (size_t i = firstPendingIndex; i < m_GameObjects.size(); ++i)
+        {
+            if (!m_GameObjects[i]->IsDestroyed())
+            {
+                m_GameObjects[i]->OnStart();
+            }
         }
     }
 
     static void InitScene();
+    static void DestroyGameObjects();
 
 public:
 	static void Init();
@@ -63,16 +80,15 @@ public:
 
     static void UnregisterRenderer(RendererBase* renderer)
     {
-        // スワップポップで効率的に削除
-        for(size_t i = 0; i < m_Renderers.size(); ++i)
+        for (size_t i = 0; i < m_Renderers.size(); ++i)
         {
-            if(m_Renderers[i] == renderer)
+            if (m_Renderers[i] == renderer)
             {
                 std::swap(m_Renderers[i], m_Renderers.back());
-                break;
+                m_Renderers.pop_back();
+                return;
             }
         }
-        m_Renderers.pop_back();
     }
 
     // prefabの構築完了後に開始する。シーン構築中は全オブジェクトをまとめて開始する。
@@ -88,7 +104,7 @@ public:
             GameObject* newObj = it->second(position, rotation, scale);
             m_pendingGameObjects.emplace_back(newObj);
 
-            if (!m_isInitializingScene)
+            if (m_sceneTransitionPhase == SceneTransitionPhase::None)
             {
                 newObj->OnStart();
             }
@@ -106,7 +122,7 @@ public:
         m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
         GameObject* newObj = m_pendingGameObjects.back().get();
 
-        if (!m_isInitializingScene)
+        if (m_sceneTransitionPhase == SceneTransitionPhase::None)
         {
             newObj->OnStart();
         }
@@ -126,7 +142,7 @@ public:
     {
         for (const auto& gameObject : m_GameObjects)
         {
-            if (gameObject->GetComponent<T>() != nullptr)
+            if (!gameObject->IsDestroyed() && gameObject->GetComponent<T>() != nullptr)
             {
                 return gameObject.get();
             }
@@ -140,7 +156,7 @@ public:
         std::vector<GameObject*> result;
         for (const auto& gameObject : m_GameObjects)
         {
-            if (gameObject->GetComponent<T>() != nullptr)
+            if (!gameObject->IsDestroyed() && gameObject->GetComponent<T>() != nullptr)
             {
                 result.push_back(gameObject.get());
             }

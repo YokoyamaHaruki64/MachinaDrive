@@ -14,7 +14,8 @@ protected:
 	std::vector<std::unique_ptr<Component>> m_components;
 
     bool m_isStarted = false;
-    bool m_isDestroy = false;
+    bool m_isDestroyRequested = false;
+    bool m_isDestroyed = false;
 public:
     GameObject();
     GameObject(
@@ -24,12 +25,15 @@ public:
 
     void Destroy()
     {
-        m_isDestroy = true;
+        if (!m_isDestroyed)
+        {
+            m_isDestroyRequested = true;
+        }
     }
 
     bool IsDestroyed() const
     {
-        return m_isDestroy;
+        return m_isDestroyRequested || m_isDestroyed;
     }
 
     bool IsStarted() const
@@ -77,16 +81,24 @@ public:
 
     void OnDestroy()
     {
-        for (auto& component : m_components)
+        if (m_isDestroyed)
         {
-            component->OnDestroy();
+            return;
         }
 
+        m_isDestroyed = true;
+        m_isStarted = false;
+
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            m_components[i]->OnDestroy();
+        }
     }
 
     void OnStart()
     {
-        if (m_isStarted)
+        if (m_isStarted || m_isDestroyRequested || m_isDestroyed)
         {
             return;
         }
@@ -103,7 +115,7 @@ public:
 
 	void Update()
 	{
-        for (size_t i = 0; i < m_components.size(); ++i)
+        for (size_t i = 0; i < m_components.size() && !m_isDestroyRequested; ++i)
 		{
             m_components[i]->Update();
 		}
@@ -111,7 +123,7 @@ public:
 
     void LateUpdate()
     {
-        for (size_t i = 0; i < m_components.size(); ++i)
+        for (size_t i = 0; i < m_components.size() && !m_isDestroyRequested; ++i)
         {
             m_components[i]->LateUpdate();
         }
