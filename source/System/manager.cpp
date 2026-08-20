@@ -27,6 +27,7 @@ std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポ
 
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
+bool Manager::m_isInitializingScene = false;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
@@ -54,7 +55,10 @@ void Manager::InitScene()
     if (m_nextScene)
     {
         m_currentScene = std::move(m_nextScene);
+
+        m_isInitializingScene = true;
         m_currentScene->Init();
+        m_isInitializingScene = false;
     }
 
     PendingGameObjectsProcess();
@@ -152,11 +156,13 @@ void Manager::Update()
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
-    PendingGameObjectsProcess();
-
     if (m_nextScene)
     {
         InitScene();
+    }
+    else
+    {
+        PendingGameObjectsProcess();
     }
 
 
@@ -214,7 +220,10 @@ void Manager::Draw()
 
     for( auto& renderer : m_Renderers)
     {
-        renderer->Submit();
+        if (renderer->IsOwnerStarted())
+        {
+            renderer->Submit();
+        }
     }
 	//for(auto& gameObject : m_GameObjects)
 	//{

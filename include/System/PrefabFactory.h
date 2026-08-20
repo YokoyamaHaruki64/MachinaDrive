@@ -28,11 +28,11 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    player->AddComponentForCreate<ModelRenderer>(
+    player->AddComponent<ModelRenderer>(
         "Assets\\Models\\Player.obj");
 
-    player->AddComponentForCreate<Player>();
-    player->AddComponentForCreate<Audio>("Assets\\Sounds\\wan.wav");
+    player->AddComponent<Player>();
+    player->AddComponent<Audio>("Assets\\Sounds\\wan.wav");
 
     return player;
 }
@@ -44,10 +44,10 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
         rotation,
         scale
     );
-    enemy->AddComponentForCreate<ModelRenderer>(
+    enemy->AddComponent<ModelRenderer>(
         "Assets\\Models\\Player.obj");
 
-    enemy->AddComponentForCreate<Enemy>();
+    enemy->AddComponent<Enemy>();
 
     return enemy;
 }
@@ -59,9 +59,9 @@ GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    bullet->AddComponentForCreate<ModelRenderer>(
+    bullet->AddComponent<ModelRenderer>(
         "Assets\\Models\\bullet.obj");
-    bullet->AddComponentForCreate<Bullet>();
+    bullet->AddComponent<Bullet>();
     return bullet;
 }
 
@@ -72,7 +72,7 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
         rotation,
         scale
     );
-    ModelRenderer* renderer = tree->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = tree->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
 
@@ -99,7 +99,7 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
         rotation,
         scale
     );
-    ModelRenderer* renderer = explosion->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = explosion->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetBillboardType(RendererBase::BillboardType::CameraFacing);
 
@@ -117,7 +117,7 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
         }
     }
 
-    explosion->AddComponentForCreate<ExplosionEffect>();
+    explosion->AddComponent<ExplosionEffect>();
     return explosion;
 }
 
@@ -128,8 +128,8 @@ GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotat
         rotation,
         scale
     );
-    boundBall->AddComponentForCreate<BoundBall>();
-    auto p = boundBall->AddComponentForCreate<ParticleEmitter>();
+    boundBall->AddComponent<BoundBall>();
+    auto p = boundBall->AddComponent<ParticleEmitter>();
     ParticleEmitter::EmitterSettings settings = p->GetSettings();
     settings.burst = false;
     settings.maxParticles = 100;
@@ -157,7 +157,7 @@ GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotat
     );
     p->SetSettings(settings);
 
-    boundBall->AddComponentForCreate<ParticleRenderer>(
+    boundBall->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
 
@@ -171,7 +171,7 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
         rotation,
         scale
     );
-    ModelRenderer* renderer = ripple->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = ripple->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetRenderPhase(RenderPhase::Transparent);
 
@@ -188,7 +188,7 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
             renderer->SetMaterial(0, material);
         }
     }
-    ripple->AddComponentForCreate<Ripple>();
+    ripple->AddComponent<Ripple>();
     return ripple;
 }
 
@@ -199,11 +199,11 @@ GameObject* FireworksEffectPrefabFactory(const Vector3& position, const Vector3&
         rotation,
         scale
     );
-    auto p = fireworks->AddComponentForCreate<ParticleEmitter>();
-    fireworks->AddComponentForCreate<ParticleRenderer>(
+    auto p = fireworks->AddComponent<ParticleEmitter>();
+    fireworks->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
-    fireworks->AddComponentForCreate<FireworksEffect>();
+    fireworks->AddComponent<FireworksEffect>();
     return fireworks;
 }
 
@@ -214,10 +214,10 @@ GameObject* ImpactBurstEffectPrefabFactory(const Vector3& position, const Vector
         rotation,
         scale
     );
-    auto p = impact->AddComponentForCreate<ParticleEmitter>();
-    impact->AddComponentForCreate<ParticleRenderer>(
+    auto p = impact->AddComponent<ParticleEmitter>();
+    impact->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
-    impact->AddComponentForCreate<ImpactBurst>();
+    impact->AddComponent<ImpactBurst>();
     return impact;
 }

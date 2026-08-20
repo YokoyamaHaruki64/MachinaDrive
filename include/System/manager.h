@@ -27,15 +27,18 @@ private:
 
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
+    static bool m_isInitializingScene;
 
 
     static void PendingGameObjectsProcess()
     {
-        for (auto& pendingObj : m_pendingGameObjects)
+        std::vector<std::unique_ptr<GameObject>> pendingGameObjects = std::move(m_pendingGameObjects);
+
+        for (auto& pendingObj : pendingGameObjects)
         {
             m_GameObjects.emplace_back(std::move(pendingObj));
+            m_GameObjects.back()->OnStart();
         }
-        m_pendingGameObjects.clear();
     }
 
     static void InitScene();
@@ -72,26 +75,7 @@ public:
         m_Renderers.pop_back();
     }
 
-    // prefabから生成のみを行う関数（シーンから呼び出し）
-    // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
-    static GameObject* InstantiateForBeginScene(
-        const std::string& prefabName,
-        const Vector3& position,
-        const Vector3& rotation,
-        const Vector3& scale)
-    {
-        auto it = m_FactoryMap.find(prefabName);
-        if (it != m_FactoryMap.end())
-        {
-            GameObject* newObj = it->second(position, rotation, scale);
-            m_pendingGameObjects.emplace_back(newObj);
-
-            return newObj;
-        }
-        return nullptr; // タイプが見つからない場合
-    }
-
-
+    // prefabの構築完了後に開始する。シーン構築中は全オブジェクトをまとめて開始する。
     static GameObject* Instantiate(
         const std::string& prefabName,
         const Vector3& position,
@@ -104,7 +88,10 @@ public:
             GameObject* newObj = it->second(position, rotation, scale);
             m_pendingGameObjects.emplace_back(newObj);
 
-            newObj->OnStart(); // 生成と同時にOnStartを呼び出す
+            if (!m_isInitializingScene)
+            {
+                newObj->OnStart();
+            }
 
             return newObj;
         }
@@ -117,7 +104,14 @@ public:
         Vector3 scale = Vector3::One())
 	{
         m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
-        return m_pendingGameObjects.back().get();
+        GameObject* newObj = m_pendingGameObjects.back().get();
+
+        if (!m_isInitializingScene)
+        {
+            newObj->OnStart();
+        }
+
+        return newObj;
 	}
 
     template<typename T>

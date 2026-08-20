@@ -21,7 +21,7 @@ void Ripple::OnStart()
     m_renderer = GetComponent<ModelRenderer>();
     if (!m_renderer)
     {
-        m_renderer = m_owner->AddComponentForCreate<ModelRenderer>(
+        m_renderer = m_owner->AddComponent<ModelRenderer>(
             ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
         GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
         if (Material* material = shader ? MaterialManager::Create("Ripple.Fallback", *shader) : nullptr)

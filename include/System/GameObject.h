@@ -13,6 +13,7 @@ protected:
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
 
+    bool m_isStarted = false;
     bool m_isDestroy = false;
 public:
     GameObject();
@@ -31,20 +32,21 @@ public:
         return m_isDestroy;
     }
 
+    bool IsStarted() const
+    {
+        return m_isStarted;
+    }
+
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
         m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
 		T* componentPtr = static_cast<T*>(m_components.back().get());
-        componentPtr->OnStart();
-		return componentPtr;
-	}
+        if (m_isStarted)
+        {
+            componentPtr->OnStart();
+        }
 
-    template <typename T, typename... Args>
-    T* AddComponentForCreate(Args&&... args)
-    {
-        m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
-        T* componentPtr = static_cast<T*>(m_components.back().get());
         return componentPtr;
     }
 
@@ -84,7 +86,16 @@ public:
 
     void OnStart()
     {
-        for( size_t i = 0; i < m_components.size(); ++i)
+        if (m_isStarted)
+        {
+            return;
+        }
+
+        m_isStarted = true;
+
+        // OnStart中に追加されたComponentはAddComponent側で開始する。
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount; ++i)
         {
             m_components[i]->OnStart();
         }
