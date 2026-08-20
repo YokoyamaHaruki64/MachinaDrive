@@ -1,10 +1,9 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/PatternTrailManager.h"
 
-#include "System/Manager.h"
-#include "System/GM_Time.h"
-#include "Component/Transform.h"
 #include "Common/Random.h"
 
 #include "Script/Wall.h"

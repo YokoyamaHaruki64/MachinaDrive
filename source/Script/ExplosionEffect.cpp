@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/ExplosionEffect.h"
 
-#include "System/GM_Time.h"
-#include "Component/modelRenderer.h"
 #include "Graphics/Material.h"
 
 

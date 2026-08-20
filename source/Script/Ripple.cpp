@@ -1,10 +1,9 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
+#include "Component/ComponentInc.h"
+
 
 #include "Script/Ripple.h"
-#include "Component/modelRenderer.h"
-#include "Component/Transform.h"
 #include "Common/Random.h"
 #include "Graphics/Material.h"
 #include "Graphics/MaterialManager.h"

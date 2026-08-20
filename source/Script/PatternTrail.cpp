@@ -1,13 +1,12 @@
 ﻿#include "pch.h"
 
-#include "System/Manager.h"
+#include "Component/ComponentInc.h"
+
 
 #include "Script/PatternTrail.h"
 #include "Script/PatternTrailHeader.h"
 #include "Script/BallManager.h"
 #include "Script/EffectConfig.h"
-#include "Component/TrailRenderer.h"
-#include "Component/Transform.h"
 
 void PatternTrail::OnStart()
 {

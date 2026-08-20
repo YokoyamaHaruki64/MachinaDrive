@@ -275,6 +275,12 @@
     <ClInclude Include="include\System\GameObject.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\SystemInc.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\ComponentInc.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\input.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>

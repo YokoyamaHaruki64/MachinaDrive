@@ -1,13 +1,11 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/TItleUI.h"
 
-#include "System/GM_Time.h"
-#include "System/input.h"
-#include "System/manager.h"
 #include "Scene/GameScene.h"
 
-#include "Component/Transform.h"
 
 void TitleUI::OnStart()
 {

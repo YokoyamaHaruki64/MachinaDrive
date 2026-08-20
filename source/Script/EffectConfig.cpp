@@ -1,9 +1,10 @@
 ﻿#include "Script/EffectConfig.h"
 
+#include "Component/ComponentInc.h"
+
 #include "imgui.h"
 #include "imgui_curve_custom.h"
 
-#include "System/GM_time.h"
 
 void EffectConfig::OnStart()
 {

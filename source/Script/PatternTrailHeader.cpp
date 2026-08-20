@@ -1,12 +1,11 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
+#include "Component/ComponentInc.h"
+
 
 #include "Script/PatternTrailHeader.h"
 #include "Script/EffectConfig.h"
 
-#include "Component/TrailRenderer.h"
-#include "Component/Transform.h"
 
 void PatternTrailHeader::Init(EffectConfig* config, const Vector3& normal, Axis axis, float angle)
 {

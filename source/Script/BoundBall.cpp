@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
-#include "System/manager.h"
+#include "Component/ComponentInc.h"
+
 #include "Common/Random.h"
-#include "Component/Transform.h"
-#include "Component/ParticleSystem.h"
 
 #include "Script/BoundBall.h"
 #include "Script/Wall.h"
