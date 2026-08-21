@@ -13,10 +13,10 @@ WinMain
   │    ├─ Renderer / RendererBase
   │    ├─ PostEffect
   │    └─ Prefab factory
-  └─ LogSystem
-       ├─ 秒単位のログ集約
-       ├─ LogFileWorker
-       └─ ImGui Log
+  └─ 診断システム
+       ├─ Logger / LogSystem / LogFileWorker
+       ├─ PerformanceMonitor
+       └─ DebugWindow
 ```
 
 ## モジュール構成
@@ -35,7 +35,7 @@ WinMain
 
 ## 実行フロー
 
-`WinMain` は 60 FPS を目標に、`Time::Update()`、`Manager::Update()`、`Manager::Draw()`、`LogSystem::Flush()` を順に呼ぶ。
+`WinMain` は 60 FPS を目標に、`Time::Update()`、`PerformanceMonitor::RecordFrameTime()`、`Manager::Update()`、`Manager::Draw()`、`LogSystem::Flush()` を順に呼ぶ。
 
 ```text
 起動
@@ -111,23 +111,11 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクト
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
 
-## ログ
+## 診断機能
 
-ログの記録と出力は責務を分離する。ScriptやComponentは`SystemInc.h`から公開される`Logger`だけを利用し、出力タイミングを制御する`LogSystem`は直接操作しない。
+ログの記録・集約・ファイル出力、性能計測、ImGuiの`Debug`ウィンドウは診断システムとして扱う。ログの記録は任意のスレッドから行い、集約と性能計測はメインスレッド、ファイル出力は専用Workerで処理する。
 
-- `Logger::Log()`、`Logger::Warning()`、`Logger::Error()`は、ログレベル、本文、記録時刻、呼び出し元、呼び出し側のスレッドIDをスレッドセーフなFIFOへ記録する。FIFOは最大`MaxQueuedLogs`件とし、上限到達時は古い低重要度ログから置き換える。
-- `LogSystem::Flush()`はフレーム終端で最大`LogsPerFrame`件をFIFOから取り出す。同じ秒、ログレベル、ファイル、行番号、スレッドIDを発生元として識別し、その中で本文のハッシュを比較して同一ログを集約する。ハッシュ一致時には本文も比較し、衝突による誤集約を防ぐ。
-- 同一ログの発生回数は現在秒の間ImGui上で更新し、秒が変わった時点で確定する。本文が異なるログは同じ発生元でも別々に保持する。
-- `LogFileWorker`は確定した構造化ログを受け取り、専用スレッドで文字列整形して`Logs/Log_日時_PID.txt`へ非同期に書き込む。待ちキューは最大`MaxQueuedLogs`件で、ファイルの`flush()`は1秒間隔と終了時に行う。
-- ImGuiの`Debug`ウィンドウに`Log`タブを設け、レベル絞り込み、文字列フィルター、クリア、自動スクロールを提供する。表示履歴は最大`ImGuiHistoryCount`件とし、フィルター未使用時は画面内の項目だけを整形・描画する。LoggerとFile Workerが破棄した件数も表示する。
-- `LogSystem::Shutdown()`はLoggerの残件をすべて配送し、Workerのキューを書き切ってからスレッドを終了する。
-
-ログはメタ情報と本文を分けて表示し、複数行の本文も各行をスペース4個分インデントする。
-
-```text
-[02:10:15.123][Error][60][CameraController.cpp:20][Thread 12345]
-    Playerコンポーネントを持つGameObjectが見つかりません。
-```
+各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
 ## リソースとシェーダー
 
