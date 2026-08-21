@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <memory>
+
 #include "System/GameObject.h"
 #include "Graphics/GraphicInc.h"
 
@@ -21,9 +23,9 @@
 #include "Script/FireworksEffect.h"
 #include "Script/ImpactBurst.h"
 
-GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* player = new GameObject(
+    std::unique_ptr<GameObject> player = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -37,9 +39,9 @@ GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation
     return player;
 }
 
-GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> EnemyPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* enemy = new GameObject(
+    std::unique_ptr<GameObject> enemy = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -52,9 +54,9 @@ GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation,
     return enemy;
 }
 
-GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> BulletPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* bullet = new GameObject(
+    std::unique_ptr<GameObject> bullet = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -65,9 +67,9 @@ GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation
     return bullet;
 }
 
-GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> TreePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* tree = new GameObject(
+    std::unique_ptr<GameObject> tree = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -92,9 +94,9 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
     return tree;
 }
 
-GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> ExplosionPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* explosion = new GameObject(
+    std::unique_ptr<GameObject> explosion = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -121,9 +123,9 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
     return explosion;
 }
 
-GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> BoundBallPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* boundBall = new GameObject(
+    std::unique_ptr<GameObject> boundBall = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -164,9 +166,9 @@ GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotat
     return boundBall;
 }
 
-GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> RipplePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* ripple = new GameObject(
+    std::unique_ptr<GameObject> ripple = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -192,9 +194,9 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
     return ripple;
 }
 
-GameObject* FireworksEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> FireworksEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* fireworks = new GameObject(
+    std::unique_ptr<GameObject> fireworks = std::make_unique<GameObject>(
         position,
         rotation,
         scale
@@ -207,9 +209,9 @@ GameObject* FireworksEffectPrefabFactory(const Vector3& position, const Vector3&
     return fireworks;
 }
 
-GameObject* ImpactBurstEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> ImpactBurstEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* impact = new GameObject(
+    std::unique_ptr<GameObject> impact = std::make_unique<GameObject>(
         position,
         rotation,
         scale

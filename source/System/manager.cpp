@@ -31,8 +31,7 @@ Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTr
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
-std::unordered_map<std::string,
-    std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> Manager::m_FactoryMap;
+std::unordered_map<std::string, Manager::PrefabFactory> Manager::m_FactoryMap;
 
 
 void Manager::DestroyGameObjects()

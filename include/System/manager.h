@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <functional>
 #include <string>
+#include <utility>
 #include "math/vector3.h"
 #include "System/GameObject.h"
 #include "Component/PostEffect.h"
@@ -16,6 +17,12 @@ class Scene;
 
 class Manager
 {
+public:
+    using PrefabFactory = std::function<std::unique_ptr<GameObject>(
+        const Vector3&,
+        const Vector3&,
+        const Vector3&)>;
+
 private:
     enum class SceneTransitionPhase
     {
@@ -29,8 +36,7 @@ private:
     static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
 
-    static std::unordered_map<std::string,
-        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
+    static std::unordered_map<std::string, PrefabFactory> m_FactoryMap;
 
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
@@ -68,9 +74,9 @@ public:
 
     static void RegisterFactory(
         const std::string& typeName,
-        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)> factoryFunction)
+        PrefabFactory factoryFunction)
     {
-        m_FactoryMap[typeName] = factoryFunction;
+        m_FactoryMap[typeName] = std::move(factoryFunction);
     }
 
     static void RegisterRenderer(RendererBase* renderer)
@@ -101,8 +107,14 @@ public:
         auto it = m_FactoryMap.find(prefabName);
         if (it != m_FactoryMap.end())
         {
-            GameObject* newObj = it->second(position, rotation, scale);
-            m_pendingGameObjects.emplace_back(newObj);
+            std::unique_ptr<GameObject> newObject = it->second(position, rotation, scale);
+            if (!newObject)
+            {
+                return nullptr;
+            }
+
+            GameObject* newObj = newObject.get();
+            m_pendingGameObjects.emplace_back(std::move(newObject));
 
             if (m_sceneTransitionPhase == SceneTransitionPhase::None)
             {
