@@ -182,7 +182,7 @@ void LogSystem::FlushAll()
 }
 
 
-void LogSystem::DrawImGui()
+void LogSystem::DrawImGuiTab()
 {
     if (!s_aggregationState)
     {
@@ -195,117 +195,108 @@ void LogSystem::DrawImGui()
     static bool autoScroll = true;
     static ImGuiTextFilter textFilter;
 
-    ImGui::SetNextWindowSize(ImVec2(700.0f, 350.0f), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Debug"))
+    if (ImGui::BeginTabItem("Log"))
     {
-        if (ImGui::BeginTabBar("DebugTabs"))
+        ImGui::Checkbox("Log", &showLog);
+        ImGui::SameLine();
+        ImGui::Checkbox("Warning", &showWarning);
+        ImGui::SameLine();
+        ImGui::Checkbox("Error", &showError);
+        ImGui::SameLine();
+        ImGui::Checkbox("Auto Scroll", &autoScroll);
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear"))
         {
-            if (ImGui::BeginTabItem("Log"))
-            {
-                ImGui::Checkbox("Log", &showLog);
-                ImGui::SameLine();
-                ImGui::Checkbox("Warning", &showWarning);
-                ImGui::SameLine();
-                ImGui::Checkbox("Error", &showError);
-                ImGui::SameLine();
-                ImGui::Checkbox("Auto Scroll", &autoScroll);
-                ImGui::SameLine();
-
-                if (ImGui::Button("Clear"))
-                {
-                    s_imguiEntries.clear();
-                }
-
-                textFilter.Draw("Filter", 250.0f);
-                ImGui::SameLine();
-                ImGui::Text(
-                    "Dropped: Logger %zu / File %zu",
-                    s_aggregationState->loggerDroppedCount,
-                    s_aggregationState->fileDroppedCount);
-
-                if (ImGui::BeginChild("LogEntries", ImVec2(0.0f, 0.0f), true, ImGuiWindowFlags_HorizontalScrollbar))
-                {
-                    const bool scrollToBottom = autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY();
-                    const size_t finalizedCount = s_imguiEntries.size();
-                    const size_t totalCount = finalizedCount + s_aggregationState->currentEntries.size();
-
-                    const auto getEntry = [finalizedCount](size_t index) -> const LogEntry&
-                    {
-                        if (index < finalizedCount)
-                        {
-                            return s_imguiEntries[index].entry;
-                        }
-
-                        return s_aggregationState->currentEntries[index - finalizedCount];
-                    };
-
-                    const auto drawEntry = [&getEntry](size_t index)
-                    {
-                        const LogEntry& entry = getEntry(index);
-                        const std::string text = FormatEntry(entry);
-
-                        ImGui::PushStyleColor(ImGuiCol_Text, GetLevelColor(entry.level));
-                        ImGui::TextUnformatted(text.c_str());
-                        ImGui::PopStyleColor();
-                    };
-
-                    const bool requiresFiltering = textFilter.IsActive()
-                        || !showLog
-                        || !showWarning
-                        || !showError;
-
-                    // 絞り込み中は表示対象が不連続になるため、全件から対象を選ぶ。
-                    if (requiresFiltering)
-                    {
-                        for (size_t i = 0; i < totalCount; ++i)
-                        {
-                            const LogEntry& entry = getEntry(i);
-                            if (!IsVisibleLevel(entry.level, showLog, showWarning, showError))
-                            {
-                                continue;
-                            }
-
-                            const std::string text = FormatEntry(entry);
-                            if (!textFilter.PassFilter(text.c_str()))
-                            {
-                                continue;
-                            }
-
-                            ImGui::PushStyleColor(ImGuiCol_Text, GetLevelColor(entry.level));
-                            ImGui::TextUnformatted(text.c_str());
-                            ImGui::PopStyleColor();
-                        }
-                    }
-                    else
-                    {
-                        // 全レベル表示時は画面内の項目だけを整形・描画する。
-                        ImGuiListClipper clipper;
-                        clipper.Begin(static_cast<int>(totalCount));
-                        while (clipper.Step())
-                        {
-                            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                            {
-                                const LogEntry& entry = getEntry(static_cast<size_t>(i));
-                                if (IsVisibleLevel(entry.level, showLog, showWarning, showError))
-                                {
-                                    drawEntry(static_cast<size_t>(i));
-                                }
-                            }
-                        }
-                    }
-
-                    if (scrollToBottom)
-                    {
-                        ImGui::SetScrollHereY(1.0f);
-                    }
-                }
-                ImGui::EndChild();
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
+            s_imguiEntries.clear();
         }
+
+        textFilter.Draw("Filter", 250.0f);
+        ImGui::SameLine();
+        ImGui::Text(
+            "Dropped: Logger %zu / File %zu",
+            s_aggregationState->loggerDroppedCount,
+            s_aggregationState->fileDroppedCount);
+
+        if (ImGui::BeginChild("LogEntries", ImVec2(0.0f, 0.0f), true, ImGuiWindowFlags_HorizontalScrollbar))
+        {
+            const bool scrollToBottom = autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY();
+            const size_t finalizedCount = s_imguiEntries.size();
+            const size_t totalCount = finalizedCount + s_aggregationState->currentEntries.size();
+
+            const auto getEntry = [finalizedCount](size_t index) -> const LogEntry&
+            {
+                if (index < finalizedCount)
+                {
+                    return s_imguiEntries[index].entry;
+                }
+
+                return s_aggregationState->currentEntries[index - finalizedCount];
+            };
+
+            const auto drawEntry = [&getEntry](size_t index)
+            {
+                const LogEntry& entry = getEntry(index);
+                const std::string text = FormatEntry(entry);
+
+                ImGui::PushStyleColor(ImGuiCol_Text, GetLevelColor(entry.level));
+                ImGui::TextUnformatted(text.c_str());
+                ImGui::PopStyleColor();
+            };
+
+            const bool requiresFiltering = textFilter.IsActive()
+                || !showLog
+                || !showWarning
+                || !showError;
+
+            // 絞り込み中は表示対象が不連続になるため、全件から対象を選ぶ。
+            if (requiresFiltering)
+            {
+                for (size_t i = 0; i < totalCount; ++i)
+                {
+                    const LogEntry& entry = getEntry(i);
+                    if (!IsVisibleLevel(entry.level, showLog, showWarning, showError))
+                    {
+                        continue;
+                    }
+
+                    const std::string text = FormatEntry(entry);
+                    if (!textFilter.PassFilter(text.c_str()))
+                    {
+                        continue;
+                    }
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, GetLevelColor(entry.level));
+                    ImGui::TextUnformatted(text.c_str());
+                    ImGui::PopStyleColor();
+                }
+            }
+            else
+            {
+                // 全レベル表示時は画面内の項目だけを整形・描画する。
+                ImGuiListClipper clipper;
+                clipper.Begin(static_cast<int>(totalCount));
+                while (clipper.Step())
+                {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                    {
+                        const LogEntry& entry = getEntry(static_cast<size_t>(i));
+                        if (IsVisibleLevel(entry.level, showLog, showWarning, showError))
+                        {
+                            drawEntry(static_cast<size_t>(i));
+                        }
+                    }
+                }
+            }
+
+            if (scrollToBottom)
+            {
+                ImGui::SetScrollHereY(1.0f);
+            }
+        }
+        ImGui::EndChild();
+        ImGui::EndTabItem();
     }
-    ImGui::End();
 }
 
 

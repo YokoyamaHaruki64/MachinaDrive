@@ -19,7 +19,7 @@ public:
     static void Init();
     static void Flush();
     static void FlushAll();
-    static void DrawImGui();
+    static void DrawImGuiTab();
     static void Shutdown();
 
 private:
