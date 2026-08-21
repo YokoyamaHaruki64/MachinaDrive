@@ -72,6 +72,8 @@ public:
 	static void Update();
 	static void Draw();
 
+    static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
+
     static void RegisterFactory(
         const std::string& typeName,
         PrefabFactory factoryFunction)

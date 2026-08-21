@@ -229,6 +229,9 @@
     <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
     <ClCompile Include="source\System\DebugWindow.cpp" />
+    <ClCompile Include="source\System\EditorSystem.cpp" />
+    <ClCompile Include="source\System\HierarchyWindow.cpp" />
+    <ClCompile Include="source\System\InspectorWindow.cpp" />
     <ClCompile Include="source\System\FieldRegistry.cpp" />
     <ClCompile Include="source\System\LogFileWorker.cpp" />
     <ClCompile Include="source\System\Logger.cpp" />
@@ -392,6 +395,9 @@
     <ClInclude Include="include\Script\Wall.h" />
     <ClInclude Include="include\System\component.h" />
     <ClInclude Include="include\System\DebugWindow.h" />
+    <ClInclude Include="include\System\EditorSystem.h" />
+    <ClInclude Include="include\System\HierarchyWindow.h" />
+    <ClInclude Include="include\System\InspectorWindow.h" />
     <ClInclude Include="include\System\FieldRegistry.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
