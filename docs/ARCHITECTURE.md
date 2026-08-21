@@ -39,8 +39,8 @@ WinMain
 
 毎フレーム: Manager::Update
   ├─ 入力と ImGui フレームを更新
-  ├─ 保留中オブジェクトを有効化
-  ├─ 保留中シーンがあれば切替
+  ├─ 保留中シーンがあれば切替、なければ保留中オブジェクトを有効化
+  ├─ Scene::Update
   ├─ GameObject::Update
   ├─ GameObject::LateUpdate
   └─ Destroy 指定済みオブジェクトを OnDestroy 後に削除
@@ -55,16 +55,18 @@ WinMain
 
 ## GameObject と Component
 
-`GameObject` は `Transform` を必ず持ち、追加された `Component` を `std::unique_ptr` で所有する。コンポーネントは `m_owner` で所有 GameObject にアクセスする。
+`GameObject` は `Transform` を必ず持ち、追加された `Component` を `std::unique_ptr` で所有する。コンポーネントは `m_owner` で所有 GameObject にアクセスする。`Manager` も稼働中および保留中の GameObject を `std::unique_ptr` で所有し、外部には非所有の `GameObject*` を返す。
 
 | フック | 呼び出しタイミング |
 | --- | --- |
-| `OnStart()` | シーン初期化完了時、または `AddComponent()` による即時追加時 |
+| `OnStart()` | 所有 GameObject の開始時、または開始済み GameObject への追加時 |
 | `Update()` | 毎フレームの主処理 |
 | `LateUpdate()` | 全 `Update()` 後の後段処理 |
 | `OnDestroy()` | オブジェクトまたはシーンの破棄時 |
 
-`AddComponent()` は追加直後に `OnStart()` を実行する。一方、シーンや prefab の構築中は `AddComponentForCreate()` で追加し、`Manager` がシーン初期化を完了した後に一括で `OnStart()` を実行する。依存するコンポーネントがある場合、この初期化順序を前提にする。
+`AddComponent()` は所有 GameObject が開始済みの場合だけ、追加したコンポーネントの `OnStart()` を即時実行する。開始前の GameObject ではコンポーネントを保持するだけで、GameObject の `OnStart()` が各コンポーネントを追加順に開始する。prefab は必要なコンポーネントをすべて追加してから `Manager::Instantiate()` が GameObject を開始するため、コンポーネント間の依存関係を構築時に解決できる。
+
+`Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 
 ## シーンと生成
 
@@ -72,11 +74,12 @@ WinMain
 
 オブジェクトは以下の経路で生成する。
 
-- `Manager::CreateEmpty()`: 空の GameObject を保留リストに追加する。
-- `Manager::InstantiateForBeginScene()`: prefab を生成し、シーン初期化完了時に `OnStart()` を呼ぶ。
-- `Manager::Instantiate()`: prefab を生成し、ただちに `OnStart()` を呼ぶ。
+- `Manager::CreateEmpty()`: 空の GameObject を生成する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
+- `Manager::Instantiate()`: 登録済み prefab を構築する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
 
-prefab の実装は `include/System/PrefabFactory.h` にあり、`Manager::Init()` で名前とファクトリを登録する。新しい prefab はこの両方を追加して利用する。
+シーンの `Init()` 中に生成された GameObject は保留リストに格納される。シーン構築の完了後、同じ生成バッチの全 GameObject を稼働リストへ移してから順番に `OnStart()` を呼ぶため、別 GameObject を検索する依存関係も開始時に解決できる。通常時に生成された GameObject は生成直後から Manager の検索対象となる。
+
+prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクトリは構築済み GameObject を `std::unique_ptr` で返す。`Manager::Init()` で名前とファクトリを登録し、`Manager::Instantiate()` が返された所有権を受け取る。新しい prefab はファクトリの実装と登録の両方を追加して利用する。
 
 ## 描画
 
