@@ -58,6 +58,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
 
+	LogSystem::Init();
 	Manager::Init();
 
 
@@ -111,7 +112,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
 
 	Manager::Uninit();
-    LogSystem::FlushAll();
+    LogSystem::Shutdown();
 
 	CoUninitialize();
 

@@ -228,6 +228,7 @@
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\System\GM_Time.cpp" />
     <ClCompile Include="source\System\input.cpp" />
+    <ClCompile Include="source\System\LogFileWorker.cpp" />
     <ClCompile Include="source\System\Logger.cpp" />
     <ClCompile Include="source\System\LogSystem.cpp" />
     <ClCompile Include="source\System\main.cpp" />
@@ -393,6 +394,7 @@
     <ClInclude Include="include\Component\ComponentInc.h" />
     <ClInclude Include="include\System\GM_Time.h" />
     <ClInclude Include="include\System\input.h" />
+    <ClInclude Include="include\System\LogFileWorker.h" />
     <ClInclude Include="include\System\Logger.h" />
     <ClInclude Include="include\System\LogSystem.h" />
     <ClInclude Include="include\System\main.h" />

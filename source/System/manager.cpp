@@ -4,6 +4,7 @@
 
 #include "System/PrefabFactory.h"
 #include "System/input.h"
+#include "System/LogSystem.h"
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
 #include "Graphics/MaterialManager.h"
@@ -258,6 +259,8 @@ void Manager::Draw()
     {
         m_postEffects[i]->Apply();
     }
+
+    LogSystem::DrawImGui();
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
