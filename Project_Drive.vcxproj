@@ -146,6 +146,7 @@
     <ClCompile Include="source\Component\Skydome.cpp" />
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\Component\Transform.cpp" />
     <ClCompile Include="source\Graphics\Material.cpp" />
     <ClCompile Include="source\Graphics\MaterialManager.cpp" />
     <ClCompile Include="source\Graphics\ModelLoader.cpp" />

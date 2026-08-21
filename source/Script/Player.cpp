@@ -3,6 +3,13 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/Player.h"
+#include "System/FieldRegistry.h"
+
+void Player::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD(m_velocity);
+    GM_FIELD(m_isGrounded);
+}
 
 #include "Scene/ResultScene.h"
 #include "math/MathCommon.h"

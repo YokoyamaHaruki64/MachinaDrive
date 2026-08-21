@@ -18,4 +18,7 @@ public:
     Player(GameObject* owner) : Component(owner)
     {
     }
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

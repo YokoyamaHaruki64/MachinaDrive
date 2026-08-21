@@ -168,6 +168,9 @@
     <ClCompile Include="source\Component\TrailRenderer.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\Transform.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\Ripple.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
