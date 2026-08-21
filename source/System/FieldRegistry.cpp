@@ -1,0 +1,103 @@
+﻿#include "pch.h"
+
+#include "imgui.h"
+
+#include "System/FieldRegistry.h"
+
+namespace
+{
+    int ResizeStringInputCallback(ImGuiInputTextCallbackData* data)
+    {
+        if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+        {
+            std::string* value = static_cast<std::string*>(data->UserData);
+            value->resize(data->BufTextLen);
+            data->Buf = value->data();
+        }
+        return 0;
+    }
+
+    bool InputText(const char* label, std::string& value)
+    {
+        if (value.capacity() == 0)
+            value.reserve(32);
+
+        return ImGui::InputText(
+            label,
+            value.data(),
+            value.capacity() + 1,
+            ImGuiInputTextFlags_CallbackResize,
+            ResizeStringInputCallback,
+            &value);
+    }
+
+    void DrawMatrix3x3(const char* label, Matrix3x3& value)
+    {
+        ImGui::TextUnformatted(label);
+        ImGui::Indent();
+        for (int row = 0; row < 3; ++row)
+        {
+            ImGui::PushID(row);
+            ImGui::DragFloat3("##Row", value.m[row], 0.01f);
+            ImGui::PopID();
+        }
+        ImGui::Unindent();
+    }
+
+    void DrawMatrix4x4(const char* label, Matrix4x4& value)
+    {
+        ImGui::TextUnformatted(label);
+        ImGui::Indent();
+        for (int row = 0; row < 4; ++row)
+        {
+            ImGui::PushID(row);
+            ImGui::DragFloat4("##Row", value.m[row], 0.01f);
+            ImGui::PopID();
+        }
+        ImGui::Unindent();
+    }
+}
+
+std::string FieldRegistry::CreateDisplayName(std::string_view key)
+{
+    if (key.starts_with("m_"))
+        key.remove_prefix(2);
+
+    std::string result;
+    for (char character : key)
+    {
+        if (character == '_')
+        {
+            result += ' ';
+            continue;
+        }
+
+        if (!result.empty() && isupper(static_cast<unsigned char>(character)))
+            result += ' ';
+        result += result.empty() ? static_cast<char>(toupper(static_cast<unsigned char>(character))) : character;
+    }
+    return result;
+}
+
+void FieldRegistry::DrawImGui()
+{
+    for (FieldDescriptor& field : m_fields)
+    {
+        ImGui::PushID(field.key.c_str());
+        switch (field.valueType)
+        {
+        case FieldValueType::Bool: ImGui::Checkbox(field.displayName.c_str(), static_cast<bool*>(field.value)); break;
+        case FieldValueType::Int: ImGui::DragInt(field.displayName.c_str(), static_cast<int*>(field.value)); break;
+        case FieldValueType::Float: ImGui::DragFloat(field.displayName.c_str(), static_cast<float*>(field.value), 0.01f); break;
+        case FieldValueType::String: InputText(field.displayName.c_str(), *static_cast<std::string*>(field.value)); break;
+        case FieldValueType::Vector2: ImGui::DragFloat2(field.displayName.c_str(), &static_cast<Vector2*>(field.value)->x, 0.01f); break;
+        case FieldValueType::Vector3: ImGui::DragFloat3(field.displayName.c_str(), &static_cast<Vector3*>(field.value)->x, 0.01f); break;
+        case FieldValueType::Vector4: ImGui::DragFloat4(field.displayName.c_str(), &static_cast<Vector4*>(field.value)->x, 0.01f); break;
+        case FieldValueType::Color: ImGui::ColorEdit4(field.displayName.c_str(), &static_cast<Color*>(field.value)->r); break;
+        case FieldValueType::Matrix3x3: DrawMatrix3x3(field.displayName.c_str(), *static_cast<Matrix3x3*>(field.value)); break;
+        case FieldValueType::Matrix4x4: DrawMatrix4x4(field.displayName.c_str(), *static_cast<Matrix4x4*>(field.value)); break;
+        default: ImGui::Text("%s: 未対応", field.displayName.c_str()); break;
+        }
+        ImGui::PopID();
+    }
+}

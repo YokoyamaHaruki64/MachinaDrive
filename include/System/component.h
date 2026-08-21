@@ -4,6 +4,7 @@
 
 class Transform;
 class GameObject;
+class FieldRegistry;
 
 class Component
 {
@@ -26,8 +27,13 @@ public:
     virtual void LateUpdate() {};
 	virtual void Draw() {};
 
+    void DrawInspectorImGui();
+
     Transform* transform() const;
 
     template <typename T>
     T* GetComponent() const;
+
+protected:
+    virtual void RegisterFields(FieldRegistry& fields) {}
 };
