@@ -14,7 +14,7 @@ WinMain
   │    ├─ PostEffect
   │    └─ Prefab factory
   └─ LogSystem
-       ├─ Visual Studio 出力
+       ├─ 秒単位のログ集約
        ├─ LogFileWorker
        └─ ImGui Log
 ```
@@ -60,7 +60,9 @@ WinMain
   └─ 表示
 
 フレーム終端: LogSystem::Flush
-  └─ 最大100件をVisual Studio、ファイルWorker、ImGui履歴へ配送
+  ├─ 最大100件を取り出して現在秒のログへ集約
+  ├─ 現在秒の件数をImGuiへ反映
+  └─ 秒が変わったら確定ログをファイルWorkerへ配送
 
 終了
   ├─ Manager::Uninit
@@ -113,17 +115,17 @@ Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [REND
 
 ログの記録と出力は責務を分離する。ScriptやComponentは`SystemInc.h`から公開される`Logger`だけを利用し、出力タイミングを制御する`LogSystem`は直接操作しない。
 
-- `Logger::Log()`、`Logger::Warning()`、`Logger::Error()`は、ログレベル、本文、記録時刻、呼び出し元、呼び出し側のスレッドIDをスレッドセーフなFIFOへ記録する。
-- `LogSystem::Flush()`はフレーム終端で最大`LogsPerFrame`件をFIFOから取り出し、各出力先へ配送する。
-- Visual Studioには`OutputDebugStringA()`で出力する。
-- `LogFileWorker`は専用スレッドで`Logs/Log_日時_PID.txt`へ非同期に書き込み、メインスレッドのファイルI/Oを避ける。
-- ImGuiの`Debug`ウィンドウに`Log`タブを設け、レベル絞り込み、文字列フィルター、クリア、自動スクロールを提供する。表示履歴は最大`ImGuiHistoryCount`件とする。
+- `Logger::Log()`、`Logger::Warning()`、`Logger::Error()`は、ログレベル、本文、記録時刻、呼び出し元、呼び出し側のスレッドIDをスレッドセーフなFIFOへ記録する。FIFOは最大`MaxQueuedLogs`件とし、上限到達時は古い低重要度ログから置き換える。
+- `LogSystem::Flush()`はフレーム終端で最大`LogsPerFrame`件をFIFOから取り出す。同じ秒、ログレベル、ファイル、行番号、スレッドIDを発生元として識別し、その中で本文のハッシュを比較して同一ログを集約する。ハッシュ一致時には本文も比較し、衝突による誤集約を防ぐ。
+- 同一ログの発生回数は現在秒の間ImGui上で更新し、秒が変わった時点で確定する。本文が異なるログは同じ発生元でも別々に保持する。
+- `LogFileWorker`は確定した構造化ログを受け取り、専用スレッドで文字列整形して`Logs/Log_日時_PID.txt`へ非同期に書き込む。待ちキューは最大`MaxQueuedLogs`件で、ファイルの`flush()`は1秒間隔と終了時に行う。
+- ImGuiの`Debug`ウィンドウに`Log`タブを設け、レベル絞り込み、文字列フィルター、クリア、自動スクロールを提供する。表示履歴は最大`ImGuiHistoryCount`件とし、フィルター未使用時は画面内の項目だけを整形・描画する。LoggerとFile Workerが破棄した件数も表示する。
 - `LogSystem::Shutdown()`はLoggerの残件をすべて配送し、Workerのキューを書き切ってからスレッドを終了する。
 
 ログはメタ情報と本文を分けて表示し、複数行の本文も各行をスペース4個分インデントする。
 
 ```text
-[02:10:15.123][Error][CameraController.cpp:20][Thread 12345]
+[02:10:15.123][Error][60][CameraController.cpp:20][Thread 12345]
     Playerコンポーネントを持つGameObjectが見つかりません。
 ```
 
