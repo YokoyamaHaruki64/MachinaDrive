@@ -4,14 +4,17 @@
 #include <deque>
 #include <fstream>
 #include <mutex>
-#include <string>
 #include <thread>
 #include <vector>
+
+#include "System/Logger.h"
 
 // ファイルI/Oをメインスレッドから分離し、受け取ったログを順番に書き出す。
 class LogFileWorker final
 {
 public:
+    static constexpr size_t MaxQueuedLogs = 4096;
+
     LogFileWorker() = default;
     ~LogFileWorker();
 
@@ -19,7 +22,7 @@ public:
     LogFileWorker& operator=(const LogFileWorker&) = delete;
 
     bool Start();
-    void Enqueue(std::vector<std::string> entries);
+    size_t Enqueue(std::vector<LogEntry> entries);
     void Shutdown();
 
 private:
@@ -29,7 +32,7 @@ private:
     std::thread m_thread;
     std::mutex m_mutex;
     std::condition_variable m_condition;
-    std::deque<std::string> m_entries;
+    std::deque<LogEntry> m_entries;
     bool m_isRunning = false;
     bool m_stopRequested = false;
 };

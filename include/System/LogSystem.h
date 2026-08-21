@@ -2,9 +2,11 @@
 
 #include <cstddef>
 #include <deque>
+#include <memory>
 #include <string>
 
-enum class LogLevel;
+#include "System/Logger.h"
+
 class LogFileWorker;
 
 // フレーム終端でログを取り出し、各出力先へ配送する。
@@ -23,12 +25,16 @@ public:
 private:
     struct ImGuiLogEntry
     {
-        LogLevel level;
-        std::string text;
+        LogEntry entry;
     };
 
-    static size_t FlushBatch(size_t maxCount);
+    struct AggregationState;
+
+    static size_t FlushBatch(size_t maxCount, bool forceFinalize);
+    static void ProcessEntry(LogEntry entry);
+    static void FinalizeCurrentLogs();
 
     static LogFileWorker s_fileWorker;
     static std::deque<ImGuiLogEntry> s_imguiEntries;
+    static std::unique_ptr<AggregationState> s_aggregationState;
 };

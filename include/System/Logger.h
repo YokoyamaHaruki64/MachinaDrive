@@ -24,6 +24,7 @@ struct LogEntry
     std::chrono::system_clock::time_point timestamp;
     std::source_location source;
     std::thread::id threadId;
+    size_t count = 1;
 };
 
 class LogSystem;
@@ -32,6 +33,8 @@ class LogSystem;
 class Logger final
 {
 public:
+    static constexpr size_t MaxQueuedLogs = 4096;
+
     static void Log(
         std::string_view message,
         const std::source_location& source = std::source_location::current());
@@ -47,13 +50,22 @@ public:
 private:
     friend class LogSystem;
 
+    struct DrainResult
+    {
+        std::vector<LogEntry> entries;
+        size_t droppedCount;
+        bool hasMore;
+    };
+
     static void Write(
         LogLevel level,
         std::string_view message,
         const std::source_location& source);
 
-    static std::vector<LogEntry> Drain(size_t maxCount);
+    static DrainResult Drain(size_t maxCount);
+    static bool MakeRoom(LogLevel incomingLevel);
 
     static std::mutex s_mutex;
     static std::deque<LogEntry> s_entries;
+    static size_t s_droppedCount;
 };
