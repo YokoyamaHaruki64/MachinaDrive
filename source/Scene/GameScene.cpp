@@ -26,11 +26,11 @@ void GameScene::Init()
 {
     // シーン初期化
     GameObject* camera = Manager::CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
-    camera->AddComponentForCreate<Camera>(Camera::MainCamera);
-    camera->AddComponentForCreate<CameraController>();
+    camera->AddComponent<Camera>(Camera::MainCamera);
+    camera->AddComponent<CameraController>();
 
     GameObject* field = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    ModelRenderer* fieldRenderer = field->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* fieldRenderer = field->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Plane));
     Material* fieldMaterial = MaterialManager::Get("GameScene.Field.Material");
     if (!fieldMaterial)
@@ -45,7 +45,7 @@ void GameScene::Init()
     fieldRenderer->SetMaterial(0, fieldMaterial);
 
     GameObject* obj = Manager::CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    ModelRenderer* cubeRenderer = obj->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* cubeRenderer = obj->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Cube));
     Material* cubeMaterial = MaterialManager::Get("GameScene.Cube.Material");
     if (!cubeMaterial)
@@ -58,9 +58,9 @@ void GameScene::Init()
         }
     }
     cubeRenderer->SetMaterial(0, cubeMaterial);
-    obj->AddComponentForCreate<RotateCube>();
+    obj->AddComponent<RotateCube>();
 
-    Manager::InstantiateForBeginScene(
+    Manager::Instantiate(
         "Player",
         Vector3(0.0f, 0.0f, 1.0f),
         Vector3(0.0f, 0.0f, 0.0f),
@@ -74,7 +74,7 @@ void GameScene::Init()
 
     for (const auto& pos : enemyPos)
     {
-        Manager::InstantiateForBeginScene(
+        Manager::Instantiate(
             "Enemy",
             pos,
             Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
@@ -91,7 +91,7 @@ void GameScene::Init()
 
     for (const auto& pos : treePos)
     {
-        GameObject* tree = Manager::InstantiateForBeginScene(
+        GameObject* tree = Manager::Instantiate(
             "Tree",
             pos,
             Vector3::Zero(),
@@ -101,12 +101,12 @@ void GameScene::Init()
     }
 
     GameObject* skydome = Manager::CreateEmpty();
-    skydome->AddComponentForCreate<Skydome>();
+    skydome->AddComponent<Skydome>();
 
     GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
-    scoreObj->AddComponentForCreate<Score>();
+    scoreObj->AddComponent<Score>();
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 
-    Manager::CreateEmpty()->AddComponentForCreate<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
+    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
 }

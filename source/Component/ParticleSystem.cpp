@@ -1,11 +1,11 @@
 ﻿#include "pch.h"
 
-#include "System/GameObject.h"
+#include "Component/ComponentInc.h"
+
+
 #include "System/Renderer.h"
-#include "System/GM_Time.h"
 #include "Common/Random.h"
 #include "Component/ParticleSystem.h"
-#include "Component/Transform.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderManager.h"

@@ -1,13 +1,11 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/ResultUI.h"
 
-#include "System/GM_Time.h"
-#include "System/input.h"
-#include "System/manager.h"
 #include "Scene/TitleScene.h"
 
-#include "Component/Transform.h"
 
 void ResultUI::OnStart()
 {

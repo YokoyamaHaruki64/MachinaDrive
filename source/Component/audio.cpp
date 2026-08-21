@@ -1,5 +1,4 @@
 ﻿
-#include "System/main.h"
 #include "Component/audio.h"
 
 

@@ -1,9 +1,8 @@
 ﻿#include "Component/Skydome.h"
 
-#include "Component/Transform.h"
-#include "Component/modelRenderer.h"
-#include "Component/Camera.h"
-#include "System/manager.h"
+#include "Component/ComponentInc.h"
+
+
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/TextureManager.h"

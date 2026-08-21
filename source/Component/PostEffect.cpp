@@ -1,5 +1,8 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
+
 #include "Component/PostEffect.h"
 
 #include "Graphics/MaterialManager.h"

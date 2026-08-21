@@ -1,8 +1,10 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
+
 #include "Component/Camera.h"
 #include "System/Renderer.h"
-#include "Component/Transform.h"
 
 std::unordered_map<Camera::CameraTag, Camera*> Camera::s_camerasByTag;
 Camera* Camera::s_mainCamera = nullptr;

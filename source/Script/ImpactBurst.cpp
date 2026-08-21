@@ -1,10 +1,10 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/ImpactBurst.h"
 
-#include "System/manager.h"
 #include "Script/EffectConfig.h"
-#include "Component/ParticleSystem.h"
 
 void ImpactBurst::OnStart()
 {

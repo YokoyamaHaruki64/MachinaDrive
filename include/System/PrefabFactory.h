@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <memory>
+
 #include "System/GameObject.h"
 #include "Graphics/GraphicInc.h"
 
@@ -21,58 +23,58 @@
 #include "Script/FireworksEffect.h"
 #include "Script/ImpactBurst.h"
 
-GameObject* PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> PlayerPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* player = new GameObject(
+    std::unique_ptr<GameObject> player = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    player->AddComponentForCreate<ModelRenderer>(
+    player->AddComponent<ModelRenderer>(
         "Assets\\Models\\Player.obj");
 
-    player->AddComponentForCreate<Player>();
-    player->AddComponentForCreate<Audio>("Assets\\Sounds\\wan.wav");
+    player->AddComponent<Player>();
+    player->AddComponent<Audio>("Assets\\Sounds\\wan.wav");
 
     return player;
 }
 
-GameObject* EnemyPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> EnemyPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* enemy = new GameObject(
+    std::unique_ptr<GameObject> enemy = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    enemy->AddComponentForCreate<ModelRenderer>(
+    enemy->AddComponent<ModelRenderer>(
         "Assets\\Models\\Player.obj");
 
-    enemy->AddComponentForCreate<Enemy>();
+    enemy->AddComponent<Enemy>();
 
     return enemy;
 }
 
-GameObject* BulletPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> BulletPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* bullet = new GameObject(
+    std::unique_ptr<GameObject> bullet = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    bullet->AddComponentForCreate<ModelRenderer>(
+    bullet->AddComponent<ModelRenderer>(
         "Assets\\Models\\bullet.obj");
-    bullet->AddComponentForCreate<Bullet>();
+    bullet->AddComponent<Bullet>();
     return bullet;
 }
 
-GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> TreePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* tree = new GameObject(
+    std::unique_ptr<GameObject> tree = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    ModelRenderer* renderer = tree->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = tree->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetBillboardType(RendererBase::BillboardType::YAxisFixed);
 
@@ -92,14 +94,14 @@ GameObject* TreePrefabFactory(const Vector3& position, const Vector3& rotation, 
     return tree;
 }
 
-GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> ExplosionPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* explosion = new GameObject(
+    std::unique_ptr<GameObject> explosion = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    ModelRenderer* renderer = explosion->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = explosion->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetBillboardType(RendererBase::BillboardType::CameraFacing);
 
@@ -117,19 +119,19 @@ GameObject* ExplosionPrefabFactory(const Vector3& position, const Vector3& rotat
         }
     }
 
-    explosion->AddComponentForCreate<ExplosionEffect>();
+    explosion->AddComponent<ExplosionEffect>();
     return explosion;
 }
 
-GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> BoundBallPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* boundBall = new GameObject(
+    std::unique_ptr<GameObject> boundBall = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    boundBall->AddComponentForCreate<BoundBall>();
-    auto p = boundBall->AddComponentForCreate<ParticleEmitter>();
+    boundBall->AddComponent<BoundBall>();
+    auto p = boundBall->AddComponent<ParticleEmitter>();
     ParticleEmitter::EmitterSettings settings = p->GetSettings();
     settings.burst = false;
     settings.maxParticles = 100;
@@ -157,21 +159,21 @@ GameObject* BoundBallPrefabFactory(const Vector3& position, const Vector3& rotat
     );
     p->SetSettings(settings);
 
-    boundBall->AddComponentForCreate<ParticleRenderer>(
+    boundBall->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
 
     return boundBall;
 }
 
-GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> RipplePrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* ripple = new GameObject(
+    std::unique_ptr<GameObject> ripple = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    ModelRenderer* renderer = ripple->AddComponentForCreate<ModelRenderer>(
+    ModelRenderer* renderer = ripple->AddComponent<ModelRenderer>(
         ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
     renderer->SetRenderPhase(RenderPhase::Transparent);
 
@@ -188,36 +190,36 @@ GameObject* RipplePrefabFactory(const Vector3& position, const Vector3& rotation
             renderer->SetMaterial(0, material);
         }
     }
-    ripple->AddComponentForCreate<Ripple>();
+    ripple->AddComponent<Ripple>();
     return ripple;
 }
 
-GameObject* FireworksEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> FireworksEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* fireworks = new GameObject(
+    std::unique_ptr<GameObject> fireworks = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    auto p = fireworks->AddComponentForCreate<ParticleEmitter>();
-    fireworks->AddComponentForCreate<ParticleRenderer>(
+    auto p = fireworks->AddComponent<ParticleEmitter>();
+    fireworks->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
-    fireworks->AddComponentForCreate<FireworksEffect>();
+    fireworks->AddComponent<FireworksEffect>();
     return fireworks;
 }
 
-GameObject* ImpactBurstEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+std::unique_ptr<GameObject> ImpactBurstEffectPrefabFactory(const Vector3& position, const Vector3& rotation, const Vector3& scale)
 {
-    GameObject* impact = new GameObject(
+    std::unique_ptr<GameObject> impact = std::make_unique<GameObject>(
         position,
         rotation,
         scale
     );
-    auto p = impact->AddComponentForCreate<ParticleEmitter>();
-    impact->AddComponentForCreate<ParticleRenderer>(
+    auto p = impact->AddComponent<ParticleEmitter>();
+    impact->AddComponent<ParticleRenderer>(
         p,
         L"Assets/Textures/particle.png");
-    impact->AddComponentForCreate<ImpactBurst>();
+    impact->AddComponent<ImpactBurst>();
     return impact;
 }

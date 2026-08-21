@@ -1,5 +1,8 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
+
 #include "Component/SpriteRenderer.h"
 
 #include "Graphics/MaterialManager.h"

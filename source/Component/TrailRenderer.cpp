@@ -1,14 +1,14 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
+
 #include "Component/TrailRenderer.h"
 
-#include "Component/Camera.h"
-#include "Component/Transform.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
-#include "System/GM_Time.h"
 #include "System/renderer.h"
 
 namespace

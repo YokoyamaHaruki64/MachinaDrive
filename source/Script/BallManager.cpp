@@ -1,9 +1,8 @@
 ﻿
 #include "pch.h"
 
-#include "System/Manager.h" 
-#include "System/GM_Time.h"
-#include "Component/Transform.h"
+#include "Component/ComponentInc.h"
+
 #include "Common/Random.h"
 #include "Script/BallManager.h"
 #include "Script/Wall.h"

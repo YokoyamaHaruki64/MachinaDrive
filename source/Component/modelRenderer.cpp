@@ -1,8 +1,10 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
+
 #include "Component/modelRenderer.h"
 
-#include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"

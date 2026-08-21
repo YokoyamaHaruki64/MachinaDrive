@@ -1,8 +1,7 @@
 ﻿#include "Score.h"
-#include "System/manager.h"
 
-#include "Component/Transform.h"
-#include "Component/SpriteRenderer.h"
+#include "Component/ComponentInc.h"
+
 
 void Score::OnStart()
 {

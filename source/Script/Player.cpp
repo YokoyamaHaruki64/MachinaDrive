@@ -1,14 +1,10 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/Player.h"
 
-#include "System/input.h"
-#include "System/manager.h"
-#include "System/GM_Time.h"
 #include "Scene/ResultScene.h"
-#include "Component/Transform.h"
-#include "Component/Camera.h"
-#include "Component/audio.h"
 #include "math/MathCommon.h"
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"

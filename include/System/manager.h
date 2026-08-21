@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <functional>
 #include <string>
+#include <utility>
 #include "math/vector3.h"
 #include "System/GameObject.h"
 #include "Component/PostEffect.h"
@@ -16,29 +17,54 @@ class Scene;
 
 class Manager
 {
+public:
+    using PrefabFactory = std::function<std::unique_ptr<GameObject>(
+        const Vector3&,
+        const Vector3&,
+        const Vector3&)>;
+
 private:
+    enum class SceneTransitionPhase
+    {
+        None,
+        Destroying,
+        Initializing,
+    };
+
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
     static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
 
-    static std::unordered_map<std::string,
-        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)>> m_FactoryMap;
+    static std::unordered_map<std::string, PrefabFactory> m_FactoryMap;
 
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
+    static SceneTransitionPhase m_sceneTransitionPhase;
 
 
     static void PendingGameObjectsProcess()
     {
-        for (auto& pendingObj : m_pendingGameObjects)
+        std::vector<std::unique_ptr<GameObject>> pendingGameObjects = std::move(m_pendingGameObjects);
+        const size_t firstPendingIndex = m_GameObjects.size();
+
+        for (auto& pendingObj : pendingGameObjects)
         {
             m_GameObjects.emplace_back(std::move(pendingObj));
         }
-        m_pendingGameObjects.clear();
+
+        // 検索時に同じ生成バッチの全オブジェクトが見える状態で開始する。
+        for (size_t i = firstPendingIndex; i < m_GameObjects.size(); ++i)
+        {
+            if (!m_GameObjects[i]->IsDestroyed())
+            {
+                m_GameObjects[i]->OnStart();
+            }
+        }
     }
 
     static void InitScene();
+    static void DestroyGameObjects();
 
 public:
 	static void Init();
@@ -48,9 +74,9 @@ public:
 
     static void RegisterFactory(
         const std::string& typeName,
-        std::function<GameObject* (const Vector3&, const Vector3&, const Vector3&)> factoryFunction)
+        PrefabFactory factoryFunction)
     {
-        m_FactoryMap[typeName] = factoryFunction;
+        m_FactoryMap[typeName] = std::move(factoryFunction);
     }
 
     static void RegisterRenderer(RendererBase* renderer)
@@ -60,38 +86,18 @@ public:
 
     static void UnregisterRenderer(RendererBase* renderer)
     {
-        // スワップポップで効率的に削除
-        for(size_t i = 0; i < m_Renderers.size(); ++i)
+        for (size_t i = 0; i < m_Renderers.size(); ++i)
         {
-            if(m_Renderers[i] == renderer)
+            if (m_Renderers[i] == renderer)
             {
                 std::swap(m_Renderers[i], m_Renderers.back());
-                break;
+                m_Renderers.pop_back();
+                return;
             }
         }
-        m_Renderers.pop_back();
     }
 
-    // prefabから生成のみを行う関数（シーンから呼び出し）
-    // シーン初期化時の生成でも、Instantiateを呼び出すとOnStartが呼ばれてしまうため、OnStartを呼び出さない生成関数を用意
-    static GameObject* InstantiateForBeginScene(
-        const std::string& prefabName,
-        const Vector3& position,
-        const Vector3& rotation,
-        const Vector3& scale)
-    {
-        auto it = m_FactoryMap.find(prefabName);
-        if (it != m_FactoryMap.end())
-        {
-            GameObject* newObj = it->second(position, rotation, scale);
-            m_pendingGameObjects.emplace_back(newObj);
-
-            return newObj;
-        }
-        return nullptr; // タイプが見つからない場合
-    }
-
-
+    // prefabの構築完了後に開始する。シーン構築中は全オブジェクトをまとめて開始する。
     static GameObject* Instantiate(
         const std::string& prefabName,
         const Vector3& position,
@@ -101,10 +107,23 @@ public:
         auto it = m_FactoryMap.find(prefabName);
         if (it != m_FactoryMap.end())
         {
-            GameObject* newObj = it->second(position, rotation, scale);
-            m_pendingGameObjects.emplace_back(newObj);
+            std::unique_ptr<GameObject> newObject = it->second(position, rotation, scale);
+            if (!newObject)
+            {
+                return nullptr;
+            }
 
-            newObj->OnStart(); // 生成と同時にOnStartを呼び出す
+            if (m_sceneTransitionPhase == SceneTransitionPhase::None)
+            {
+                GameObject* newObj = newObject.get();
+                m_GameObjects.emplace_back(std::move(newObject));
+                newObj->OnStart();
+
+                return newObj;
+            }
+
+            GameObject* newObj = newObject.get();
+            m_pendingGameObjects.emplace_back(std::move(newObject));
 
             return newObj;
         }
@@ -116,8 +135,20 @@ public:
         Vector3 rotation = Vector3::Zero(),
         Vector3 scale = Vector3::One())
 	{
-        m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
-        return m_pendingGameObjects.back().get();
+        std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(position, rotation, scale);
+        GameObject* newObj = newObject.get();
+
+        if (m_sceneTransitionPhase == SceneTransitionPhase::None)
+        {
+            m_GameObjects.emplace_back(std::move(newObject));
+            newObj->OnStart();
+
+            return newObj;
+        }
+
+        m_pendingGameObjects.emplace_back(std::move(newObject));
+
+        return newObj;
 	}
 
     template<typename T>
@@ -132,7 +163,7 @@ public:
     {
         for (const auto& gameObject : m_GameObjects)
         {
-            if (gameObject->GetComponent<T>() != nullptr)
+            if (!gameObject->IsDestroyed() && gameObject->GetComponent<T>() != nullptr)
             {
                 return gameObject.get();
             }
@@ -146,7 +177,7 @@ public:
         std::vector<GameObject*> result;
         for (const auto& gameObject : m_GameObjects)
         {
-            if (gameObject->GetComponent<T>() != nullptr)
+            if (!gameObject->IsDestroyed() && gameObject->GetComponent<T>() != nullptr)
             {
                 result.push_back(gameObject.get());
             }

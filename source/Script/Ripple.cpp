@@ -1,10 +1,9 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
+#include "Component/ComponentInc.h"
+
 
 #include "Script/Ripple.h"
-#include "Component/modelRenderer.h"
-#include "Component/Transform.h"
 #include "Common/Random.h"
 #include "Graphics/Material.h"
 #include "Graphics/MaterialManager.h"
@@ -21,7 +20,7 @@ void Ripple::OnStart()
     m_renderer = GetComponent<ModelRenderer>();
     if (!m_renderer)
     {
-        m_renderer = m_owner->AddComponentForCreate<ModelRenderer>(
+        m_renderer = m_owner->AddComponent<ModelRenderer>(
             ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
         GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
         if (Material* material = shader ? MaterialManager::Create("Ripple.Fallback", *shader) : nullptr)

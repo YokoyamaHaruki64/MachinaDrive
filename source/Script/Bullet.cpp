@@ -1,8 +1,7 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
-#include "System/manager.h"
-#include "Component/Transform.h"
+#include "Component/ComponentInc.h"
+
 
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
