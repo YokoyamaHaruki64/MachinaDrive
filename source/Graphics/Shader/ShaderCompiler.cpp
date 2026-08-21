@@ -11,6 +11,7 @@ Author : Yokoyama Haruki
 ===============================================================================*/
 
 #include "Graphics/Shader/ShaderCompiler.h"
+#include "System/Logger.h"
 
 #include <d3dcompiler.h>
 #include <wrl/client.h>
@@ -45,11 +46,11 @@ bool ShaderCompiler::CompileShader(
         if (errorBlob)
         {
             std::string errorMessage(static_cast<const char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
-            MessageBoxA(NULL, errorMessage.c_str(), "GraphicsShaderPass Compilation Error", MB_OK | MB_ICONERROR);
+            Logger::Error(errorMessage);
         }
         else
         {
-            MessageBoxW(NULL, L"Unknown error occurred during shader compilation.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーコンパイル中に詳細不明のエラーが発生しました。");
         }
         return false;
     }

@@ -2,6 +2,7 @@
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderLoader.h"
 #include "Graphics/Shader/ShaderProgram.h"
+#include "System/Logger.h"
 
 std::vector<std::unique_ptr<GraphicsShader>> ShaderManager::m_shaders;
 std::unique_ptr<ShaderLoader> ShaderManager::m_shaderLoader;
@@ -55,12 +56,18 @@ GraphicsShader* ShaderManager::LoadShaderFromFile(const std::string& filePath)
         return existingShader;
 
     if (!m_shaderLoader)
+    {
+        Logger::Error("シェーダーローダーが初期化されていません。\nShader: " + filePath);
         return nullptr;
+    }
 
     const ShaderID shaderID = m_shaderIDs++;
     std::unique_ptr<GraphicsShader> shader(m_shaderLoader->LoadShaderFromFile(filePath, shaderID));
     if (!shader || !shader->IsValid())
+    {
+        Logger::Error("シェーダーの読み込みに失敗しました。\nShader: " + filePath);
         return nullptr;
+    }
 
     GraphicsShader* result = shader.get();
     m_shaders.push_back(std::move(shader));

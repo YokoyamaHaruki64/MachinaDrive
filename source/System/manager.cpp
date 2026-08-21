@@ -2,8 +2,11 @@
 
 #include "System/manager.h"
 
+#include "System/DebugWindow.h"
 #include "System/PrefabFactory.h"
 #include "System/input.h"
+#include "System/Logger.h"
+#include "System/PerformanceMonitor.h"
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
 #include "Graphics/MaterialManager.h"
@@ -73,7 +76,7 @@ void Manager::InitScene()
     PendingGameObjectsProcess();
 }
 
-void Manager::Init()
+bool Manager::Init()
 {
     RegisterFactory("Player", PlayerPrefabFactory);
     RegisterFactory("Enemy", EnemyPrefabFactory);
@@ -85,9 +88,17 @@ void Manager::Init()
     RegisterFactory("Firework", FireworksEffectPrefabFactory);
     RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
-	Renderer::Init();
+    Renderer::Init();
     TextureManager::Init();
-    ShaderManager::Init();
+    if (!ShaderManager::Init())
+    {
+        Logger::Fatal("既定シェーダーの読み込みに失敗しました。\nShader: shader/DefaultLit.shader");
+
+        ShaderManager::Uninit();
+        TextureManager::Uninit();
+        Renderer::Uninit();
+        return false;
+    }
     MaterialManager::Init();
     ModelManager::Init();
 	Input::Init();
@@ -124,6 +135,8 @@ void Manager::Init()
 
     m_nextScene = std::make_unique<TitleScene>();
     InitScene();
+
+    return true;
 }
 
 
@@ -158,6 +171,7 @@ void Manager::Uninit()
 }
 void Manager::Update()
 {
+    PerformanceMonitor::BeginUpdate();
 
 	Input::Update();
     ImGui_ImplDX11_NewFrame();
@@ -185,6 +199,8 @@ void Manager::Update()
         }
     }
 
+    // Manager::Update全体からLateUpdateだけを分離して計測する。
+    PerformanceMonitor::BeginLateUpdate();
     for (size_t i = 0; i < m_GameObjects.size(); ++i)
     {
         if (!m_GameObjects[i]->IsDestroyed())
@@ -192,6 +208,7 @@ void Manager::Update()
             m_GameObjects[i]->LateUpdate();
         }
     }
+    PerformanceMonitor::EndLateUpdate();
 
     // 破棄されたオブジェクトの削除
     for (size_t i = 0; i < m_GameObjects.size();)
@@ -215,10 +232,13 @@ void Manager::Update()
         }
     }
 
+    PerformanceMonitor::SetObjectCounts(m_GameObjects.size(), m_pendingGameObjects.size());
+    PerformanceMonitor::EndUpdate();
 }
 
 void Manager::Draw()
 {
+	PerformanceMonitor::BeginRender();
 	Renderer::Begin();
 
     if (Camera* camera = Camera::GetMainCamera())
@@ -259,9 +279,12 @@ void Manager::Draw()
         m_postEffects[i]->Apply();
     }
 
+    DebugWindow::DrawImGui();
+
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	Renderer::End();
-
+	// Presentの待機時間もフレームの描画負荷として扱う。
+	PerformanceMonitor::EndRender();
 }

@@ -23,6 +23,7 @@ class ShaderParser
 {
 private:
     std::string m_sourceCode{};
+    bool m_isValid = true;
 
     bool removeComments();
     void removeSpaceAndNewlines(std::string& str) const;
@@ -92,14 +93,12 @@ public:
     ShaderParser(const std::string& sourceCode)
         : m_sourceCode(sourceCode)
     {
-        if(!removeComments())
-        {
-            // Handle error
-            MessageBoxW(NULL, L"Failed to remove comments from shader source code.", L"Error", MB_OK | MB_ICONERROR);
-        }
+        m_isValid = removeComments();
     }
 
     ~ShaderParser() = default;
+
+    bool IsValid() const { return m_isValid; }
 
     bool ExtractBlock(const std::string& blockName, std::string& outBlock, int blockOffset = 0) const;
     bool ExtractPassBlock(std::string& outBlock, std::string& outTag, int passOffset = 0) const;

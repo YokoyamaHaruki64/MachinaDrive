@@ -13,6 +13,7 @@ Author : Yokoyama Haruki
 
 #include "Graphics/Shader/ShaderReflector.h"
 #include "Graphics/Shader/ShaderInc.h"
+#include "System/Logger.h"
 
 #include <d3dcompiler.h>
 
@@ -30,7 +31,7 @@ bool ShaderReflector::ReflectShader(ReflectionResult& outResult)
 
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to reflect shader.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("シェーダーリフレクションの生成に失敗しました。");
         return false;
     }
 
@@ -38,7 +39,7 @@ bool ShaderReflector::ReflectShader(ReflectionResult& outResult)
     hr = m_reflection->GetDesc(&m_shaderDesc);
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to get shader description from shader reflection.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("シェーダーリフレクション情報の取得に失敗しました。");
         return false;
     }
 

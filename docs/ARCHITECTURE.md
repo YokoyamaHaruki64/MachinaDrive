@@ -6,13 +6,17 @@ Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント
 
 ```text
 WinMain
-  └─ Manager
-       ├─ Scene
-       │    └─ GameObject
-       │         └─ Component
-       ├─ Renderer / RendererBase
-       ├─ PostEffect
-       └─ Prefab factory
+  ├─ Manager
+  │    ├─ Scene
+  │    │    └─ GameObject
+  │    │         └─ Component
+  │    ├─ Renderer / RendererBase
+  │    ├─ PostEffect
+  │    └─ Prefab factory
+  └─ 診断システム
+       ├─ Logger / LogSystem / LogFileWorker
+       ├─ PerformanceMonitor
+       └─ DebugWindow
 ```
 
 ## モジュール構成
@@ -27,15 +31,18 @@ WinMain
 | `shader/` | HLSL ソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
 | `Assets/` | 実行時に読むモデル、テクスチャ、サウンド |
 | `config/` | ImGui とゲーム内調整値の設定 |
+| `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
 ## 実行フロー
 
-`WinMain` は 60 FPS を目標に、`Time::Update()`、`Manager::Update()`、`Manager::Draw()` を順に呼ぶ。
+`WinMain` は 60 FPS を目標に、`Time::Update()`、`PerformanceMonitor::RecordFrameTime()`、`Manager::Update()`、`Manager::Draw()`、`LogSystem::Flush()` を順に呼ぶ。
 
 ```text
-起動: Manager::Init
-  ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
-  └─ TitleScene を初期化
+起動
+  ├─ LogSystem::Init でファイル出力Workerを開始
+  └─ Manager::Init
+       ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
+       └─ TitleScene を初期化
 
 毎フレーム: Manager::Update
   ├─ 入力と ImGui フレームを更新
@@ -51,6 +58,15 @@ WinMain
   ├─ PostEffect を適用
   ├─ ImGui を描画
   └─ 表示
+
+フレーム終端: LogSystem::Flush
+  ├─ 最大100件を取り出して現在秒のログへ集約
+  ├─ 現在秒の件数をImGuiへ反映
+  └─ 秒が変わったら確定ログをファイルWorkerへ配送
+
+終了
+  ├─ Manager::Uninit
+  └─ LogSystem::Shutdown で残件を書き出してWorkerを終了
 ```
 
 ## GameObject と Component
@@ -94,6 +110,12 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクト
 描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
+
+## 診断機能
+
+ログの記録・集約・ファイル出力、性能計測、ImGuiの`Debug`ウィンドウは診断システムとして扱う。ログの記録は任意のスレッドから行い、集約と性能計測はメインスレッド、ファイル出力は専用Workerで処理する。
+
+各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
 ## リソースとシェーダー
 

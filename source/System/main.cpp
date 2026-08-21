@@ -3,6 +3,8 @@
 #include "System/main.h"
 #include "System/manager.h"
 #include "System/GM_Time.h"
+#include "System/LogSystem.h"
+#include "System/PerformanceMonitor.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui.h"
@@ -57,7 +59,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
 
-	Manager::Init();
+	LogSystem::Init();
+	if (!Manager::Init())
+	{
+        LogSystem::Shutdown();
+        CoUninitialize();
+        UnregisterClass(CLASS_NAME, wcex.hInstance);
+        return EXIT_FAILURE;
+	}
 
 
 
@@ -97,9 +106,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			if( deltaTime >= (1000 / 60))
 			{
 				dwExecLastTime = dwCurrentTime;
-                Time::Update(deltaTime / 1000.0f);
+				Time::Update(deltaTime / 1000.0f);
+				PerformanceMonitor::RecordFrameTime(Time::GetUnscaledDeltaTime());
 				Manager::Update();
 				Manager::Draw();
+                LogSystem::Flush();
 			}
 		}
 	}
@@ -109,6 +120,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
 
 	Manager::Uninit();
+    LogSystem::Shutdown();
 
 	CoUninitialize();
 
