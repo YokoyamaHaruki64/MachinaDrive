@@ -117,6 +117,8 @@ Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [REND
 
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
+実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
+
 ## リソースとシェーダー
 
 実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は `Assets\\Models`、`Assets\\Textures`、`Assets\\Sounds`、`BuildedShader`、`config` である。
