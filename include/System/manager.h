@@ -112,6 +112,7 @@ public:
             {
                 return nullptr;
             }
+            newObject->SetName(prefabName + "(Instance)");
 
             if (m_sceneTransitionPhase == SceneTransitionPhase::None)
             {
@@ -135,7 +136,16 @@ public:
         Vector3 rotation = Vector3::Zero(),
         Vector3 scale = Vector3::One())
 	{
-        std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(position, rotation, scale);
+        return CreateEmpty("Empty", position, rotation, scale);
+	}
+
+    static GameObject* CreateEmpty(
+        std::string name,
+        Vector3 position = Vector3::Zero(),
+        Vector3 rotation = Vector3::Zero(),
+        Vector3 scale = Vector3::One())
+    {
+        std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(std::move(name), position, rotation, scale);
         GameObject* newObj = newObject.get();
 
         if (m_sceneTransitionPhase == SceneTransitionPhase::None)
@@ -149,7 +159,7 @@ public:
         m_pendingGameObjects.emplace_back(std::move(newObject));
 
         return newObj;
-	}
+    }
 
     template<typename T>
     static void ChangeScene()

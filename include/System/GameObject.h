@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 #include "math/Vector3.h"
 #include "component.h"
 
@@ -10,6 +11,7 @@ class Transform;
 class GameObject
 {
 protected:
+    std::string m_name{ "Empty" };
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
 
@@ -22,6 +24,21 @@ public:
         const Vector3& position,
         const Vector3& rotation = Vector3::Zero(),
         const Vector3& scale = Vector3::One());
+    GameObject(
+        std::string name,
+        const Vector3& position = Vector3::Zero(),
+        const Vector3& rotation = Vector3::Zero(),
+        const Vector3& scale = Vector3::One());
+
+    const std::string& GetName() const
+    {
+        return m_name;
+    }
+
+    void SetName(std::string name)
+    {
+        m_name = std::move(name);
+    }
 
     void Destroy()
     {
