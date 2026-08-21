@@ -327,6 +327,7 @@
     <ClInclude Include="External\Include\Assimp\XMLTools.h" />
     <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="include\Common\Color.h" />
+    <ClInclude Include="include\Common\ValueType.h" />
     <ClInclude Include="include\Common\Random.h" />
     <ClInclude Include="include\Component\audio.h" />
     <ClInclude Include="include\Component\Camera.h" />

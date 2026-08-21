@@ -3,6 +3,7 @@
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 #include "System/renderer.h"
+#include "imgui.h"
 
 #include <algorithm>
 #include <cstring>
@@ -602,4 +603,99 @@ bool Material::Bind(std::string_view passTag)
 
     Bind(*passIndex);
     return true;
+}
+
+void Material::DrawInspectorImGui()
+{
+    ImGui::Text("Material: %s", m_name.c_str());
+
+    for (const ShaderPropertyDesc& property : m_shader->GetProperties())
+    {
+        const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
+        const MaterialPropertyID id = GetPropertyID(property.id);
+
+        ImGui::PushID(static_cast<int>(property.id));
+        if (property.storage == MaterialPropertyStorage::ConstantBuffer && property.offset == INVALID_PROPERTY_OFFSET)
+        {
+            ImGui::Text("%s: シェーダーで未使用", label);
+        }
+        else if (property.type == ValueType::Float)
+        {
+            float value = GetFloat(id);
+            if (ImGui::DragFloat(label, &value, 0.01f)) SetFloat(id, value);
+        }
+        else if (property.type == ValueType::Int)
+        {
+            int value = GetInt(id);
+            if (ImGui::DragInt(label, &value)) SetInt(id, value);
+        }
+        else if (property.type == ValueType::Bool)
+        {
+            bool value = GetBool(id);
+            if (ImGui::Checkbox(label, &value)) SetBool(id, value);
+        }
+        else if (property.type == ValueType::Color)
+        {
+            Color value = GetColor(id);
+            if (ImGui::ColorEdit4(label, &value.r)) SetColor(id, value);
+        }
+        else if (property.type == ValueType::Vector2)
+        {
+            Vector2 value = GetVector2(id);
+            if (ImGui::DragFloat2(label, &value.x, 0.01f)) SetVector2(id, value);
+        }
+        else if (property.type == ValueType::Vector3)
+        {
+            Vector3 value = GetVector3(id);
+            if (ImGui::DragFloat3(label, &value.x, 0.01f)) SetVector3(id, value);
+        }
+        else if (property.type == ValueType::Vector4)
+        {
+            Vector4 value = GetVector4(id);
+            if (ImGui::DragFloat4(label, &value.x, 0.01f)) SetVector4(id, value);
+        }
+        else if (property.type == ValueType::Matrix3x3)
+        {
+            Matrix3x3 value = GetMatrix3x3(id);
+            bool changed = false;
+
+            ImGui::TextUnformatted(label);
+            ImGui::Indent();
+            for (int row = 0; row < 3; ++row)
+            {
+                ImGui::PushID(row);
+                changed |= ImGui::DragFloat3("##Row", value.m[row], 0.01f);
+                ImGui::PopID();
+            }
+            ImGui::Unindent();
+
+            if (changed) SetMatrix3x3(id, value);
+        }
+        else if (property.type == ValueType::Matrix4x4)
+        {
+            Matrix4x4 value = GetMatrix4x4(id);
+            bool changed = false;
+
+            ImGui::TextUnformatted(label);
+            ImGui::Indent();
+            for (int row = 0; row < 4; ++row)
+            {
+                ImGui::PushID(row);
+                changed |= ImGui::DragFloat4("##Row", value.m[row], 0.01f);
+                ImGui::PopID();
+            }
+            ImGui::Unindent();
+
+            if (changed) SetMatrix4x4(id, value);
+        }
+        else if (property.type == ValueType::Texture2D)
+        {
+            ImGui::Text("%s: Texture ID %d", label, GetTexture(id).id);
+        }
+        else
+        {
+            ImGui::Text("%s: 未対応", label);
+        }
+        ImGui::PopID();
+    }
 }

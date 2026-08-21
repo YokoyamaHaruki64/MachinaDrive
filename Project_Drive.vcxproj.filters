@@ -398,6 +398,9 @@
     <ClInclude Include="include\Common\Color.h">
       <Filter>ヘッダー ファイル\Common</Filter>
     </ClInclude>
+    <ClInclude Include="include\Common\ValueType.h">
+      <Filter>ヘッダー ファイル\Common</Filter>
+    </ClInclude>
     <ClInclude Include="include\Common\Random.h">
       <Filter>ヘッダー ファイル\Common</Filter>
     </ClInclude>

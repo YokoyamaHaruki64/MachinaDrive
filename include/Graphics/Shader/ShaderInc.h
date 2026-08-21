@@ -18,6 +18,7 @@
 #include <d3d11shader.h>
 
 #include "Graphics/GraphicInc.h"
+#include "Common/ValueType.h"
 
 
 struct ShaderParameterDesc
@@ -59,20 +60,7 @@ struct ConstantBufferInfo
     std::vector<ShaderParameterDesc> parameters{};
 };
 
-enum class PropertyType
-{
-    Unknown,
-    Float,
-    Int,
-    Bool,
-    Vector2,
-    Vector3,
-    Vector4,
-    Matrix3x3,
-    Matrix4x4,
-    Color,
-    Texture2D
-};
+using PropertyType = ValueType;
 
 enum class MaterialPropertyStorage
 {

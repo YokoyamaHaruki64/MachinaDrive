@@ -81,6 +81,8 @@ public:
     TextureHandle GetTexture(MaterialPropertyID id) const;
     TextureHandle GetTexture(std::string_view name) const;
 
+    void DrawInspectorImGui();
+
     void Bind(size_t passIndex);
     bool Bind(std::string_view passTag);
 };

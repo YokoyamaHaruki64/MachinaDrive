@@ -39,6 +39,7 @@ public:
 
     void SetMaterial(uint32_t materialSlot, Material* material);
     Material* GetMaterial(uint32_t materialSlot = 0) override;
+    uint32_t GetMaterialSlotCount() const override { return static_cast<uint32_t>(m_materialOverrides.size()); }
     uint32_t GetMeshID() const override;
 
     void Draw() override;
