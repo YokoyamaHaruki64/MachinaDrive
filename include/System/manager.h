@@ -113,13 +113,17 @@ public:
                 return nullptr;
             }
 
-            GameObject* newObj = newObject.get();
-            m_pendingGameObjects.emplace_back(std::move(newObject));
-
             if (m_sceneTransitionPhase == SceneTransitionPhase::None)
             {
+                GameObject* newObj = newObject.get();
+                m_GameObjects.emplace_back(std::move(newObject));
                 newObj->OnStart();
+
+                return newObj;
             }
+
+            GameObject* newObj = newObject.get();
+            m_pendingGameObjects.emplace_back(std::move(newObject));
 
             return newObj;
         }
@@ -131,13 +135,18 @@ public:
         Vector3 rotation = Vector3::Zero(),
         Vector3 scale = Vector3::One())
 	{
-        m_pendingGameObjects.emplace_back(std::make_unique<GameObject>(position, rotation, scale));
-        GameObject* newObj = m_pendingGameObjects.back().get();
+        std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(position, rotation, scale);
+        GameObject* newObj = newObject.get();
 
         if (m_sceneTransitionPhase == SceneTransitionPhase::None)
         {
+            m_GameObjects.emplace_back(std::move(newObject));
             newObj->OnStart();
+
+            return newObj;
         }
+
+        m_pendingGameObjects.emplace_back(std::move(newObject));
 
         return newObj;
 	}

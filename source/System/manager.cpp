@@ -177,19 +177,19 @@ void Manager::Update()
         m_currentScene->Update();
     }
 
-	for (auto& gameObject : m_GameObjects)
-	{
-        if (!gameObject->IsDestroyed())
-        {
-		    gameObject->Update();
-        }
-	}
-
-    for (auto& gameObject : m_GameObjects)
+    for (size_t i = 0; i < m_GameObjects.size(); ++i)
     {
-        if (!gameObject->IsDestroyed())
+        if (!m_GameObjects[i]->IsDestroyed())
         {
-            gameObject->LateUpdate();
+            m_GameObjects[i]->Update();
+        }
+    }
+
+    for (size_t i = 0; i < m_GameObjects.size(); ++i)
+    {
+        if (!m_GameObjects[i]->IsDestroyed())
+        {
+            m_GameObjects[i]->LateUpdate();
         }
     }
 
