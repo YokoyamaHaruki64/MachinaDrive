@@ -6,6 +6,7 @@
 #include "System/GameObject.h"
 #include "System/GM_Time.h"
 #include "System/input.h"
+#include "System/Logger.h"
 #include "System/main.h"
 #include "System/manager.h"
 

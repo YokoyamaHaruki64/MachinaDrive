@@ -17,8 +17,7 @@ void CameraController::OnStart()
     }
     else
     {
-        // Playerオブジェクトが見つからない場合のエラーハンドリング（例: デバッグログ）
-        OutputDebugStringA("Error: No GameObject with Player component found in the scene.\n");
+        Logger::Error("Playerコンポーネントを持つGameObjectが見つかりません。");
     }
     m_camera = Camera::GetMainCamera();
 }
