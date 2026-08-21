@@ -6,13 +6,17 @@ Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント
 
 ```text
 WinMain
-  └─ Manager
-       ├─ Scene
-       │    └─ GameObject
-       │         └─ Component
-       ├─ Renderer / RendererBase
-       ├─ PostEffect
-       └─ Prefab factory
+  ├─ Manager
+  │    ├─ Scene
+  │    │    └─ GameObject
+  │    │         └─ Component
+  │    ├─ Renderer / RendererBase
+  │    ├─ PostEffect
+  │    └─ Prefab factory
+  └─ LogSystem
+       ├─ Visual Studio 出力
+       ├─ LogFileWorker
+       └─ ImGui Log
 ```
 
 ## モジュール構成
@@ -27,15 +31,18 @@ WinMain
 | `shader/` | HLSL ソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
 | `Assets/` | 実行時に読むモデル、テクスチャ、サウンド |
 | `config/` | ImGui とゲーム内調整値の設定 |
+| `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
 ## 実行フロー
 
-`WinMain` は 60 FPS を目標に、`Time::Update()`、`Manager::Update()`、`Manager::Draw()` を順に呼ぶ。
+`WinMain` は 60 FPS を目標に、`Time::Update()`、`Manager::Update()`、`Manager::Draw()`、`LogSystem::Flush()` を順に呼ぶ。
 
 ```text
-起動: Manager::Init
-  ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
-  └─ TitleScene を初期化
+起動
+  ├─ LogSystem::Init でファイル出力Workerを開始
+  └─ Manager::Init
+       ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
+       └─ TitleScene を初期化
 
 毎フレーム: Manager::Update
   ├─ 入力と ImGui フレームを更新
@@ -51,6 +58,13 @@ WinMain
   ├─ PostEffect を適用
   ├─ ImGui を描画
   └─ 表示
+
+フレーム終端: LogSystem::Flush
+  └─ 最大100件をVisual Studio、ファイルWorker、ImGui履歴へ配送
+
+終了
+  ├─ Manager::Uninit
+  └─ LogSystem::Shutdown で残件を書き出してWorkerを終了
 ```
 
 ## GameObject と Component
@@ -94,6 +108,24 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクト
 描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
+
+## ログ
+
+ログの記録と出力は責務を分離する。ScriptやComponentは`SystemInc.h`から公開される`Logger`だけを利用し、出力タイミングを制御する`LogSystem`は直接操作しない。
+
+- `Logger::Log()`、`Logger::Warning()`、`Logger::Error()`は、ログレベル、本文、記録時刻、呼び出し元、呼び出し側のスレッドIDをスレッドセーフなFIFOへ記録する。
+- `LogSystem::Flush()`はフレーム終端で最大`LogsPerFrame`件をFIFOから取り出し、各出力先へ配送する。
+- Visual Studioには`OutputDebugStringA()`で出力する。
+- `LogFileWorker`は専用スレッドで`Logs/Log_日時_PID.txt`へ非同期に書き込み、メインスレッドのファイルI/Oを避ける。
+- ImGuiの`Debug`ウィンドウに`Log`タブを設け、レベル絞り込み、文字列フィルター、クリア、自動スクロールを提供する。表示履歴は最大`ImGuiHistoryCount`件とする。
+- `LogSystem::Shutdown()`はLoggerの残件をすべて配送し、Workerのキューを書き切ってからスレッドを終了する。
+
+ログはメタ情報と本文を分けて表示し、複数行の本文も各行をスペース4個分インデントする。
+
+```text
+[02:10:15.123][Error][CameraController.cpp:20][Thread 12345]
+    Playerコンポーネントを持つGameObjectが見つかりません。
+```
 
 ## リソースとシェーダー
 
