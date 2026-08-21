@@ -17,10 +17,10 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/Shader/ShaderFactory.h"
 #include "Graphics/Shader/ShaderInc.h"
+#include "System/Logger.h"
 
 #include <fstream>
 #include <unordered_set>
-#include <windows.h>
 
 bool ShaderLoader::ResolvePropertyLayout(
     std::vector<ShaderPropertyDesc>& properties,
@@ -82,7 +82,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
     std::ifstream file(filePath);
     if (!file.is_open())
     {
-        MessageBoxW(NULL, L"Failed to open shaderPass file.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("シェーダーファイルを開けません。\nShader: " + filePath);
         return nullptr;
     }
     std::string sourceCode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -90,21 +90,19 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
 
     // シェーダーコードを解析して、必要な情報を抽出する
     ShaderParser parser(sourceCode);
+    if (!parser.IsValid())
+    {
+        Logger::Error("シェーダーソースのコメント解析に失敗しました。\nShader: " + filePath);
+        return nullptr;
+    }
 
     // シェーダーの名前を抽出
     std::string shaderName;
     if (!parser.ExtractShaderName(shaderName))
     {
-        MessageBoxW(NULL, L"Failed to extract shaderPass name from shaderPass source.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("シェーダー名を取得できません。\nShader: " + filePath);
         return nullptr;
     }
-
-    //// 同名のシェーダーが既に存在するか確認
-    //if (m_shaderManager.GetShaderByFileName(shaderName) != nullptr)
-    //{
-    //    MessageBoxW(NULL, L"GraphicsShaderPass with the same name already exists.", L"Error", MB_OK | MB_ICONERROR);
-    //    return nullptr;
-    //}
 
     // Shader全体のRenderStateを抽出
     RenderState defaultRenderState;
@@ -150,6 +148,11 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
     {
         // Passブロックの解析
         ShaderParser passParser(passBlock);
+        if (!passParser.IsValid())
+        {
+            Logger::Error("シェーダーPassのコメント解析に失敗しました。\nShader: " + filePath);
+            return nullptr;
+        }
 
         // PassブロックのRenderStateを抽出
         RenderState overrideRenderState = defaultRenderState;
@@ -164,7 +167,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         std::string hlslCode;
         if (!passParser.ExtractHLSL(hlslCode))
         {
-            MessageBoxW(NULL, L"Failed to extract HLSL code from shaderPass source.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーPassからHLSLコードを取得できません。\nShader: " + filePath);
             return nullptr;
         }
 
@@ -180,7 +183,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         // エントリーポイントが両方とも指定されていない場合はエラー
         if (vertexShaderEntry.empty() && pixelShaderEntry.empty())
         {
-            MessageBoxW(NULL, L"GraphicsShaderPass entry points not specified in shaderPass source.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーPassのエントリーポイントが指定されていません。\nShader: " + filePath);
             return nullptr;
         }
 
@@ -208,7 +211,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
                 }
                 catch (const std::exception&)
                 {
-                    MessageBoxW(NULL, L"Invalid shaderPass model format. Expected 'n.m' where n and m are integers.", L"Error", MB_OK | MB_ICONERROR);
+                    Logger::Error("シェーダーモデルの形式が不正です。n.m形式で指定してください。\nShader: " + filePath);
                     return nullptr;
                 }
                 shaderModelVS = "vs_" + std::to_string(major) + '_' + std::to_string(minor);
@@ -216,7 +219,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
             }
             else
             {
-                MessageBoxW(NULL, L"Invalid shaderPass model format. Expected 'n.m'.", L"Error", MB_OK | MB_ICONERROR);
+                Logger::Error("シェーダーモデルの形式が不正です。n.m形式で指定してください。\nShader: " + filePath);
                 return nullptr;
             }
         }
@@ -234,19 +237,20 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
             overrideRenderState,
             shaderPass))
         {
-            MessageBoxW(NULL, L"Failed to create GraphicsShaderPass.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーPassの生成に失敗しました。\nShader: " + filePath);
             return nullptr;
         }
 
         // シェーダーが有効か確認
         if (!shaderPass.IsValid())
         {
+            Logger::Error("生成したシェーダーPassが無効です。\nShader: " + filePath);
             return nullptr;
         }
 
         if (!passTag.empty() && !passTags.emplace(passTag).second)
         {
-            MessageBoxA(nullptr, "Shader pass tags must be unique.", "Shader Loader Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーPassのタグが重複しています。\nShader: " + filePath);
             return nullptr;
         }
 
@@ -255,7 +259,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         // Parserの宣言とReflectionのGPUレイアウトを対応付け、全Passでの一致も検証する。
         if (!ResolvePropertyLayout(properties, shaderPass))
         {
-            MessageBoxW(NULL, L"Properties layout differs between shader passes.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダーPass間でPropertiesのレイアウトが一致しません。\nShader: " + filePath);
             return nullptr;
         }
 

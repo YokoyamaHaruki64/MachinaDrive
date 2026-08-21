@@ -5,6 +5,7 @@
 #include "System/DebugWindow.h"
 #include "System/PrefabFactory.h"
 #include "System/input.h"
+#include "System/Logger.h"
 #include "System/PerformanceMonitor.h"
 #include "System/renderer.h"
 #include "Graphics/TextureManager.h"
@@ -75,7 +76,7 @@ void Manager::InitScene()
     PendingGameObjectsProcess();
 }
 
-void Manager::Init()
+bool Manager::Init()
 {
     RegisterFactory("Player", PlayerPrefabFactory);
     RegisterFactory("Enemy", EnemyPrefabFactory);
@@ -87,9 +88,17 @@ void Manager::Init()
     RegisterFactory("Firework", FireworksEffectPrefabFactory);
     RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
 
-	Renderer::Init();
+    Renderer::Init();
     TextureManager::Init();
-    ShaderManager::Init();
+    if (!ShaderManager::Init())
+    {
+        Logger::Fatal("既定シェーダーの読み込みに失敗しました。\nShader: shader/DefaultLit.shader");
+
+        ShaderManager::Uninit();
+        TextureManager::Uninit();
+        Renderer::Uninit();
+        return false;
+    }
     MaterialManager::Init();
     ModelManager::Init();
 	Input::Init();
@@ -126,6 +135,8 @@ void Manager::Init()
 
     m_nextScene = std::make_unique<TitleScene>();
     InitScene();
+
+    return true;
 }
 
 

@@ -17,6 +17,7 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/ShaderInc.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "System/renderer.h"
+#include "System/Logger.h"
 
 bool ShaderFactory::createVertexShader(
     ID3DBlob* shaderBlob,
@@ -33,7 +34,7 @@ bool ShaderFactory::createVertexShader(
 
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to create vertex shader from shader blob.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("頂点シェーダーの生成に失敗しました。");
         return false;
     }
 
@@ -67,7 +68,7 @@ bool ShaderFactory::createPixelShader(
 
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to create pixel shader from shader blob.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("ピクセルシェーダーの生成に失敗しました。");
         return false;
     }
 
@@ -181,7 +182,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
         vertexShaderModel,
         vertexShaderBlob.GetAddressOf()))
     {
-        MessageBoxW(NULL, L"Failed to compile vertex shader.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
     // ピクセルシェーダー
@@ -193,7 +193,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
         pixelShaderModel,
         pixelShaderBlob.GetAddressOf()))
     {
-        MessageBoxW(NULL, L"Failed to compile pixel shader.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -211,7 +210,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
         inputLayout.GetAddressOf(),
         inputSlot))
     {
-        MessageBoxW(NULL, L"Failed to create vertex shader and input layout.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -219,7 +217,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     ComPtr<ID3D11PixelShader> pixelShader;
     if (!createPixelShader(pixelShaderBlob.Get(), pixelShader.GetAddressOf()))
     {
-        MessageBoxW(NULL, L"Failed to create pixel shader.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -232,7 +229,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     ShaderReflector::ReflectionResult vertexReflectionResult;
     if (!vertexReflector.ReflectShader(vertexReflectionResult))
     {
-        MessageBoxW(NULL, L"Failed to reflect vertex shader.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -241,7 +237,6 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     ShaderReflector::ReflectionResult pixelReflectionResult;
     if (!pixelReflector.ReflectShader(pixelReflectionResult))
     {
-        MessageBoxW(NULL, L"Failed to reflect pixel shader.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 

@@ -51,6 +51,8 @@ const char* GetLevelName(LogLevel level)
         return "Warning";
     case LogLevel::Error:
         return "Error";
+    case LogLevel::Fatal:
+        return "Fatal";
     default:
         return "Unknown";
     }
@@ -104,7 +106,12 @@ std::string FormatEntry(const LogEntry& entry)
 }
 
 
-bool IsVisibleLevel(LogLevel level, bool showLog, bool showWarning, bool showError)
+bool IsVisibleLevel(
+    LogLevel level,
+    bool showLog,
+    bool showWarning,
+    bool showError,
+    bool showFatal)
 {
     switch (level)
     {
@@ -114,6 +121,8 @@ bool IsVisibleLevel(LogLevel level, bool showLog, bool showWarning, bool showErr
         return showWarning;
     case LogLevel::Error:
         return showError;
+    case LogLevel::Fatal:
+        return showFatal;
     default:
         return false;
     }
@@ -128,6 +137,8 @@ ImVec4 GetLevelColor(LogLevel level)
         return ImVec4(1.0f, 0.8f, 0.2f, 1.0f);
     case LogLevel::Error:
         return ImVec4(1.0f, 0.35f, 0.35f, 1.0f);
+    case LogLevel::Fatal:
+        return ImVec4(1.0f, 0.2f, 1.0f, 1.0f);
     default:
         return ImGui::GetStyleColorVec4(ImGuiCol_Text);
     }
@@ -192,6 +203,7 @@ void LogSystem::DrawImGuiTab()
     static bool showLog = true;
     static bool showWarning = true;
     static bool showError = true;
+    static bool showFatal = true;
     static bool autoScroll = true;
     static ImGuiTextFilter textFilter;
 
@@ -202,6 +214,8 @@ void LogSystem::DrawImGuiTab()
         ImGui::Checkbox("Warning", &showWarning);
         ImGui::SameLine();
         ImGui::Checkbox("Error", &showError);
+        ImGui::SameLine();
+        ImGui::Checkbox("Fatal", &showFatal);
         ImGui::SameLine();
         ImGui::Checkbox("Auto Scroll", &autoScroll);
         ImGui::SameLine();
@@ -247,7 +261,8 @@ void LogSystem::DrawImGuiTab()
             const bool requiresFiltering = textFilter.IsActive()
                 || !showLog
                 || !showWarning
-                || !showError;
+                || !showError
+                || !showFatal;
 
             // 絞り込み中は表示対象が不連続になるため、全件から対象を選ぶ。
             if (requiresFiltering)
@@ -255,7 +270,7 @@ void LogSystem::DrawImGuiTab()
                 for (size_t i = 0; i < totalCount; ++i)
                 {
                     const LogEntry& entry = getEntry(i);
-                    if (!IsVisibleLevel(entry.level, showLog, showWarning, showError))
+                    if (!IsVisibleLevel(entry.level, showLog, showWarning, showError, showFatal))
                     {
                         continue;
                     }
@@ -281,7 +296,7 @@ void LogSystem::DrawImGuiTab()
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                     {
                         const LogEntry& entry = getEntry(static_cast<size_t>(i));
-                        if (IsVisibleLevel(entry.level, showLog, showWarning, showError))
+                        if (IsVisibleLevel(entry.level, showLog, showWarning, showError, showFatal))
                         {
                             drawEntry(static_cast<size_t>(i));
                         }

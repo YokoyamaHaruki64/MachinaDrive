@@ -34,6 +34,8 @@ const char* GetLevelName(LogLevel level)
         return "Warning";
     case LogLevel::Error:
         return "Error";
+    case LogLevel::Fatal:
+        return "Fatal";
     default:
         return "Unknown";
     }
@@ -105,11 +107,21 @@ std::deque<LogEntry>::iterator FindDiscardCandidate(
         });
     }
 
-    if (candidate == entries.end() && incomingLevel == LogLevel::Error)
+    if (candidate == entries.end()
+        && incomingLevel != LogLevel::Log
+        && incomingLevel != LogLevel::Warning)
     {
         candidate = std::find_if(entries.begin(), entries.end(), [](const LogEntry& entry)
         {
             return entry.level == LogLevel::Error;
+        });
+    }
+
+    if (candidate == entries.end() && incomingLevel == LogLevel::Fatal)
+    {
+        candidate = std::find_if(entries.begin(), entries.end(), [](const LogEntry& entry)
+        {
+            return entry.level == LogLevel::Fatal;
         });
     }
 

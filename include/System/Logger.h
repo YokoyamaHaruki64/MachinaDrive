@@ -15,6 +15,7 @@ enum class LogLevel
     Log,
     Warning,
     Error,
+    Fatal,
 };
 
 struct LogEntry
@@ -44,6 +45,11 @@ public:
         const std::source_location& source = std::source_location::current());
 
     static void Error(
+        std::string_view message,
+        const std::source_location& source = std::source_location::current());
+
+    // 致命的な失敗を記録してから通知する。終了判断は呼び出し元が行う。
+    static void Fatal(
         std::string_view message,
         const std::source_location& source = std::source_location::current());
 

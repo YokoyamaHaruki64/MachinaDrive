@@ -11,6 +11,7 @@ Author : Yokoyama Haruki
 ===============================================================================*/
 
 #include "System/renderer.h"
+#include "System/Logger.h"
 
 #include "Graphics\Shader\InputLayoutBuilder.h"
 
@@ -33,7 +34,7 @@ bool InputLayoutBuilder::CreateInputLayout(
 
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to reflect shader.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("入力レイアウト用のシェーダーリフレクションに失敗しました。");
         return false;
     }
 
@@ -41,7 +42,7 @@ bool InputLayoutBuilder::CreateInputLayout(
     hr = reflection->GetDesc(&desc);
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to get shader description from shader reflection.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("入力レイアウト用のシェーダー情報取得に失敗しました。");
         return false;
     }
 
@@ -59,7 +60,7 @@ bool InputLayoutBuilder::CreateInputLayout(
         binding.streamType = getVertexAttribute(param);
         if( binding.streamType == VertexStreamType::Error )
         {
-            MessageBoxW(NULL, L"Unsupported vertex attribute in shader input signature.", L"Error", MB_OK | MB_ICONERROR);
+            Logger::Error("シェーダー入力シグネチャに未対応の頂点属性があります。");
             return false;
         }
         // 同じ頂点ストリームに含まれる属性（Normal/Tangent、UV2-7）は同じslotを共有する。
@@ -92,7 +93,7 @@ bool InputLayoutBuilder::CreateInputLayout(
 
     if (FAILED(hr))
     {
-        MessageBoxW(NULL, L"Failed to create input layout.", L"Error", MB_OK | MB_ICONERROR);
+        Logger::Error("入力レイアウトの生成に失敗しました。");
         return false;
     }
 

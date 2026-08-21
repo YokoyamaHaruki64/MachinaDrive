@@ -67,7 +67,7 @@ private:
     static void DestroyGameObjects();
 
 public:
-	static void Init();
+	static bool Init();
 	static void Uninit();
 	static void Update();
 	static void Draw();

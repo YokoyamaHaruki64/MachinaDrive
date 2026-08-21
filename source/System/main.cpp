@@ -60,7 +60,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 
 	LogSystem::Init();
-	Manager::Init();
+	if (!Manager::Init())
+	{
+        LogSystem::Shutdown();
+        CoUninitialize();
+        UnregisterClass(CLASS_NAME, wcex.hInstance);
+        return EXIT_FAILURE;
+	}
 
 
 
