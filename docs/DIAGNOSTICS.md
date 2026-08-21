@@ -37,7 +37,9 @@
 ```text
 起動
   └─ LogSystem::Init
-       └─ LogFileWorkerを開始
+       ├─ LogFileWorkerを開始
+       └─ Manager::Init
+            └─ 既定シェーダーの初期化失敗時はFatalを記録して起動を中断
 
 毎フレーム
   ├─ Time::Update
@@ -62,7 +64,7 @@
 
 ScriptやComponentは`SystemInc.h`から公開される`Logger`だけを利用し、出力タイミングを制御する`LogSystem`は直接操作しない。
 
-`Logger::Log()`、`Logger::Warning()`、`Logger::Error()`は、次の情報をスレッドセーフなFIFOへ記録する。
+`Logger::Log()`、`Logger::Warning()`、`Logger::Error()`、`Logger::Fatal()`は、次の情報をスレッドセーフなFIFOへ記録する。
 
 - ログレベル
 - メッセージ
@@ -71,7 +73,24 @@ ScriptやComponentは`SystemInc.h`から公開される`Logger`だけを利用�
 - 記録した側のスレッドID
 - 同一ログの発生回数
 
-FIFOは最大`Logger::MaxQueuedLogs`件とする。上限到達時は古い低重要度ログから置き換え、重要度の高いログが残りやすい状態を保つ。破棄した件数はLogタブに表示する。
+| レベル | 用途 |
+| --- | --- |
+| `Log` | 通常の動作記録 |
+| `Warning` | フォールバックなどにより処理を継続できる異常 |
+| `Error` | リソースや処理単位の失敗。呼び出し元へ失敗を返して判断を委ねる |
+| `Fatal` | アプリケーションとして継続不能な失敗 |
+
+FIFOは最大`Logger::MaxQueuedLogs`件とする。上限到達時は古い低重要度ログから置き換え、重要度の高いログが残りやすい状態を保つ。`Fatal`は`Error`以下より優先して保持する。破棄した件数はLogタブに表示する。
+
+`Fatal()`はログを記録した後にだけMessageBoxを表示する。`Fatal()`自身は即時終了せず、呼び出し元が戻り値などで初期化・実行の中断を判断する。現時点では`shader/DefaultLit.shader`の読み込み失敗をFatalとして扱い、`Manager::Init()`が失敗を返す。`WinMain`は`LogSystem::Shutdown()`で残件を書き出してから終了する。
+
+通常のシェーダー読み込み・コンパイル・リフレクション失敗はMessageBoxを表示せず、`Error`ログと`false`／`nullptr`で呼び出し元へ伝える。
+
+### Fatal MessageBoxの文字コード
+
+現在のx64構成は`CharacterSet=MultiByte`であり、コンパイルオプション`/utf-8`を指定していない。UTF-8 BOMで保存したソースであっても、狭い文字列リテラルは実行コードページ（日本語Windowsでは通常CP932）として生成される。
+
+このため`Logger::Fatal()`がMessageBox用に狭い文字列を`std::wstring`へ変換する際は、`MultiByteToWideChar(CP_ACP, 0, ...)`を使用する。`CP_UTF8`と`MB_ERR_INVALID_CHARS`を使うとCP932の日本語文字列を不正UTF-8として扱い、必要な文字数が0になる。将来、プロジェクト全体で`/utf-8`を採用する場合は、変換コードも`CP_UTF8`へ合わせて見直す。
 
 ## 同一ログの集約
 
@@ -93,6 +112,7 @@ FIFOは最大`Logger::MaxQueuedLogs`件とする。上限到達時は古い低�
 - ファイルの`flush()`は1秒間隔と終了時
 - ImGui用履歴は最大`LogSystem::ImGuiHistoryCount`件
 - Logタブのフィルター未使用時は、画面内の項目だけを整形・描画
+- Logタブは`Log`、`Warning`、`Error`、`Fatal`ごとの表示フィルターを持つ
 
 ログはメタ情報と本文を分け、複数行の本文も各行をスペース4個分インデントする。
 
