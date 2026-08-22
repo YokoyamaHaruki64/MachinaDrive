@@ -4,7 +4,7 @@
 PS_IN main(VS_IN input)
 {
     PS_IN output;
-    
+
     matrix wvp;
     wvp = mul(World, View);
     wvp = mul(wvp, Projection);
@@ -17,6 +17,6 @@ PS_IN main(VS_IN input)
     output.WorldPos = mul(input.Position, World);
     output.ObjectNormal = input.Normal;
     return output;
-    
-    
+
+
 }

@@ -37,7 +37,7 @@ SpriteRenderer::SpriteRenderer(
     const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader");
+    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTransparent.shader");
     if (shader)
         m_materialInstance = MaterialManager::GetDefault(*shader);
 

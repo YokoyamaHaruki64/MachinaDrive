@@ -92,7 +92,7 @@ bool Manager::Init()
     TextureManager::Init();
     if (!ShaderManager::Init())
     {
-        Logger::Fatal("既定シェーダーの読み込みに失敗しました。\nShader: shader/DefaultLit.shader");
+        Logger::Fatal("既定シェーダーの読み込みに失敗しました。\nShader: Assets/Shaders/DefaultLit.shader");
 
         ShaderManager::Uninit();
         TextureManager::Uninit();

@@ -194,7 +194,7 @@ ParticleRenderer::ParticleRenderer(
         m_mesh = &quadModel->meshes.front();
 
     static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader"))
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader"))
         m_materialInstance = MaterialManager::Create("Particle." + std::to_string(materialInstanceIndex++), *shader);
 
     m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};

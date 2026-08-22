@@ -418,7 +418,7 @@
     <ClInclude Include="include\System\RendererBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shader\BloomBlur_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\BloomBlur_PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -428,7 +428,7 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Bloom_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\Bloom_PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -438,15 +438,15 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\common.hlsl">
+    <FxCompile Include="Assets\Shaders\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="shader\postprocess_common.hlsl">
+    <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitPS.hlsl">
+    <FxCompile Include="Assets\Shaders\DefaultLitPS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -456,7 +456,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitVS.hlsl">
+    <FxCompile Include="Assets\Shaders\DefaultLitVS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
@@ -466,7 +466,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Dice_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\Dice_PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -476,7 +476,7 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Dice_VS.hlsl">
+    <FxCompile Include="Assets\Shaders\Dice_VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -486,7 +486,7 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\FullScreen_VS.hlsl">
+    <FxCompile Include="Assets\Shaders\FullScreen_VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -498,7 +498,7 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\unlitTexturePS.hlsl">
+    <FxCompile Include="Assets\Shaders\unlitTexturePS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -508,7 +508,7 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\unlitTextureVS.hlsl">
+    <FxCompile Include="Assets\Shaders\unlitTextureVS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -521,11 +521,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="shader\DefaultLit.shader" />
-    <None Include="shader\PostProcessBloom.shader" />
-    <None Include="shader\UnlitAdditive.shader" />
-    <None Include="shader\UnlitTexture.shader" />
-    <None Include="shader\UnlitTransparent.shader" />
+    <None Include="Assets\Shaders\DefaultLit.shader" />
+    <None Include="Assets\Shaders\PostProcessBloom.shader" />
+    <None Include="Assets\Shaders\UnlitAdditive.shader" />
+    <None Include="Assets\Shaders\UnlitTexture.shader" />
+    <None Include="Assets\Shaders\UnlitTransparent.shader" />
     <None Include="External\Include\Assimp\color4.inl" />
     <None Include="External\Include\Assimp\material.inl" />
     <None Include="External\Include\Assimp\matrix3x3.inl" />

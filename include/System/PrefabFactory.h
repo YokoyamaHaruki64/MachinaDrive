@@ -31,10 +31,10 @@ std::unique_ptr<GameObject> PlayerPrefabFactory(const Vector3& position, const V
         scale
     );
     player->AddComponent<ModelRenderer>(
-        "Assets\\Models\\Player.obj");
+        "Assets\\Local\\Models\\Player.obj");
 
     player->AddComponent<Player>();
-    player->AddComponent<Audio>("Assets\\Sounds\\wan.wav");
+    player->AddComponent<Audio>("Assets\\Local\\Sounds\\wan.wav");
 
     return player;
 }
@@ -47,7 +47,7 @@ std::unique_ptr<GameObject> EnemyPrefabFactory(const Vector3& position, const Ve
         scale
     );
     enemy->AddComponent<ModelRenderer>(
-        "Assets\\Models\\Player.obj");
+        "Assets\\Local\\Models\\Player.obj");
 
     enemy->AddComponent<Enemy>();
 
@@ -62,7 +62,7 @@ std::unique_ptr<GameObject> BulletPrefabFactory(const Vector3& position, const V
         scale
     );
     bullet->AddComponent<ModelRenderer>(
-        "Assets\\Models\\bullet.obj");
+        "Assets\\Local\\Models\\bullet.obj");
     bullet->AddComponent<Bullet>();
     return bullet;
 }
@@ -82,11 +82,11 @@ std::unique_ptr<GameObject> TreePrefabFactory(const Vector3& position, const Vec
     Material* material = MaterialManager::Get("Tree.Material");
     if (!material)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTransparent.shader"))
         {
             material = MaterialManager::Create("Tree.Material", *shader);
             if (material)
-                material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\tree.png"));
+                material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\tree.png"));
         }
     }
 
@@ -107,14 +107,14 @@ std::unique_ptr<GameObject> ExplosionPrefabFactory(const Vector3& position, cons
 
     // UVアニメーションがRendererごとに異なるため、ExplosionごとにMaterialを分ける。
     static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTransparent.shader"))
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTransparent.shader"))
     {
         Material* material = MaterialManager::Create(
             "Explosion.Material." + std::to_string(materialInstanceIndex++),
             *shader);
         if (material)
         {
-            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\explosion.png"));
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\explosion.png"));
             renderer->SetMaterial(0, material);
         }
     }
@@ -161,7 +161,7 @@ std::unique_ptr<GameObject> BoundBallPrefabFactory(const Vector3& position, cons
 
     boundBall->AddComponent<ParticleRenderer>(
         p,
-        L"Assets/Textures/particle.png");
+        L"Assets/Local/Textures/particle.png");
 
     return boundBall;
 }
@@ -179,14 +179,14 @@ std::unique_ptr<GameObject> RipplePrefabFactory(const Vector3& position, const V
 
     // 波紋は色を個別更新するため、インスタンスごとにMaterialを生成する。
     static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader"))
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader"))
     {
         Material* material = MaterialManager::Create(
             "Ripple.Material." + std::to_string(materialInstanceIndex++),
             *shader);
         if (material)
         {
-            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\Ripple.png"));
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\Ripple.png"));
             renderer->SetMaterial(0, material);
         }
     }
@@ -204,7 +204,7 @@ std::unique_ptr<GameObject> FireworksEffectPrefabFactory(const Vector3& position
     auto p = fireworks->AddComponent<ParticleEmitter>();
     fireworks->AddComponent<ParticleRenderer>(
         p,
-        L"Assets/Textures/particle.png");
+        L"Assets/Local/Textures/particle.png");
     fireworks->AddComponent<FireworksEffect>();
     return fireworks;
 }
@@ -219,7 +219,7 @@ std::unique_ptr<GameObject> ImpactBurstEffectPrefabFactory(const Vector3& positi
     auto p = impact->AddComponent<ParticleEmitter>();
     impact->AddComponent<ParticleRenderer>(
         p,
-        L"Assets/Textures/particle.png");
+        L"Assets/Local/Textures/particle.png");
     impact->AddComponent<ImpactBurst>();
     return impact;
 }

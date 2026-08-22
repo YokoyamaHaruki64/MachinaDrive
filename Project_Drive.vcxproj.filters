@@ -13,7 +13,7 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shader">
+    <Filter Include="Assets\Shaders">
       <UniqueIdentifier>{306ec0f5-25ef-44db-ac82-153e1158be13}</UniqueIdentifier>
     </Filter>
     <Filter Include="ヘッダー ファイル\math">
@@ -793,56 +793,56 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shader\common.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\common.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\postprocess_common.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\unlitTexturePS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\unlitTexturePS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\unlitTextureVS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\unlitTextureVS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitPS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\DefaultLitPS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitVS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\DefaultLitVS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\Dice_PS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\Dice_PS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\Dice_VS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\Dice_VS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\FullScreen_VS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\FullScreen_VS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\Bloom_PS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\Bloom_PS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shader\BloomBlur_PS.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Assets\Shaders\BloomBlur_PS.hlsl">
+      <Filter>Assets\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="shader\DefaultLit.shader">
-      <Filter>Shader</Filter>
+    <None Include="Assets\Shaders\DefaultLit.shader">
+      <Filter>Assets\Shaders</Filter>
     </None>
-    <None Include="shader\PostProcessBloom.shader">
-      <Filter>Shader</Filter>
+    <None Include="Assets\Shaders\PostProcessBloom.shader">
+      <Filter>Assets\Shaders</Filter>
     </None>
-    <None Include="shader\UnlitAdditive.shader">
-      <Filter>Shader</Filter>
+    <None Include="Assets\Shaders\UnlitAdditive.shader">
+      <Filter>Assets\Shaders</Filter>
     </None>
-    <None Include="shader\UnlitTexture.shader">
-      <Filter>Shader</Filter>
+    <None Include="Assets\Shaders\UnlitTexture.shader">
+      <Filter>Assets\Shaders</Filter>
     </None>
-    <None Include="shader\UnlitTransparent.shader">
-      <Filter>Shader</Filter>
+    <None Include="Assets\Shaders\UnlitTransparent.shader">
+      <Filter>Assets\Shaders</Filter>
     </None>
     <None Include="include\System\DirectXTex.inl">
       <Filter>ヘッダー ファイル\System</Filter>

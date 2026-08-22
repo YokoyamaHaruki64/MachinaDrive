@@ -22,10 +22,10 @@ void Ripple::OnStart()
     {
         m_renderer = m_owner->AddComponent<ModelRenderer>(
             ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
-        GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
+        GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader");
         if (Material* material = shader ? MaterialManager::Create("Ripple.Fallback", *shader) : nullptr)
         {
-            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\Ripple.png"));
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\Ripple.png"));
             m_renderer->SetMaterial(0, material);
         }
     }

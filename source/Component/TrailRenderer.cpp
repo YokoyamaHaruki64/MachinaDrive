@@ -63,7 +63,7 @@ void TrailRenderer::CreateVertexStreams()
 TrailRenderer::TrailRenderer(GameObject* owner, const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
+    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader");
     if (shader)
         m_materialInstance = MaterialManager::GetDefault(*shader);
 

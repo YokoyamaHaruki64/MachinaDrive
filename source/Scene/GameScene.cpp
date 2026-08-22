@@ -35,11 +35,11 @@ void GameScene::Init()
     Material* fieldMaterial = MaterialManager::Get("GameScene.Field.Material");
     if (!fieldMaterial)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
         {
             fieldMaterial = MaterialManager::Create("GameScene.Field.Material", *shader);
             if (fieldMaterial)
-                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\glass2.png"));
+                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\glass2.png"));
         }
     }
     fieldRenderer->SetMaterial(0, fieldMaterial);
@@ -50,11 +50,11 @@ void GameScene::Init()
     Material* cubeMaterial = MaterialManager::Get("GameScene.Cube.Material");
     if (!cubeMaterial)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
         {
             cubeMaterial = MaterialManager::Create("GameScene.Cube.Material", *shader);
             if (cubeMaterial)
-                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\DarkMatReal.png"));
+                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\DarkMatReal.png"));
         }
     }
     cubeRenderer->SetMaterial(0, cubeMaterial);
@@ -108,5 +108,5 @@ void GameScene::Init()
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 
-    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
+    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Local\\Sounds\\bgm.wav")->Play(true);
 }

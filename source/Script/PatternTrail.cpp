@@ -73,7 +73,7 @@ void PatternTrail::CreateTrailPattern(
         auto th = trail->AddComponent<PatternTrailHeader>();
         th->Init(m_config, normal, PatternTrailHeader::Axis::Y, angle);
 
-        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/White.png");
+        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Local/Textures/White.png");
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);

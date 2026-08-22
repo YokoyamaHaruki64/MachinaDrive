@@ -4,13 +4,13 @@
 PS_IN main(VS_IN input)
 {
     PS_IN output;
-    
+
     matrix wvp;
     wvp = mul(World, View);
     wvp = mul(wvp, Projection);
     output.Position = mul(input.Position, wvp);
 
-    // •½sˆÚ“®¬•ª‚ğœ‚¢‚Äƒ[ƒ‹ƒhs—ñ‚ğ–@ü‚É“K—p
+    // ï¿½ï¿½ï¿½sï¿½Ú“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äƒï¿½ï¿½[ï¿½ï¿½ï¿½hï¿½sï¿½ï¿½ï¿½@ï¿½ï¿½ï¿½É“Kï¿½p
     output.Normal = float4(normalize(mul(input.Normal.xyz, (float3x3) World)), 0.0);
     output.TexCoord = input.TexCoord;
     output.Diffuse = input.Diffuse;
