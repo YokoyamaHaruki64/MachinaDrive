@@ -527,6 +527,9 @@
     <ClInclude Include="include\math\Matrix4x4.h">
       <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\math\Quaternion.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
     <ClInclude Include="include\math\Vector2.h">
       <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>

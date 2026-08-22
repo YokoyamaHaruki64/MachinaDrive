@@ -13,7 +13,11 @@ Author : Yokoyama Haruki
 #ifndef _MATRIX4X4_H_
 #define _MATRIX4X4_H_
 
-#include <assert.h>
+#include <cassert>
+
+#include <DirectXMath.h>
+
+#include "math/Vector3.h"
 
 /// @brief row-major
 /// @brief 行ベクトル (v * M)
@@ -171,10 +175,10 @@ struct Matrix4x4
     inline static constexpr Matrix4x4 Translation(float x, float y, float z)
     {
         return Matrix4x4(
-            1.0f, 0.0f, 0.0f, x,
-            0.0f, 1.0f, 0.0f, y,
-            0.0f, 0.0f, 1.0f, z,
-            0.0f, 0.0f, 0.0f, 1.0f
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            x, y, z, 1.0f
         );
     }
 
@@ -210,8 +214,8 @@ struct Matrix4x4
         float sinA = sinf(angle);
         return Matrix4x4(
             1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, cosA, -sinA, 0.0f,
-            0.0f, sinA, cosA, 0.0f,
+            0.0f, cosA, sinA, 0.0f,
+            0.0f, -sinA, cosA, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         );
     }
@@ -224,9 +228,9 @@ struct Matrix4x4
         float cosA = cosf(angle);
         float sinA = sinf(angle);
         return Matrix4x4(
-            cosA, 0.0f, sinA, 0.0f,
+            cosA, 0.0f, -sinA, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
-            -sinA, 0.0f, cosA, 0.0f,
+            sinA, 0.0f, cosA, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         );
     }
@@ -239,19 +243,19 @@ struct Matrix4x4
         float cosA = cosf(angle);
         float sinA = sinf(angle);
         return Matrix4x4(
-            cosA, -sinA, 0.0f, 0.0f,
-            sinA, cosA, 0.0f, 0.0f,
+            cosA, sinA, 0.0f, 0.0f,
+            -sinA, cosA, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         );
     }
 
     /// @brief ZXY順で回転する行列を返す
-    /// @param roll ロール角（Z軸回転、ラジアン）
     /// @param pitch ピッチ角（X軸回転、ラジアン）
     /// @param yaw ヨー角（Y軸回転、ラジアン）
+    /// @param roll ロール角（Z軸回転、ラジアン）
     /// @return 4x4のZXY順で回転する行列
-    inline static Matrix4x4 RotationRollPitchYaw(float roll, float pitch, float yaw)
+    inline static Matrix4x4 RotationRollPitchYaw(float pitch, float yaw, float roll)
     {
         Matrix4x4 rotX = RotationX(pitch);
         Matrix4x4 rotY = RotationY(yaw);
@@ -284,6 +288,28 @@ struct Matrix4x4
             0.0f, 0.0f, -Q * nearZ, 0.0f
         );
     }
+
+    static Matrix4x4 FromXMMATRIX(DirectX::FXMMATRIX matrix)
+    {
+        DirectX::XMFLOAT4X4 value;
+        DirectX::XMStoreFloat4x4(&value, matrix);
+
+        return Matrix4x4(
+            value._11, value._12, value._13, value._14,
+            value._21, value._22, value._23, value._24,
+            value._31, value._32, value._33, value._34,
+            value._41, value._42, value._43, value._44);
+    }
+
+    DirectX::XMMATRIX ToXMMATRIX() const
+    {
+        return DirectX::XMMATRIX(
+            DirectX::XMVectorSet(m[0][0], m[0][1], m[0][2], m[0][3]),
+            DirectX::XMVectorSet(m[1][0], m[1][1], m[1][2], m[1][3]),
+            DirectX::XMVectorSet(m[2][0], m[2][1], m[2][2], m[2][3]),
+            DirectX::XMVectorSet(m[3][0], m[3][1], m[3][2], m[3][3]));
+    }
+
     // ===============================
     // メンバ関数
     // ===============================
@@ -347,13 +373,13 @@ struct Matrix4x4
     }
 
     /// @brief この行列に回転（ZXY順）を適用する関数
-    /// @param roll ロール角（Z軸回転、ラジアン）
     /// @param pitch ピッチ角（X軸回転、ラジアン）
     /// @param yaw ヨー角（Y軸回転、ラジアン）
+    /// @param roll ロール角（Z軸回転、ラジアン）
     /// @return この行列への参照
-    inline Matrix4x4& RotateRollPitchYaw(float roll, float pitch, float yaw)
+    inline Matrix4x4& RotateRollPitchYaw(float pitch, float yaw, float roll)
     {
-        *this = *this * RotationRollPitchYaw(roll, pitch, yaw);
+        *this = *this * RotationRollPitchYaw(pitch, yaw, roll);
         return *this;
     }
 

@@ -3,6 +3,7 @@
 #include "System/main.h"
 
 #include "System/Component.h"
+#include "math/Quaternion.h"
 #include "math/Vector3.h"
 
 class Transform : public Component

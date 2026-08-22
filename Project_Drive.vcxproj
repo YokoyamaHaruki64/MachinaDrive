@@ -368,6 +368,7 @@
     <ClInclude Include="include\math\MathCommon.h" />
     <ClInclude Include="include\math\Matrix3x3.h" />
     <ClInclude Include="include\math\Matrix4x4.h" />
+    <ClInclude Include="include\math\Quaternion.h" />
     <ClInclude Include="include\math\Vector2.h" />
     <ClInclude Include="include\math\Vector3.h" />
     <ClInclude Include="include\math\Vector4.h" />

@@ -51,3 +51,11 @@ public:
 `Slerp()`は、2つの回転の内積が負の場合に一方を反転し、常に短い経路で補間する。十分に近い回転同士は数値安定性のため線形補間後に正規化してよい。
 
 Quaternion同士の加算・減算、Euler角を直接加算する演算子は提供しない。回転合成には`operator*`、補間には`Slerp()`、Eulerによる設定には変換APIを使用する。
+
+## Matrix4x4
+
+`Matrix4x4`はフレームワーク内で行列を保存・公開する正規型とする。座標系は左手系、ベクトルは行ベクトル`v * M`、要素はrow-majorで扱う。この規約では平行移動成分を`m[3][0..2]`に置き、TRS行列は`Scale * Rotation * Translation`の順に合成する。
+
+当面の行列演算は、`Matrix4x4::ToXMMATRIX()`と`Matrix4x4::FromXMMATRIX()`を境界としてDirectXMathへ委譲する。Transform、Material、Sceneなどの保持値は`Matrix4x4`を使用し、行列乗算、逆行列、分解、描画直前の処理だけを`XMMATRIX`で行う。
+
+将来は`Matrix4x4`自体をSIMD対応の実装へ置き換える。利用側が`Matrix4x4`と変換APIだけへ依存することで、この置換時にTransformや描画コードの公開APIを変更しない。
