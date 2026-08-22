@@ -28,8 +28,9 @@ WinMain
 | `include/Scene/`, `source/Scene/` | タイトル、ゲーム、リザルト各シーンの構築と振る舞い |
 | `include/Script/`, `source/Script/` | プレイヤー、敵、弾、UI、演出などゲーム固有のコンポーネント |
 | `include/math/`, `include/Common/` | ベクトル、曲線、色、乱数などの共通機能 |
-| `shader/` | HLSL ソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
-| `Assets/` | 実行時に読むモデル、テクスチャ、サウンド |
+| `Assets/Shaders/` | Git管理する`.shader`アセットとHLSLソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
+| `Assets/Scenes/`、`Assets/Prefabs/`、`Assets/Materials/` | Git管理するScene、Prefab、Materialアセット |
+| `Assets/Local/` | モデル、テクスチャ、サウンドなどローカル専用リソース。Git管理対象外 |
 | `config/` | ImGui とゲーム内調整値の設定 |
 | `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
@@ -84,6 +85,30 @@ WinMain
 
 `Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 
+## Transform Hierarchy
+
+GameObjectは必ず1つ持つTransformを通じて親子関係を構成する。親子関係の正はTransformが持ち、Managerは親子に関わらずすべてのGameObjectを`std::unique_ptr`で一元所有する。GameObject側はTransformへの委譲APIと、破棄時の子孫処理を担当する。
+
+```text
+Manager
+  └─ GameObject（全Objectを一元所有）
+       └─ Transform
+            ├─ parent: Transform*（非所有）
+            └─ children: Transform*[]（非所有）
+```
+
+TransformはLocal Position、Local Quaternion Rotation、Local Scaleを保持する。Rotationの内部表現はQuaternionだけとし、Euler角を別の状態として保持しない。World行列はLocal行列と親TransformのWorld行列から求める。
+
+TransformはQuaternionを扱う`GetLocalRotation()`と`SetLocalRotation()`、Euler角を扱う`GetLocalEulerAngles()`と`SetLocalEulerAngles()`を明示して提供する。既存のEuler角APIは互換性のため後者へ転送する。InspectorはEuler角を編集値として表示し、変更時にQuaternionへ変換する。YAMLにはQuaternionを`[x, y, z, w]`として保存する。Quaternion自体のAPIと演算規約は[MATH.md](MATH.md)を参照する。
+
+Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱う。Local値を扱うAPIには必ず`Local`を含め、`GetLocalPosition()`、`SetLocalPosition()`、`GetLocalRotation()`、`SetLocalRotation()`、`GetLocalScale()`、`SetLocalScale()`とする。親を持たないTransformではWorld値とLocal値は一致する。
+
+`SetParent()`は自己親子と循環参照を拒否し、失敗時はErrorLogを記録して状態を変更しない。`nullptr`を指定するとRootへ戻す。親変更時は、見た目のWorld変換を維持する`KeepWorld`を既定とし、Local変換を維持する`KeepLocal`も指定できる。親子リストの更新はTransformが担当する。
+
+親GameObjectを`Destroy()`すると、その場で子孫にも再帰的に破棄予約を伝播する。予約されたGameObjectは同じフレームの残りの`Update()`と`LateUpdate()`を実行せず、Managerの破棄フェーズで実際に削除する。
+
+親に非一様Scale、子に回転がある組み合わせではshearが生じる。初期実装ではTRSへの近似分解として扱い、完全なshearの保存・復元は対象外とする。
+
 ## シーンと生成
 
 `Scene` は `Init()` を必須とし、必要に応じて `Uninit()`、`Update()`、`Draw()` を実装する。`Manager::ChangeScene<T>()` は次のフレームの更新時にシーンを切り替える。切替時には旧シーンの `Uninit()`、全 GameObject の `OnDestroy()`、オブジェクト群とポストエフェクトの破棄が行われる。
@@ -111,6 +136,8 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクト
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
 
+Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む復元規則は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+
 ## 診断機能
 
 ログの記録・集約・ファイル出力、性能計測、ImGuiの`Debug`ウィンドウは診断システムとして扱う。ログの記録は任意のスレッドから行い、集約と性能計測はメインスレッド、ファイル出力は専用Workerで処理する。
@@ -121,7 +148,7 @@ Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [REND
 
 ## リソースとシェーダー
 
-実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は `Assets\\Models`、`Assets\\Textures`、`Assets\\Sounds`、`BuildedShader`、`config` である。
+実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は`Assets/Scenes`、`Assets/Prefabs`、`Assets/Materials`、`Assets/Shaders`、`Assets/Local/Models`、`Assets/Local/Textures`、`Assets/Local/Sounds`、`BuildedShader`、`config`である。
 
 HLSL は Shader Model 5.0 を対象とし、`common.hlsl` は共有定義で単体コンパイルしない。各実行用シェーダーはプロジェクト設定で `.cso` へコンパイルされ、C++ 側はそのファイルをロードする。
 
