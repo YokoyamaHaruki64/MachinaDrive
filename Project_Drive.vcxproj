@@ -240,6 +240,7 @@
     <ClCompile Include="source\System\PerformanceMonitor.cpp" />
     <ClCompile Include="source\System\main.cpp" />
     <ClCompile Include="source\System\GameObject.cpp" />
+    <ClCompile Include="source\System\GameObjectReference.cpp" />
     <ClCompile Include="source\System\manager.cpp" />
     <ClCompile Include="source\System\renderer.cpp" />
     <ClCompile Include="source\System\RendererBase.cpp" />
@@ -404,6 +405,9 @@
     <ClInclude Include="include\System\FieldRegistry.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
+    <ClInclude Include="include\System\GameObjectReference.h" />
+    <ClInclude Include="include\System\PrefabReference.h" />
+    <ClInclude Include="include\System\Script.h" />
     <ClInclude Include="include\System\SystemInc.h" />
     <ClInclude Include="include\Component\ComponentInc.h" />
     <ClInclude Include="include\System\GM_Time.h" />

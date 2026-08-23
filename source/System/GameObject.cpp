@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "System/GameObject.h"
+#include "System/GameObjectReference.h"
 #include "Component/Transform.h"
 
 GameObject::GameObject()
@@ -31,8 +32,32 @@ void GameObject::Destroy()
         return;
     }
 
+    ClearReferences();
     m_transform->DestroyChildren();
     m_isDestroyRequested = true;
+}
+
+void GameObject::RegisterReference(GameObjectReference* reference)
+{
+    m_references.push_back(reference);
+}
+
+void GameObject::UnregisterReference(GameObjectReference* reference)
+{
+    const auto iterator = std::find(m_references.begin(), m_references.end(), reference);
+    if (iterator != m_references.end())
+    {
+        m_references.erase(iterator);
+    }
+}
+
+void GameObject::ClearReferences()
+{
+    // Clear側で登録解除されるため、末尾から処理してイテレータを保持しない。
+    while (!m_references.empty())
+    {
+        m_references.back()->Clear();
+    }
 }
 
 bool GameObject::SetParent(GameObject* parent, ParentTransformMode mode)

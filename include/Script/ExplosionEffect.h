@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Script.h"
 
-class ExplosionEffect : public Component
+class ExplosionEffect : public Script
 {
     static constexpr float LIFETIME = 0.3f; // エフェクトの寿命（秒）
     static constexpr int FRAME_COUNT = 16;   // スプライトシートのフレーム数
@@ -11,7 +11,7 @@ class ExplosionEffect : public Component
 public:
     ExplosionEffect() = delete;
     explicit ExplosionEffect(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void OnStart() override;

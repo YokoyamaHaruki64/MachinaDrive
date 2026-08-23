@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Script.h"
 
-class TitleUI : public Component
+class TitleUI : public Script
 {
 private:
     Vector3 m_originalPosition = Vector3::Zero();
@@ -12,7 +12,7 @@ private:
 public:
     TitleUI() = delete;
     explicit TitleUI(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void OnStart() override;

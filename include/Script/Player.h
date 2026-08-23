@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 #include "System/GameObject.h"
 
 class Audio;
-class Player : public Component
+class Player : public Script
 {
 private:
 	Vector3 m_velocity{ 0.0f, 0.0f, 0.0f };
@@ -15,7 +15,7 @@ public:
     void OnStart() override;
     void Update() override;
     Player() = delete;
-    Player(GameObject* owner) : Component(owner)
+    Player(GameObject* owner) : Script(owner)
     {
     }
 

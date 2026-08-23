@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 
-class ImpactBurst : public Component
+class ImpactBurst : public Script
 {
 
 public:
-    ImpactBurst(GameObject* owner) : Component(owner) {}
+    ImpactBurst(GameObject* owner) : Script(owner) {}
     virtual ~ImpactBurst() override {};
     virtual void OnStart() override;
 };

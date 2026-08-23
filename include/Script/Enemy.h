@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 
-class Enemy : public Component
+class Enemy : public Script
 {
 public:
     Enemy() = default;
     explicit Enemy(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void Update() override;

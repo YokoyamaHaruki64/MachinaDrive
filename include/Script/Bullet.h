@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Script.h"
 
-class Bullet : public Component
+class Bullet : public Script
 {
     static constexpr float SPEED = 50.0f;
     static constexpr float HIT_RADIUS = 1.2f; // 当たり判定の半径
@@ -14,7 +14,7 @@ class Bullet : public Component
 public:
     Bullet() = delete;
     explicit Bullet(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void Update() override;

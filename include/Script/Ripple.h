@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 #include "Common/Color.h"
 #include "math/Curve.h"
 
 class ModelRenderer;
 
-class Ripple : public Component
+class Ripple : public Script
 {
     ModelRenderer* m_renderer = nullptr;
 
@@ -27,7 +27,7 @@ class Ripple : public Component
     Curve<Color> m_colorCurve{};
 
 public:
-    Ripple(GameObject* owner) :Component(owner)
+    Ripple(GameObject* owner) : Script(owner)
     {}
     virtual ~Ripple() override {}
     virtual void OnStart() override;

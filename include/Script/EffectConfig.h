@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Script.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
 #include "imgui.h"
 
-class EffectConfig : public Component
+class EffectConfig : public Script
 {
 public:
     struct PatternTrailConfig
@@ -106,7 +106,7 @@ public:
 
     EffectConfig() = delete;
     explicit EffectConfig(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
 

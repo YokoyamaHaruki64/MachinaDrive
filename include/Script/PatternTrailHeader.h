@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 #include "math/Vector3.h"
 #include "math/Curve.h"
 
 class EffectConfig;
 class TrailRenderer;
 
-class PatternTrailHeader : public Component
+class PatternTrailHeader : public Script
 {
 public:
     enum Axis
@@ -42,7 +42,7 @@ private:
 public:
     PatternTrailHeader() = delete;
     explicit PatternTrailHeader(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     virtual ~PatternTrailHeader() {}

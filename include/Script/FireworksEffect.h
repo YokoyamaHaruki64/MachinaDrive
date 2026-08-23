@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
 
-class FireworksEffect : public Component
+class FireworksEffect : public Script
 {
 public:
-    FireworksEffect(GameObject* owner) : Component(owner) {}
+    FireworksEffect(GameObject* owner) : Script(owner) {}
     virtual ~FireworksEffect() override {};
     virtual void OnStart() override;
     virtual void Update() override;

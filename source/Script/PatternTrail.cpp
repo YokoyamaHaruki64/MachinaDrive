@@ -35,7 +35,7 @@ void PatternTrail::LateUpdate()
     // 破棄されたトレイルヘッダーを削除
     for (int i = 0; i < m_trailHeaders.size(); ++i)
     {
-        GameObject* trail = m_trailHeaders[i];
+        const GameObjectReference& trail = m_trailHeaders[i];
         if (!trail || trail->IsDestroyed())
         {
             // スワップポップで削除
@@ -83,7 +83,7 @@ void PatternTrail::CreateTrailPattern(
         tr->SetWidth(settings.width);
 
 
-        m_trailHeaders.push_back(trail);
+        m_trailHeaders.emplace_back(trail);
     }
 
     m_normal = normal;

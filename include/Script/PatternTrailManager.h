@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
+#include "System/GameObjectReference.h"
 #include "math/Vector3.h"
 #include "math/Curve.h"
 
@@ -8,17 +9,17 @@
 
 class EffectConfig;
 
-class PatternTrailManager : public Component
+class PatternTrailManager : public Script
 {
 private:
-    std::vector<GameObject*> m_walls;
+    std::vector<GameObjectReference> m_walls;
     EffectConfig* m_config = nullptr;
 
     float m_elapsedTime = 0.0f; // 経過時間
 public:
     PatternTrailManager() = delete;
     explicit PatternTrailManager(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     virtual void OnStart() override;

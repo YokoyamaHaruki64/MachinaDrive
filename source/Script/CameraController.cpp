@@ -13,7 +13,7 @@ void CameraController::OnStart()
     GameObject* playerObject = Manager::GetFirstObjectByComponent<Player>();
     if (playerObject != nullptr)
     {
-        m_target = playerObject->GetTransform();
+        m_target = playerObject;
     }
     else
     {
@@ -35,10 +35,10 @@ void CameraController::LateUpdate()
     }
 
     // カメラのターゲットを設定
-    if (m_target == nullptr)
+    if (!m_target)
         m_camera->SetTarget(Vector3::Zero()); // ターゲットがない場合は原点を向く
     else
-        m_camera->SetTarget(m_target->GetPosition());
+        m_camera->SetTarget(m_target->GetTransform()->GetPosition());
 
     // カメラの位置をターゲットから一定の距離と高さに設定
     const float cameraYaw = transform()->GetEulerAngles().y;

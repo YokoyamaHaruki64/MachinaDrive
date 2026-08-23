@@ -7,6 +7,7 @@
 #include "component.h"
 
 class Transform;
+class GameObjectReference;
 enum class ParentTransformMode;
 
 class GameObject
@@ -15,6 +16,7 @@ protected:
     std::string m_name{ "Empty" };
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
+    std::vector<GameObjectReference*> m_references;
 
     bool m_isStarted = false;
     bool m_isDestroyRequested = false;
@@ -103,6 +105,8 @@ public:
         m_isDestroyed = true;
         m_isStarted = false;
 
+        ClearReferences();
+
         const size_t componentCount = m_components.size();
         for (size_t i = 0; i < componentCount; ++i)
         {
@@ -150,6 +154,12 @@ public:
 	//	}
 	//}
 
+private:
+    void RegisterReference(GameObjectReference* reference);
+    void UnregisterReference(GameObjectReference* reference);
+    void ClearReferences();
+
+    friend class GameObjectReference;
 };
 
 // テンプレート関数インクルード（循環参照回避）

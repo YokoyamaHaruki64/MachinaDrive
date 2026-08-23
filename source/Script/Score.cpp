@@ -18,7 +18,7 @@ void Score::OnStart()
 
         digitObj->GetTransform()->SetScale(Vector3(100.0f, 100.0f, 1.0f));
 
-        m_scoreObjects.push_back(digitObj);
+        m_scoreObjects.emplace_back(digitObj);
     }
 }
 
@@ -29,7 +29,13 @@ void Score::Update()
     {
         int digit = score % 10;
         score /= 10;
-        SpriteRenderer* renderer = m_scoreObjects[i]->GetComponent<SpriteRenderer>();
+        const GameObjectReference& digitObject = m_scoreObjects[i];
+        if (!digitObject)
+        {
+            continue;
+        }
+
+        SpriteRenderer* renderer = digitObject->GetComponent<SpriteRenderer>();
         if(renderer)
         {
             float uvOffsetX = digit % 5 * 0.2f;

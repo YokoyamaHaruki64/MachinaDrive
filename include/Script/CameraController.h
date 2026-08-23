@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Script.h"
+#include "System/GameObjectReference.h"
 
-class Transform;
 class Camera;
 
-class CameraController : public Component
+class CameraController : public Script
 {
-    Transform* m_target = nullptr;
+    GameObjectReference m_target;
     Camera* m_camera = nullptr;
 
     static constexpr float CAMERA_DISTANCE = 10.0f;
@@ -15,11 +15,11 @@ class CameraController : public Component
 public:
     CameraController() = default;
     explicit CameraController(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
-    void SetTarget(Transform* target) { m_target = target; }
-    Transform* GetTarget() const { return m_target; }
+    void SetTarget(GameObject* target) { m_target = target; }
+    GameObject* GetTarget() const { return m_target.Get(); }
 
     void OnStart() override;
     void LateUpdate() override;
