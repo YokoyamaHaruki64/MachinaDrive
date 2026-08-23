@@ -123,10 +123,6 @@ PostProcess は通常描画キューへ提出せず、Material を使ってフ�
 
 初期化は Renderer、TextureManager、ShaderManager、MaterialManager、ModelManager の順に行う。終了時は GameObject と PostProcess を先に破棄し、ModelManager、MaterialManager、TextureManager、ShaderManager、Renderer の順に解放する。これにより、Material / ModelAsset が参照する Shader と GPU リソースの寿命を守る。
 
-## 今後の拡張候補
+## 今後の課題
 
-- Mesh / Material / Pass 単位の DrawItem 化と Bind キャッシュ
-- Skeleton、Animation、Skinning の ModelAsset への追加
-- TextureCube、Texture2DArray、Buffer 系 Resource Property
-- Shadow Phase の実描画キュー
-- 透過 Material とカリング方針の整理
+描画、ModelAssetを含む将来の拡張・最適化項目は[FUTURE_WORK.md](FUTURE_WORK.md)を参照する。

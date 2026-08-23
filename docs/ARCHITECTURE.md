@@ -146,6 +146,8 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 
 実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
 
+現在の機能完了条件には含めない拡張・最適化項目は[FUTURE_WORK.md](FUTURE_WORK.md)を参照する。
+
 ## リソースとシェーダー
 
 実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は`Assets/Scenes`、`Assets/Prefabs`、`Assets/Materials`、`Assets/Shaders`、`Assets/Local/Models`、`Assets/Local/Textures`、`Assets/Local/Sounds`、`BuildedShader`、`config`である。
