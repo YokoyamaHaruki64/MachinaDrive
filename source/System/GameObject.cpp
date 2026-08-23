@@ -23,3 +23,24 @@ Transform* GameObject::GetTransform() const
 {
     return m_transform;
 }
+
+void GameObject::Destroy()
+{
+    if (m_isDestroyed || m_isDestroyRequested)
+    {
+        return;
+    }
+
+    m_transform->DestroyChildren();
+    m_isDestroyRequested = true;
+}
+
+bool GameObject::SetParent(GameObject* parent, ParentTransformMode mode)
+{
+    return m_transform->SetParent(parent ? parent->GetTransform() : nullptr, mode);
+}
+
+bool GameObject::SetParent(GameObject* parent)
+{
+    return SetParent(parent, ParentTransformMode::KeepWorld);
+}

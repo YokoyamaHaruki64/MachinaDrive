@@ -10,9 +10,9 @@ Transform* Component::transform() const
     return m_owner ? m_owner->GetTransform() : nullptr;
 }
 
-void Component::DrawInspectorImGui()
+void Component::DrawInspectorImGui(InspectorFieldSpace inspectorSpace)
 {
     FieldRegistry fields;
     RegisterFields(fields);
-    fields.DrawImGui();
+    fields.DrawImGui(inspectorSpace);
 }

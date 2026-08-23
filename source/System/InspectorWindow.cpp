@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "System/InspectorWindow.h"
+#include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "System/RendererBase.h"
 #include <typeinfo>
@@ -29,7 +30,14 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
         ImGui::PushID(component);
         if (ImGui::TreeNode(typeid(*component).name()))
         {
-            component->DrawInspectorImGui();
+            InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All;
+            if (dynamic_cast<Transform*>(component))
+            {
+                ImGui::Checkbox("Local", &m_showLocalTransform);
+                inspectorSpace = m_showLocalTransform ? InspectorFieldSpace::Local : InspectorFieldSpace::World;
+            }
+
+            component->DrawInspectorImGui(inspectorSpace);
 
             if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
             {

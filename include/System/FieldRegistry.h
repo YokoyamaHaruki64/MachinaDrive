@@ -16,6 +16,13 @@ enum class InspectorFieldType
     Curve,
 };
 
+enum class InspectorFieldSpace
+{
+    All,
+    World,
+    Local,
+};
+
 struct FieldDescriptor
 {
     std::string key;
@@ -23,6 +30,8 @@ struct FieldDescriptor
     void* value{};
     ValueType valueType{};
     InspectorFieldType inspectorType{ InspectorFieldType::Auto };
+    InspectorFieldSpace inspectorSpace{ InspectorFieldSpace::All };
+    std::function<void(const FieldDescriptor&)> drawAccessor;
 };
 
 class FieldRegistry
@@ -30,6 +39,7 @@ class FieldRegistry
     std::vector<FieldDescriptor> m_fields;
 
     static std::string CreateDisplayName(std::string_view key);
+    static bool DrawValue(const FieldDescriptor& field, void* value);
 
     template <typename T>
     static constexpr ValueType GetValueType()
@@ -54,9 +64,38 @@ public:
         m_fields.push_back({ std::string(key), CreateDisplayName(key), &value, GetValueType<T>(), inspectorType });
     }
 
-    void DrawImGui();
+    template <typename T, typename Getter, typename Setter>
+    void AddAccessor(
+        std::string_view key,
+        Getter getter,
+        Setter setter,
+        InspectorFieldSpace inspectorSpace,
+        InspectorFieldType inspectorType = InspectorFieldType::Auto)
+    {
+        FieldDescriptor descriptor{
+            std::string(key),
+            CreateDisplayName(key),
+            nullptr,
+            GetValueType<T>(),
+            inspectorType,
+            inspectorSpace,
+        };
+
+        descriptor.drawAccessor = [getter = std::move(getter), setter = std::move(setter)](const FieldDescriptor& field)
+        {
+            T value = getter();
+            if (DrawValue(field, &value))
+            {
+                setter(value);
+            }
+        };
+        m_fields.push_back(std::move(descriptor));
+    }
+
+    void DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
 };
 
 #define GM_FIELD(member) fields.Add(#member, member)
 #define GM_FIELD_KEY(key, member) fields.Add(key, member)
 #define GM_FIELD_TYPE(member, type) fields.Add(#member, member, type)
+#include <functional>

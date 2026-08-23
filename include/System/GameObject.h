@@ -7,6 +7,7 @@
 #include "component.h"
 
 class Transform;
+enum class ParentTransformMode;
 
 class GameObject
 {
@@ -40,13 +41,7 @@ public:
         m_name = std::move(name);
     }
 
-    void Destroy()
-    {
-        if (!m_isDestroyed)
-        {
-            m_isDestroyRequested = true;
-        }
-    }
+    void Destroy();
 
     bool IsDestroyed() const
     {
@@ -85,6 +80,8 @@ public:
 	}
 
     Transform* GetTransform() const;
+    bool SetParent(GameObject* parent, ParentTransformMode mode);
+    bool SetParent(GameObject* parent);
 
     std::vector<Component*> GetComponents() const
     {

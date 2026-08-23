@@ -41,10 +41,11 @@ void CameraController::LateUpdate()
         m_camera->SetTarget(m_target->GetPosition());
 
     // カメラの位置をターゲットから一定の距離と高さに設定
+    const float cameraYaw = transform()->GetEulerAngles().y;
     Vector3 cameraPos = m_camera->GetTarget() + Vector3(
-        -sinf(transform()->GetRotation().y) * CAMERA_DISTANCE,
+        -sinf(cameraYaw) * CAMERA_DISTANCE,
         CAMERA_HEIGHT,
-        -cosf(transform()->GetRotation().y) * CAMERA_DISTANCE
+        -cosf(cameraYaw) * CAMERA_DISTANCE
     );
 
     m_camera->transform()->SetPosition(cameraPos);

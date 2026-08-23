@@ -86,10 +86,12 @@ void RendererBase::Submit()
 
 const XMMATRIX RendererBase::CalcWorldMatrix(const Transform* transform, BillboardType billboardType)
 {
-    Vector3 position = transform->GetPosition();
-    Vector3 rotation = transform->GetRotation();
-    Vector3 scale = transform->GetScale();
-    return CalcWorldMatrix(position, rotation, scale, billboardType);
+    if (billboardType == BillboardType::None)
+    {
+        return transform->GetWorldMatrix().ToXMMATRIX();
+    }
+
+    return CalcWorldMatrix(transform->GetPosition(), Vector3::Zero(), transform->GetScale(), billboardType);
 }
 
 const XMMATRIX RendererBase::CalcWorldMatrix(

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "math/Vector3.h"
+#include "System/FieldRegistry.h"
 
 class Transform;
 class GameObject;
-class FieldRegistry;
 
 class Component
 {
@@ -27,7 +27,7 @@ public:
     virtual void LateUpdate() {};
 	virtual void Draw() {};
 
-    void DrawInspectorImGui();
+    void DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
 
     Transform* transform() const;
 

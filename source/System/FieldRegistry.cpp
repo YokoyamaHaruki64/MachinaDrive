@@ -79,24 +79,41 @@ std::string FieldRegistry::CreateDisplayName(std::string_view key)
     return result;
 }
 
-void FieldRegistry::DrawImGui()
+bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
+{
+    switch (field.valueType)
+    {
+    case ValueType::Bool: return ImGui::Checkbox(field.displayName.c_str(), static_cast<bool*>(value));
+    case ValueType::Int: return ImGui::DragInt(field.displayName.c_str(), static_cast<int*>(value));
+    case ValueType::Float: return ImGui::DragFloat(field.displayName.c_str(), static_cast<float*>(value), 0.01f);
+    case ValueType::String: return InputText(field.displayName.c_str(), *static_cast<std::string*>(value));
+    case ValueType::Vector2: return ImGui::DragFloat2(field.displayName.c_str(), &static_cast<Vector2*>(value)->x, 0.01f);
+    case ValueType::Vector3: return ImGui::DragFloat3(field.displayName.c_str(), &static_cast<Vector3*>(value)->x, 0.01f);
+    case ValueType::Vector4: return ImGui::DragFloat4(field.displayName.c_str(), &static_cast<Vector4*>(value)->x, 0.01f);
+    case ValueType::Color: return ImGui::ColorEdit4(field.displayName.c_str(), &static_cast<Color*>(value)->r);
+    case ValueType::Matrix3x3: DrawMatrix3x3(field.displayName.c_str(), *static_cast<Matrix3x3*>(value)); return false;
+    case ValueType::Matrix4x4: DrawMatrix4x4(field.displayName.c_str(), *static_cast<Matrix4x4*>(value)); return false;
+    default: ImGui::Text("%s: 未対応", field.displayName.c_str()); return false;
+    }
+}
+
+void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
 {
     for (FieldDescriptor& field : m_fields)
     {
-        ImGui::PushID(field.key.c_str());
-        switch (field.valueType)
+        if (inspectorSpace != InspectorFieldSpace::All && field.inspectorSpace != inspectorSpace)
         {
-        case ValueType::Bool: ImGui::Checkbox(field.displayName.c_str(), static_cast<bool*>(field.value)); break;
-        case ValueType::Int: ImGui::DragInt(field.displayName.c_str(), static_cast<int*>(field.value)); break;
-        case ValueType::Float: ImGui::DragFloat(field.displayName.c_str(), static_cast<float*>(field.value), 0.01f); break;
-        case ValueType::String: InputText(field.displayName.c_str(), *static_cast<std::string*>(field.value)); break;
-        case ValueType::Vector2: ImGui::DragFloat2(field.displayName.c_str(), &static_cast<Vector2*>(field.value)->x, 0.01f); break;
-        case ValueType::Vector3: ImGui::DragFloat3(field.displayName.c_str(), &static_cast<Vector3*>(field.value)->x, 0.01f); break;
-        case ValueType::Vector4: ImGui::DragFloat4(field.displayName.c_str(), &static_cast<Vector4*>(field.value)->x, 0.01f); break;
-        case ValueType::Color: ImGui::ColorEdit4(field.displayName.c_str(), &static_cast<Color*>(field.value)->r); break;
-        case ValueType::Matrix3x3: DrawMatrix3x3(field.displayName.c_str(), *static_cast<Matrix3x3*>(field.value)); break;
-        case ValueType::Matrix4x4: DrawMatrix4x4(field.displayName.c_str(), *static_cast<Matrix4x4*>(field.value)); break;
-        default: ImGui::Text("%s: 未対応", field.displayName.c_str()); break;
+            continue;
+        }
+
+        ImGui::PushID(field.key.c_str());
+        if (field.drawAccessor)
+        {
+            field.drawAccessor(field);
+        }
+        else
+        {
+            DrawValue(field, field.value);
         }
         ImGui::PopID();
     }

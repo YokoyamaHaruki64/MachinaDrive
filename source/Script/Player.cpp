@@ -84,7 +84,7 @@ void Player::Update()
 
     transform()->Translate(m_velocity * Time::GetDeltaTime()); // 位置の更新
     float targetRotationY = atan2f(m_velocity.x, m_velocity.z); // 移動方向に向く
-    const Vector3& myRot = transform()->GetRotation();
+    const Vector3 myRot = transform()->GetRotation().QuatToEuler();
     transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * Time::GetDeltaTime()), myRot.z)); // 回転の更新
 
 	if(transform()->GetPosition().y < 0.0f)
