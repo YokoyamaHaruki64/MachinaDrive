@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "System/InspectorWindow.h"
+#include "System/ComponentRegistry.h"
 #include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "System/RendererBase.h"
@@ -28,7 +29,9 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
     for (Component* component : selectedGameObject->GetComponents())
     {
         ImGui::PushID(component);
-        if (ImGui::TreeNode(typeid(*component).name()))
+        const ComponentRegistration* registration = ComponentRegistry::Find(typeid(*component));
+        const char* componentName = registration ? registration->displayName.c_str() : typeid(*component).name();
+        if (ImGui::TreeNode(componentName))
         {
             InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All;
             if (dynamic_cast<Transform*>(component))
@@ -58,6 +61,40 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
             ImGui::TreePop();
         }
         ImGui::PopID();
+    }
+
+    if (ImGui::Button("Add Component"))
+    {
+        ImGui::OpenPopup("AddComponentPopup");
+    }
+
+    if (ImGui::BeginPopup("AddComponentPopup"))
+    {
+        for (ComponentCategory category : { ComponentCategory::Component, ComponentCategory::Script })
+        {
+            const char* categoryName = category == ComponentCategory::Component ? "Component" : "Script";
+            if (ImGui::BeginMenu(categoryName))
+            {
+                for (const ComponentRegistration& registration : ComponentRegistry::GetRegistrations())
+                {
+                    if (!registration.showInAddComponent || registration.category != category)
+                    {
+                        continue;
+                    }
+
+                    const bool canAdd = ComponentRegistry::CanAdd(registration, *selectedGameObject);
+                    ImGui::BeginDisabled(!canAdd);
+                    if (ImGui::MenuItem(registration.displayName.c_str()))
+                    {
+                        ComponentRegistry::Add(registration, *selectedGameObject);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndDisabled();
+                }
+                ImGui::EndMenu();
+            }
+        }
+        ImGui::EndPopup();
     }
 
     ImGui::End();

@@ -4,6 +4,7 @@
 
 class Enemy : public Script
 {
+    REGISTER_COMPONENT(Enemy, "Enemy");
 public:
     Enemy() = default;
     explicit Enemy(GameObject* owner)

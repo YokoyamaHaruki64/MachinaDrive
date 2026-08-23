@@ -132,6 +132,9 @@
     <ClCompile Include="source\System\GameObjectReference.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\ComponentRegistry.cpp">
+      <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\GM_Time.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
@@ -300,6 +303,9 @@
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\System\component.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\ComponentRegistry.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\System\DirectXTex.h">

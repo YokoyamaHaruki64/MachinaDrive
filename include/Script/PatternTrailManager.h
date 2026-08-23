@@ -11,6 +11,7 @@ class EffectConfig;
 
 class PatternTrailManager : public Script
 {
+    REGISTER_COMPONENT(PatternTrailManager, "PatternTrailManager");
 private:
     std::vector<GameObjectReference> m_walls;
     EffectConfig* m_config = nullptr;

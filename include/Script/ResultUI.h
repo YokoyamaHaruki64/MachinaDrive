@@ -4,6 +4,7 @@
 
 class ResultUI : public Script
 {
+    REGISTER_COMPONENT(ResultUI, "ResultUI");
 private:
     Vector3 m_originalPosition = Vector3::Zero();
     float m_amplitude = 15.0f; // 振幅

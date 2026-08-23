@@ -3,6 +3,7 @@
 #include "System/main.h"
 
 #include "System/Component.h"
+#include "System/ComponentRegistry.h"
 #include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
@@ -16,6 +17,8 @@
 
 class ParticleEmitter : public Component
 {
+    REGISTER_COMPONENT(ParticleEmitter, "Particle Emitter");
+
 public:
 
     enum VelocityType : uint8_t

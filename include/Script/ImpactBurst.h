@@ -4,6 +4,7 @@
 
 class ImpactBurst : public Script
 {
+    REGISTER_COMPONENT(ImpactBurst, "ImpactBurst");
 
 public:
     ImpactBurst(GameObject* owner) : Script(owner) {}

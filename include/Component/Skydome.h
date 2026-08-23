@@ -1,12 +1,15 @@
 ﻿#pragma once
 
 #include "System/component.h"
+#include "System/ComponentRegistry.h"
 
 class Camera;
 class GameObject;
 
 class Skydome : public Component
 {
+    REGISTER_COMPONENT(Skydome, "Skydome");
+
     Camera* m_mainCamera = nullptr;
     GameObject* m_domeObject = nullptr;
 public:

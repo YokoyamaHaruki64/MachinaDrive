@@ -4,6 +4,7 @@
 
 class Wall : public Script
 {
+    REGISTER_COMPONENT(Wall, "Wall");
     Vector3 m_normal = Vector3::Zero(); // 壁の法線ベクトル 
 public:
     Wall() = delete;

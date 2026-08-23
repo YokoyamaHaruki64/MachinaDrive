@@ -7,6 +7,7 @@ class Camera;
 
 class CameraController : public Script
 {
+    REGISTER_COMPONENT(CameraController, "CameraController");
     GameObjectReference m_target;
     Camera* m_camera = nullptr;
 

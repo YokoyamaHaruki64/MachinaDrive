@@ -7,6 +7,7 @@
 
 class EffectConfig : public Script
 {
+    REGISTER_COMPONENT(EffectConfig, "EffectConfig");
 public:
     struct PatternTrailConfig
     {

@@ -8,6 +8,7 @@ class ModelRenderer;
 
 class Ripple : public Script
 {
+    REGISTER_COMPONENT(Ripple, "Ripple");
     ModelRenderer* m_renderer = nullptr;
 
     float m_lifeTime = 1.0f; // 波紋の寿命

@@ -7,6 +7,7 @@ class GameObject;
 
 class Score : public Script
 {
+    REGISTER_COMPONENT(Score, "Score");
     static constexpr int MAX_DIGITS = 4;        // スコア表示の最大桁数
     int m_score = 0;
     std::vector<GameObjectReference> m_scoreObjects;    // スコア表示用のGameObjectのリスト

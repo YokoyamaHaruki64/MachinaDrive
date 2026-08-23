@@ -4,6 +4,7 @@
 
 class FireworksEffect : public Script
 {
+    REGISTER_COMPONENT(FireworksEffect, "FireworksEffect");
 public:
     FireworksEffect(GameObject* owner) : Script(owner) {}
     virtual ~FireworksEffect() override {};

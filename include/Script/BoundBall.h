@@ -8,6 +8,7 @@ class EffectConfig;
 
 class BoundBall : public Script
 {
+    REGISTER_COMPONENT(BoundBall, "BoundBall");
     static constexpr float RADIUS = 0.3f; // 球の半径
     static constexpr float RIPPLE_EFFECT_COOLDOWN = 0.2f; // Rippleエフェクトのクールダウン時間
     Vector3 m_velocity;

@@ -7,6 +7,7 @@ class EffectConfig;
 
 class PatternTrail : public Script
 {
+    REGISTER_COMPONENT(PatternTrail, "PatternTrail");
     std::vector<GameObjectReference> m_trailHeaders;
     Vector3 m_normal = Vector3::Up();
     EffectConfig* m_config = nullptr;

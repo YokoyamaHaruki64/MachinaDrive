@@ -30,6 +30,7 @@ public:
     void DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
 
     Transform* transform() const;
+    GameObject* GetOwner() const { return m_owner; }
 
     template <typename T>
     T* GetComponent() const;

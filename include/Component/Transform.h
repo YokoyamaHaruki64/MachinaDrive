@@ -5,6 +5,7 @@
 #include "System/main.h"
 
 #include "System/Component.h"
+#include "System/ComponentRegistry.h"
 #include "math/Matrix4x4.h"
 #include "math/Quaternion.h"
 #include "math/Vector3.h"
@@ -17,6 +18,8 @@ enum class ParentTransformMode
 
 class Transform : public Component
 {
+    REGISTER_COMPONENT_OPTIONS(Transform, "Transform", false, false);
+
     Vector3 m_localPosition{ Vector3::Zero() };
     Quaternion m_localRotation{ Quaternion::Identity() };
     Vector3 m_localScale{ Vector3::One() };

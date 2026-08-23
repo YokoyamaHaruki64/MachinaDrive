@@ -9,6 +9,7 @@ class TrailRenderer;
 
 class PatternTrailHeader : public Script
 {
+    REGISTER_COMPONENT(PatternTrailHeader, "PatternTrailHeader");
 public:
     enum Axis
     {

@@ -4,6 +4,7 @@
 
 class TitleUI : public Script
 {
+    REGISTER_COMPONENT(TitleUI, "TitleUI");
 private:
     Vector3 m_originalPosition = Vector3::Zero();
     float m_amplitude = 15.0f; // 振幅

@@ -14,3 +14,5 @@ public:
 
     ~Script() override = default;
 };
+
+#include "System/ComponentRegistry.h"

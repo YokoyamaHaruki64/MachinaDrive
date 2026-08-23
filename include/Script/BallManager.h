@@ -7,6 +7,7 @@
 
 class BallManager : public Script
 {
+    REGISTER_COMPONENT(BallManager, "BallManager");
 public:
 
 private:

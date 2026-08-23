@@ -11,7 +11,7 @@ bool EditorSystem::IsActiveGameObject(GameObject* gameObject)
 {
     for (const std::unique_ptr<GameObject>& candidate : Manager::GetActiveGameObjects())
     {
-        if (candidate.get() == gameObject)
+        if (candidate.get() == gameObject && !candidate->IsDestroyed())
             return true;
     }
     return false;

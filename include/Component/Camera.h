@@ -2,12 +2,15 @@
 
 #include "math/Vector3.h"
 #include "System/Component.h"
+#include "System/ComponentRegistry.h"
 #include "System/GameObject.h"
 
 #include <unordered_map>
 
 class Camera : public Component
 {
+    REGISTER_COMPONENT(Camera, "Camera");
+
 public:
 
     enum CameraTag
