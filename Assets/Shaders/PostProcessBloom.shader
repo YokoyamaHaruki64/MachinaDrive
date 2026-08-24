@@ -1,4 +1,4 @@
-﻿Shader "PostProcessBloom"
+Shader "PostProcessBloom"
 {
     Properties
     {
