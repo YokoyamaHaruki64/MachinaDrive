@@ -2,8 +2,6 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_map>
-#include <functional>
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -18,12 +16,6 @@ class Scene;
 
 class Manager
 {
-public:
-    using PrefabFactory = std::function<std::unique_ptr<GameObject>(
-        const Vector3&,
-        const Vector3&,
-        const Vector3&)>;
-
 private:
     enum class SceneTransitionPhase
     {
@@ -36,8 +28,6 @@ private:
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
     static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
-
-    static std::unordered_map<std::string, PrefabFactory> m_FactoryMap;
 
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
@@ -93,13 +83,6 @@ public:
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
 
-    static void RegisterFactory(
-        const std::string& typeName,
-        PrefabFactory factoryFunction)
-    {
-        m_FactoryMap[typeName] = std::move(factoryFunction);
-    }
-
     static void RegisterRenderer(RendererBase* renderer)
     {
         m_Renderers.push_back(renderer);
@@ -116,40 +99,6 @@ public:
                 return;
             }
         }
-    }
-
-    // prefabの構築完了後に開始する。シーン構築中は全オブジェクトをまとめて開始する。
-    static GameObject* Instantiate(
-        const std::string& prefabName,
-        const Vector3& position,
-        const Vector3& rotation,
-        const Vector3& scale)
-    {
-        auto it = m_FactoryMap.find(prefabName);
-        if (it != m_FactoryMap.end())
-        {
-            std::unique_ptr<GameObject> newObject = it->second(position, rotation, scale);
-            if (!newObject)
-            {
-                return nullptr;
-            }
-            newObject->SetName(prefabName + "(Instance)");
-
-            if (m_sceneTransitionPhase == SceneTransitionPhase::None)
-            {
-                GameObject* newObj = newObject.get();
-                m_GameObjects.emplace_back(std::move(newObject));
-                newObj->OnStart();
-
-                return newObj;
-            }
-
-            GameObject* newObj = newObject.get();
-            m_pendingGameObjects.emplace_back(std::move(newObject));
-
-            return newObj;
-        }
-        return nullptr; // タイプが見つからない場合
     }
 
     static GameObject* CreateEmpty(

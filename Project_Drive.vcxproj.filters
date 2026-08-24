@@ -395,9 +395,6 @@
     <ClInclude Include="include\System\manager.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\PrefabFactory.h">
-      <Filter>ヘッダー ファイル\System</Filter>
-    </ClInclude>
     <ClInclude Include="include\System\renderer.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>

@@ -66,8 +66,8 @@ void GameScene::Init()
     cubeRenderer->SetMaterial(0, cubeMaterial);
     obj->AddComponent<RotateCube>();
 
-    Manager::Instantiate(
-        "Player",
+    Manager::InstantiatePrefab(
+        "Assets/Prefabs/Player.prefab",
         Vector3(0.0f, 0.0f, 1.0f),
         Vector3(0.0f, 0.0f, 0.0f),
         Vector3::One());
@@ -80,8 +80,8 @@ void GameScene::Init()
 
     for (const auto& pos : enemyPos)
     {
-        Manager::Instantiate(
-            "Enemy",
+        Manager::InstantiatePrefab(
+            "Assets/Prefabs/Enemy.prefab",
             pos,
             Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
             Vector3::One());
@@ -97,13 +97,11 @@ void GameScene::Init()
 
     for (const auto& pos : treePos)
     {
-        GameObject* tree = Manager::Instantiate(
-            "Tree",
+        Manager::InstantiatePrefab(
+            "Assets/Prefabs/Tree.prefab",
             pos,
             Vector3::Zero(),
             Vector3::One() * 5.0f);
-
-        tree->GetComponent<ModelRenderer>()->SetRenderPhase(RenderPhase::Transparent);
     }
 
     GameObject* skydome = Manager::CreateEmpty();

@@ -1,0 +1,91 @@
+version: 1
+name: BoundBall
+gameObjects:
+  - id: 1
+    name: BoundBall
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: BoundBall
+        fields: {}
+      - type: ParticleEmitter
+        fields:
+          offset: [0, 0, 0]
+          maxParticles: 100
+          burst: false
+          burstCount: 10
+          burstTime: 0.1
+          finishedDestroy: false
+          emitRate: 1000
+          lifetimeMin: 0.05
+          lifetimeMax: 0.05
+          gravity: [0, 0, 0]
+          drag: 0.1
+          size: [1, 1, 1]
+          scaleOverLifetime:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 1
+              inControl: 1
+              outControl: 1
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 0.1
+                inControl: 0.1
+                outControl: 0.1
+              - time: 1
+                value: 0.1
+                inControl: 0.1
+                outControl: 0.1
+            g:
+              - time: 0
+                value: 0.3
+                inControl: 0.3
+                outControl: 0.3
+              - time: 1
+                value: 0.3
+                inControl: 0.3
+                outControl: 0.3
+            b:
+              - time: 0
+                value: 0.4
+                inControl: 0.4
+                outControl: 0.4
+              - time: 1
+                value: 0.2
+                inControl: 0.2
+                outControl: 0.2
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          randomizeSpeed: true
+          speed: 5
+          speedMin: 3
+          speedMax: 5
+          direction: [0, 1, 0]
+          coneAngle: 30
+          spawnRadius: 0.1
+          spawnNormal: [0, 1, 0]
+          velocityType: 0
+          spawnType: 0
+      - type: ParticleRenderer
+        fields:
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/Particle.material

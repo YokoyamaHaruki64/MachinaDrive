@@ -1,0 +1,22 @@
+version: 1
+name: Tree
+gameObjects:
+  - id: 1
+    name: Tree
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: ModelRenderer
+        fields:
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 2
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/Tree.material
+          m_inverseAxisFlags: 0

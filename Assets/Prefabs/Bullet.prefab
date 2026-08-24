@@ -1,0 +1,23 @@
+version: 1
+name: Bullet
+gameObjects:
+  - id: 1
+    name: Bullet
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: ModelRenderer
+        fields:
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/bullet.obj
+          m_materialPaths: []
+          m_inverseAxisFlags: 0
+      - type: Bullet
+        fields: {}

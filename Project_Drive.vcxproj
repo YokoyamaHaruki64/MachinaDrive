@@ -435,7 +435,6 @@
     <ClInclude Include="include\System\PerformanceMonitor.h" />
     <ClInclude Include="include\System\main.h" />
     <ClInclude Include="include\System\manager.h" />
-    <ClInclude Include="include\System\PrefabFactory.h" />
     <ClInclude Include="include\System\renderer.h" />
     <ClInclude Include="include\System\RendererBase.h" />
   </ItemGroup>

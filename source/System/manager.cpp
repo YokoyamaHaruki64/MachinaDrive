@@ -4,11 +4,11 @@
 
 #include "System/DebugWindow.h"
 #include "System/GameObjectArchive.h"
-#include "System/PrefabFactory.h"
 #include "System/input.h"
 #include "System/Logger.h"
 #include "System/PerformanceMonitor.h"
 #include "System/renderer.h"
+#include "System/RendererBase.h"
 #include "Graphics/TextureManager.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
@@ -35,9 +35,6 @@ std::unique_ptr<Scene> Manager::m_nextScene;
 Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTransitionPhase::None;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
-
-std::unordered_map<std::string, Manager::PrefabFactory> Manager::m_FactoryMap;
-
 
 void Manager::DestroyGameObjects()
 {
@@ -258,16 +255,6 @@ void Manager::InitScene()
 
 bool Manager::Init()
 {
-    RegisterFactory("Player", PlayerPrefabFactory);
-    RegisterFactory("Enemy", EnemyPrefabFactory);
-    RegisterFactory("Bullet", BulletPrefabFactory);
-    RegisterFactory("Tree", TreePrefabFactory);
-    RegisterFactory("ExplosionEffect", ExplosionPrefabFactory);
-    RegisterFactory("Ball", BoundBallPrefabFactory);
-    RegisterFactory("Ripple", RipplePrefabFactory);
-    RegisterFactory("Firework", FireworksEffectPrefabFactory);
-    RegisterFactory("ImpactBurst", ImpactBurstEffectPrefabFactory);
-
     Renderer::Init();
     TextureManager::Init();
     if (!ShaderManager::Init())
