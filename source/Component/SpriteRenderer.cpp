@@ -32,13 +32,29 @@ namespace
 }
 
 SpriteRenderer::SpriteRenderer(
+    GameObject* owner)
+    : RendererBase(owner)
+{
+    m_renderPhase = RenderPhase::Overlay;
+}
+
+SpriteRenderer::SpriteRenderer(
     GameObject* owner,
     const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitTransparent.material");
+    m_renderPhase = RenderPhase::Overlay;
+    if (textureFile)
+    {
+        m_texturePath = std::filesystem::path(textureFile).generic_string();
+    }
+}
 
-    m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
+void SpriteRenderer::OnStart()
+{
+    m_materialInstance = MaterialManager::Load(m_materialPath);
+
+    m_texture = m_texturePath.empty() ? TextureHandle{} : TextureManager::LoadTexture(m_texturePath);
     UINT width{};
     UINT height{};
     if (TextureManager::GetTextureSize(m_texture, width, height))
@@ -69,7 +85,23 @@ SpriteRenderer::SpriteRenderer(
     m_texCoordBuffer = CreateSpriteVertexBuffer(texCoords);
     m_colorBuffer = CreateSpriteVertexBuffer(colors);
 
-    m_renderPhase = RenderPhase::Overlay;
+}
+
+void SpriteRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_materialInstance && !m_materialInstance->GetFilePath().empty())
+    {
+        m_materialPath = m_materialInstance->GetFilePath();
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD(m_texturePath);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
+    GM_FIELD(m_baseColor);
+    GM_FIELD(m_uvOffsetX);
+    GM_FIELD(m_uvOffsetY);
+    GM_FIELD(m_uvWidth);
+    GM_FIELD(m_uvHeight);
 }
 
 void SpriteRenderer::Draw()
@@ -146,5 +178,6 @@ void SpriteRenderer::SetMaterial(uint32_t slot, Material* material)
     if (slot == 0)
     {
         m_materialInstance = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
     }
 }

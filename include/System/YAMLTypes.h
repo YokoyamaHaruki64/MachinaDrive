@@ -16,6 +16,7 @@ struct YAMLArchiveContext
 
     std::function<std::optional<ObjectId>(const GameObject*)> getObjectId;
     std::function<GameObject*(ObjectId)> resolveObject;
+    std::function<bool(std::string_view)> resolvePrefab;
 };
 
 enum class YAMLMessageLevel

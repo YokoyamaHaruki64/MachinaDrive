@@ -117,6 +117,9 @@
     <ClCompile Include="source\System\FieldRegistry.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\FileSystem.cpp">
+      <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\YAMLArchive.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
@@ -133,6 +136,9 @@
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\System\GameObject.cpp">
+      <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\GameObjectArchive.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="source\System\GameObjectReference.cpp">
@@ -320,6 +326,9 @@
     <ClInclude Include="include\System\GameObject.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\GameObjectArchive.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\GameObjectReference.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
@@ -366,6 +375,9 @@
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\System\FieldRegistry.inl">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\FileSystem.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\System\YAMLCodec.h">

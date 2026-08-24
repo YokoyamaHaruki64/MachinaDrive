@@ -12,6 +12,11 @@
 
 void ResultScene::Init()
 {
+    if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
+    {
+        return;
+    }
+
     // シーン初期化
     GameObject* titleBG = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f));
     titleBG->AddComponent<SpriteRenderer>(L"Assets/Local/Textures/ResultBG.png");

@@ -186,6 +186,19 @@ bool YAMLArchive::SaveFields(
     const FieldRegistry& fields,
     const YAMLArchiveContext& context)
 {
+    YAMLValue document;
+    if (!EncodeFields(fields, document, context))
+    {
+        return false;
+    }
+    return SaveDocument(path, document);
+}
+
+bool YAMLArchive::EncodeFields(
+    const FieldRegistry& fields,
+    YAMLValue& output,
+    const YAMLArchiveContext& context)
+{
     try
     {
         YAMLValue document = YAMLValue::Map();
@@ -193,7 +206,6 @@ bool YAMLArchive::SaveFields(
         {
             if (!field.save)
             {
-                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
                 continue;
             }
 
@@ -208,7 +220,8 @@ bool YAMLArchive::SaveFields(
             document.map.emplace_back(field.key, std::move(value));
         }
 
-        return SaveDocument(path, document);
+        output = std::move(document);
+        return true;
     }
     catch (const std::exception& exception)
     {
@@ -235,10 +248,32 @@ bool YAMLArchive::LoadFields(
             return false;
         }
 
+        return DecodeFields(document, fields, context);
+    }
+    catch (const std::exception& exception)
+    {
+        Logger::Error("YAML読み込みに失敗しました: " + std::string(exception.what()));
+        return false;
+    }
+}
+
+bool YAMLArchive::DecodeFields(
+    const YAMLValue& input,
+    FieldRegistry& fields,
+    const YAMLArchiveContext& context)
+{
+    try
+    {
+        if (input.type != YAMLValue::Type::Map)
+        {
+            Logger::Error("YAML Field群はMapである必要があります。");
+            return false;
+        }
+
         Implementation::Assignments assignments;
         for (const FieldDescriptor& field : fields.GetFields())
         {
-            const YAMLValue* value = document.Find(field.key);
+            const YAMLValue* value = input.Find(field.key);
             if (!value)
             {
                 continue;
@@ -260,7 +295,7 @@ bool YAMLArchive::LoadFields(
             assignments.emplace_back(std::move(assignment));
         }
 
-        for (const auto& [key, value] : document.map)
+        for (const auto& [key, value] : input.map)
         {
             const auto found = std::find_if(fields.GetFields().begin(), fields.GetFields().end(), [&key](const FieldDescriptor& field)
             {

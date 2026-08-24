@@ -58,6 +58,7 @@ public:
 
     static const std::vector<ComponentRegistration>& GetRegistrations();
     static const ComponentRegistration* Find(std::type_index type);
+    static const ComponentRegistration* Find(std::string_view typeName);
     static bool CanAdd(const ComponentRegistration& registration, const GameObject& gameObject);
     static Component* Add(const ComponentRegistration& registration, GameObject& gameObject);
 

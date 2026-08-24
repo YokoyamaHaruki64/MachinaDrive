@@ -4,6 +4,7 @@
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
 #include "System/RendererBase.h"
+#include "System/ComponentRegistry.h"
 #include "math/Curve.h"
 #include "math/Vector3.h"
 
@@ -11,6 +12,8 @@
 
 class TrailRenderer : public RendererBase
 {
+    REGISTER_COMPONENT(TrailRenderer, "Trail Renderer");
+
 public:
     enum TrailFaceMode
     {
@@ -36,6 +39,8 @@ private:
 
     Material* m_materialInstance{};
     TextureHandle m_texture{};
+    std::string m_texturePath;
+    std::string m_materialPath{ "Assets/Materials/UnlitAdditive.material" };
 
     std::deque<TrailSegment> m_segments;
     Curve<float> m_widthCurve = Curve<float>(1.0f, 0.0f);
@@ -53,8 +58,10 @@ private:
 
 public:
     TrailRenderer() = delete;
+    explicit TrailRenderer(GameObject* owner);
     explicit TrailRenderer(GameObject* owner, const wchar_t* textureFile);
     virtual ~TrailRenderer() {}
+    void OnStart() override;
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
     void SetMaterial(uint32_t slot, Material* material) override;
@@ -77,4 +84,7 @@ public:
     void SetMinSegmentDistance(float distance) { m_minSegmentDistance = distance; }
     void SetTrailLifetime(float lifetime) { m_trailLifetime = lifetime; }
     void SetWidth(float width) { m_width = width; }
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

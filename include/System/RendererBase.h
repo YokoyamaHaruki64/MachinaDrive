@@ -36,6 +36,7 @@ protected:
     BillboardType m_billboardType = BillboardType::None; // ビルボードの種類
 
     const XMMATRIX CalcWorldMatrix();
+    void RegisterFields(FieldRegistry& fields) override;
 
 private:
     SortDescriptor CreateSortDescriptor(const Camera* camera);

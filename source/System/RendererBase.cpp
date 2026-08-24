@@ -74,6 +74,23 @@ RendererBase::~RendererBase()
     Manager::UnregisterRenderer(this);
 }
 
+void RendererBase::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD(m_drawLayer);
+    fields.AddAccessor<int>("renderPhase",
+        [this] { return static_cast<int>(m_renderPhase); },
+        [this](int value) { m_renderPhase = static_cast<RenderPhase>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+    fields.AddAccessor<int>("billboardType",
+        [this] { return static_cast<int>(m_billboardType); },
+        [this](int value) { m_billboardType = static_cast<BillboardType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+}
+
 void RendererBase::Submit()
 {
     DrawItem item{};

@@ -235,6 +235,7 @@
     <ClCompile Include="source\System\HierarchyWindow.cpp" />
     <ClCompile Include="source\System\InspectorWindow.cpp" />
     <ClCompile Include="source\System\FieldRegistry.cpp" />
+    <ClCompile Include="source\System\FileSystem.cpp" />
     <ClCompile Include="source\System\YAMLArchive.cpp">
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -245,6 +246,7 @@
     <ClCompile Include="source\System\PerformanceMonitor.cpp" />
     <ClCompile Include="source\System\main.cpp" />
     <ClCompile Include="source\System\GameObject.cpp" />
+    <ClCompile Include="source\System\GameObjectArchive.cpp" />
     <ClCompile Include="source\System\GameObjectReference.cpp" />
     <ClCompile Include="source\System\manager.cpp" />
     <ClCompile Include="source\System\renderer.cpp" />
@@ -412,11 +414,13 @@
     <ClInclude Include="include\System\InspectorWindow.h" />
     <ClInclude Include="include\System\FieldRegistry.h" />
     <ClInclude Include="include\System\FieldRegistry.inl" />
+    <ClInclude Include="include\System\FileSystem.h" />
     <ClInclude Include="include\System\YAMLCodec.h" />
     <ClInclude Include="include\System\YAMLArchive.h" />
     <ClInclude Include="include\System\YAMLTypes.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
+    <ClInclude Include="include\System\GameObjectArchive.h" />
     <ClInclude Include="include\System\GameObjectReference.h" />
     <ClInclude Include="include\System\PrefabReference.h" />
     <ClInclude Include="include\System\Script.h" />

@@ -265,4 +265,9 @@ void Transform::RegisterFields(FieldRegistry& fields)
     fields.AddAccessor<Vector3>("position", [this] { return GetLocalPosition(); }, [this](const Vector3& value) { SetLocalPosition(value); }, InspectorFieldSpace::Local);
     fields.AddAccessor<Vector3>("rotation (deg)", [this] { return GetLocalEulerAngles() * Math::RAD2DEG; }, [this](const Vector3& value) { SetLocalEulerAngles(value * Math::DEG2RAD); }, InspectorFieldSpace::Local);
     fields.AddAccessor<Vector3>("scale", [this] { return GetLocalScale(); }, [this](const Vector3& value) { SetLocalScale(value); }, InspectorFieldSpace::Local);
+
+    // Inspector表示とは独立したキーで、Transformの正であるLocal TRSを保存する。
+    fields.AddAccessor<Vector3>("m_localPosition", [this] { return GetLocalPosition(); }, [this](const Vector3& value) { SetLocalPosition(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
+    fields.AddAccessor<Quaternion>("m_localRotation", [this] { return GetLocalRotation(); }, [this](const Quaternion& value) { SetLocalRotation(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
+    fields.AddAccessor<Vector3>("m_localScale", [this] { return GetLocalScale(); }, [this](const Vector3& value) { SetLocalScale(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
 }

@@ -14,6 +14,8 @@ class GameObject
 {
 protected:
     std::string m_name{ "Empty" };
+    std::string m_prefabPath;
+    bool m_isPrefabResolutionError = false;
     Transform* m_transform = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
     std::vector<GameObjectReference*> m_references;
@@ -41,6 +43,28 @@ public:
     void SetName(std::string name)
     {
         m_name = std::move(name);
+    }
+
+    const std::string& GetPrefabPath() const
+    {
+        return m_prefabPath;
+    }
+
+    void SetPrefabPath(std::string path)
+    {
+        m_prefabPath = std::move(path);
+        m_isPrefabResolutionError = false;
+    }
+
+    void MarkPrefabResolutionError(std::string path)
+    {
+        m_prefabPath = std::move(path);
+        m_isPrefabResolutionError = true;
+    }
+
+    bool IsPrefabResolutionError() const
+    {
+        return m_isPrefabResolutionError;
     }
 
     void Destroy();

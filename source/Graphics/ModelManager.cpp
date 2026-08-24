@@ -214,3 +214,15 @@ ModelAsset* ModelManager::GetPrimitive(PrimitiveType primitiveType)
     const auto found = name ? g_modelAssets.find(name) : g_modelAssets.end();
     return found == g_modelAssets.end() ? nullptr : found->second.get();
 }
+
+std::optional<std::string> ModelManager::GetSourcePath(const ModelAsset* modelAsset)
+{
+    for (const auto& [path, asset] : g_modelAssets)
+    {
+        if (asset.get() == modelAsset)
+        {
+            return path;
+        }
+    }
+    return std::nullopt;
+}

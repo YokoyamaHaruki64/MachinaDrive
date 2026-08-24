@@ -179,7 +179,48 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
         p.color = m_settings.colorOverLifetime.Evaluate(normalizedAge);
     }
 }
+void ParticleEmitter::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD_KEY("offset", m_settings.offset);
+    GM_FIELD_KEY("maxParticles", m_settings.maxParticles);
+    GM_FIELD_KEY("burst", m_settings.burst);
+    GM_FIELD_KEY("burstCount", m_settings.burstCount);
+    GM_FIELD_KEY("burstTime", m_settings.burstTime);
+    GM_FIELD_KEY("finishedDestroy", m_settings.finishedDestroy);
+    GM_FIELD_KEY("emitRate", m_settings.emitRate);
+    GM_FIELD_KEY("lifetimeMin", m_settings.lifetimeMin);
+    GM_FIELD_KEY("lifetimeMax", m_settings.lifetimeMax);
+    GM_FIELD_KEY("gravity", m_settings.gravity);
+    GM_FIELD_KEY("drag", m_settings.drag);
+    GM_FIELD_KEY("size", m_settings.size);
+    GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
+    GM_FIELD_KEY("speed", m_settings.speed);
+    GM_FIELD_KEY("speedMin", m_settings.speedMin);
+    GM_FIELD_KEY("speedMax", m_settings.speedMax);
+    GM_FIELD_KEY("direction", m_settings.direction);
+    GM_FIELD_KEY("coneAngle", m_settings.coneAngle);
+    GM_FIELD_KEY("spawnRadius", m_settings.spawnRadius);
+    GM_FIELD_KEY("spawnNormal", m_settings.spawnNormal);
+    fields.AddAccessor<int>("velocityType",
+        [this] { return static_cast<int>(m_settings.velocityType); },
+        [this](int value) { m_settings.velocityType = static_cast<VelocityType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+    fields.AddAccessor<int>("spawnType",
+        [this] { return static_cast<int>(m_settings.spawnType); },
+        [this](int value) { m_settings.spawnType = static_cast<SpawnType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+}
 
+ParticleRenderer::ParticleRenderer(GameObject* owner)
+    : RendererBase(owner)
+{
+    m_billboardType = BillboardType::CameraFacing;
+    m_renderPhase = RenderPhase::Transparent;
+}
 
 ParticleRenderer::ParticleRenderer(
     GameObject* owner,
@@ -188,15 +229,40 @@ ParticleRenderer::ParticleRenderer(
     : RendererBase(owner),
     m_emitter(emitter)
 {
+    if (textureFile)
+    {
+        m_texturePath = std::filesystem::path(textureFile).generic_string();
+    }
+    m_billboardType = BillboardType::CameraFacing;
+    m_renderPhase = RenderPhase::Transparent;
+}
+
+void ParticleRenderer::OnStart()
+{
+    if (!m_emitter)
+    {
+        m_emitter = GetComponent<ParticleEmitter>();
+    }
+
     ModelAsset* quadModel = ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad);
     if (quadModel && !quadModel->meshes.empty())
         m_mesh = &quadModel->meshes.front();
 
-    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitAdditive.material");
+    m_materialInstance = MaterialManager::Load(m_materialPath);
 
-    m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
-    m_billboardType = BillboardType::CameraFacing;
-    m_renderPhase = RenderPhase::Transparent;
+    m_texture = m_texturePath.empty() ? TextureHandle{} : TextureManager::LoadTexture(m_texturePath);
+}
+
+void ParticleRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_materialInstance && !m_materialInstance->GetFilePath().empty())
+    {
+        m_materialPath = m_materialInstance->GetFilePath();
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD(m_texturePath);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
 }
 
 Material* ParticleRenderer::GetMaterial(uint32_t slot)
@@ -210,6 +276,7 @@ void ParticleRenderer::SetMaterial(uint32_t slot, Material* material)
     if (slot == 0)
     {
         m_materialInstance = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
     }
 }
 

@@ -170,6 +170,11 @@ void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
 {
     for (FieldDescriptor& field : m_fields)
     {
+        if (field.inspectorType == InspectorFieldType::Hidden)
+        {
+            continue;
+        }
+
         if (inspectorSpace != InspectorFieldSpace::All && field.inspectorSpace != inspectorSpace)
         {
             continue;

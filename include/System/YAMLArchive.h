@@ -13,6 +13,15 @@ public:
     static bool SaveDocument(const std::filesystem::path& path, const YAMLValue& document);
     static bool LoadDocument(const std::filesystem::path& path, YAMLValue& document);
 
+    static bool EncodeFields(
+        const FieldRegistry& fields,
+        YAMLValue& output,
+        const YAMLArchiveContext& context = {});
+    static bool DecodeFields(
+        const YAMLValue& input,
+        FieldRegistry& fields,
+        const YAMLArchiveContext& context = {});
+
     static bool SaveFields(
         const std::filesystem::path& path,
         const FieldRegistry& fields,

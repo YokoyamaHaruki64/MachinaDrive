@@ -3,6 +3,7 @@
 #include "System/manager.h"
 
 #include "System/DebugWindow.h"
+#include "System/GameObjectArchive.h"
 #include "System/PrefabFactory.h"
 #include "System/input.h"
 #include "System/Logger.h"
@@ -17,6 +18,7 @@
 
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
+#include "Component/Transform.h"
 #include "Component/audio.h"
 
 #include "imgui.h"
@@ -50,6 +52,167 @@ void Manager::DestroyGameObjects()
 
     // OnDestroyから生成されたオブジェクトを次のシーンへ持ち越さない。
     m_pendingGameObjects.clear();
+}
+
+void Manager::StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects)
+{
+    const size_t firstLoadedIndex = m_GameObjects.size();
+    for (std::unique_ptr<GameObject>& gameObject : gameObjects)
+    {
+        m_GameObjects.emplace_back(std::move(gameObject));
+    }
+
+    for (size_t index = firstLoadedIndex; index < m_GameObjects.size(); ++index)
+    {
+        m_GameObjects[index]->OnStart();
+    }
+}
+
+bool Manager::SaveCurrentScene()
+{
+    if (!m_currentScene)
+    {
+        Logger::Error("保存対象のSceneがありません。");
+        return false;
+    }
+    return SaveSceneObjects(m_currentScene->GetSceneFilePath());
+}
+
+bool Manager::SaveSceneObjects(const std::filesystem::path& path)
+{
+    std::vector<GameObject*> gameObjects;
+    gameObjects.reserve(m_GameObjects.size());
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed())
+        {
+            gameObjects.push_back(gameObject.get());
+        }
+    }
+    return GameObjectArchive::Save(path, path.stem().string(), gameObjects, true);
+}
+
+bool Manager::LoadSceneObjects(const std::filesystem::path& path)
+{
+    LoadedGameObjectArchive loaded;
+    if (!GameObjectArchive::Load(path, loaded, false))
+    {
+        return false;
+    }
+
+    // 復元完了後にだけ旧Object群を破棄し、読込失敗時は現在のSceneを維持する。
+    DestroyGameObjects();
+    if (m_sceneTransitionPhase == SceneTransitionPhase::None)
+    {
+        StartLoadedGameObjects(std::move(loaded.gameObjects));
+    }
+    else
+    {
+        for (std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
+        {
+            m_pendingGameObjects.emplace_back(std::move(gameObject));
+        }
+    }
+    return true;
+}
+
+bool Manager::SavePrefab(GameObject& root, const std::filesystem::path& path)
+{
+    std::vector<GameObject*> gameObjects;
+    std::vector<GameObject*> remaining{ &root };
+    while (!remaining.empty())
+    {
+        GameObject* gameObject = remaining.back();
+        remaining.pop_back();
+        gameObjects.push_back(gameObject);
+        for (Transform* child : gameObject->GetTransform()->GetChildren())
+        {
+            remaining.push_back(child->GetOwner());
+        }
+    }
+
+    if (!GameObjectArchive::Save(path, path.stem().string(), gameObjects, false))
+    {
+        return false;
+    }
+
+    const std::string normalizedPath = path.lexically_normal().generic_string();
+    for (GameObject* gameObject : gameObjects)
+    {
+        gameObject->SetPrefabPath(normalizedPath);
+    }
+    return true;
+}
+
+bool Manager::ApplyToPrefab(GameObject& gameObject)
+{
+    if (gameObject.GetPrefabPath().empty())
+    {
+        Logger::Error("Prefab参照を持たないGameObjectはApplyできません。");
+        return false;
+    }
+
+    GameObject* root = &gameObject;
+    while (Transform* parent = root->GetTransform()->GetParent())
+    {
+        GameObject* parentObject = parent->GetOwner();
+        if (parentObject->GetPrefabPath() != gameObject.GetPrefabPath())
+        {
+            break;
+        }
+        root = parentObject;
+    }
+    return SavePrefab(*root, gameObject.GetPrefabPath());
+}
+
+GameObject* Manager::InstantiatePrefab(
+    const std::filesystem::path& path,
+    const Vector3& position,
+    const Vector3& rotation,
+    const Vector3& scale)
+{
+    LoadedGameObjectArchive loaded;
+    if (!GameObjectArchive::Load(path, loaded, true))
+    {
+        return nullptr;
+    }
+
+    GameObject* root{};
+    for (const std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
+    {
+        if (!gameObject->GetTransform()->GetParent())
+        {
+            if (root)
+            {
+                Logger::Error("PrefabにはRoot GameObjectを1つだけ定義してください: " + path.string());
+                return nullptr;
+            }
+            root = gameObject.get();
+        }
+    }
+    if (!root)
+    {
+        Logger::Error("PrefabにRoot GameObjectがありません: " + path.string());
+        return nullptr;
+    }
+
+    root->SetName(path.stem().string() + "(Instance)");
+    root->GetTransform()->SetPosition(position);
+    root->GetTransform()->SetEulerAngles(rotation);
+    root->GetTransform()->SetScale(scale);
+
+    if (m_sceneTransitionPhase == SceneTransitionPhase::None)
+    {
+        StartLoadedGameObjects(std::move(loaded.gameObjects));
+    }
+    else
+    {
+        for (std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
+        {
+            m_pendingGameObjects.emplace_back(std::move(gameObject));
+        }
+    }
+    return root;
 }
 
 

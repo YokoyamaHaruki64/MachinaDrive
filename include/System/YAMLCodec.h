@@ -342,7 +342,10 @@ struct YAMLCodec<PrefabReference>
         return {};
     }
 
-    static YAMLCodecResult Decode(const YAMLValue& input, PrefabReference& output, const YAMLArchiveContext&)
+    static YAMLCodecResult Decode(
+        const YAMLValue& input,
+        PrefabReference& output,
+        const YAMLArchiveContext& context)
     {
         if (input.type == YAMLValue::Type::Null)
         {
@@ -352,6 +355,12 @@ struct YAMLCodec<PrefabReference>
         if (input.type != YAMLValue::Type::Scalar)
         {
             return { false };
+        }
+
+        if (context.resolvePrefab && !context.resolvePrefab(input.scalar))
+        {
+            output.MarkResolutionError(input.scalar);
+            return { true, YAMLMessageLevel::Error, "Prefab参照を解決できません" };
         }
 
         output.SetPath(input.scalar);

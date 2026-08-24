@@ -21,6 +21,7 @@ enum class InspectorFieldType
     Slider,
     List,
     Curve,
+    Hidden,
 };
 
 enum class InspectorFieldSpace
@@ -147,7 +148,8 @@ public:
         Getter getter,
         Setter setter,
         InspectorFieldSpace inspectorSpace,
-        InspectorFieldType inspectorType = InspectorFieldType::Auto)
+        InspectorFieldType inspectorType = InspectorFieldType::Auto,
+        bool serialize = false)
     {
         FieldDescriptor descriptor{
             std::string(key),
@@ -158,7 +160,7 @@ public:
             inspectorSpace,
         };
 
-        descriptor.drawAccessor = [getter = std::move(getter), setter = std::move(setter)](const FieldDescriptor& field)
+        descriptor.drawAccessor = [getter, setter](const FieldDescriptor& field)
         {
             T value = getter();
             if (DrawValue(field, &value))
@@ -166,6 +168,30 @@ public:
                 setter(value);
             }
         };
+
+        if (serialize)
+        {
+            descriptor.save = [getter](YAMLValue& output, const YAMLArchiveContext& context)
+            {
+                return YAMLCodec<T>::Encode(getter(), output, context);
+            };
+            descriptor.load = [setter](
+                const YAMLValue& input,
+                const YAMLArchiveContext& context,
+                std::function<void()>& assignment)
+            {
+                T value{};
+                YAMLCodecResult result = YAMLCodec<T>::Decode(input, value, context);
+                if (result.success)
+                {
+                    assignment = [setter, value = std::move(value)]() mutable
+                    {
+                        setter(value);
+                    };
+                }
+                return result;
+            };
+        }
         m_fields.push_back(std::move(descriptor));
     }
 

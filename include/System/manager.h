@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <functional>
+#include <filesystem>
 #include <string>
 #include <utility>
 #include "math/vector3.h"
@@ -65,12 +66,24 @@ private:
 
     static void InitScene();
     static void DestroyGameObjects();
+    static void StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects);
 
 public:
 	static bool Init();
 	static void Uninit();
 	static void Update();
 	static void Draw();
+
+    static bool SaveCurrentScene();
+    static bool SaveSceneObjects(const std::filesystem::path& path);
+    static bool LoadSceneObjects(const std::filesystem::path& path);
+    static bool SavePrefab(GameObject& root, const std::filesystem::path& path);
+    static bool ApplyToPrefab(GameObject& gameObject);
+    static GameObject* InstantiatePrefab(
+        const std::filesystem::path& path,
+        const Vector3& position = Vector3::Zero(),
+        const Vector3& rotation = Vector3::Zero(),
+        const Vector3& scale = Vector3::One());
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
 

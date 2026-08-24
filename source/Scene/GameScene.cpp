@@ -24,6 +24,12 @@
 
 void GameScene::Init()
 {
+    if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
+    {
+        Manager::AddPostEffect(std::make_unique<Bloom>());
+        return;
+    }
+
     // シーン初期化
     GameObject* camera = Manager::CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
     camera->AddComponent<Camera>(Camera::MainCamera);

@@ -4,6 +4,7 @@
 // 個別ヘッダーは自己完結を保つため、このファイルに依存させない。
 #include "System/Component.h"
 #include "System/ComponentRegistry.h"
+#include "System/FileSystem.h"
 #include "System/GameObject.h"
 #include "System/GM_Time.h"
 #include "System/input.h"

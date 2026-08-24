@@ -65,6 +65,19 @@ void ComponentRegistry::RegisterInternal(ComponentRegistration registration)
     registrations.emplace_back(std::move(registration));
 }
 
+const ComponentRegistration* ComponentRegistry::Find(std::string_view typeName)
+{
+    for (const ComponentRegistration& registration : GetMutableRegistrations())
+    {
+        if (registration.typeName == typeName)
+        {
+            return &registration;
+        }
+    }
+
+    return nullptr;
+}
+
 std::vector<ComponentRegistration>& ComponentRegistry::GetMutableRegistrations()
 {
     static std::vector<ComponentRegistration> registrations;

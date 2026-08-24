@@ -59,15 +59,52 @@ void TrailRenderer::CreateVertexStreams()
     m_colorBuffer = CreateTrailVertexBuffer<ColorVertex>();
 }
 
+TrailRenderer::TrailRenderer(GameObject* owner)
+    : RendererBase(owner)
+{
+    m_renderPhase = RenderPhase::Transparent;
+}
+
 TrailRenderer::TrailRenderer(GameObject* owner, const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitAdditive.material");
+    m_renderPhase = RenderPhase::Transparent;
+    if (textureFile)
+    {
+        m_texturePath = std::filesystem::path(textureFile).generic_string();
+    }
+}
 
-    m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
+void TrailRenderer::OnStart()
+{
+    m_materialInstance = MaterialManager::Load(m_materialPath);
+
+    m_texture = m_texturePath.empty() ? TextureHandle{} : TextureManager::LoadTexture(m_texturePath);
     CreateVertexStreams();
 
-    m_renderPhase = RenderPhase::Transparent;
+}
+
+void TrailRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_materialInstance && !m_materialInstance->GetFilePath().empty())
+    {
+        m_materialPath = m_materialInstance->GetFilePath();
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD(m_texturePath);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
+    GM_FIELD(m_offset);
+    GM_FIELD(m_fixedDirection);
+    GM_FIELD(m_trailLifetime);
+    GM_FIELD(m_minSegmentDistance);
+    GM_FIELD(m_width);
+    fields.AddAccessor<int>("faceMode",
+        [this] { return static_cast<int>(m_faceMode); },
+        [this](int value) { m_faceMode = static_cast<TrailFaceMode>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
 }
 
 Material* TrailRenderer::GetMaterial(uint32_t slot)
@@ -81,6 +118,7 @@ void TrailRenderer::SetMaterial(uint32_t slot, Material* material)
     if (slot == 0)
     {
         m_materialInstance = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
     }
 }
 

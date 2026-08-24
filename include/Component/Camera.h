@@ -63,4 +63,11 @@ private:
     static Camera* s_mainCamera;
     static std::unordered_map<CameraTag, Camera*> s_camerasByTag;
 
+protected:
+    void RegisterFields(FieldRegistry& fields) override
+    {
+        GM_FIELD(m_target);
+        GM_FIELD(m_up);
+    }
+
 };
