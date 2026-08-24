@@ -1,10 +1,32 @@
 ﻿#include "pch.h"
 
+#include <optional>
+
 #include "imgui.h"
 
 #include "Component/Transform.h"
+#include "System/FileSystem.h"
 #include "System/HierarchyWindow.h"
+#include "System/Logger.h"
 #include "System/Manager.h"
+
+std::optional<std::filesystem::path> HierarchyWindow::ToAssetRelativePath(
+    const std::filesystem::path& selectedPath)
+{
+    if (_wcsicmp(selectedPath.extension().c_str(), L".prefab") != 0)
+    {
+        Logger::Error("Prefabファイルの拡張子は.prefabにしてください。");
+        return std::nullopt;
+    }
+
+    if (!FileSystem::IsUnderDirectory(selectedPath, "Assets"))
+    {
+        Logger::Error("PrefabはAssetsフォルダ配下に配置してください。");
+        return std::nullopt;
+    }
+
+    return FileSystem::ToProjectRelative(selectedPath);
+}
 
 void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& selectedGameObject)
 {
@@ -51,6 +73,18 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& se
 
     if (ImGui::BeginPopupContextItem("GameObjectContext"))
     {
+        if (ImGui::MenuItem("Create Prefab"))
+        {
+            const std::optional<std::filesystem::path> selectedPath =
+                FileSystem::SaveFileDialog("Assets", ".prefab", "New.prefab");
+            if (selectedPath)
+            {
+                if (const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(*selectedPath))
+                {
+                    Manager::SavePrefab(gameObject, *assetPath);
+                }
+            }
+        }
         if (ImGui::MenuItem("Delete"))
         {
             gameObject.Destroy();
@@ -96,6 +130,12 @@ void HierarchyWindow::DrawImGui(GameObject*& selectedGameObject)
     ImGui::SetNextWindowSize(ImVec2(260.0f, 400.0f), ImGuiCond_FirstUseEver);
     ImGui::Begin("Hierarchy");
 
+    if (ImGui::Button("Save Scene"))
+    {
+        Manager::SaveCurrentScene();
+    }
+    ImGui::Separator();
+
     for (const std::unique_ptr<GameObject>& gameObject : Manager::GetActiveGameObjects())
     {
         if (!gameObject->GetTransform()->GetParent())
@@ -111,6 +151,18 @@ void HierarchyWindow::DrawImGui(GameObject*& selectedGameObject)
         if (ImGui::MenuItem("Create Empty"))
         {
             selectedGameObject = Manager::CreateEmpty();
+        }
+        if (ImGui::MenuItem("Instantiate Prefab"))
+        {
+            const std::optional<std::filesystem::path> selectedPath =
+                FileSystem::OpenFileDialog("Assets", ".prefab");
+            if (selectedPath)
+            {
+                if (const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(*selectedPath))
+                {
+                    selectedGameObject = Manager::InstantiatePrefab(*assetPath);
+                }
+            }
         }
         ImGui::EndPopup();
     }

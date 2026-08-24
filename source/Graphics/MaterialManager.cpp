@@ -193,6 +193,36 @@ Material* MaterialManager::Create(std::string_view name, const GraphicsShader& s
     return result;
 }
 
+bool MaterialManager::Rename(Material& material, std::string_view name)
+{
+    if (name.empty())
+    {
+        Logger::Error("Material名は空にできません。");
+        return false;
+    }
+    if (material.m_name == name)
+    {
+        return true;
+    }
+
+    material.m_name = name;
+
+    // 同名Materialを許可しているため、先に生成されたものを名前検索の代表として再構築する。
+    m_materialsByName.clear();
+    for (const auto& entry : m_materials)
+    {
+        Material* ownedMaterial = entry.second.get();
+        auto [nameIterator, inserted] = m_materialsByName.try_emplace(
+            ownedMaterial->GetName(),
+            ownedMaterial);
+        if (!inserted && ownedMaterial->GetID() < nameIterator->second->GetID())
+        {
+            nameIterator->second = ownedMaterial;
+        }
+    }
+    return true;
+}
+
 Material* MaterialManager::Load(const std::filesystem::path& path)
 {
     const std::string normalizedPath = NormalizePath(path);

@@ -2,11 +2,13 @@
 #include "Graphics/Material.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#include "System/FileSystem.h"
 #include "System/Logger.h"
 #include "System/renderer.h"
 #include "imgui.h"
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <type_traits>
 
@@ -745,9 +747,53 @@ bool Material::Bind(std::string_view passTag)
     return true;
 }
 
+void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
+{
+    const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
+    const std::string& path = GetTexturePath(id);
+    if (HasTextureError(id))
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "%s: Error", label);
+    }
+    else
+    {
+        ImGui::Text("%s: %s", label, path.empty() ? "None" : path.c_str());
+    }
+
+    if (ImGui::Button("Select"))
+    {
+        static constexpr std::array<std::string_view, 9> textureExtensions
+        {
+            ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".gif", ".wdp", ".jxr",
+        };
+        const std::optional<std::filesystem::path> selectedPath =
+            FileSystem::OpenFileDialog("Assets", textureExtensions);
+        if (selectedPath)
+        {
+            if (!FileSystem::IsUnderDirectory(*selectedPath, "Assets"))
+            {
+                Logger::Error("TextureはAssetsフォルダ配下に配置してください。");
+            }
+            else if (const std::optional<std::filesystem::path> assetPath =
+                FileSystem::ToProjectRelative(*selectedPath))
+            {
+                SetTexturePath(id, assetPath->generic_string());
+            }
+        }
+    }
+
+    if (!path.empty())
+    {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+        {
+            SetTexturePath(id, {});
+        }
+    }
+}
+
 void Material::DrawInspectorImGui()
 {
-    ImGui::Text("Material: %s", m_name.c_str());
     if (!m_isValid)
     {
         ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "Status: Error");
@@ -834,16 +880,7 @@ void Material::DrawInspectorImGui()
         }
         else if (property.type == ValueType::Texture2D)
         {
-            const std::string& path = GetTexturePath(id);
-            if (HasTextureError(id))
-            {
-                ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "%s: Error", label);
-                ImGui::TextWrapped("    %s", path.c_str());
-            }
-            else
-            {
-                ImGui::Text("%s: %s", label, path.empty() ? "None" : path.c_str());
-            }
+            DrawTexturePropertyImGui(property, id);
         }
         else
         {

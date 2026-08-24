@@ -31,6 +31,7 @@ class Material
     void ShowPropertyError(const char* operation, MaterialPropertyID id) const;
     void CreatePropertiesBuffer();
     void BindProperties(const GraphicsShaderPass& shaderPass);
+    void DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id);
 
     friend class MaterialManager;
 

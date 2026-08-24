@@ -27,6 +27,7 @@ public:
     static void Uninit();
 
     static Material* Create(std::string_view name, const GraphicsShader& shader);
+    static bool Rename(Material& material, std::string_view name);
     static Material* Load(const std::filesystem::path& path);
     static bool Save(Material& material, const std::filesystem::path& path);
     static Material* GetDefault(const GraphicsShader& shader);
