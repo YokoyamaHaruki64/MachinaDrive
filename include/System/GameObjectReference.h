@@ -7,6 +7,7 @@ class GameObjectReference final
 {
 private:
     GameObject* m_target = nullptr;
+    bool m_isResolutionError = false;
 
 public:
     GameObjectReference() = default;
@@ -24,6 +25,8 @@ public:
     explicit operator bool() const;
 
     GameObject* Get() const;
+    bool IsResolutionError() const;
     void Set(GameObject* target);
     void Clear();
+    void MarkResolutionError();
 };

@@ -8,6 +8,7 @@ class PrefabReference final
 {
 private:
     std::string m_path;
+    bool m_isResolutionError = false;
 
 public:
     PrefabReference() = default;
@@ -24,11 +25,24 @@ public:
     void SetPath(std::string path)
     {
         m_path = std::move(path);
+        m_isResolutionError = false;
     }
 
     void Clear()
     {
         m_path.clear();
+        m_isResolutionError = false;
+    }
+
+    void MarkResolutionError(std::string path)
+    {
+        m_path = std::move(path);
+        m_isResolutionError = true;
+    }
+
+    bool IsResolutionError() const
+    {
+        return m_isResolutionError;
     }
 
     explicit operator bool() const

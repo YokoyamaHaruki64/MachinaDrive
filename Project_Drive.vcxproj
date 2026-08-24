@@ -395,6 +395,7 @@
     <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
+    <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
     <ClInclude Include="include\Script\PatternTrailHeader.h" />
     <ClInclude Include="include\Script\Wall.h" />
@@ -405,6 +406,7 @@
     <ClInclude Include="include\System\HierarchyWindow.h" />
     <ClInclude Include="include\System\InspectorWindow.h" />
     <ClInclude Include="include\System\FieldRegistry.h" />
+    <ClInclude Include="include\System\FieldRegistry.inl" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
     <ClInclude Include="include\System\GameObjectReference.h" />

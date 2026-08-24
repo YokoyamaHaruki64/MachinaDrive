@@ -16,18 +16,39 @@ GameObjectReference::~GameObjectReference()
 
 GameObjectReference::GameObjectReference(const GameObjectReference& other)
 {
-    Set(other.m_target);
+    if (other.m_isResolutionError)
+    {
+        MarkResolutionError();
+    }
+    else
+    {
+        Set(other.m_target);
+    }
 }
 
 GameObjectReference& GameObjectReference::operator=(const GameObjectReference& other)
 {
-    Set(other.m_target);
+    if (other.m_isResolutionError)
+    {
+        MarkResolutionError();
+    }
+    else
+    {
+        Set(other.m_target);
+    }
     return *this;
 }
 
 GameObjectReference::GameObjectReference(GameObjectReference&& other) noexcept
 {
-    Set(other.m_target);
+    if (other.m_isResolutionError)
+    {
+        MarkResolutionError();
+    }
+    else
+    {
+        Set(other.m_target);
+    }
     other.Clear();
 }
 
@@ -35,7 +56,14 @@ GameObjectReference& GameObjectReference::operator=(GameObjectReference&& other)
 {
     if (this != &other)
     {
-        Set(other.m_target);
+        if (other.m_isResolutionError)
+        {
+            MarkResolutionError();
+        }
+        else
+        {
+            Set(other.m_target);
+        }
         other.Clear();
     }
 
@@ -68,8 +96,15 @@ GameObject* GameObjectReference::Get() const
     return m_target;
 }
 
+bool GameObjectReference::IsResolutionError() const
+{
+    return m_isResolutionError;
+}
+
 void GameObjectReference::Set(GameObject* target)
 {
+    m_isResolutionError = false;
+
     if (target && target->IsDestroyed())
     {
         target = nullptr;
@@ -91,9 +126,22 @@ void GameObjectReference::Set(GameObject* target)
 
 void GameObjectReference::Clear()
 {
+    m_isResolutionError = false;
+
     GameObject* target = std::exchange(m_target, nullptr);
     if (target)
     {
         target->UnregisterReference(this);
     }
+}
+
+void GameObjectReference::MarkResolutionError()
+{
+    GameObject* target = std::exchange(m_target, nullptr);
+    if (target)
+    {
+        target->UnregisterReference(this);
+    }
+
+    m_isResolutionError = true;
 }

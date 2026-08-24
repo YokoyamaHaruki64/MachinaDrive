@@ -7,6 +7,11 @@
 
 #include "Graphics/GraphicInc.h"
 #include "Common/ValueType.h"
+#include "math/Quaternion.h"
+#include "System/GameObjectReference.h"
+#include "System/PrefabReference.h"
+
+struct ImGuiInputTextCallbackData;
 
 enum class InspectorFieldType
 {
@@ -40,6 +45,16 @@ class FieldRegistry
 
     static std::string CreateDisplayName(std::string_view key);
     static bool DrawValue(const FieldDescriptor& field, void* value);
+    static bool DrawQuaternion(const char* label, Quaternion& value);
+    static bool DrawGameObjectReference(const char* label, GameObjectReference& value);
+    static bool DrawPrefabReference(const char* label, PrefabReference& value);
+    static void DrawMatrix3x3(const char* label, Matrix3x3& value);
+    static void DrawMatrix4x4(const char* label, Matrix4x4& value);
+    static bool InputText(const char* label, std::string& value);
+    static int ResizeStringInputCallback(ImGuiInputTextCallbackData* data);
+
+    template <typename T>
+    static bool DrawList(const FieldDescriptor& field, std::vector<T>& values);
 
     template <typename T>
     static constexpr ValueType GetValueType()
@@ -54,6 +69,9 @@ class FieldRegistry
         else if constexpr (std::is_same_v<T, Color>) return ValueType::Color;
         else if constexpr (std::is_same_v<T, Matrix3x3>) return ValueType::Matrix3x3;
         else if constexpr (std::is_same_v<T, Matrix4x4>) return ValueType::Matrix4x4;
+        else if constexpr (std::is_same_v<T, Quaternion>) return ValueType::Quaternion;
+        else if constexpr (std::is_same_v<T, GameObjectReference>) return ValueType::GameObjectReference;
+        else if constexpr (std::is_same_v<T, PrefabReference>) return ValueType::PrefabReference;
         else static_assert(!sizeof(T), "未対応のField型です。");
     }
 
@@ -62,6 +80,23 @@ public:
     void Add(std::string_view key, T& value, InspectorFieldType inspectorType = InspectorFieldType::Auto)
     {
         m_fields.push_back({ std::string(key), CreateDisplayName(key), &value, GetValueType<T>(), inspectorType });
+    }
+
+    template <typename T>
+    void Add(std::string_view key, std::vector<T>& values, InspectorFieldType inspectorType = InspectorFieldType::List)
+    {
+        FieldDescriptor descriptor{
+            std::string(key),
+            CreateDisplayName(key),
+            &values,
+            GetValueType<T>(),
+            inspectorType,
+        };
+        descriptor.drawAccessor = [](const FieldDescriptor& field)
+        {
+            DrawList(field, *static_cast<std::vector<T>*>(field.value));
+        };
+        m_fields.push_back(std::move(descriptor));
     }
 
     template <typename T, typename Getter, typename Setter>
@@ -98,4 +133,6 @@ public:
 #define GM_FIELD(member) fields.Add(#member, member)
 #define GM_FIELD_KEY(key, member) fields.Add(key, member)
 #define GM_FIELD_TYPE(member, type) fields.Add(#member, member, type)
+
+#include "System/FieldRegistry.inl"
 #include <functional>

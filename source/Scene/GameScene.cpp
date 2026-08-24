@@ -19,6 +19,7 @@
 
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
+#include "Script/FieldRegistryTest.h"
 #include "Script/RotateCube.h"
 #include "Script/Score.h"
 
@@ -105,6 +106,9 @@ void GameScene::Init()
 
     GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
     scoreObj->AddComponent<Score>();
+
+    GameObject* fieldRegistryTest = Manager::CreateEmpty("FieldRegistry Test");
+    fieldRegistryTest->AddComponent<FieldRegistryTest>();
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 

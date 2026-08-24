@@ -359,6 +359,9 @@
     <ClInclude Include="include\System\FieldRegistry.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\FieldRegistry.inl">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\PerformanceMonitor.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
@@ -372,6 +375,9 @@
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\RotateCube.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\FieldRegistryTest.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\CameraController.h">

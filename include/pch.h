@@ -3,6 +3,7 @@
 // Precompiled header file
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
+#define IMGUI_DEFINE_MATH_OPERATORS
 
 // Windows APIとDirectX関連のヘッダーファイル
 #include <windows.h>
