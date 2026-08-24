@@ -165,11 +165,25 @@ bool Manager::ApplyToPrefab(GameObject& gameObject)
     return SavePrefab(*root, gameObject.GetPrefabPath());
 }
 
+GameObject* Manager::InstantiatePrefab(const std::filesystem::path& path)
+{
+    return InstantiatePrefabInternal(path, nullptr, nullptr, nullptr);
+}
+
 GameObject* Manager::InstantiatePrefab(
     const std::filesystem::path& path,
     const Vector3& position,
     const Vector3& rotation,
     const Vector3& scale)
+{
+    return InstantiatePrefabInternal(path, &position, &rotation, &scale);
+}
+
+GameObject* Manager::InstantiatePrefabInternal(
+    const std::filesystem::path& path,
+    const Vector3* position,
+    const Vector3* rotation,
+    const Vector3* scale)
 {
     LoadedGameObjectArchive loaded;
     if (!GameObjectArchive::Load(path, loaded, true))
@@ -197,9 +211,12 @@ GameObject* Manager::InstantiatePrefab(
     }
 
     root->SetName(path.stem().string() + "(Instance)");
-    root->GetTransform()->SetPosition(position);
-    root->GetTransform()->SetEulerAngles(rotation);
-    root->GetTransform()->SetScale(scale);
+    if (position && rotation && scale)
+    {
+        root->GetTransform()->SetPosition(*position);
+        root->GetTransform()->SetEulerAngles(*rotation);
+        root->GetTransform()->SetScale(*scale);
+    }
 
     if (m_sceneTransitionPhase == SceneTransitionPhase::None)
     {

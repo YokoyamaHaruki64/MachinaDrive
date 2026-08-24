@@ -258,16 +258,16 @@ const Vector3& Transform::GetScale() const
 
 void Transform::RegisterFields(FieldRegistry& fields)
 {
-    fields.AddAccessor<Vector3>("position", [this] { return GetPosition(); }, [this](const Vector3& value) { SetPosition(value); }, InspectorFieldSpace::World);
-    fields.AddAccessor<Vector3>("rotation (deg)", [this] { return GetEulerAngles() * Math::RAD2DEG; }, [this](const Vector3& value) { SetEulerAngles(value * Math::DEG2RAD); }, InspectorFieldSpace::World);
-    fields.AddAccessor<Vector3>("scale", [this] { return GetScale(); }, [this](const Vector3& value) { SetScale(value); }, InspectorFieldSpace::World);
+    GM_FIELD_ACCESSOR(Vector3, "position", GetPosition(), SetPosition(value), World);
+    GM_FIELD_ACCESSOR(Vector3, "rotation (deg)", GetEulerAngles() * Math::RAD2DEG, SetEulerAngles(value * Math::DEG2RAD), World);
+    GM_FIELD_ACCESSOR(Vector3, "scale", GetScale(), SetScale(value), World);
 
-    fields.AddAccessor<Vector3>("position", [this] { return GetLocalPosition(); }, [this](const Vector3& value) { SetLocalPosition(value); }, InspectorFieldSpace::Local);
-    fields.AddAccessor<Vector3>("rotation (deg)", [this] { return GetLocalEulerAngles() * Math::RAD2DEG; }, [this](const Vector3& value) { SetLocalEulerAngles(value * Math::DEG2RAD); }, InspectorFieldSpace::Local);
-    fields.AddAccessor<Vector3>("scale", [this] { return GetLocalScale(); }, [this](const Vector3& value) { SetLocalScale(value); }, InspectorFieldSpace::Local);
+    GM_FIELD_ACCESSOR(Vector3, "position", GetLocalPosition(), SetLocalPosition(value), Local);
+    GM_FIELD_ACCESSOR(Vector3, "rotation (deg)", GetLocalEulerAngles() * Math::RAD2DEG, SetLocalEulerAngles(value * Math::DEG2RAD), Local);
+    GM_FIELD_ACCESSOR(Vector3, "scale", GetLocalScale(), SetLocalScale(value), Local);
 
     // Inspector表示とは独立したキーで、Transformの正であるLocal TRSを保存する。
-    fields.AddAccessor<Vector3>("m_localPosition", [this] { return GetLocalPosition(); }, [this](const Vector3& value) { SetLocalPosition(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
-    fields.AddAccessor<Quaternion>("m_localRotation", [this] { return GetLocalRotation(); }, [this](const Quaternion& value) { SetLocalRotation(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
-    fields.AddAccessor<Vector3>("m_localScale", [this] { return GetLocalScale(); }, [this](const Vector3& value) { SetLocalScale(value); }, InspectorFieldSpace::All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(Vector3, "m_localPosition", GetLocalPosition(), SetLocalPosition(value), All, InspectorFieldType::Hidden, true);
+    GM_FIELD_ACCESSOR_TYPE(Quaternion, "m_localRotation", GetLocalRotation(), SetLocalRotation(value), All, InspectorFieldType::Hidden, true);
+    GM_FIELD_ACCESSOR_TYPE(Vector3, "m_localScale", GetLocalScale(), SetLocalScale(value), All, InspectorFieldType::Hidden, true);
 }

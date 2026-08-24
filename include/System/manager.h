@@ -67,6 +67,11 @@ private:
     static void InitScene();
     static void DestroyGameObjects();
     static void StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects);
+    static GameObject* InstantiatePrefabInternal(
+        const std::filesystem::path& path,
+        const Vector3* position,
+        const Vector3* rotation,
+        const Vector3* scale);
 
 public:
 	static bool Init();
@@ -79,11 +84,12 @@ public:
     static bool LoadSceneObjects(const std::filesystem::path& path);
     static bool SavePrefab(GameObject& root, const std::filesystem::path& path);
     static bool ApplyToPrefab(GameObject& gameObject);
+    static GameObject* InstantiatePrefab(const std::filesystem::path& path);
     static GameObject* InstantiatePrefab(
         const std::filesystem::path& path,
-        const Vector3& position = Vector3::Zero(),
-        const Vector3& rotation = Vector3::Zero(),
-        const Vector3& scale = Vector3::One());
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale);
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
 
