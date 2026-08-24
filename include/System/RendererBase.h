@@ -6,6 +6,7 @@
 #include "System/renderer.h"
 #include "Graphics/GraphicInc.h"
 
+
 class Camera;
 
 struct SortDescriptor
@@ -46,6 +47,7 @@ public:
     virtual ~RendererBase();
     virtual void Draw() override = 0;
     virtual Material* GetMaterial(uint32_t slot = 0) = 0;
+    virtual void SetMaterial(uint32_t slot, Material* material) = 0;
     virtual uint32_t GetMaterialSlotCount() const { return 1; }
     virtual uint32_t GetMeshID() const { return 0; }
     bool IsOwnerStarted() const { return m_owner && m_owner->IsStarted(); }

@@ -15,8 +15,12 @@ class Material
     const GraphicsShader* m_shader{};
     MaterialID m_id{};
     std::string m_name{};
+    std::string m_filePath{};
+    bool m_isValid = true;
     std::vector<uint8_t> m_propertyData{};
     std::vector<TextureHandle> m_resourceValues{};
+    std::vector<std::string> m_resourcePaths{};
+    std::vector<bool> m_resourceErrors{};
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_propertiesBuffer{};
 
     const ShaderPropertyDesc* FindShaderProperty(MaterialPropertyID id) const;
@@ -28,11 +32,15 @@ class Material
     void CreatePropertiesBuffer();
     void BindProperties(const GraphicsShaderPass& shaderPass);
 
+    friend class MaterialManager;
+
 public:
     Material(std::string name, const GraphicsShader& shader);
 
     MaterialID GetID() const { return m_id; }
     const std::string& GetName() const { return m_name; }
+    const std::string& GetFilePath() const { return m_filePath; }
+    bool IsValid() const { return m_isValid; }
     MaterialPropertyID GetPropertyID(ShaderPropertyID shaderPropertyID) const;
     MaterialPropertyID GetPropertyID(std::string_view name) const;
 
@@ -59,6 +67,8 @@ public:
     Color SetColor(std::string_view name, const Color& value);
     TextureHandle SetTexture(MaterialPropertyID id, TextureHandle texture);
     TextureHandle SetTexture(std::string_view name, TextureHandle texture);
+    bool SetTexturePath(MaterialPropertyID id, std::string path);
+    bool SetTexturePath(std::string_view name, std::string path);
 
     float GetFloat(MaterialPropertyID id) const;
     float GetFloat(std::string_view name) const;
@@ -80,6 +90,11 @@ public:
     Color GetColor(std::string_view name) const;
     TextureHandle GetTexture(MaterialPropertyID id) const;
     TextureHandle GetTexture(std::string_view name) const;
+    const std::string& GetTexturePath(MaterialPropertyID id) const;
+    bool HasTextureError(MaterialPropertyID id) const;
+
+    bool GetPropertyValue(const ShaderPropertyDesc& property, PropertyValue& value) const;
+    bool SetPropertyValue(const ShaderPropertyDesc& property, const PropertyValue& value);
 
     void DrawInspectorImGui();
 

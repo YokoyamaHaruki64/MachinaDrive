@@ -8,7 +8,6 @@
 #include "Component/ParticleSystem.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
-#include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 
@@ -193,9 +192,7 @@ ParticleRenderer::ParticleRenderer(
     if (quadModel && !quadModel->meshes.empty())
         m_mesh = &quadModel->meshes.front();
 
-    static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader"))
-        m_materialInstance = MaterialManager::Create("Particle." + std::to_string(materialInstanceIndex++), *shader);
+    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitAdditive.material");
 
     m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
     m_billboardType = BillboardType::CameraFacing;
@@ -206,6 +203,14 @@ Material* ParticleRenderer::GetMaterial(uint32_t slot)
 {
     // Particleは単一Materialのみを持つ。
     return slot == 0 ? m_materialInstance : nullptr;
+}
+
+void ParticleRenderer::SetMaterial(uint32_t slot, Material* material)
+{
+    if (slot == 0)
+    {
+        m_materialInstance = material;
+    }
 }
 
 void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color) const

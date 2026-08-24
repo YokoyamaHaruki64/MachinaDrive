@@ -6,7 +6,6 @@
 #include "Component/TrailRenderer.h"
 
 #include "Graphics/MaterialManager.h"
-#include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 #include "System/renderer.h"
@@ -63,9 +62,7 @@ void TrailRenderer::CreateVertexStreams()
 TrailRenderer::TrailRenderer(GameObject* owner, const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader");
-    if (shader)
-        m_materialInstance = MaterialManager::GetDefault(*shader);
+    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitAdditive.material");
 
     m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
     CreateVertexStreams();
@@ -77,6 +74,14 @@ Material* TrailRenderer::GetMaterial(uint32_t slot)
 {
     // Trailは単一Materialのみを持つ。
     return slot == 0 ? m_materialInstance : nullptr;
+}
+
+void TrailRenderer::SetMaterial(uint32_t slot, Material* material)
+{
+    if (slot == 0)
+    {
+        m_materialInstance = material;
+    }
 }
 
 void TrailRenderer::Draw()

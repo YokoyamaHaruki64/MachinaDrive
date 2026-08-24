@@ -49,7 +49,8 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
                     if (Material* material = renderer->GetMaterial(slot))
                     {
                         ImGui::PushID(static_cast<int>(slot));
-                        if (ImGui::TreeNode("Material"))
+                        const char* label = material->IsValid() ? "Material" : "Material (Error)";
+                        if (ImGui::TreeNode(label))
                         {
                             material->DrawInspectorImGui();
                             ImGui::TreePop();
@@ -99,4 +100,3 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
 
     ImGui::End();
 }
-

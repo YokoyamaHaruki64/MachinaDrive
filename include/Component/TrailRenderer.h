@@ -57,6 +57,7 @@ public:
     virtual ~TrailRenderer() {}
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
 
     const Curve<float>& GetWidthCurve() const { return m_widthCurve; }
     const CurveColor& GetColorCurve() const { return m_colorCurve; }

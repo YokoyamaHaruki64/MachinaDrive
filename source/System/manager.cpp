@@ -99,7 +99,16 @@ bool Manager::Init()
         Renderer::Uninit();
         return false;
     }
-    MaterialManager::Init();
+    if (!MaterialManager::Init())
+    {
+        Logger::Fatal("Fallback Materialの初期化に失敗しました。");
+
+        MaterialManager::Uninit();
+        ShaderManager::Uninit();
+        TextureManager::Uninit();
+        Renderer::Uninit();
+        return false;
+    }
     ModelManager::Init();
 	Input::Init();
     PostProcess::Init();
@@ -158,9 +167,9 @@ void Manager::Uninit()
 
     // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
     m_postEffects.clear();
+    PostProcess::Uninit();
     ModelManager::Uninit();
     MaterialManager::Uninit();
-    PostProcess::Uninit();
     TextureManager::Uninit();
     ShaderManager::Uninit();
     Renderer::Uninit();

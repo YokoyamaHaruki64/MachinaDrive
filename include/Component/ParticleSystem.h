@@ -76,8 +76,8 @@ public:
         // 速度タイプ
         VelocityType velocityType = VelocityType::Directional;
 
-        // Directional / Cone 
-        Vector3 direction = Vector3::Up(); 
+        // Directional / Cone
+        Vector3 direction = Vector3::Up();
 
         // Cone
         float coneAngle = 30.0f;    // Coneの角度（degrees）
@@ -195,4 +195,5 @@ public:
 
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
 };

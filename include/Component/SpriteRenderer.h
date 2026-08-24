@@ -31,6 +31,7 @@ public:
     virtual ~SpriteRenderer() {}
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
 
     void SetUVRect(float offsetX, float offsetY, float width, float height)
     {

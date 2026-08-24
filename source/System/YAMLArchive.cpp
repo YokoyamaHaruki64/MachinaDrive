@@ -117,43 +117,12 @@ public:
         }
     }
 
-    static const YAMLValue* FindMapValue(const YAMLValue& map, const std::string& key)
-    {
-        const auto found = std::find_if(map.map.begin(), map.map.end(), [&key](const auto& entry)
-        {
-            return entry.first == key;
-        });
-        return found == map.map.end() ? nullptr : &found->second;
-    }
 };
 
-bool YAMLArchive::SaveFields(
-    const std::filesystem::path& path,
-    const FieldRegistry& fields,
-    const YAMLArchiveContext& context)
+bool YAMLArchive::SaveDocument(const std::filesystem::path& path, const YAMLValue& document)
 {
     try
     {
-        YAMLValue document = YAMLValue::Map();
-        for (const FieldDescriptor& field : fields.GetFields())
-        {
-            if (!field.save)
-            {
-                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
-                continue;
-            }
-
-            YAMLValue value;
-            const YAMLCodecResult result = field.save(value, context);
-            Implementation::ReportCodecMessage(result, field.key);
-            if (!result.success)
-            {
-                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
-                continue;
-            }
-            document.map.emplace_back(field.key, std::move(value));
-        }
-
         ryml::Tree tree;
         Implementation::WriteValue(tree.rootref(), document);
 
@@ -185,10 +154,7 @@ bool YAMLArchive::SaveFields(
     }
 }
 
-bool YAMLArchive::LoadFields(
-    const std::filesystem::path& path,
-    FieldRegistry& fields,
-    const YAMLArchiveContext& context)
+bool YAMLArchive::LoadDocument(const std::filesystem::path& path, YAMLValue& document)
 {
     try
     {
@@ -201,9 +167,69 @@ bool YAMLArchive::LoadFields(
 
         std::string source((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
         ryml::Tree tree = ryml::parse_in_arena(c4::to_csubstr(source));
+        if (!Implementation::ReadValue(tree.crootref(), document))
+        {
+            Logger::Error("YAMLの読み込みに失敗しました: " + path.string());
+            return false;
+        }
+        return true;
+    }
+    catch (const std::exception& exception)
+    {
+        Logger::Error("YAML読み込みに失敗しました: " + std::string(exception.what()));
+        return false;
+    }
+}
 
+bool YAMLArchive::SaveFields(
+    const std::filesystem::path& path,
+    const FieldRegistry& fields,
+    const YAMLArchiveContext& context)
+{
+    try
+    {
+        YAMLValue document = YAMLValue::Map();
+        for (const FieldDescriptor& field : fields.GetFields())
+        {
+            if (!field.save)
+            {
+                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
+                continue;
+            }
+
+            YAMLValue value;
+            const YAMLCodecResult result = field.save(value, context);
+            Implementation::ReportCodecMessage(result, field.key);
+            if (!result.success)
+            {
+                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
+                continue;
+            }
+            document.map.emplace_back(field.key, std::move(value));
+        }
+
+        return SaveDocument(path, document);
+    }
+    catch (const std::exception& exception)
+    {
+        Logger::Error("YAML保存に失敗しました: " + std::string(exception.what()));
+        return false;
+    }
+}
+
+bool YAMLArchive::LoadFields(
+    const std::filesystem::path& path,
+    FieldRegistry& fields,
+    const YAMLArchiveContext& context)
+{
+    try
+    {
         YAMLValue document;
-        if (!Implementation::ReadValue(tree.crootref(), document) || document.type != YAMLValue::Type::Map)
+        if (!LoadDocument(path, document))
+        {
+            return false;
+        }
+        if (document.type != YAMLValue::Type::Map)
         {
             Logger::Error("YAMLルートはMapである必要があります: " + path.string());
             return false;
@@ -212,7 +238,7 @@ bool YAMLArchive::LoadFields(
         Implementation::Assignments assignments;
         for (const FieldDescriptor& field : fields.GetFields())
         {
-            const YAMLValue* value = Implementation::FindMapValue(document, field.key);
+            const YAMLValue* value = document.Find(field.key);
             if (!value)
             {
                 continue;

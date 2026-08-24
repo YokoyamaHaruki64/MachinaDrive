@@ -73,6 +73,7 @@ TextureHandle TextureManager::LoadTexture(const std::wstring& filePath)
 
     resource.width = static_cast<UINT>(metadata.width);
     resource.height = static_cast<UINT>(metadata.height);
+    resource.sourcePath = std::filesystem::path(normalizedPath).generic_string();
 
     const TextureID textureID = m_nextTextureID++;
     m_textures.emplace(textureID, std::move(resource));
@@ -222,4 +223,14 @@ bool TextureManager::GetTextureSize(TextureHandle texture, UINT& outWidth, UINT&
     outWidth = resource->second.width;
     outHeight = resource->second.height;
     return true;
+}
+
+std::optional<std::string> TextureManager::GetSourcePath(TextureHandle texture)
+{
+    const auto resource = m_textures.find(texture.id);
+    if (resource == m_textures.end() || resource->second.sourcePath.empty())
+    {
+        return std::nullopt;
+    }
+    return resource->second.sourcePath;
 }

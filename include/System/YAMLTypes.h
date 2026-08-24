@@ -4,6 +4,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -74,5 +75,23 @@ struct YAMLValue
         YAMLValue result;
         result.type = Type::Map;
         return result;
+    }
+
+    YAMLValue& Add(std::string key, YAMLValue value)
+    {
+        map.emplace_back(std::move(key), std::move(value));
+        return map.back().second;
+    }
+
+    const YAMLValue* Find(std::string_view key) const
+    {
+        for (const auto& [entryKey, value] : map)
+        {
+            if (entryKey == key)
+            {
+                return &value;
+            }
+        }
+        return nullptr;
     }
 };

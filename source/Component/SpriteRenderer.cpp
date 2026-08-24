@@ -6,7 +6,6 @@
 #include "Component/SpriteRenderer.h"
 
 #include "Graphics/MaterialManager.h"
-#include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 #include "System/renderer.h"
@@ -37,9 +36,7 @@ SpriteRenderer::SpriteRenderer(
     const wchar_t* textureFile)
     : RendererBase(owner)
 {
-    GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTransparent.shader");
-    if (shader)
-        m_materialInstance = MaterialManager::GetDefault(*shader);
+    m_materialInstance = MaterialManager::Load("Assets/Materials/UnlitTransparent.material");
 
     m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
     UINT width{};
@@ -142,4 +139,12 @@ Material* SpriteRenderer::GetMaterial(uint32_t slot)
 {
     // Spriteは単一Materialのみを持つ。
     return slot == 0 ? m_materialInstance : nullptr;
+}
+
+void SpriteRenderer::SetMaterial(uint32_t slot, Material* material)
+{
+    if (slot == 0)
+    {
+        m_materialInstance = material;
+    }
 }

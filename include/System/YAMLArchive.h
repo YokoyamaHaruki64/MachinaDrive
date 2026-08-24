@@ -10,6 +10,9 @@ class FieldRegistry;
 class YAMLArchive final
 {
 public:
+    static bool SaveDocument(const std::filesystem::path& path, const YAMLValue& document);
+    static bool LoadDocument(const std::filesystem::path& path, YAMLValue& document);
+
     static bool SaveFields(
         const std::filesystem::path& path,
         const FieldRegistry& fields,
