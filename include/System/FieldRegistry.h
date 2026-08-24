@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -10,6 +11,7 @@
 #include "math/Quaternion.h"
 #include "System/GameObjectReference.h"
 #include "System/PrefabReference.h"
+#include "System/YAMLCodec.h"
 
 struct ImGuiInputTextCallbackData;
 
@@ -37,6 +39,11 @@ struct FieldDescriptor
     InspectorFieldType inspectorType{ InspectorFieldType::Auto };
     InspectorFieldSpace inspectorSpace{ InspectorFieldSpace::All };
     std::function<void(const FieldDescriptor&)> drawAccessor;
+    std::function<YAMLCodecResult(YAMLValue&, const YAMLArchiveContext&)> save;
+    std::function<YAMLCodecResult(
+        const YAMLValue&,
+        const YAMLArchiveContext&,
+        std::function<void()>&)> load;
 };
 
 class FieldRegistry
@@ -55,6 +62,32 @@ class FieldRegistry
 
     template <typename T>
     static bool DrawList(const FieldDescriptor& field, std::vector<T>& values);
+
+    template <typename T>
+    static void ConfigureSerialization(FieldDescriptor& descriptor, T& value)
+    {
+        T* target = &value;
+        descriptor.save = [target](YAMLValue& output, const YAMLArchiveContext& context)
+        {
+            return YAMLCodec<T>::Encode(*target, output, context);
+        };
+        descriptor.load = [target](
+            const YAMLValue& input,
+            const YAMLArchiveContext& context,
+            std::function<void()>& assignment)
+        {
+            T value{};
+            YAMLCodecResult result = YAMLCodec<T>::Decode(input, value, context);
+            if (result.success)
+            {
+                assignment = [target, value = std::move(value)]() mutable
+                {
+                    *target = std::move(value);
+                };
+            }
+            return result;
+        };
+    }
 
     template <typename T>
     static constexpr ValueType GetValueType()
@@ -79,7 +112,15 @@ public:
     template <typename T>
     void Add(std::string_view key, T& value, InspectorFieldType inspectorType = InspectorFieldType::Auto)
     {
-        m_fields.push_back({ std::string(key), CreateDisplayName(key), &value, GetValueType<T>(), inspectorType });
+        FieldDescriptor descriptor{
+            std::string(key),
+            CreateDisplayName(key),
+            &value,
+            GetValueType<T>(),
+            inspectorType,
+        };
+        ConfigureSerialization(descriptor, value);
+        m_fields.push_back(std::move(descriptor));
     }
 
     template <typename T>
@@ -96,6 +137,7 @@ public:
         {
             DrawList(field, *static_cast<std::vector<T>*>(field.value));
         };
+        ConfigureSerialization(descriptor, values);
         m_fields.push_back(std::move(descriptor));
     }
 
@@ -128,6 +170,11 @@ public:
     }
 
     void DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+
+    const std::vector<FieldDescriptor>& GetFields() const
+    {
+        return m_fields;
+    }
 };
 
 #define GM_FIELD(member) fields.Add(#member, member)

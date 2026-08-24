@@ -235,6 +235,10 @@
     <ClCompile Include="source\System\HierarchyWindow.cpp" />
     <ClCompile Include="source\System\InspectorWindow.cpp" />
     <ClCompile Include="source\System\FieldRegistry.cpp" />
+    <ClCompile Include="source\System\YAMLArchive.cpp">
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="source\System\LogFileWorker.cpp" />
     <ClCompile Include="source\System\Logger.cpp" />
     <ClCompile Include="source\System\LogSystem.cpp" />
@@ -247,6 +251,7 @@
     <ClCompile Include="source\System\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\Include\rapidyaml\rapidyaml.hpp" />
     <ClInclude Include="External\Include\Assimp\aabb.h" />
     <ClInclude Include="External\Include\Assimp\ai_assert.h" />
     <ClInclude Include="External\Include\Assimp\anim.h" />
@@ -407,6 +412,9 @@
     <ClInclude Include="include\System\InspectorWindow.h" />
     <ClInclude Include="include\System\FieldRegistry.h" />
     <ClInclude Include="include\System\FieldRegistry.inl" />
+    <ClInclude Include="include\System\YAMLCodec.h" />
+    <ClInclude Include="include\System\YAMLArchive.h" />
+    <ClInclude Include="include\System\YAMLTypes.h" />
     <ClInclude Include="include\System\DirectXTex.h" />
     <ClInclude Include="include\System\GameObject.h" />
     <ClInclude Include="include\System\GameObjectReference.h" />

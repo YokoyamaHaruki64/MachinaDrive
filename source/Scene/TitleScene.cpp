@@ -8,6 +8,7 @@
 #include "Component/SpriteRenderer.h"
 
 #include "Script/TItleUI.h"
+#include "Script/FieldRegistryTest.h"
 
 
 void TitleScene::Init()
@@ -31,4 +32,7 @@ void TitleScene::Init()
     titleUI->AddComponent<SpriteRenderer>(L"Assets/Local/Textures/TitleUI.png");
     titleUI->AddComponent<TitleUI>();
     titleUI->GetTransform()->SetScale(Vector3(800.0f, 200.0f, 1.0f));
+
+    GameObject* fieldRegistryTest = Manager::CreateEmpty("FieldRegistry Test");
+    fieldRegistryTest->AddComponent<FieldRegistryTest>();
 }

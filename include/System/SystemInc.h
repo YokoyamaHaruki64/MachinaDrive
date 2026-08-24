@@ -10,5 +10,6 @@
 #include "System/Logger.h"
 #include "System/main.h"
 #include "System/manager.h"
+#include "System/YAMLArchive.h"
 
 #include "Component/Transform.h"

@@ -70,6 +70,9 @@
     <Filter Include="External\Assimp">
       <UniqueIdentifier>{e8221a4e-48c4-4be5-a8e2-5296d50e7d37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External\rapidyaml">
+      <UniqueIdentifier>{9A5A9E6C-3CC4-43D3-AF27-A596A9F2A24D}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Script\CameraController.cpp">
@@ -112,6 +115,9 @@
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="source\System\FieldRegistry.cpp">
+      <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\YAMLArchive.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="source\System\PerformanceMonitor.cpp">
@@ -362,6 +368,15 @@
     <ClInclude Include="include\System\FieldRegistry.inl">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\YAMLCodec.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\YAMLArchive.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\YAMLTypes.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\PerformanceMonitor.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
@@ -562,6 +577,9 @@
     </ClInclude>
     <ClInclude Include="include\math\Matrix3x3.h">
       <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="External\Include\rapidyaml\rapidyaml.hpp">
+      <Filter>External\rapidyaml</Filter>
     </ClInclude>
     <ClInclude Include="External\Include\Assimp\aabb.h">
       <Filter>External\Assimp</Filter>

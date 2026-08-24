@@ -22,6 +22,11 @@
 - Morph Target / Blend Shapeを読み込む。
 - 大規模モデル向けにMesh結合、Index format、頂点StreamとフォールバックBuffer容量を見直す。
 
+## Serialize / Deserialize
+
+- `YAMLCodec<T>`、固定長配列Traits、Field登録時の型消去コールバックが重なっている現行実装を見直し、新しい型を短く直感的に追加できる記述方式へ簡素化する。
+- 簡素化時も、rapidyaml依存の局所化、配列要素Codecの再利用、全Field検証後の一括反映、参照解決エラーの継続処理は維持する。
+
 ## 検証
 
 - OBJ、FBX、glTF、透明Materialを含むVRoid、Skinning / Animationを含むモデルで表示を確認する。
