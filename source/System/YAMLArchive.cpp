@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#define C4_ERROR_THROWS_EXCEPTION
+#define RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS
 #define RYML_SINGLE_HDR_DEFINE_NOW
 #include "External/Include/rapidyaml/rapidyaml.hpp"
 
@@ -14,6 +14,16 @@ class YAMLArchive::Implementation final
 public:
     // 全Fieldの検証完了後にまとめて反映し、途中失敗で既存状態を壊さない。
     using Assignments = std::vector<std::function<void()>>;
+
+    static void RemoveUtf8Bom(std::string& source)
+    {
+        static constexpr std::string_view Utf8Bom{ "\xEF\xBB\xBF", 3 };
+        if (source.starts_with(Utf8Bom))
+        {
+            // BOMを含めたまま渡すと、rapidyamlがネストしたSequenceの字下げを誤判定する。
+            source.erase(0, Utf8Bom.size());
+        }
+    }
 
     static void WriteValue(ryml::NodeRef node, const YAMLValue& value)
     {
@@ -34,6 +44,10 @@ public:
             break;
         case YAMLValue::Type::Sequence:
             node |= ryml::SEQ;
+            if (value.collectionStyle == YAMLValue::CollectionStyle::Flow)
+            {
+                node |= ryml::FLOW_SL;
+            }
             for (const YAMLValue& element : value.sequence)
             {
                 WriteValue(node.append_child(), element);
@@ -166,6 +180,7 @@ bool YAMLArchive::LoadDocument(const std::filesystem::path& path, YAMLValue& doc
         }
 
         std::string source((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+        Implementation::RemoveUtf8Bom(source);
         ryml::Tree tree = ryml::parse_in_arena(c4::to_csubstr(source));
         if (!Implementation::ReadValue(tree.crootref(), document))
         {
@@ -173,6 +188,13 @@ bool YAMLArchive::LoadDocument(const std::filesystem::path& path, YAMLValue& doc
             return false;
         }
         return true;
+    }
+    catch (const ryml::ExceptionParse& exception)
+    {
+        std::string message;
+        ryml::format_exc(&message, exception);
+        Logger::Error("YAML読み込みに失敗しました: " + path.string() + "\n" + message);
+        return false;
     }
     catch (const std::exception& exception)
     {

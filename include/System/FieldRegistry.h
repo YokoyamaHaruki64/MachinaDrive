@@ -104,6 +104,8 @@ class FieldRegistry
         else if constexpr (std::is_same_v<T, Matrix3x3>) return ValueType::Matrix3x3;
         else if constexpr (std::is_same_v<T, Matrix4x4>) return ValueType::Matrix4x4;
         else if constexpr (std::is_same_v<T, Quaternion>) return ValueType::Quaternion;
+        else if constexpr (std::is_same_v<T, Curve<float>>) return ValueType::CurveFloat;
+        else if constexpr (std::is_same_v<T, CurveColor>) return ValueType::CurveColor;
         else if constexpr (std::is_same_v<T, GameObjectReference>) return ValueType::GameObjectReference;
         else if constexpr (std::is_same_v<T, PrefabReference>) return ValueType::PrefabReference;
         else static_assert(!sizeof(T), "未対応のField型です。");
@@ -205,6 +207,7 @@ public:
 
 #define GM_FIELD(member) fields.Add(#member, member)
 #define GM_FIELD_KEY(key, member) fields.Add(key, member)
+#define GM_FIELD_KEY_TYPE(key, member, type) fields.Add(key, member, type)
 #define GM_FIELD_TYPE(member, type) fields.Add(#member, member, type)
 #define GM_FIELD_ACCESSOR(type, key, getter, setter, space) \
     fields.AddAccessor<type>(key, \

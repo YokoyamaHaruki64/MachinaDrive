@@ -36,6 +36,12 @@ struct YAMLCodecResult
 // YAMLライブラリに依存しない中間表現。Codecとファイル形式の実装を分離する。
 struct YAMLValue
 {
+    enum class CollectionStyle
+    {
+        Block,
+        Flow,
+    };
+
     enum class Type
     {
         Null,
@@ -45,6 +51,7 @@ struct YAMLValue
     };
 
     Type type = Type::Null;
+    CollectionStyle collectionStyle = CollectionStyle::Block;
     std::string scalar;
     bool isString = false;
     std::vector<YAMLValue> sequence;
@@ -64,10 +71,11 @@ struct YAMLValue
         return result;
     }
 
-    static YAMLValue Sequence()
+    static YAMLValue Sequence(CollectionStyle style = CollectionStyle::Block)
     {
         YAMLValue result;
         result.type = Type::Sequence;
+        result.collectionStyle = style;
         return result;
     }
 

@@ -15,6 +15,8 @@ enum class ValueType
     Matrix4x4,
     Color,
     Quaternion,
+    CurveFloat,
+    CurveColor,
     GameObjectReference,
     PrefabReference,
     Texture2D,

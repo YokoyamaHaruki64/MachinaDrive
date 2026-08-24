@@ -193,6 +193,8 @@ void ParticleEmitter::RegisterFields(FieldRegistry& fields)
     GM_FIELD_KEY("gravity", m_settings.gravity);
     GM_FIELD_KEY("drag", m_settings.drag);
     GM_FIELD_KEY("size", m_settings.size);
+    GM_FIELD_KEY_TYPE("scaleOverLifetime", m_settings.scaleOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY_TYPE("colorOverLifetime", m_settings.colorOverLifetime, InspectorFieldType::Curve);
     GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
     GM_FIELD_KEY("speed", m_settings.speed);
     GM_FIELD_KEY("speedMin", m_settings.speedMin);

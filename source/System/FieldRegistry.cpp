@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "imgui.h"
+#include "imgui_curve_custom.h"
 
 #include "System/FieldRegistry.h"
 #include "System/Manager.h"
@@ -93,6 +94,8 @@ bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
     case ValueType::Matrix3x3: DrawMatrix3x3(field.displayName.c_str(), *static_cast<Matrix3x3*>(value)); return false;
     case ValueType::Matrix4x4: DrawMatrix4x4(field.displayName.c_str(), *static_cast<Matrix4x4*>(value)); return false;
     case ValueType::Quaternion: return DrawQuaternion(field.displayName.c_str(), *static_cast<Quaternion*>(value));
+    case ValueType::CurveFloat: return ImGui::EditCurveFloat(field.displayName.c_str(), *static_cast<Curve<float>*>(value));
+    case ValueType::CurveColor: return ImGui::EditCurveColor(field.displayName.c_str(), *static_cast<CurveColor*>(value));
     case ValueType::GameObjectReference: return DrawGameObjectReference(field.displayName.c_str(), *static_cast<GameObjectReference*>(value));
     case ValueType::PrefabReference: return DrawPrefabReference(field.displayName.c_str(), *static_cast<PrefabReference*>(value));
     default: ImGui::Text("%s: 未対応", field.displayName.c_str()); return false;

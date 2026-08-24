@@ -13,6 +13,7 @@
 #include "Common/Color.h"
 #include "math/Matrix3x3.h"
 #include "math/Matrix4x4.h"
+#include "math/Curve.h"
 #include "math/Quaternion.h"
 #include "math/Vector2.h"
 #include "math/Vector3.h"
@@ -94,7 +95,7 @@ public:
     static YAMLCodecResult EncodeFloatSequence(const T& value, YAMLValue& output)
     {
         const std::array<float, Count> components = ::YAMLFloatSequenceTraits<T>::ToArray(value);
-        output = YAMLValue::Sequence();
+        output = YAMLValue::Sequence(YAMLValue::CollectionStyle::Flow);
         output.sequence.reserve(Count);
 
         for (float component : components)
@@ -330,6 +331,137 @@ struct YAMLCodec<T, std::void_t<decltype(YAMLFloatSequenceTraits<T>::Count)>>
     static YAMLCodecResult Decode(const YAMLValue& input, T& output, const YAMLArchiveContext&)
     {
         return YAMLCodecUtility::DecodeFloatSequence<T, YAMLFloatSequenceTraits<T>::Count>(input, output);
+    }
+};
+
+template <typename T>
+struct YAMLCodec<Curve<T>>
+{
+    static YAMLCodecResult Encode(
+        const Curve<T>& curve,
+        YAMLValue& output,
+        const YAMLArchiveContext& context)
+    {
+        output = YAMLValue::Sequence();
+        output.sequence.reserve(curve.GetKeyCount());
+        for (const typename Curve<T>::Key& key : curve.GetKeys())
+        {
+            YAMLValue encodedKey = YAMLValue::Map();
+            YAMLValue time;
+            YAMLValue value;
+            YAMLValue inControl;
+            YAMLValue outControl;
+            if (!YAMLCodec<float>::Encode(key.time, time, context).success ||
+                !YAMLCodec<T>::Encode(key.value, value, context).success ||
+                !YAMLCodec<T>::Encode(key.inControl, inControl, context).success ||
+                !YAMLCodec<T>::Encode(key.outControl, outControl, context).success)
+            {
+                return { false };
+            }
+
+            encodedKey.Add("time", std::move(time));
+            encodedKey.Add("value", std::move(value));
+            encodedKey.Add("inControl", std::move(inControl));
+            encodedKey.Add("outControl", std::move(outControl));
+            output.sequence.emplace_back(std::move(encodedKey));
+        }
+        return {};
+    }
+
+    static YAMLCodecResult Decode(
+        const YAMLValue& input,
+        Curve<T>& output,
+        const YAMLArchiveContext& context)
+    {
+        if (input.type != YAMLValue::Type::Sequence)
+        {
+            return { false };
+        }
+
+        std::vector<typename Curve<T>::Key> keys;
+        keys.reserve(input.sequence.size());
+        for (const YAMLValue& encodedKey : input.sequence)
+        {
+            if (encodedKey.type != YAMLValue::Type::Map)
+            {
+                return { false };
+            }
+
+            const YAMLValue* time = encodedKey.Find("time");
+            const YAMLValue* value = encodedKey.Find("value");
+            const YAMLValue* inControl = encodedKey.Find("inControl");
+            const YAMLValue* outControl = encodedKey.Find("outControl");
+            typename Curve<T>::Key key;
+            if (!time || !value || !inControl || !outControl ||
+                !YAMLCodec<float>::Decode(*time, key.time, context).success ||
+                !YAMLCodec<T>::Decode(*value, key.value, context).success ||
+                !YAMLCodec<T>::Decode(*inControl, key.inControl, context).success ||
+                !YAMLCodec<T>::Decode(*outControl, key.outControl, context).success)
+            {
+                return { false };
+            }
+            keys.emplace_back(std::move(key));
+        }
+
+        output.SetKeys(keys);
+        return {};
+    }
+};
+
+template <>
+struct YAMLCodec<CurveColor>
+{
+    static YAMLCodecResult Encode(
+        const CurveColor& curve,
+        YAMLValue& output,
+        const YAMLArchiveContext& context)
+    {
+        YAMLValue red;
+        YAMLValue green;
+        YAMLValue blue;
+        YAMLValue alpha;
+        if (!YAMLCodec<Curve<float>>::Encode(curve.r, red, context).success ||
+            !YAMLCodec<Curve<float>>::Encode(curve.g, green, context).success ||
+            !YAMLCodec<Curve<float>>::Encode(curve.b, blue, context).success ||
+            !YAMLCodec<Curve<float>>::Encode(curve.a, alpha, context).success)
+        {
+            return { false };
+        }
+
+        output = YAMLValue::Map();
+        output.Add("r", std::move(red));
+        output.Add("g", std::move(green));
+        output.Add("b", std::move(blue));
+        output.Add("a", std::move(alpha));
+        return {};
+    }
+
+    static YAMLCodecResult Decode(
+        const YAMLValue& input,
+        CurveColor& output,
+        const YAMLArchiveContext& context)
+    {
+        if (input.type != YAMLValue::Type::Map)
+        {
+            return { false };
+        }
+
+        const YAMLValue* red = input.Find("r");
+        const YAMLValue* green = input.Find("g");
+        const YAMLValue* blue = input.Find("b");
+        const YAMLValue* alpha = input.Find("a");
+        CurveColor decoded;
+        if (!red || !green || !blue || !alpha ||
+            !YAMLCodec<Curve<float>>::Decode(*red, decoded.r, context).success ||
+            !YAMLCodec<Curve<float>>::Decode(*green, decoded.g, context).success ||
+            !YAMLCodec<Curve<float>>::Decode(*blue, decoded.b, context).success ||
+            !YAMLCodec<Curve<float>>::Decode(*alpha, decoded.a, context).success)
+        {
+            return { false };
+        }
+
+        output = std::move(decoded);
+        return {};
     }
 };
 
