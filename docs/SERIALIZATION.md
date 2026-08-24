@@ -17,9 +17,9 @@
 
 ## 保存先
 
-保存するアセットはGit管理される`Assets/`配下に置く。実行時に生成したPrefabも同じ場所へ保存できる。ローカル環境ごとに用意する大容量リソースは`Assets/Local/`配下に置き、Git管理しない。
+保存するアセットはGit管理される`Assets/`配下に置く。種類別フォルダはダイアログの初期位置と推奨配置であり、`Assets/`配下であれば別の場所も選択できる。実行時に生成したPrefabも同じ規則で保存する。ローカル環境ごとに用意する大容量リソースは`Assets/Local/`配下に置き、Git管理しない。
 
-| 種類 | 拡張子 | 基本配置 | Git管理 |
+| 種類 | 拡張子 | 推奨配置 | Git管理 |
 | --- | --- | --- | --- |
 | Scene | `.scene` | `Assets/Scenes/` | 管理する |
 | Prefab | `.prefab` | `Assets/Prefabs/` | 管理する |
@@ -41,7 +41,7 @@ name: Game
 gameObjects:
   - id: 1
     name: Player
-    prefab: Prefabs/Player.prefab
+    prefab: Assets/Prefabs/Player.prefab
     parent: null
     components:
       - type: Transform
@@ -64,8 +64,8 @@ virtual const std::filesystem::path& GetSceneFilePath() const = 0;
 GameObjectを所有するManagerが、実際の読み書きを担当する。`SaveCurrentScene()`は現在のSceneから`GetSceneFilePath()`を取得して保存し、呼び出し側がファイルパスを指定する必要はない。Sceneの`Init()`は`GetSceneFilePath()`を指定して`LoadSceneObjects()`を呼ぶ。
 
 ```cpp
-bool Manager::SaveCurrentScene() const;
-bool Manager::SaveSceneObjects(const std::filesystem::path& path) const;
+bool Manager::SaveCurrentScene();
+bool Manager::SaveSceneObjects(const std::filesystem::path& path);
 bool Manager::LoadSceneObjects(const std::filesystem::path& path);
 ```
 
@@ -91,6 +91,19 @@ gameObjects:
 
 PrefabをInstantiateする時は、ファイル内の`id`を新しいGameObject群に対応付けて参照を解決する。ファイルの`id`を実行中のGameObjectへそのまま持ち込まない。
 
+`InstantiatePrefab(path)`は、Prefabに保存されたRoot Transformをそのまま使用する。配置を明示するオーバーロードだけが、復元後のRootへ指定したWorld Position、Euler Rotation、Scaleを適用する。子GameObjectは保存されたLocal Transformを維持する。
+
+```cpp
+GameObject* Manager::InstantiatePrefab(const std::filesystem::path& path);
+GameObject* Manager::InstantiatePrefab(
+    const std::filesystem::path& path,
+    const Vector3& position,
+    const Vector3& rotation,
+    const Vector3& scale);
+```
+
+Hierarchyの空白部分にある右クリックメニューから`Instantiate Prefab`を選ぶと、`.prefab`選択ダイアログを開いて保存値のまま生成する。GameObjectの右クリックメニューにある`Create Prefab`は、選択ObjectをRootとする子階層を保存する。Prefabから生成したObjectは生成元パスを保持し、Inspectorの`Apply to Prefab`で同じファイルを更新できる。
+
 ## Transformの親子関係
 
 親子関係の正は`Transform`である。`Manager`は親子に関係なく全GameObjectを一元所有し、Transformは親と子への非所有参照だけを保持する。
@@ -108,6 +121,8 @@ Componentは原則として`GameObject*`だけを受け取って生成する。�
 ゲーム固有の振る舞いは`Script`基底クラスを経由して`Component`を継承する。Scriptは別の生成・保存機構を持たず、通常のComponentと同じRegistryで復元する。InspectorのAdd Component一覧では、`Script`派生かどうかを基に`Components`と`Scripts`へ自動分類して表示する。
 
 設定値は必ずInspectorフィールドとして登録し、通常生成、Prefab復元、Scene復元のいずれでも生成後に同じ経路で適用する。たとえばModelRendererはモデルのパスなどをフィールドとして保存し、フィールド適用後の`OnStart()`でリソースを解決する。コンストラクタ引数は、所有GameObjectや実行基盤などFieldとして保存できない不変の依存だけに限定する。
+
+通常のメンバーは`GM_FIELD`、保存キー指定は`GM_FIELD_KEY`、Inspector表現指定は`GM_FIELD_TYPE`で登録する。getter／setterが必要な値は`GM_FIELD_ACCESSOR`を使用し、表示種別と保存有無まで指定する場合は`GM_FIELD_ACCESSOR_TYPE`を使用する。TransformはWorld／Local編集とdirty伝播を維持するため、全PRSをAccessorマクロで登録する。保存対象はHiddenのLocal Position、Local Quaternion Rotation、Local Scaleとする。
 
 登録されていないComponent型、存在しないフィールド、期待する型と異なる値はエラーログを残して読み込みを継続する。必須のComponentが復元できない場合の扱いは、Componentごとに後続で定義する。
 
@@ -174,9 +189,15 @@ properties:
 
 `.material`自体または指定Shaderを解決できない場合は、RendererがMagentaFallbackMaterialを使用する。一方、Textureプロパティのパスだけを解決できない場合はMaterialをエラー扱いにせず、そのTextureだけをFallbackTextureへ置き換えて描画を継続する。この場合はErrorLogを記録し、Material Inspectorの該当Texture欄を`Error`として表示する。
 
+SceneとPrefabが保存するのはRendererのMaterialファイルパスであり、実行中に作成した未保存MaterialのPropertyは埋め込まない。未保存Materialを持つScene／Prefabを保存すると、そのMaterialは再起動後に復元できない。永続化が必要なMaterialは、先にInspectorの`Save Material As`で`.material`として保存する。
+
 ## Inspectorとの関係
 
-InspectorはGameObject名、登録済みComponentフィールド、Materialプロパティを編集する。Scene保存はScene全体、`Apply to Prefab`は選択GameObjectを含むPrefabを対象とする。保存UIと実際の書き込み処理は、YAMLArchiveおよび各アセットの保存サービスへ委譲する。
+InspectorはGameObject情報、登録済みComponentフィールド、MaterialスロットとPropertyを表示・編集する。RendererのMaterialパスFieldはシリアライズに使用するが、通常の文字列や可変長Listとしては表示しない。実際のスロット数を固定表示し、`Select Material`から`.material`を選択する。
+
+Materialが未設定または参照エラーの場合は、`.shader`を選ぶ`Create Material`を表示する。ファイルパスを持たないMaterialは`Save Material As`、保存済みMaterialは`Save Material`で現在のパスへ上書きする。Material名はInspectorから編集でき、Texture Propertyは対応画像拡張子の選択ダイアログと`Clear`操作を提供する。すべての選択・保存先は`Assets/`配下に制限する。
+
+Scene保存はHierarchy上部の`Save Scene`、`Apply to Prefab`は選択GameObjectを含むPrefabを対象とする。保存UIと実際の書き込み処理は、`YAMLArchive`、`GameObjectArchive`、`MaterialManager`へ委譲し、OS依存ダイアログとパス検証は`FileSystem`へ集約する。
 
 Button、Curveなど基本値以外のInspectorフィールド種別は、必要になった時点でシリアライズ形式と合わせて追加する。
 

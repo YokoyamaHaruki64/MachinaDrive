@@ -12,7 +12,7 @@ WinMain
   │    │         └─ Component
   │    ├─ Renderer / RendererBase
   │    ├─ PostEffect
-  │    └─ Prefab factory
+  │    └─ Prefab archive / legacy factory
   └─ 診断システム
        ├─ Logger / LogSystem / LogFileWorker
        ├─ PerformanceMonitor
@@ -116,11 +116,12 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 オブジェクトは以下の経路で生成する。
 
 - `Manager::CreateEmpty()`: 空の GameObject を生成する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
-- `Manager::Instantiate()`: 登録済み prefab を構築する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
+- `Manager::InstantiatePrefab()`: `.prefab`からGameObject階層、Component、Field、親子参照を復元する。引数なしでは保存済みRoot Transformを維持し、PRS指定時だけRootを上書きする。
+- `Manager::Instantiate()`: 移行期間中の登録済みPrefabFactoryからGameObjectを構築する。
 
 シーンの `Init()` 中に生成された GameObject は保留リストに格納される。シーン構築の完了後、同じ生成バッチの全 GameObject を稼働リストへ移してから順番に `OnStart()` を呼ぶため、別 GameObject を検索する依存関係も開始時に解決できる。通常時に生成された GameObject は生成直後から Manager の検索対象となる。
 
-prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクトリは構築済み GameObject を `std::unique_ptr` で返す。`Manager::Init()` で名前とファクトリを登録し、`Manager::Instantiate()` が返された所有権を受け取る。新しい prefab はファクトリの実装と登録の両方を追加して利用する。
+新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::InstantiatePrefab()`である。`include/System/PrefabFactory.h`と`Manager::Instantiate()`は既存生成コードの移行用として残している。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
 ## 描画
 
@@ -150,7 +151,7 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 
 ## リソースとシェーダー
 
-実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は`Assets/Scenes`、`Assets/Prefabs`、`Assets/Materials`、`Assets/Shaders`、`Assets/Local/Models`、`Assets/Local/Textures`、`Assets/Local/Sounds`、`BuildedShader`、`config`である。
+実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。Scene、Prefab、Material、Shader、Textureなどのアセットは`Assets/`配下であれば配置でき、種類別フォルダは推奨配置およびファイルダイアログの初期位置として扱う。ローカル専用リソースは`Assets/Local/`、Shader生成物は`BuildedShader/`、設定は`config/`に置く。
 
 HLSL は Shader Model 5.0 を対象とし、`common.hlsl` は共有定義で単体コンパイルしない。各実行用シェーダーはプロジェクト設定で `.cso` へコンパイルされ、C++ 側はそのファイルをロードする。
 
