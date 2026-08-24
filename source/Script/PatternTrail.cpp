@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "Component/ComponentInc.h"
+#include "Graphics/MaterialManager.h"
 
 
 #include "Script/PatternTrail.h"
@@ -73,7 +74,10 @@ void PatternTrail::CreateTrailPattern(
         auto th = trail->AddComponent<PatternTrailHeader>();
         th->Init(m_config, normal, PatternTrailHeader::Axis::Y, angle);
 
-        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Local/Textures/White.png");
+        auto tr = trail->AddComponent<TrailRenderer>();
+        tr->SetMaterial(
+            0,
+            MaterialManager::Load("Assets/Materials/Trail.material"));
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);

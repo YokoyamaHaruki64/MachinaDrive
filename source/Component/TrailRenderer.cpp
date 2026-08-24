@@ -7,7 +7,6 @@
 
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "Graphics/TextureManager.h"
 #include "System/renderer.h"
 
 namespace
@@ -65,34 +64,21 @@ TrailRenderer::TrailRenderer(GameObject* owner)
     m_renderPhase = RenderPhase::Transparent;
 }
 
-TrailRenderer::TrailRenderer(GameObject* owner, const wchar_t* textureFile)
-    : RendererBase(owner)
-{
-    m_renderPhase = RenderPhase::Transparent;
-    if (textureFile)
-    {
-        m_texturePath = std::filesystem::path(textureFile).generic_string();
-    }
-}
-
 void TrailRenderer::OnStart()
 {
-    m_materialInstance = MaterialManager::Load(m_materialPath);
-
-    m_texture = m_texturePath.empty() ? TextureHandle{} : TextureManager::LoadTexture(m_texturePath);
+    m_material = MaterialManager::Load(m_materialPath);
     CreateVertexStreams();
 
 }
 
 void TrailRenderer::RegisterFields(FieldRegistry& fields)
 {
-    if (m_materialInstance && !m_materialInstance->GetFilePath().empty())
+    if (m_material && !m_material->GetFilePath().empty())
     {
-        m_materialPath = m_materialInstance->GetFilePath();
+        m_materialPath = m_material->GetFilePath();
     }
 
     RendererBase::RegisterFields(fields);
-    GM_FIELD(m_texturePath);
     GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
     GM_FIELD(m_offset);
     GM_FIELD(m_fixedDirection);
@@ -110,22 +96,23 @@ void TrailRenderer::RegisterFields(FieldRegistry& fields)
 Material* TrailRenderer::GetMaterial(uint32_t slot)
 {
     // Trailは単一Materialのみを持つ。
-    return slot == 0 ? m_materialInstance : nullptr;
+    return slot == 0 ? m_material : nullptr;
 }
 
 void TrailRenderer::SetMaterial(uint32_t slot, Material* material)
 {
     if (slot == 0)
     {
-        m_materialInstance = material;
+        m_material = material;
         m_materialPath = material ? material->GetFilePath() : std::string{};
+        ClearMaterialPropertyOverride();
     }
 }
 
 void TrailRenderer::Draw()
 {
     UpdateSegments();
-    if (!m_materialInstance || m_segments.size() < 2)
+    if (!m_material || m_segments.size() < 2)
         return;
 
     const size_t vertexCount = m_segments.size() * 2;
@@ -187,10 +174,9 @@ void TrailRenderer::Draw()
     }
 
     Renderer::SetWorldMatrix(XMMatrixIdentity());
-    m_materialInstance->SetTexture("_MainTex", m_texture);
-    m_materialInstance->Bind(0);
+    m_material->Bind(0, FindMaterialPropertyOverride());
 
-    for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
     {
         ID3D11Buffer* vertexBuffer = nullptr;
         switch (binding.streamType)

@@ -4,9 +4,6 @@
 
 #include "Script/ExplosionEffect.h"
 
-#include "Graphics/Material.h"
-
-
 void ExplosionEffect::OnStart()
 {
     // 初期のUV座標を設定w
@@ -15,12 +12,11 @@ void ExplosionEffect::OnStart()
     if (renderer != nullptr)
     {
         renderer->SetRenderPhase(RenderPhase::Transparent);
+
         // 最初のフレームのUV座標
-        if (Material* material = renderer->GetMaterial())
-        {
-            material->SetVector2("_UVScale", Vector2(1.0f / 4.0f, 1.0f / 4.0f));
-            material->SetVector2("_UVOffset", Vector2(0.0f, 0.0f));
-        }
+        MaterialPropertyOverride& propertyOverride = renderer->GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVScale", Vector2(1.0f / 4.0f, 1.0f / 4.0f));
+        propertyOverride.SetVector2("_UVOffset", Vector2(0.0f, 0.0f));
     }
 }
 
@@ -43,10 +39,8 @@ void ExplosionEffect::Update()
     ModelRenderer* renderer = GetComponent<ModelRenderer>();
     if (renderer != nullptr)
     {
-        if (Material* material = renderer->GetMaterial())
-        {
-            material->SetVector2("_UVScale", Vector2(width, height));
-            material->SetVector2("_UVOffset", Vector2(offsetX, offsetY));
-        }
+        MaterialPropertyOverride& propertyOverride = renderer->GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVScale", Vector2(width, height));
+        propertyOverride.SetVector2("_UVOffset", Vector2(offsetX, offsetY));
     }
 }

@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "Graphics/Material.h"
+
+#include "Graphics/MaterialPropertyOverride.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 #include "System/FileSystem.h"
@@ -106,7 +108,126 @@ void Material::CreatePropertiesBuffer()
     Renderer::GetDevice()->CreateBuffer(&bufferDesc, nullptr, &m_propertiesBuffer);
 }
 
-bool Material::SetConstantBufferValue(MaterialPropertyID id, PropertyType type, const void* value, size_t valueSize)
+bool Material::WriteConstantBufferValue(
+    std::vector<uint8_t>& propertyData,
+    const ShaderPropertyDesc& property,
+    const PropertyValue& value)
+{
+    if (property.storage != MaterialPropertyStorage::ConstantBuffer ||
+        property.offset == INVALID_PROPERTY_OFFSET ||
+        property.offset + property.size > propertyData.size())
+    {
+        return false;
+    }
+
+    if (property.type == PropertyType::Matrix3x3)
+    {
+        const Matrix3x3* matrix = std::get_if<Matrix3x3>(&value);
+        if (!matrix)
+            return false;
+
+        for (UINT column = 0; column < 3; ++column)
+        {
+            const float packedColumn[3]
+            {
+                matrix->m[0][column],
+                matrix->m[1][column],
+                matrix->m[2][column],
+            };
+            std::memcpy(propertyData.data() + property.offset + (column * 16), packedColumn, sizeof(packedColumn));
+        }
+        return true;
+    }
+
+    if (property.type == PropertyType::Matrix4x4)
+    {
+        const Matrix4x4* matrix = std::get_if<Matrix4x4>(&value);
+        if (!matrix)
+            return false;
+
+        for (UINT column = 0; column < 4; ++column)
+        {
+            const float packedColumn[4]
+            {
+                matrix->m[0][column],
+                matrix->m[1][column],
+                matrix->m[2][column],
+                matrix->m[3][column],
+            };
+            std::memcpy(propertyData.data() + property.offset + (column * 16), packedColumn, sizeof(packedColumn));
+        }
+        return true;
+    }
+
+    const void* source{};
+    size_t sourceSize{};
+    UINT packedBool{};
+    if (property.type == PropertyType::Float)
+    {
+        if (const float* typedValue = std::get_if<float>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Int)
+    {
+        if (const int* typedValue = std::get_if<int>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Bool)
+    {
+        if (const bool* typedValue = std::get_if<bool>(&value))
+        {
+            packedBool = *typedValue ? 1u : 0u;
+            source = &packedBool;
+            sourceSize = sizeof(packedBool);
+        }
+    }
+    else if (property.type == PropertyType::Vector2)
+    {
+        if (const Vector2* typedValue = std::get_if<Vector2>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Vector3)
+    {
+        if (const Vector3* typedValue = std::get_if<Vector3>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Vector4)
+    {
+        if (const Vector4* typedValue = std::get_if<Vector4>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Color)
+    {
+        if (const Color* typedValue = std::get_if<Color>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+
+    if (!source || sourceSize > property.size)
+        return false;
+
+    std::memcpy(propertyData.data() + property.offset, source, sourceSize);
+    return true;
+}
+
+bool Material::SetConstantBufferValue(MaterialPropertyID id, PropertyType type, const void* value, size_t)
 {
     // 共有FallbackはRenderer固有値で上書きせず、常にエラー表示用のマゼンタを維持する。
     if (!m_isValid)
@@ -114,54 +235,26 @@ bool Material::SetConstantBufferValue(MaterialPropertyID id, PropertyType type, 
         return true;
     }
 
-    // ID・Storage・型を検証して、Resourceや別MaterialのPropertyへの書き込みを防ぐ。
     const ShaderPropertyDesc* property = FindShaderProperty(id);
-    if (!property || property->storage != MaterialPropertyStorage::ConstantBuffer || property->type != type)
+    if (!property || property->type != type)
         return false;
 
-    if (property->offset == INVALID_PROPERTY_OFFSET || property->offset + property->size > m_propertyData.size())
-        return false;
-
-    // HLSLの行列は列ごとに16バイト境界へ配置されるため、通常のmemcpyでは格納しない。
-    if (type == PropertyType::Matrix3x3)
+    PropertyValue propertyValue;
+    switch (type)
     {
-        const Matrix3x3& matrix = *static_cast<const Matrix3x3*>(value);
-        for (UINT column = 0; column < 3; ++column)
-        {
-            const float packedColumn[3]
-            {
-                matrix.m[0][column],
-                matrix.m[1][column],
-                matrix.m[2][column],
-            };
-            std::memcpy(m_propertyData.data() + property->offset + (column * 16), packedColumn, sizeof(packedColumn));
-        }
-        return true;
+    case PropertyType::Float: propertyValue = *static_cast<const float*>(value); break;
+    case PropertyType::Int: propertyValue = *static_cast<const int*>(value); break;
+    case PropertyType::Bool: propertyValue = *static_cast<const UINT*>(value) != 0; break;
+    case PropertyType::Vector2: propertyValue = *static_cast<const Vector2*>(value); break;
+    case PropertyType::Vector3: propertyValue = *static_cast<const Vector3*>(value); break;
+    case PropertyType::Vector4: propertyValue = *static_cast<const Vector4*>(value); break;
+    case PropertyType::Matrix3x3: propertyValue = *static_cast<const Matrix3x3*>(value); break;
+    case PropertyType::Matrix4x4: propertyValue = *static_cast<const Matrix4x4*>(value); break;
+    case PropertyType::Color: propertyValue = *static_cast<const Color*>(value); break;
+    default: return false;
     }
 
-    if (type == PropertyType::Matrix4x4)
-    {
-        const Matrix4x4& matrix = *static_cast<const Matrix4x4*>(value);
-        for (UINT column = 0; column < 4; ++column)
-        {
-            const float packedColumn[4]
-            {
-                matrix.m[0][column],
-                matrix.m[1][column],
-                matrix.m[2][column],
-                matrix.m[3][column],
-            };
-            std::memcpy(m_propertyData.data() + property->offset + (column * 16), packedColumn, sizeof(packedColumn));
-        }
-        return true;
-    }
-
-    // スカラー・ベクトル・ColorはReflectionが返したoffsetへ直接格納できる。
-    if (valueSize > property->size)
-        return false;
-
-    std::memcpy(m_propertyData.data() + property->offset, value, valueSize);
-    return true;
+    return WriteConstantBufferValue(m_propertyData, *property, propertyValue);
 }
 
 bool Material::GetConstantBufferValue(MaterialPropertyID id, PropertyType type, void* outValue, size_t valueSize) const
@@ -686,7 +779,9 @@ bool Material::SetPropertyValue(const ShaderPropertyDesc& property, const Proper
     return succeeded;
 }
 
-void Material::BindProperties(const GraphicsShaderPass& shaderPass)
+void Material::BindProperties(
+    const GraphicsShaderPass& shaderPass,
+    const MaterialPropertyOverride* propertyOverride)
 {
     // Propertiesを参照しないPassでは、b3への更新・Bindは不要である。
     if (!m_propertiesBuffer)
@@ -696,9 +791,25 @@ void Material::BindProperties(const GraphicsShaderPass& shaderPass)
     if (!propertiesInfo)
         return;
 
-    // CPU側の最新バイト列をGPUバッファへ転送し、Reflectionで確定した各ステージへBindする。
+    const std::vector<uint8_t>* propertyData = &m_propertyData;
+    if (propertyOverride && !propertyOverride->Empty())
+    {
+        // Materialが保持する再利用バッファで、Particleごとの描画でもヒープ確保を発生させない。
+        m_overridePropertyData = m_propertyData;
+        for (const auto& [name, value] : propertyOverride->GetValues())
+        {
+            const ShaderPropertyDesc* property = m_shader->GetProperty(name);
+            if (property && property->storage == MaterialPropertyStorage::ConstantBuffer)
+            {
+                WriteConstantBufferValue(m_overridePropertyData, *property, value);
+            }
+        }
+        propertyData = &m_overridePropertyData;
+    }
+
+    // 共有Materialは書き換えず、この描画で解決した値だけをGPUへ転送する。
     ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
-    deviceContext->UpdateSubresource(m_propertiesBuffer.Get(), 0, nullptr, m_propertyData.data(), 0, 0);
+    deviceContext->UpdateSubresource(m_propertiesBuffer.Get(), 0, nullptr, propertyData->data(), 0, 0);
 
     ID3D11Buffer* propertiesBuffer = m_propertiesBuffer.Get();
     if (propertiesInfo->vsSlot >= 0)
@@ -708,7 +819,7 @@ void Material::BindProperties(const GraphicsShaderPass& shaderPass)
         deviceContext->PSSetConstantBuffers(propertiesInfo->psSlot, 1, &propertiesBuffer);
 }
 
-void Material::Bind(size_t passIndex)
+void Material::Bind(size_t passIndex, const MaterialPropertyOverride* propertyOverride)
 {
     const GraphicsShaderPass& shaderPass = GetShaderPass(passIndex);
     ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
@@ -717,7 +828,7 @@ void Material::Bind(size_t passIndex)
     shaderPass.Bind();
 
     // Propertiesの定数値を先にb3へ反映する。
-    BindProperties(shaderPass);
+    BindProperties(shaderPass, propertyOverride);
 
     // Resource PropertyはPassごとのReflection結果に従って各シェーダーステージへ設定する。
     for (const ShaderTextureInfo& binding : shaderPass.GetTextureInfo())
@@ -726,7 +837,17 @@ void Material::Bind(size_t passIndex)
         if (!property || property->storage != MaterialPropertyStorage::Resource)
             continue;
 
-        const TextureHandle texture = m_resourceValues[property->id];
+        TextureHandle texture = m_resourceValues[property->id];
+        if (propertyOverride)
+        {
+            if (const PropertyValue* value = propertyOverride->Find(property->name))
+            {
+                if (const TextureHandle* overriddenTexture = std::get_if<TextureHandle>(value))
+                {
+                    texture = *overriddenTexture;
+                }
+            }
+        }
         ID3D11ShaderResourceView* resource = TextureManager::GetShaderResourceView(texture);
 
         if (binding.vsSlot >= 0)
@@ -737,13 +858,13 @@ void Material::Bind(size_t passIndex)
     }
 }
 
-bool Material::Bind(std::string_view passTag)
+bool Material::Bind(std::string_view passTag, const MaterialPropertyOverride* propertyOverride)
 {
     const std::optional<size_t> passIndex = m_shader->GetShaderPassIndex(passTag);
     if (!passIndex)
         return false;
 
-    Bind(*passIndex);
+    Bind(*passIndex, propertyOverride);
     return true;
 }
 

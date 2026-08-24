@@ -13,25 +13,12 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
 
-    Material* m_materialInstance{};
-    TextureHandle m_texture{};
-    Color m_baseColor{ Color::White() };
-    int m_textureWidth = 0;
-    int m_textureHeight = 0;
-    std::string m_texturePath;
-    std::string m_materialPath{ "Assets/Materials/UnlitTransparent.material" };
-
-    float m_uvOffsetX = 0.0f;
-    float m_uvOffsetY = 0.0f;
-    float m_uvWidth = 1.0f;
-    float m_uvHeight = 1.0f;
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Sprite.material" };
 
 public:
     SpriteRenderer() = delete;
     explicit SpriteRenderer(GameObject* owner);
-    SpriteRenderer(
-        GameObject* owner,
-        const wchar_t* textureFile);
 
     virtual ~SpriteRenderer() {}
     void OnStart() override;
@@ -41,27 +28,25 @@ public:
 
     void SetUVRect(float offsetX, float offsetY, float width, float height)
     {
-        m_uvOffsetX = offsetX;
-        m_uvOffsetY = offsetY;
-        m_uvWidth = width;
-        m_uvHeight = height;
+        MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVOffset", Vector2(offsetX, offsetY));
+        propertyOverride.SetVector2("_UVScale", Vector2(width, height));
     }
 
     void SetUVOffset(float offsetX, float offsetY)
     {
-        m_uvOffsetX = offsetX;
-        m_uvOffsetY = offsetY;
+        GetMaterialPropertyOverride().SetVector2("_UVOffset", Vector2(offsetX, offsetY));
     }
 
     void SetUVSize(float width, float height)
     {
-        m_uvWidth = width;
-        m_uvHeight = height;
+        GetMaterialPropertyOverride().SetVector2("_UVScale", Vector2(width, height));
     }
 
-    int GetTextureWidth() const { return m_textureWidth; }
-    int GetTextureHeight() const { return m_textureHeight; }
-    void SetColor(const Color& color) { m_baseColor = color; }
+    void SetColor(const Color& color)
+    {
+        GetMaterialPropertyOverride().SetColor("_BaseColor", color);
+    }
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;

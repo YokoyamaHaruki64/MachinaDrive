@@ -7,7 +7,6 @@
 
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "Graphics/TextureManager.h"
 #include "System/renderer.h"
 
 namespace
@@ -38,36 +37,9 @@ SpriteRenderer::SpriteRenderer(
     m_renderPhase = RenderPhase::Overlay;
 }
 
-SpriteRenderer::SpriteRenderer(
-    GameObject* owner,
-    const wchar_t* textureFile)
-    : RendererBase(owner)
-{
-    m_renderPhase = RenderPhase::Overlay;
-    if (textureFile)
-    {
-        m_texturePath = std::filesystem::path(textureFile).generic_string();
-    }
-}
-
 void SpriteRenderer::OnStart()
 {
-    m_materialInstance = MaterialManager::Load(m_materialPath);
-
-    m_texture = m_texturePath.empty() ? TextureHandle{} : TextureManager::LoadTexture(m_texturePath);
-    UINT width{};
-    UINT height{};
-    if (TextureManager::GetTextureSize(m_texture, width, height))
-    {
-        m_textureWidth = static_cast<int>(width);
-        m_textureHeight = static_cast<int>(height);
-    }
-    else
-    {
-        // 無効なTextureHandleは白のフォールバックへ解決し、矩形サイズは1x1とする。
-        m_textureWidth = 1;
-        m_textureHeight = 1;
-    }
+    m_material = MaterialManager::Load(m_materialPath);
 
     const std::vector<PositionVertex> positions
     {
@@ -89,24 +61,18 @@ void SpriteRenderer::OnStart()
 
 void SpriteRenderer::RegisterFields(FieldRegistry& fields)
 {
-    if (m_materialInstance && !m_materialInstance->GetFilePath().empty())
+    if (m_material && !m_material->GetFilePath().empty())
     {
-        m_materialPath = m_materialInstance->GetFilePath();
+        m_materialPath = m_material->GetFilePath();
     }
 
     RendererBase::RegisterFields(fields);
-    GM_FIELD(m_texturePath);
     GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
-    GM_FIELD(m_baseColor);
-    GM_FIELD(m_uvOffsetX);
-    GM_FIELD(m_uvOffsetY);
-    GM_FIELD(m_uvWidth);
-    GM_FIELD(m_uvHeight);
 }
 
 void SpriteRenderer::Draw()
 {
-    if (!m_materialInstance)
+    if (!m_material)
         return;
 
     // Overlayでは一時的に2D射影を使い、他の3D Rendererへ影響を残さないよう復元する。
@@ -115,15 +81,11 @@ void SpriteRenderer::Draw()
     Renderer::SetWorldViewProjection2D();
     Renderer::SetWorldMatrix(CalcWorldMatrix());
 
-    m_materialInstance->SetColor("_BaseColor", m_baseColor);
-    m_materialInstance->SetVector2("_UVScale", Vector2(m_uvWidth, m_uvHeight));
-    m_materialInstance->SetVector2("_UVOffset", Vector2(m_uvOffsetX, m_uvOffsetY));
-    m_materialInstance->SetTexture("_MainTex", m_texture);
-    m_materialInstance->Bind(0);
+    m_material->Bind(0, FindMaterialPropertyOverride());
 
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
     bool hasAllRequiredStreams = true;
-    for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
     {
         ID3D11Buffer* vertexBuffer = nullptr;
         switch (binding.streamType)
@@ -170,14 +132,15 @@ void SpriteRenderer::Draw()
 Material* SpriteRenderer::GetMaterial(uint32_t slot)
 {
     // Spriteは単一Materialのみを持つ。
-    return slot == 0 ? m_materialInstance : nullptr;
+    return slot == 0 ? m_material : nullptr;
 }
 
 void SpriteRenderer::SetMaterial(uint32_t slot, Material* material)
 {
     if (slot == 0)
     {
-        m_materialInstance = material;
+        m_material = material;
         m_materialPath = material ? material->GetFilePath() : std::string{};
+        ClearMaterialPropertyOverride();
     }
 }

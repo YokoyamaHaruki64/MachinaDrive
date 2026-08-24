@@ -1,0 +1,8 @@
+version: 1
+name: ResultBG
+shader: Assets/Shaders/UnlitTransparent.shader
+properties:
+  _BaseColor: [1, 1, 1, 1]
+  _UVScale: [1, 1]
+  _UVOffset: [0, 0]
+  _MainTex: Assets/Local/Textures/ResultBG.png

@@ -43,7 +43,7 @@ namespace
             return;
 
         Renderer::SetWorldMatrix(worldMatrix);
-        material->Bind(0);
+        material->Bind(0, renderer.FindMaterialPropertyOverride(mesh.materialSlot));
         const GraphicsShaderPass& shaderPass = material->GetShaderPass(0);
 
         // Passが要求するStreamだけを、その入力スロットへ対応付ける。
@@ -161,6 +161,7 @@ void ModelRenderer::RegisterFields(FieldRegistry& fields)
 void ModelRenderer::SetModel(ModelAsset* modelAsset)
 {
     m_model = modelAsset;
+    m_materialPropertyOverrides.clear();
     if (const std::optional<std::string> sourcePath = ModelManager::GetSourcePath(modelAsset))
     {
         m_modelPath = *sourcePath;
@@ -200,6 +201,7 @@ void ModelRenderer::SetMaterial(uint32_t materialSlot, Material* material)
     // nullptrを設定すると、ファイルに埋め込まれた既定Materialへ戻す。
     m_materialOverrides[materialSlot] = material;
     m_materialPaths[materialSlot] = material ? material->GetFilePath() : std::string{};
+    ClearMaterialPropertyOverride(materialSlot);
 }
 
 Material* ModelRenderer::GetMaterial(uint32_t materialSlot)

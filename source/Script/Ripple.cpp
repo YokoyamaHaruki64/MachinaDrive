@@ -30,8 +30,7 @@ void Ripple::OnStart()
         }
     }
 
-    if (Material* material = m_renderer->GetMaterial())
-        material->SetColor("_BaseColor", c);
+    m_renderer->GetMaterialPropertyOverride().SetColor("_BaseColor", c);
 
     transform()->SetScale(Vector3(baseScale, baseScale, baseScale));
 }
@@ -42,8 +41,7 @@ void Ripple::Update()
     m_elapsedTime += Time::GetDeltaTime();
     float t = m_elapsedTime / m_lifeTime;
     Color c = m_colorCurve.Evaluate(t); // カラーを更新
-    if (Material* material = m_renderer->GetMaterial())
-        material->SetColor("_BaseColor", c);
+    m_renderer->GetMaterialPropertyOverride().SetColor("_BaseColor", c);
     float s = baseScale * (1.5f + t); // スケールを増加させる
     transform()->SetScale(Vector3(s, s, s));
 

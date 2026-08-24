@@ -5,6 +5,7 @@
 #include "System/manager.h"
 #include "System/renderer.h"
 #include "Graphics/GraphicInc.h"
+#include "Graphics/MaterialPropertyOverride.h"
 
 
 class Camera;
@@ -34,6 +35,7 @@ protected:
     RenderPhase m_renderPhase = RenderPhase::Opaque;
     int m_drawLayer = 0; // 描画順序
     BillboardType m_billboardType = BillboardType::None; // ビルボードの種類
+    std::vector<MaterialPropertyOverride> m_materialPropertyOverrides;
 
     const XMMATRIX CalcWorldMatrix();
     void RegisterFields(FieldRegistry& fields) override;
@@ -51,6 +53,29 @@ public:
     virtual void SetMaterial(uint32_t slot, Material* material) = 0;
     virtual uint32_t GetMaterialSlotCount() const { return 1; }
     virtual uint32_t GetMeshID() const { return 0; }
+    MaterialPropertyOverride& GetMaterialPropertyOverride(uint32_t slot = 0)
+    {
+        if (m_materialPropertyOverrides.size() <= slot)
+        {
+            m_materialPropertyOverrides.resize(static_cast<size_t>(slot) + 1);
+        }
+        return m_materialPropertyOverrides[slot];
+    }
+    const MaterialPropertyOverride* FindMaterialPropertyOverride(uint32_t slot = 0) const
+    {
+        if (slot >= m_materialPropertyOverrides.size() || m_materialPropertyOverrides[slot].Empty())
+        {
+            return nullptr;
+        }
+        return &m_materialPropertyOverrides[slot];
+    }
+    void ClearMaterialPropertyOverride(uint32_t slot = 0)
+    {
+        if (slot < m_materialPropertyOverrides.size())
+        {
+            m_materialPropertyOverrides[slot].Clear();
+        }
+    }
     bool IsOwnerStarted() const { return m_owner && m_owner->IsStarted(); }
     void Submit();
 

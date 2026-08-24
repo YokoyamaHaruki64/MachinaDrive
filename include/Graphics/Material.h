@@ -9,6 +9,7 @@
 
 class GraphicsShader;
 class GraphicsShaderPass;
+class MaterialPropertyOverride;
 
 class Material
 {
@@ -18,6 +19,7 @@ class Material
     std::string m_filePath{};
     bool m_isValid = true;
     std::vector<uint8_t> m_propertyData{};
+    std::vector<uint8_t> m_overridePropertyData{};
     std::vector<TextureHandle> m_resourceValues{};
     std::vector<std::string> m_resourcePaths{};
     std::vector<bool> m_resourceErrors{};
@@ -30,7 +32,13 @@ class Material
     void SetDefaultValue(const ShaderPropertyDesc& property);
     void ShowPropertyError(const char* operation, MaterialPropertyID id) const;
     void CreatePropertiesBuffer();
-    void BindProperties(const GraphicsShaderPass& shaderPass);
+    static bool WriteConstantBufferValue(
+        std::vector<uint8_t>& propertyData,
+        const ShaderPropertyDesc& property,
+        const PropertyValue& value);
+    void BindProperties(
+        const GraphicsShaderPass& shaderPass,
+        const MaterialPropertyOverride* propertyOverride);
     void DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id);
 
     friend class MaterialManager;
@@ -99,6 +107,6 @@ public:
 
     void DrawInspectorImGui();
 
-    void Bind(size_t passIndex);
-    bool Bind(std::string_view passTag);
+    void Bind(size_t passIndex, const MaterialPropertyOverride* propertyOverride = nullptr);
+    bool Bind(std::string_view passTag, const MaterialPropertyOverride* propertyOverride = nullptr);
 };

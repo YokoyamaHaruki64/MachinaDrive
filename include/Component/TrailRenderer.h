@@ -37,10 +37,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
 
-    Material* m_materialInstance{};
-    TextureHandle m_texture{};
-    std::string m_texturePath;
-    std::string m_materialPath{ "Assets/Materials/UnlitAdditive.material" };
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Trail.material" };
 
     std::deque<TrailSegment> m_segments;
     Curve<float> m_widthCurve = Curve<float>(1.0f, 0.0f);
@@ -59,7 +57,6 @@ private:
 public:
     TrailRenderer() = delete;
     explicit TrailRenderer(GameObject* owner);
-    explicit TrailRenderer(GameObject* owner, const wchar_t* textureFile);
     virtual ~TrailRenderer() {}
     void OnStart() override;
     void Draw() override;

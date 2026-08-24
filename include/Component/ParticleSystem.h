@@ -187,20 +187,14 @@ class ParticleRenderer : public RendererBase
 private:
     ParticleEmitter* m_emitter{};
     const Mesh* m_mesh{};
-    Material* m_materialInstance{};
-    TextureHandle m_texture{};
-    std::string m_texturePath;
-    std::string m_materialPath{ "Assets/Materials/UnlitAdditive.material" };
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Particle.material" };
 
-    void BindMesh(const XMMATRIX& worldMatrix, const Color& color) const;
+    void BindMesh(const XMMATRIX& worldMatrix, const Color& color);
 
 public:
     ParticleRenderer() = delete;
     explicit ParticleRenderer(GameObject* owner);
-    ParticleRenderer(
-        GameObject* owner,
-        ParticleEmitter* emitter,
-        const wchar_t* textureFile);
 
     void OnStart() override;
     void Draw() override;

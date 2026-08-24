@@ -349,6 +349,7 @@
     <ClInclude Include="include\Component\Transform.h" />
     <ClInclude Include="include\Graphics\GraphicInc.h" />
     <ClInclude Include="include\Graphics\Material.h" />
+    <ClInclude Include="include\Graphics\MaterialPropertyOverride.h" />
     <ClInclude Include="include\Graphics\MaterialManager.h" />
     <ClInclude Include="include\Graphics\ModelAsset.h" />
     <ClInclude Include="include\Graphics\ModelLoader.h" />
