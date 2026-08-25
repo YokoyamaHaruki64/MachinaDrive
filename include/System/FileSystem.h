@@ -1,8 +1,10 @@
 ﻿#pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -37,5 +39,19 @@ public:
         std::string_view defaultFileName = {});
 
 private:
-    class Implementation;
+    static constexpr size_t MaxDialogPathLength = 32768;
+
+    // 拡張子の表記ゆれを吸収し、ダイアログと探索の判定を共通化する。
+    static std::wstring NormalizeExtension(std::string_view extension);
+    static std::vector<std::wstring> NormalizeExtensions(std::span<const std::string_view> extensions);
+    static std::wstring CreateFilter(std::span<const std::wstring> extensions);
+    static bool HasExtension(const std::filesystem::path& path, std::span<const std::wstring> extensions);
+    static bool HasExtension(const std::filesystem::path& path, const std::wstring& extension);
+
+    // Win32ダイアログの結果をプロジェクト共通のpath形式へ正規化して返す。
+    static std::optional<std::filesystem::path> ShowFileDialog(
+        bool saveFile,
+        const std::filesystem::path& initialDirectory,
+        std::span<const std::string_view> extensions,
+        std::string_view defaultFileName);
 };

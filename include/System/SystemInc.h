@@ -11,6 +11,7 @@
 #include "System/Logger.h"
 #include "System/main.h"
 #include "System/manager.h"
-#include "System/YAMLArchive.h"
+#include "System/YAMLDocumentIO.h"
+#include "System/YAMLReflection.h"
 
 #include "Component/Transform.h"

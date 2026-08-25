@@ -3,7 +3,7 @@
 #include "System/manager.h"
 
 #include "System/DebugWindow.h"
-#include "System/GameObjectArchive.h"
+#include "System/GameObjectYamlSerializer.h"
 #include "System/input.h"
 #include "System/Logger.h"
 #include "System/PerformanceMonitor.h"
@@ -86,13 +86,17 @@ bool Manager::SaveSceneObjects(const std::filesystem::path& path)
             gameObjects.push_back(gameObject.get());
         }
     }
-    return GameObjectArchive::Save(path, path.stem().string(), gameObjects, true);
+    return GameObjectYamlSerializer::SaveToFile(
+        path,
+        path.stem().string(),
+        gameObjects,
+        PrefabReferenceSaveMode::Include);
 }
 
 bool Manager::LoadSceneObjects(const std::filesystem::path& path)
 {
-    LoadedGameObjectArchive loaded;
-    if (!GameObjectArchive::Load(path, loaded, false))
+    GameObjectLoadResult loaded;
+    if (!GameObjectYamlSerializer::LoadFromFile(path, loaded, PrefabSourcePathMode::UseSerializedPath))
     {
         return false;
     }
@@ -128,7 +132,11 @@ bool Manager::SavePrefab(GameObject& root, const std::filesystem::path& path)
         }
     }
 
-    if (!GameObjectArchive::Save(path, path.stem().string(), gameObjects, false))
+    if (!GameObjectYamlSerializer::SaveToFile(
+        path,
+        path.stem().string(),
+        gameObjects,
+        PrefabReferenceSaveMode::Exclude))
     {
         return false;
     }
@@ -182,8 +190,8 @@ GameObject* Manager::InstantiatePrefabInternal(
     const Vector3* rotation,
     const Vector3* scale)
 {
-    LoadedGameObjectArchive loaded;
-    if (!GameObjectArchive::Load(path, loaded, true))
+    GameObjectLoadResult loaded;
+    if (!GameObjectYamlSerializer::LoadFromFile(path, loaded, PrefabSourcePathMode::UseSourceFilePath))
     {
         return nullptr;
     }

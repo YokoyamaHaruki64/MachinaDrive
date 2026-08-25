@@ -28,8 +28,8 @@ public:
 	virtual void Draw() {};
 
     void DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
-    bool EncodeFields(YAMLValue& output, const YAMLArchiveContext& context = {});
-    bool DecodeFields(const YAMLValue& input, const YAMLArchiveContext& context = {});
+    bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {});
+    bool FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context = {});
 
     Transform* transform() const;
     GameObject* GetOwner() const { return m_owner; }

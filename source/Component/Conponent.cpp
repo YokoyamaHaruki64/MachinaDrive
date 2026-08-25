@@ -17,16 +17,16 @@ void Component::DrawInspectorImGui(InspectorFieldSpace inspectorSpace)
     fields.DrawImGui(inspectorSpace);
 }
 
-bool Component::EncodeFields(YAMLValue& output, const YAMLArchiveContext& context)
+bool Component::ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context)
 {
     FieldRegistry fields;
     RegisterFields(fields);
-    return YAMLArchive::EncodeFields(fields, output, context);
+    return fields.ToYAMLValue(output, context);
 }
 
-bool Component::DecodeFields(const YAMLValue& input, const YAMLArchiveContext& context)
+bool Component::FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context)
 {
     FieldRegistry fields;
     RegisterFields(fields);
-    return YAMLArchive::DecodeFields(input, fields, context);
+    return fields.FromYAMLValue(input, context);
 }

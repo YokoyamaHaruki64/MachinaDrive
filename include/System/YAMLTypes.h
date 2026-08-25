@@ -10,7 +10,8 @@
 
 class GameObject;
 
-struct YAMLArchiveContext
+// GameObject参照など、YAMLValue変換時だけ必要な外部解決処理を保持する。
+struct YAMLValueConversionContext
 {
     using ObjectId = uint64_t;
 
@@ -26,14 +27,15 @@ enum class YAMLMessageLevel
     Error,
 };
 
-struct YAMLCodecResult
+// C++値とYAMLValueの変換だけに対する結果。ファイルI/Oの成否は含めない。
+struct YAMLValueConversionResult
 {
     bool success = true;
     YAMLMessageLevel messageLevel = YAMLMessageLevel::None;
     std::string message;
 };
 
-// YAMLライブラリに依存しない中間表現。Codecとファイル形式の実装を分離する。
+// YAMLライブラリに依存しない中間表現。型変換処理とファイル形式を分離する
 struct YAMLValue
 {
     enum class CollectionStyle

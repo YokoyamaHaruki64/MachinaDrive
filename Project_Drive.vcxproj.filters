@@ -120,7 +120,7 @@
     <ClCompile Include="source\System\FileSystem.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
-    <ClCompile Include="source\System\YAMLArchive.cpp">
+    <ClCompile Include="source\System\YAMLDocumentIO.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="source\System\PerformanceMonitor.cpp">
@@ -138,7 +138,7 @@
     <ClCompile Include="source\System\GameObject.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
-    <ClCompile Include="source\System\GameObjectArchive.cpp">
+    <ClCompile Include="source\System\GameObjectYamlSerializer.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="source\System\GameObjectReference.cpp">
@@ -326,7 +326,7 @@
     <ClInclude Include="include\System\GameObject.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\GameObjectArchive.h">
+    <ClInclude Include="include\System\GameObjectYamlSerializer.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\System\GameObjectReference.h">
@@ -380,10 +380,13 @@
     <ClInclude Include="include\System\FileSystem.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\YAMLCodec.h">
+    <ClInclude Include="include\System\YAMLValueConverter.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\YAMLArchive.h">
+    <ClInclude Include="include\System\YAMLReflection.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\YAMLDocumentIO.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\System\YAMLTypes.h">

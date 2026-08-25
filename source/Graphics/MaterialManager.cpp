@@ -6,8 +6,8 @@
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "System/Logger.h"
-#include "System/YAMLArchive.h"
-#include "System/YAMLCodec.h"
+#include "System/YAMLDocumentIO.h"
+#include "System/YAMLValueConverter.h"
 
 std::unordered_map<MaterialID, std::unique_ptr<Material>> MaterialManager::m_materials;
 std::unordered_map<std::string, Material*> MaterialManager::m_materialsByName;
@@ -15,130 +15,129 @@ std::unordered_map<std::string, Material*> MaterialManager::m_materialsByPath;
 std::unordered_map<ShaderID, Material*> MaterialManager::m_defaultMaterials;
 Material* MaterialManager::m_fallbackMaterial{};
 
-class MaterialManager::Implementation final
+Material* MaterialManager::UseFallback(const std::string& path)
 {
-public:
-    static constexpr int VERSION = 1;
-
-    static Material* UseFallback(const std::string& path)
+    // 同じ失敗パスを毎回解析しないよう、Fallbackもパス単位でキャッシュする。
+    if (!path.empty() && m_fallbackMaterial)
     {
-        if (!path.empty() && MaterialManager::m_fallbackMaterial)
-        {
-            MaterialManager::m_materialsByPath.try_emplace(path, MaterialManager::m_fallbackMaterial);
-        }
-        return MaterialManager::m_fallbackMaterial;
+        m_materialsByPath.try_emplace(path, m_fallbackMaterial);
     }
+    return m_fallbackMaterial;
+}
 
-    template <typename T>
-    static bool ReadValue(const YAMLValue& parent, std::string_view key, T& value)
-    {
-        const YAMLValue* node = parent.Find(key);
-        return node && YAMLCodec<T>::Decode(*node, value, {}).success;
-    }
+template <typename T>
+bool MaterialManager::ReadYAMLValue(const YAMLValue& parent, std::string_view key, T& value)
+{
+    // Material文書のMap要素を取得し、型CodecでC++値へ変換する。
+    const YAMLValue* node = parent.Find(key);
+    return node && YAMLValueConverter<T>::FromYAMLValue(*node, value, {}).success;
+}
 
-    static YAMLCodecResult EncodeProperty(
-        const Material& material,
-        const ShaderPropertyDesc& property,
-        YAMLValue& output)
+YAMLValueConversionResult MaterialManager::PropertyToYAMLValue(
+    const Material& material,
+    const ShaderPropertyDesc& property,
+    YAMLValue& output)
+{
+    if (property.type == PropertyType::Texture2D)
     {
-        if (property.type == PropertyType::Texture2D)
+        // GPUハンドルではなく、再ロード可能なアセットパスだけを永続化する。
+        const MaterialPropertyID id = material.GetPropertyID(property.id);
+        const std::string& path = material.GetTexturePath(id);
+        if (!path.empty())
         {
-            const MaterialPropertyID id = material.GetPropertyID(property.id);
-            const std::string& path = material.GetTexturePath(id);
-            if (!path.empty())
-            {
-                return YAMLCodec<std::string>::Encode(path, output, {});
-            }
-
-            output = YAMLValue::Null();
-            if (material.GetTexture(id).IsValid())
-            {
-                return {
-                    true,
-                    YAMLMessageLevel::Warning,
-                    "ファイルパスを持たないTextureをNoneとして保存します",
-                };
-            }
-            return {};
+            return YAMLValueConverter<std::string>::ToYAMLValue(path, output, {});
         }
 
-        PropertyValue value;
-        if (!material.GetPropertyValue(property, value))
+        output = YAMLValue::Null();
+        if (material.GetTexture(id).IsValid())
         {
-            return { false };
+            return {
+                true,
+                YAMLMessageLevel::Warning,
+                "ファイルパスを持たないTextureをNoneとして保存します",
+            };
         }
-
-        YAMLCodecResult result{ false };
-        std::visit([&output, &result](const auto& typedValue)
-        {
-            using T = std::decay_t<decltype(typedValue)>;
-            if constexpr (!std::is_same_v<T, TextureHandle>)
-            {
-                result = YAMLCodec<T>::Encode(typedValue, output, {});
-            }
-        }, value);
-        return result;
+        return {};
     }
 
-    static bool DecodeProperty(
-        Material& material,
-        const ShaderPropertyDesc& property,
-        const YAMLValue& input)
+    PropertyValue value;
+    if (!material.GetPropertyValue(property, value))
     {
-        if (property.type == PropertyType::Texture2D)
+        return { false };
+    }
+
+    YAMLValueConversionResult result{ false };
+    std::visit([&output, &result](const auto& typedValue)
+    {
+        using T = std::decay_t<decltype(typedValue)>;
+        if constexpr (!std::is_same_v<T, TextureHandle>)
         {
-            if (input.type == YAMLValue::Type::Null)
-            {
-                material.SetTexturePath(material.GetPropertyID(property.id), {});
-                return true;
-            }
+            result = YAMLValueConverter<T>::ToYAMLValue(typedValue, output, {});
+        }
+    }, value);
+    return result;
+}
 
-            std::string path;
-            if (!YAMLCodec<std::string>::Decode(input, path, {}).success)
-            {
-                return false;
-            }
-
-            // Texture単体の参照切れはMaterial全体を失敗させず、内部でFallbackTextureへ解決する。
-            material.SetTexturePath(material.GetPropertyID(property.id), std::move(path));
+bool MaterialManager::PropertyFromYAMLValue(
+    Material& material,
+    const ShaderPropertyDesc& property,
+    const YAMLValue& input)
+{
+    if (property.type == PropertyType::Texture2D)
+    {
+        if (input.type == YAMLValue::Type::Null)
+        {
+            material.SetTexturePath(material.GetPropertyID(property.id), {});
             return true;
         }
 
-        PropertyValue value = property.defaultValue;
-        YAMLCodecResult result{ false };
-        std::visit([&input, &result](auto& typedValue)
-        {
-            using T = std::decay_t<decltype(typedValue)>;
-            if constexpr (!std::is_same_v<T, TextureHandle>)
-            {
-                result = YAMLCodec<T>::Decode(input, typedValue, {});
-            }
-        }, value);
-        return result.success && material.SetPropertyValue(property, value);
-    }
-
-    static bool ValidateDocument(
-        const YAMLValue& document,
-        std::string& name,
-        std::string& shaderPath,
-        const YAMLValue*& properties)
-    {
-        int version{};
-        if (document.type != YAMLValue::Type::Map ||
-            !ReadValue(document, "version", version) ||
-            version != VERSION ||
-            !ReadValue(document, "name", name) ||
-            name.empty() ||
-            !ReadValue(document, "shader", shaderPath) ||
-            shaderPath.empty())
+        std::string path;
+        if (!YAMLValueConverter<std::string>::FromYAMLValue(input, path, {}).success)
         {
             return false;
         }
 
-        properties = document.Find("properties");
-        return properties && properties->type == YAMLValue::Type::Map;
+        // Texture単体の参照切れはMaterial全体を失敗させず、内部でFallbackTextureへ解決する。
+        material.SetTexturePath(material.GetPropertyID(property.id), std::move(path));
+        return true;
     }
-};
+
+    // Shader宣言の既定値を土台にして、YAMLの値だけを型安全に上書きする。
+    PropertyValue value = property.defaultValue;
+    YAMLValueConversionResult result{ false };
+    std::visit([&input, &result](auto& typedValue)
+    {
+        using T = std::decay_t<decltype(typedValue)>;
+        if constexpr (!std::is_same_v<T, TextureHandle>)
+        {
+            result = YAMLValueConverter<T>::FromYAMLValue(input, typedValue, {});
+        }
+    }, value);
+    return result.success && material.SetPropertyValue(property, value);
+}
+
+bool MaterialManager::ValidateDocument(
+    const YAMLValue& document,
+    std::string& name,
+    std::string& shaderPath,
+    const YAMLValue*& properties)
+{
+    // Material生成前に、復元に必須のヘッダーとProperty Mapだけを検証する。
+    int version{};
+    if (document.type != YAMLValue::Type::Map ||
+        !ReadYAMLValue(document, "version", version) ||
+        version != MaterialFileVersion ||
+        !ReadYAMLValue(document, "name", name) ||
+        name.empty() ||
+        !ReadYAMLValue(document, "shader", shaderPath) ||
+        shaderPath.empty())
+    {
+        return false;
+    }
+
+    properties = document.Find("properties");
+    return properties && properties->type == YAMLValue::Type::Map;
+}
 
 std::string MaterialManager::NormalizePath(const std::filesystem::path& path)
 {
@@ -225,11 +224,12 @@ bool MaterialManager::Rename(Material& material, std::string_view name)
 
 Material* MaterialManager::Load(const std::filesystem::path& path)
 {
+    // パス単位で共有し、同じMaterialファイルを複数回生成しない。
     const std::string normalizedPath = NormalizePath(path);
     if (normalizedPath.empty())
     {
         Logger::Error("Materialパスが空です。");
-        return Implementation::UseFallback(normalizedPath);
+        return UseFallback(normalizedPath);
     }
 
     const auto cached = m_materialsByPath.find(normalizedPath);
@@ -239,37 +239,37 @@ Material* MaterialManager::Load(const std::filesystem::path& path)
     }
 
     YAMLValue document;
-    if (!YAMLArchive::LoadDocument(normalizedPath, document))
+    if (!YAMLDocumentIO::Load(normalizedPath, document))
     {
-        return Implementation::UseFallback(normalizedPath);
+        return UseFallback(normalizedPath);
     }
 
     std::string name;
     std::string shaderPath;
     const YAMLValue* properties{};
-    if (!Implementation::ValidateDocument(document, name, shaderPath, properties))
+    if (!ValidateDocument(document, name, shaderPath, properties))
     {
         Logger::Error("Materialファイルの形式が不正です。\nMaterial: " + normalizedPath);
-        return Implementation::UseFallback(normalizedPath);
+        return UseFallback(normalizedPath);
     }
 
     GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderPath);
     if (!shader)
     {
         Logger::Error("MaterialのShaderを解決できません。\nMaterial: " + normalizedPath + "\nShader: " + shaderPath);
-        return Implementation::UseFallback(normalizedPath);
+        return UseFallback(normalizedPath);
     }
 
     Material* material = Create(name, *shader);
     if (!material)
     {
-        return Implementation::UseFallback(normalizedPath);
+        return UseFallback(normalizedPath);
     }
 
     for (const ShaderPropertyDesc& property : shader->GetProperties())
     {
         const YAMLValue* value = properties->Find(property.name);
-        if (value && !Implementation::DecodeProperty(*material, property, *value))
+        if (value && !PropertyFromYAMLValue(*material, property, *value))
         {
             Logger::Error("Material Propertyの読み込みに失敗しました。\nMaterial: " + normalizedPath +
                 "\nProperty: " + property.name);
@@ -292,6 +292,7 @@ Material* MaterialManager::Load(const std::filesystem::path& path)
 
 bool MaterialManager::Save(Material& material, const std::filesystem::path& path)
 {
+    // 保存成功後にだけパス検索Mapを更新し、失敗時は既存参照を維持する。
     const std::string normalizedPath = NormalizePath(path);
     if (normalizedPath.empty())
     {
@@ -315,7 +316,7 @@ bool MaterialManager::Save(Material& material, const std::filesystem::path& path
 
     YAMLValue document = YAMLValue::Map();
     YAMLValue version;
-    YAMLCodec<int>::Encode(Implementation::VERSION, version, {});
+    YAMLValueConverter<int>::ToYAMLValue(MaterialFileVersion, version, {});
     document.Add("version", std::move(version));
     document.Add("name", YAMLValue::Scalar(material.GetName(), true));
     document.Add("shader", YAMLValue::Scalar(material.GetShader().GetFilePath(), true));
@@ -324,7 +325,7 @@ bool MaterialManager::Save(Material& material, const std::filesystem::path& path
     for (const ShaderPropertyDesc& property : material.GetShader().GetProperties())
     {
         YAMLValue value;
-        const YAMLCodecResult result = Implementation::EncodeProperty(material, property, value);
+        const YAMLValueConversionResult result = PropertyToYAMLValue(material, property, value);
         if (!result.message.empty())
         {
             Logger::Warning(result.message + ": " + property.name);
@@ -339,7 +340,7 @@ bool MaterialManager::Save(Material& material, const std::filesystem::path& path
     }
     document.Add("properties", std::move(properties));
 
-    if (!YAMLArchive::SaveDocument(normalizedPath, document))
+    if (!YAMLDocumentIO::Save(normalizedPath, document))
     {
         return false;
     }
