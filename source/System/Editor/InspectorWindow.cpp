@@ -210,6 +210,11 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
     }
 
     ImGui::Text("Name: %s", selectedGameObject->GetName().c_str());
+    bool active = selectedGameObject->IsActive();
+    if (ImGui::Checkbox("Active", &active))
+    {
+        selectedGameObject->SetActive(active);
+    }
     ImGui::Text("Started: %s", selectedGameObject->IsStarted() ? "Yes" : "No");
     ImGui::Text("Destroy Requested: %s", selectedGameObject->IsDestroyed() ? "Yes" : "No");
     ImGui::Separator();
@@ -232,7 +237,15 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
         ImGui::PushID(component);
         const ComponentRegistration* registration = ComponentRegistry::Find(typeid(*component));
         const char* componentName = registration ? registration->displayName.c_str() : typeid(*component).name();
-        if (ImGui::TreeNode(componentName))
+        const bool componentOpen = ImGui::TreeNode(componentName);
+        ImGui::SameLine();
+        bool enabled = component->IsEnabled();
+        if (ImGui::Checkbox("Enabled", &enabled))
+        {
+            component->SetEnabled(enabled);
+        }
+
+        if (componentOpen)
         {
             InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All;
             if (dynamic_cast<Transform*>(component))

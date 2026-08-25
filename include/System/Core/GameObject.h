@@ -21,6 +21,7 @@ protected:
     std::vector<GameObjectReference*> m_references;
 
     bool m_isStarted = false;
+    bool m_isActive = true;
     bool m_isDestroyRequested = false;
     bool m_isDestroyed = false;
 public:
@@ -79,6 +80,27 @@ public:
         return m_isStarted;
     }
 
+    bool IsActive() const
+    {
+        return m_isActive;
+    }
+
+    void SetActive(bool active)
+    {
+        if (m_isActive == active)
+        {
+            return;
+        }
+
+        m_isActive = active;
+        if (!m_isActive || !m_isStarted || m_isDestroyRequested || m_isDestroyed)
+        {
+            return;
+        }
+
+        NotifyActiveState();
+    }
+
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
@@ -87,6 +109,14 @@ public:
         if (m_isStarted)
         {
             componentPtr->OnStart();
+            if (m_isActive && !m_isDestroyRequested && !m_isDestroyed)
+            {
+                componentPtr->OnActive();
+                if (componentPtr->IsEnabled())
+                {
+                    componentPtr->OnEnable();
+                }
+            }
         }
 
         return componentPtr;
@@ -153,21 +183,42 @@ public:
         {
             m_components[i]->OnStart();
         }
+
+        if (m_isActive)
+        {
+            NotifyActiveState();
+        }
     }
 
 	void Update()
 	{
+        if (!m_isActive)
+        {
+            return;
+        }
+
         for (size_t i = 0; i < m_components.size() && !m_isDestroyRequested; ++i)
 		{
-            m_components[i]->Update();
+            if (m_components[i]->IsEnabled())
+            {
+                m_components[i]->Update();
+            }
 		}
 	}
 
     void LateUpdate()
     {
+        if (!m_isActive)
+        {
+            return;
+        }
+
         for (size_t i = 0; i < m_components.size() && !m_isDestroyRequested; ++i)
         {
-            m_components[i]->LateUpdate();
+            if (m_components[i]->IsEnabled())
+            {
+                m_components[i]->LateUpdate();
+            }
         }
     }
 	//void Draw()
@@ -179,6 +230,20 @@ public:
 	//}
 
 private:
+    void NotifyActiveState()
+    {
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount && !m_isDestroyRequested; ++i)
+        {
+            Component* component = m_components[i].get();
+            component->OnActive();
+            if (component->IsEnabled())
+            {
+                component->OnEnable();
+            }
+        }
+    }
+
     void RegisterReference(GameObjectReference* reference);
     void UnregisterReference(GameObjectReference* reference);
     void ClearReferences();

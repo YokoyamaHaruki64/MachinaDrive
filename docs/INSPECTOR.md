@@ -24,11 +24,13 @@ Inspector Window
 
 `Hierarchy Window` は稼働中の GameObject を名前で表示する。選択状態は非所有ポインタとして保持し、シーン遷移・破棄などで選択先が稼働リストから消えた場合は解除する。
 
-`Inspector Window` は選択中 GameObject の名前、開始状態、破棄予約状態、Transform、追加順の Component を表示する。Transform も通常の Component と同じフィールド登録方式を使い、Position、Rotation、Scale を編集できる。
+`Inspector Window` は選択中 GameObject の名前、有効状態、開始状態、破棄予約状態、Transform、追加順の Component を表示する。GameObjectの`Active`チェックで実行時の有効状態を切り替えられる。各Componentのヘッダーには`Enabled`チェックを表示し、Component単位の有効状態を切り替える。状態を有効へ切り替えた時は、通常のライフサイクル規則に従って`OnActive()`または`OnEnable()`が呼び出される。Transform も通常の Component と同じフィールド登録方式を使い、Position、Rotation、Scale を編集できる。
 
 HierarchyはTransformの親子関係を再帰表示する。GameObjectのドラッグ＆ドロップで親を変更し、末尾のRoot領域へドロップすると親を解除する。右クリックメニューからEmpty生成、GameObject削除、Prefab保存、Prefab Instantiateを実行できる。Inspectorの`Add Component`はComponent Registryに登録された型をComponent／Scriptに分類して表示する。
 
 Inspector は `Manager::Draw()` の ImGui 描画区間で実行する。このため、Inspector で変更した Transform や Material Property が描画へ反映されるのは原則として次フレームとなる。
+
+Component基底の`enabled`値はInspectorではComponentヘッダーのチェックボックスとして表示するため、FieldRegistryには`Hidden`として登録する。これにより、派生Componentの通常フィールドと同じ経路でYAMLへ保存・復元しつつ、Inspector上で二重表示しない。
 
 ## GameObject 名
 

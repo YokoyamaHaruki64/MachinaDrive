@@ -76,7 +76,10 @@ public:
             m_materialPropertyOverrides[slot].Clear();
         }
     }
-    bool IsOwnerStarted() const { return m_owner && m_owner->IsStarted(); }
+    bool IsOwnerStarted() const
+    {
+        return m_owner && m_owner->IsStarted() && m_owner->IsActive() && IsEnabled();
+    }
     void Submit();
 
     int GetDrawLayer() const { return m_drawLayer; }

@@ -82,11 +82,15 @@ WinMain
 | フック | 呼び出しタイミング |
 | --- | --- |
 | `OnStart()` | 所有 GameObject の開始時、または開始済み GameObject への追加時 |
+| `OnActive()` | GameObject が開始時に有効、または無効から有効へ遷移した時 |
+| `OnEnable()` | Component が開始時に有効、または無効から有効へ遷移した時（所有 GameObject も有効な場合） |
 | `Update()` | 毎フレームの主処理 |
 | `LateUpdate()` | 全 `Update()` 後の後段処理 |
 | `OnDestroy()` | オブジェクトまたはシーンの破棄時 |
 
 `AddComponent()` は所有 GameObject が開始済みの場合だけ、追加したコンポーネントの `OnStart()` を即時実行する。開始前の GameObject ではコンポーネントを保持するだけで、GameObject の `OnStart()` が各コンポーネントを追加順に開始する。prefab は必要なコンポーネントをすべて追加してから `Manager::Instantiate()` が GameObject を開始するため、コンポーネント間の依存関係を構築時に解決できる。
+
+GameObject の有効状態は `m_isActive`、Component の有効状態は `m_isEnabled` で管理し、どちらも既定値は `true` とする。`SetActive(false)` は対象 GameObject の `Update()`、`LateUpdate()`、所有 Renderer の描画を停止する。開始済み GameObject を `SetActive(true)` にすると、全 Component の `OnActive()` を呼び出し、そのうち有効な Component の `OnEnable()` を呼び出す。`SetEnabled(false)` は対象 Component の更新と描画を停止し、開始済みかつ所有 GameObject が有効な状態で `SetEnabled(true)` にすると `OnEnable()` を呼び出す。開始時の有効状態も同じ規則でコールバック対象となり、GameObject が無効な間に Component を有効化した場合の `OnEnable()` は GameObject の再有効化まで保留する。
 
 `Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 

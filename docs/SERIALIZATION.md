@@ -114,17 +114,21 @@ name: Game
 gameObjects:
   - id: 1
     name: Player
+    active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: null
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0.0, 0.0, 5.0]
           m_localRotation: [0.0, 0.0, 0.0, 1.0]
           m_localScale: [1.0, 1.0, 1.0]
 ```
 
 `gameObjects`は親子の並び順に依存しない。ロードでは、全GameObjectとコンポーネントを生成してフィールドを適用してから、`parent`のIDを解決して親子関係を復元する。すべての復元が完了した後に`OnStart()`を呼ぶ。
+
+GameObjectの`active`はオブジェクトの有効状態、Componentの`fields.enabled`はComponentの有効状態を表す。どちらも保存時に出力し、ロード時に`OnStart()`より前へ適用する。`active`がない旧形式のGameObjectは`true`、`enabled`がない旧形式のComponentは`true`として復元するため、既存のScene／Prefabとの互換性を維持する。ロード後の開始時および実行中の再有効化では、[ARCHITECTURE.md](ARCHITECTURE.md)に記載した`OnActive()`／`OnEnable()`の規則を適用する。
 
 ### Sceneファイルの入出力
 
@@ -190,6 +194,8 @@ TransformはLocal Position、Local Quaternion Rotation、Local Scaleを保存す
 ## Componentとフィールド
 
 Componentは原則として`GameObject*`だけを受け取って生成する。モデルパス、Material、移動速度などの設定値をコンストラクタ引数として渡す生成方法は使用しない。ComponentFactoryは型名と生成関数を対応付け、各Componentの実装ファイルで`REGISTER_COMPONENT(Type)`を1行記述して登録する。
+
+Component基底の`enabled`は共通フィールドとして全Componentへ自動登録する。ただしInspectorではComponentヘッダーのチェックボックスで編集するため、通常のフィールド一覧には表示しない。派生Componentの`RegisterFields()`は、従来どおり自身の設定値だけを登録する。
 
 ゲーム固有の振る舞いは`Script`基底クラスを経由して`Component`を継承する。Scriptは別の生成・保存機構を持たず、通常のComponentと同じRegistryで復元する。InspectorのAdd Component一覧では、`Script`派生かどうかを基に`Components`と`Scripts`へ自動分類して表示する。
 

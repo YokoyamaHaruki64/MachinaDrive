@@ -207,6 +207,7 @@ bool GameObjectYamlSerializer::SaveToFile(
         YAMLValue object = YAMLValue::Map();
         object.Add("id", ToYAMLValue(objectIds.at(gameObject)));
         object.Add("name", YAMLValue::Scalar(gameObject->GetName(), true));
+        object.Add("active", ToYAMLValue(gameObject->IsActive()));
 
         if (prefabReferenceMode == PrefabReferenceSaveMode::Include && !gameObject->GetPrefabPath().empty())
         {
@@ -309,6 +310,17 @@ bool GameObjectYamlSerializer::LoadFromFile(
         // GameObjectを生成
         std::unique_ptr<GameObject> gameObject = std::make_unique<GameObject>(std::move(objectName));
         GameObject* gameObjectPointer = gameObject.get();
+        if (const YAMLValue* active = sourceObject.Find("active"))
+        {
+            bool decodedActive{};
+            if (!YAMLValueConverter<bool>::FromYAMLValue(*active, decodedActive, {}).success)
+            {
+                Logger::Error("GameObjectのactiveが不正です: " + gameObjectPointer->GetName());
+                return false;
+            }
+            gameObjectPointer->SetActive(decodedActive);
+        }
+
         if (sourcePathMode == PrefabSourcePathMode::UseSourceFilePath)
         {// .prefabはファイル自身がPrefabのソースであるため、Prefab参照を保存する。
             gameObjectPointer->SetPrefabPath(path.generic_string());

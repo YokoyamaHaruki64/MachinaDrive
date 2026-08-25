@@ -11,6 +11,7 @@ class Component
 
 protected:
 	GameObject* m_owner = nullptr;
+    bool m_isEnabled = true;
 
 public:
 	Component() = delete;
@@ -21,6 +22,10 @@ public:
     virtual ~Component() {}
 
     virtual void OnStart() {};
+    // GameObjectが有効になった遷移で呼び出される。
+    virtual void OnActive() {};
+    // Componentが有効になった遷移で呼び出される。
+    virtual void OnEnable() {};
     virtual void OnDestroy() {};
 
 	virtual void Update() {};
@@ -33,6 +38,9 @@ public:
 
     Transform* transform() const;
     GameObject* GetOwner() const { return m_owner; }
+
+    bool IsEnabled() const { return m_isEnabled; }
+    void SetEnabled(bool enabled);
 
     template <typename T>
     T* GetComponent() const;
