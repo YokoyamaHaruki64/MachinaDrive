@@ -24,8 +24,9 @@
 
 ## Serialize / Deserialize
 
-- `YAMLValueConverter<T>`、固定長配列Traits、Field登録時の型消去コールバックが重なっている現行実装を見直し、新しい型を短く直感的に追加できる記述方式へ簡素化する。
-- 簡素化時も、rapidyaml依存の局所化、配列要素Codecの再利用、全Field検証後の一括反映、参照解決エラーの継続処理は維持する。
+Reflect、`YAMLValueConverter`、`YAMLDocumentIO`、`GameObjectYamlSerializer`による責務分離と再帰変換は実装済み。基本的なScene／Prefab／Materialの保存・復元、検証後の一括反映、参照解決エラーの継続処理も完了している。
+
+今後のSerialize拡張は、version migration、未対応コンテナ、保存形式の後方互換テストを必要になった時点で追加する。
 
 ## 検証
 
