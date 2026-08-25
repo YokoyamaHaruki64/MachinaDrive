@@ -7,6 +7,74 @@
 #include "imgui.h"
 
 template <typename T>
+bool FieldRegistry::DrawStructuredValue(std::string_view label, T& value)
+{
+    // DrawStructuredValueは、Reflect型、vector型、その他の値型を判定して描画する。
+    if constexpr (requires { Reflect<T>::Members(); })
+    {
+        // 独自型はReflectのメンバをTreeNodeとして再帰表示する。
+        const std::string displayName = CreateDisplayName(label);
+        return DrawReflectValue(displayName, value);
+    }
+    else if constexpr (FieldRegistryVectorTraits<T>::IsVector)
+    {
+        // vectorはList UIを使い、要素がReflect型ならさらに再帰
+        using ElementType = typename FieldRegistryVectorTraits<T>::ElementType;
+
+        FieldDescriptor field{
+            std::string(label),
+            CreateDisplayName(label),
+            &value,
+            GetValueType<ElementType>(),
+            InspectorFieldType::List,
+            InspectorFieldSpace::All,
+        };
+        return DrawList(field, value);
+    }
+    else
+    {
+        // その他の値型は通常のDrawValueで描画する。
+        FieldDescriptor field{
+            std::string(label),
+            CreateDisplayName(label),
+            &value,
+            GetValueType<T>(),
+            InspectorFieldType::Auto,
+            InspectorFieldSpace::All,
+        };
+        return DrawValue(field, &value);
+    }
+}
+
+template <typename T>
+bool FieldRegistry::DrawReflectValue(std::string_view label, T& value)
+{
+    const std::string displayName(label);
+    if (!ImGui::TreeNode(displayName.c_str()))
+    {
+        return false;
+    }
+
+    bool changed = false;
+    const auto members = Reflect<T>::Members();
+    // applyでタプルの各メンバを展開し、DrawReflectMemberを呼び出す。
+    std::apply(
+        [&value, &changed](const auto&... member)
+        {
+            ((changed |= DrawReflectMember(value, member)), ...);
+        },
+        members);
+    ImGui::TreePop();
+    return changed;
+}
+
+template <typename Owner, typename Member>
+bool FieldRegistry::DrawReflectMember(Owner& object, const Member& member)
+{
+    return DrawStructuredValue(member.first, object.*member.second);
+}
+
+template <typename T>
 bool FieldRegistry::DrawList(const FieldDescriptor& field, std::vector<T>& values)
 {
     bool changed = false;
@@ -19,7 +87,7 @@ bool FieldRegistry::DrawList(const FieldDescriptor& field, std::vector<T>& value
             FieldDescriptor elementField = field;
             elementField.displayName = "Value";
             elementField.inspectorType = InspectorFieldType::Auto;
-            changed |= DrawValue(elementField, &values[index]);
+            changed |= DrawStructuredValue(elementField.displayName, values[index]);
 
             ImGui::SameLine();
             if (ImGui::SmallButton("Remove"))

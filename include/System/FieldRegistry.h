@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 
@@ -11,7 +12,7 @@
 #include "math/Quaternion.h"
 #include "System/GameObjectReference.h"
 #include "System/PrefabReference.h"
-#include "System/YAMLCodec.h"
+#include "System/YAMLValueConverter.h"
 
 struct ImGuiInputTextCallbackData;
 
@@ -40,11 +41,26 @@ struct FieldDescriptor
     InspectorFieldType inspectorType{ InspectorFieldType::Auto };
     InspectorFieldSpace inspectorSpace{ InspectorFieldSpace::All };
     std::function<void(const FieldDescriptor&)> drawAccessor;
-    std::function<YAMLCodecResult(YAMLValue&, const YAMLArchiveContext&)> save;
-    std::function<YAMLCodecResult(
+    std::function<YAMLValueConversionResult(YAMLValue&, const YAMLValueConversionContext&)> toYAMLValue;
+    std::function<YAMLValueConversionResult(
         const YAMLValue&,
-        const YAMLArchiveContext&,
-        std::function<void()>&)> load;
+        const YAMLValueConversionContext&,
+        std::function<void()>&)> fromYAMLValue;
+};
+
+template <typename T>
+struct FieldRegistryVectorTraits
+{
+    // vector以外は通常の値として描画する。
+    static constexpr bool IsVector = false;
+};
+
+template <typename T>
+struct FieldRegistryVectorTraits<std::vector<T>>
+{
+    // Reflect型のvectorも、要素側の描画処理へ再帰できるようにする。
+    static constexpr bool IsVector = true;
+    using ElementType = T;
 };
 
 class FieldRegistry
@@ -58,8 +74,18 @@ class FieldRegistry
     static bool DrawPrefabReference(const char* label, PrefabReference& value);
     static void DrawMatrix3x3(const char* label, Matrix3x3& value);
     static void DrawMatrix4x4(const char* label, Matrix4x4& value);
+    template <typename T>
+    static bool DrawStructuredValue(std::string_view label, T& value);
+
+    template <typename T>
+    static bool DrawReflectValue(std::string_view label, T& value);
+
+    template <typename Owner, typename Member>
+    static bool DrawReflectMember(Owner& object, const Member& member);
+
     static bool InputText(const char* label, std::string& value);
     static int ResizeStringInputCallback(ImGuiInputTextCallbackData* data);
+    static void ReportConversionMessage(const YAMLValueConversionResult& result, std::string_view fieldKey);
 
     template <typename T>
     static bool DrawList(const FieldDescriptor& field, std::vector<T>& values);
@@ -68,17 +94,17 @@ class FieldRegistry
     static void ConfigureSerialization(FieldDescriptor& descriptor, T& value)
     {
         T* target = &value;
-        descriptor.save = [target](YAMLValue& output, const YAMLArchiveContext& context)
+        descriptor.toYAMLValue = [target](YAMLValue& output, const YAMLValueConversionContext& context)
         {
-            return YAMLCodec<T>::Encode(*target, output, context);
+            return YAMLValueConverter<T>::ToYAMLValue(*target, output, context);
         };
-        descriptor.load = [target](
+        descriptor.fromYAMLValue = [target](
             const YAMLValue& input,
-            const YAMLArchiveContext& context,
+            const YAMLValueConversionContext& context,
             std::function<void()>& assignment)
         {
             T value{};
-            YAMLCodecResult result = YAMLCodec<T>::Decode(input, value, context);
+            YAMLValueConversionResult result = YAMLValueConverter<T>::FromYAMLValue(input, value, context);
             if (result.success)
             {
                 assignment = [target, value = std::move(value)]() mutable
@@ -108,6 +134,8 @@ class FieldRegistry
         else if constexpr (std::is_same_v<T, CurveColor>) return ValueType::CurveColor;
         else if constexpr (std::is_same_v<T, GameObjectReference>) return ValueType::GameObjectReference;
         else if constexpr (std::is_same_v<T, PrefabReference>) return ValueType::PrefabReference;
+        // Reflect型は専用の再帰描画を使うため、ValueTypeの列挙には追加しない。
+        else if constexpr (requires { Reflect<T>::Members(); }) return ValueType::Unknown;
         else static_assert(!sizeof(T), "未対応のField型です。");
     }
 
@@ -122,6 +150,18 @@ public:
             GetValueType<T>(),
             inspectorType,
         };
+
+        if constexpr (requires { Reflect<T>::Members(); })
+        {
+            // Fieldは1つのまま保持し、Inspectorだけをメンバ単位で展開する。
+            // YAMLはConfigureSerializationがReflect用Converterへ委譲するため、Map構造を維持できる。
+            T* target = &value;
+            descriptor.drawAccessor = [target](const FieldDescriptor& field)
+            {
+                DrawReflectValue(field.displayName, *target);
+            };
+        }
+
         ConfigureSerialization(descriptor, value);
         m_fields.push_back(std::move(descriptor));
     }
@@ -173,17 +213,17 @@ public:
 
         if (serialize)
         {
-            descriptor.save = [getter](YAMLValue& output, const YAMLArchiveContext& context)
+            descriptor.toYAMLValue = [getter](YAMLValue& output, const YAMLValueConversionContext& context)
             {
-                return YAMLCodec<T>::Encode(getter(), output, context);
+                return YAMLValueConverter<T>::ToYAMLValue(getter(), output, context);
             };
-            descriptor.load = [setter](
+            descriptor.fromYAMLValue = [setter](
                 const YAMLValue& input,
-                const YAMLArchiveContext& context,
+                const YAMLValueConversionContext& context,
                 std::function<void()>& assignment)
             {
                 T value{};
-                YAMLCodecResult result = YAMLCodec<T>::Decode(input, value, context);
+                YAMLValueConversionResult result = YAMLValueConverter<T>::FromYAMLValue(input, value, context);
                 if (result.success)
                 {
                     assignment = [setter, value = std::move(value)]() mutable
@@ -198,6 +238,12 @@ public:
     }
 
     void DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+
+    // 登録Field全体をYAMLValueのMapへ変換する。
+    bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {}) const;
+
+    // YAMLValueのMapを検証し、全Fieldの変換成功を確認してから、一括で反映
+    bool FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context = {});
 
     const std::vector<FieldDescriptor>& GetFields() const
     {

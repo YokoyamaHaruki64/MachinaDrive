@@ -5,6 +5,27 @@
 
 #include "System/FieldRegistry.h"
 #include "System/Manager.h"
+#include "System/Logger.h"
+
+void FieldRegistry::ReportConversionMessage(
+    const YAMLValueConversionResult& result,
+    std::string_view fieldKey)
+{
+    if (result.message.empty())
+    {
+        return;
+    }
+
+    const std::string message = result.message + ": " + std::string(fieldKey);
+    if (result.messageLevel == YAMLMessageLevel::Error)
+    {
+        Logger::Error(message);
+    }
+    else if (result.messageLevel == YAMLMessageLevel::Warning)
+    {
+        Logger::Warning(message);
+    }
+}
 
 int FieldRegistry::ResizeStringInputCallback(ImGuiInputTextCallbackData* data)
 {
@@ -193,5 +214,105 @@ void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
             DrawValue(field, field.value);
         }
         ImGui::PopID();
+    }
+}
+
+bool FieldRegistry::ToYAMLValue(
+    YAMLValue& output,
+    const YAMLValueConversionContext& context) const
+{
+    try
+    {
+        // 登録されているFieldだけをMapへ変換し、実行時専用の値は出力しない。
+        YAMLValue document = YAMLValue::Map();
+        for (const FieldDescriptor& field : m_fields)
+        {
+            if (!field.toYAMLValue)
+            {
+                continue;
+            }
+
+            YAMLValue value;
+            const YAMLValueConversionResult result = field.toYAMLValue(value, context);
+            ReportConversionMessage(result, field.key);
+            if (!result.success)
+            {
+                Logger::Warning("YAML保存対象外のFieldをスキップしました: " + field.key);
+                continue;
+            }
+            document.map.emplace_back(field.key, std::move(value));
+        }
+
+        output = std::move(document);
+        return true;
+    }
+    catch (const std::exception& exception)
+    {
+        Logger::Error("YAMLValueへの変換に失敗しました: " + std::string(exception.what()));
+        return false;
+    }
+}
+
+bool FieldRegistry::FromYAMLValue(
+    const YAMLValue& input,
+    const YAMLValueConversionContext& context)
+{
+    try
+    {
+        if (input.type != YAMLValue::Type::Map)
+        {
+            Logger::Error("YAML Field群はMapである必要があります。");
+            return false;
+        }
+
+        // 変換だけ先に検証し、すべて成功した値だけを後段で反映する。
+        // 全Fieldの検証完了後にまとめて反映し、途中失敗で既存状態を壊さない。
+        std::vector<std::function<void()>> assignments;
+        for (const FieldDescriptor& field : m_fields)
+        {
+            const YAMLValue* value = input.Find(field.key);
+            if (!value)
+            {
+                continue;
+            }
+            if (!field.fromYAMLValue)
+            {
+                Logger::Error("YAML Fieldの読み込みに失敗しました: " + field.key);
+                return false;
+            }
+
+            std::function<void()> assignment;
+            const YAMLValueConversionResult result = field.fromYAMLValue(*value, context, assignment);
+            ReportConversionMessage(result, field.key);
+            if (!result.success || !assignment)
+            {
+                Logger::Error("YAML Fieldの読み込みに失敗しました: " + field.key);
+                return false;
+            }
+            assignments.emplace_back(std::move(assignment));
+        }
+
+        for (const auto& [key, value] : input.map)
+        {
+            const auto found = std::find_if(m_fields.begin(), m_fields.end(), [&key](const FieldDescriptor& field)
+            {
+                return field.key == key;
+            });
+            if (found == m_fields.end())
+            {
+                Logger::Error("未登録のYAML Fieldをスキップしました: " + key);
+            }
+        }
+
+        for (const std::function<void()>& assignment : assignments)
+        {
+            assignment();
+        }
+        return true;
+    }
+    catch (const std::exception& exception)
+    {
+        Logger::Error("YAMLValueからの変換に失敗しました: " + std::string(exception.what()));
+        return false;
     }
 }
