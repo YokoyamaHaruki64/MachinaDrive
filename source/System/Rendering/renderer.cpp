@@ -402,6 +402,16 @@ void Renderer::Uninit()
 
 void Renderer::Begin()
 {
+	// ImGuiの外部Viewport描画がD3D11コンテキストのRTVを変更するため、毎フレームの描画先を明示的に復元する。
+	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
+
+	D3D11_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(SCREEN_WIDTH);
+	viewport.Height = static_cast<float>(SCREEN_HEIGHT);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	m_DeviceContext->RSSetViewports(1, &viewport);
+
 	float clearColor[4] = {
 		0 / 255.0f,
 		0 / 255.0f,

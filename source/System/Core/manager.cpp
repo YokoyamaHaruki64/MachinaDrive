@@ -300,6 +300,8 @@ bool Manager::Init()
     // 入力
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Tab / 矢印 / Space / Enter
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // ゲームパッド
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // ImGuiウィンドウのDocking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // MainWindow外のプラットフォームウィンドウ
     io.ConfigWindowsMoveFromTitleBarOnly = true; // 中身をドラッグして誤移動しにくくする
 
     io.IniFilename = "config/imgui.ini"; // 設定ファイルの保存先を指定
@@ -361,6 +363,13 @@ void Manager::Update()
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
+
+    // メインビューポートの全面をDockSpaceとして確保する。InspectorやHierarchyはここへDockできる。
+    ImGui::DockSpaceOverViewport(
+        0,
+        ImGui::GetMainViewport(),
+        ImGuiDockNodeFlags_PassthruCentralNode);
+
     if (m_nextScene)
     {
         InitScene();
@@ -469,6 +478,15 @@ void Manager::Draw()
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	Renderer::End();
+
+    // Dock解除したウィンドウは、各プラットフォームのネイティブウィンドウへ描画する。
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
+
 	// Presentの待機時間もフレームの描画負荷として扱う。
 	PerformanceMonitor::EndRender();
 }
