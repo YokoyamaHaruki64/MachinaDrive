@@ -48,8 +48,8 @@ class Component
 {
 public:
     void DrawInspectorImGui();
-    bool EncodeFields(YAMLValue& output, const YAMLArchiveContext& context);
-    bool DecodeFields(const YAMLValue& input, const YAMLArchiveContext& context);
+    bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context);
+    bool FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context);
 
 protected:
     virtual void RegisterFields(FieldRegistry& fields) {}
@@ -71,6 +71,10 @@ void Player::RegisterFields(FieldRegistry& fields)
 ```
 
 `GM_FIELD(member)` はメンバー名を保存キーとして文字列化し、参照型から型情報を自動判定して `FieldRegistry` へ登録する。表示名は `m_moveSpeed` のようなメンバー名から `Move Speed` へ整形する。
+
+`Reflect<T>::Members()`を持つ独自型も`GM_FIELD(member)`で登録できる。FieldRegistry上は親Fieldを1つだけ保持し、Inspector描画時にReflectのtupleを再帰走査する。Reflect型の子メンバ、ネストしたReflect型、`std::vector<Reflect型>`は既存の基本型・List描画へ接続され、YAML上では親キー配下のMap構造として保存される。
+
+Reflectによる自動展開は基本的な値表示を対象とする。World／Localの切り替え、Accessor、Hidden、個別のInspector種別など、特別な編集規則が必要な値は従来どおりAccessor登録または個別描画を使用する。
 
 メンバー名の変更後も保存データとの互換性を保つ必要があるフィールドには、明示キー版を使う。
 

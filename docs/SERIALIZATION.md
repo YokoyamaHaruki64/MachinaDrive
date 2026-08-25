@@ -8,12 +8,85 @@
 
 ## 基本方針
 
-- YAMLライブラリにはrapidyamlを使用する。ただし、ゲーム側のコードはrapidyamlのTreeを直接操作せず、`YAMLArchive`を介して読み書きする。
+- YAMLライブラリにはrapidyamlを使用する。ただし、ゲーム側のコードはrapidyamlのTreeを直接操作せず、`YAMLDocumentIO`を介して読み書きする。
 - 保存形式には`version`を持たせ、互換性が必要になった時はバージョンごとに読み込み処理を分岐できるようにする。
 - 値の型はフィールド登録情報から決定する。YAMLへ型名は保存しない。
 - 実行時のGPUハンドルやTextureHandleなどの一時IDは保存しない。再生成可能なプロジェクト相対パスを保存する。
 - GameObject参照と親子関係は、ファイル内で一意な`id`で表す。`id`は実行時IDではなく、ファイルのロード時に解決するための値である。
 - 参照値が未設定または`null`の場合は`None`として扱う。ファイルに参照先が明記されているにもかかわらず解決できない場合はErrorLogを記録し、Inspectorでは`Error`として表示する。
+
+## クラス構成
+
+```mermaid
+classDiagram
+    class Manager {
+        +SaveCurrentScene()
+        +SaveSceneObjects(path)
+        +LoadSceneObjects(path)
+        +SavePrefab(root, path)
+        +InstantiatePrefab(path)
+    }
+    class GameObjectYamlSerializer {
+        +SaveToFile(path, name, gameObjects, prefabReferenceMode)
+        +LoadFromFile(path, output, sourcePathMode)
+    }
+    class YAMLDocumentIO {
+        +Save(path, document)
+        +Load(path, document)
+    }
+    class YAMLValue {
+        +Type type
+        +Sequence sequence
+        +Map map
+    }
+    class YAMLValueConversionResult {
+        +bool success
+        +YAMLMessageLevel messageLevel
+        +string message
+    }
+    class FieldRegistry {
+        +Add(...)
+        +GetFields()
+        +ToYAMLValue(output, context)
+        +FromYAMLValue(input, context)
+    }
+    class ComponentRegistry {
+        +Find(typeName)
+        +Add(registration, gameObject)
+    }
+    class MaterialManager {
+        +Load(path)
+        +Save(material, path)
+    }
+    class Material
+    class FileSystem {
+        +OpenFileDialog(...)
+        +SaveFileDialog(...)
+    }
+
+    Manager --> GameObjectYamlSerializer : Scene / Prefab保存・復元
+    GameObjectYamlSerializer --> YAMLDocumentIO : YAMLファイルI/O
+    GameObjectYamlSerializer --> YAMLValue : 文書を構築
+    GameObjectYamlSerializer --> ComponentRegistry : Component生成
+    FieldRegistry --> YAMLValue : Field値を変換
+    FieldRegistry --> YAMLValueConversionResult : 変換結果
+    YAMLDocumentIO --> YAMLValue : ファイルI/O
+    GameObjectYamlSerializer --> FieldRegistry : Field入出力
+    MaterialManager --> YAMLDocumentIO : Material Document
+    MaterialManager --> Material : 所有・復元
+    FileSystem ..> Manager : UIで選択したpath
+    FileSystem ..> MaterialManager : UIで選択したpath
+```
+
+`GameObjectYamlSerializer`はSceneとPrefabの共通形式を扱い、`YAMLDocumentIO`はrapidyamlとエンジン側の中間表現を分離する。`MaterialManager`は同じ`YAMLDocumentIO`を使うが、GameObject階層を経由せずMaterial単体を復元する。
+
+Fieldの変換は`FieldRegistry::ToYAMLValue()` / `FromYAMLValue()`が担当する。これらはC++値と`YAMLValue`の変換であり、ファイル保存の成否は返さない。変換時のWarning/Errorだけを`YAMLValueConversionResult`で返し、`YAMLDocumentIO::Save()` / `Load()`が`YAMLValue`とファイルの変換を担当する。
+
+### 独自型の反射変換
+
+`Reflect<T>::Members()`を定義した独自struct/classは、`YAMLValueConverter<T>`がtupleを走査して各メンバを再帰的に変換する。登録は`REFLECT_BEGIN(Type)`、`REFLECT_FIELD(member)`、`REFLECT_END()`で記述できる。privateメンバを登録する場合は型本体で`REFLECT_FRIEND(Type)`を宣言する。`Reflect<T>`が存在しない型にはこの部分特殊化は適用されず、従来どおりConverter未定義としてコンパイルエラーになる。
+
+Reflect型は`FieldRegistry`の`GM_FIELD(member)`にも登録できる。FieldRegistryはReflect型を1つのFieldとして保持し、Inspector表示時だけメンバを再帰展開するため、保存時のMap構造とInspectorの階層を一致させられる。Reflect型の各メンバは既存の`YAMLValueConverter`へ再帰的に委譲され、ネストしたReflect型と`std::vector<Reflect型>`も同じ規則で処理する。
 
 ## 保存先
 
@@ -197,7 +270,6 @@ InspectorはGameObject情報、登録済みComponentフィールド、Material�
 
 Materialが未設定または参照エラーの場合は、`.shader`を選ぶ`Create Material`を表示する。ファイルパスを持たないMaterialは`Save Material As`、保存済みMaterialは`Save Material`で現在のパスへ上書きする。Material名はInspectorから編集でき、Texture Propertyは対応画像拡張子の選択ダイアログと`Clear`操作を提供する。すべての選択・保存先は`Assets/`配下に制限する。
 
-Scene保存はHierarchy上部の`Save Scene`、`Apply to Prefab`は選択GameObjectを含むPrefabを対象とする。保存UIと実際の書き込み処理は、`YAMLArchive`、`GameObjectArchive`、`MaterialManager`へ委譲し、OS依存ダイアログとパス検証は`FileSystem`へ集約する。
+Scene保存はHierarchy上部の`Save Scene`、`Apply to Prefab`は選択GameObjectを含むPrefabを対象とする。保存UIと実際の書き込み処理は、`YAMLDocumentIO`、`GameObjectYamlSerializer`、`MaterialManager`へ委譲し、OS依存ダイアログとパス検証は`FileSystem`へ集約する。
 
 Button、Curveなど基本値以外のInspectorフィールド種別は、必要になった時点でシリアライズ形式と合わせて追加する。
-
