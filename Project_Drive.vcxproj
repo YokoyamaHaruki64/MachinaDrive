@@ -226,6 +226,7 @@
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Ripple.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
+    <ClCompile Include="source\Script\SampleMoveScript.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
@@ -403,6 +404,7 @@
     <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
+    <ClInclude Include="include\Script\SampleMoveScript.h" />
     <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
     <ClInclude Include="include\Script\PatternTrailHeader.h" />
@@ -427,6 +429,7 @@
     <ClInclude Include="include\System\Core\GameObjectReference.h" />
     <ClInclude Include="include\System\Core\PrefabReference.h" />
     <ClInclude Include="include\System\Core\Script.h" />
+    <ClInclude Include="include\System\GameplayMacros.h" />
     <ClInclude Include="include\System\SystemInc.h" />
     <ClInclude Include="include\Component\ComponentInc.h" />
     <ClInclude Include="include\System\Core\GM_Time.h" />

@@ -251,20 +251,6 @@ public:
     }
 };
 
-#define GM_FIELD(member) fields.Add(#member, member)
-#define GM_FIELD_KEY(key, member) fields.Add(key, member)
-#define GM_FIELD_KEY_TYPE(key, member, type) fields.Add(key, member, type)
-#define GM_FIELD_TYPE(member, type) fields.Add(#member, member, type)
-#define GM_FIELD_ACCESSOR(type, key, getter, setter, space) \
-    fields.AddAccessor<type>(key, \
-        [this] { return (getter); }, \
-        [this](const type& value) { setter; }, \
-        InspectorFieldSpace::space)
-#define GM_FIELD_ACCESSOR_TYPE(type, key, getter, setter, space, inspectorType, serialize) \
-    fields.AddAccessor<type>(key, \
-        [this] { return (getter); }, \
-        [this](const type& value) { setter; }, \
-        InspectorFieldSpace::space, inspectorType, serialize)
-
 #include "System/Editor/FieldRegistry.inl"
+#include "System/GameplayMacros.h"
 #include <functional>

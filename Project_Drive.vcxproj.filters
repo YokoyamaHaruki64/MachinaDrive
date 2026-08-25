@@ -288,6 +288,9 @@
     <ClCompile Include="source\Script\Score.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\SampleMoveScript.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Graphics\Material.cpp">
       <Filter>ソース ファイル\Graphics</Filter>
     </ClCompile>
@@ -375,6 +378,9 @@
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\SystemInc.h">
+      <Filter>ヘッダー ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\GameplayMacros.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\ComponentInc.h">
@@ -820,6 +826,9 @@
     </ClInclude>
     <ClInclude Include="include\Script\Score.h">
       <Filter>External\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\SampleMoveScript.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="External\Include\Assimp\SGSpatialSort.h">
       <Filter>External\Assimp</Filter>

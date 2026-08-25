@@ -24,7 +24,7 @@ classDiagram
         +SaveSceneObjects(path)
         +LoadSceneObjects(path)
         +SavePrefab(root, path)
-        +InstantiatePrefab(path)
+        +Instantiate(path)
     }
     class GameObjectYamlSerializer {
         +SaveToFile(path, name, gameObjects, prefabReferenceMode)
@@ -164,11 +164,11 @@ gameObjects:
 
 PrefabをInstantiateする時は、ファイル内の`id`を新しいGameObject群に対応付けて参照を解決する。ファイルの`id`を実行中のGameObjectへそのまま持ち込まない。
 
-`InstantiatePrefab(path)`は、Prefabに保存されたRoot Transformをそのまま使用する。配置を明示するオーバーロードだけが、復元後のRootへ指定したWorld Position、Euler Rotation、Scaleを適用する。子GameObjectは保存されたLocal Transformを維持する。
+`Instantiate(path)`は、Prefabに保存されたRoot Transformをそのまま使用する。配置を明示するオーバーロードだけが、復元後のRootへ指定したWorld Position、Euler Rotation、Scaleを適用する。子GameObjectは保存されたLocal Transformを維持する。
 
 ```cpp
-GameObject* Manager::InstantiatePrefab(const std::filesystem::path& path);
-GameObject* Manager::InstantiatePrefab(
+GameObject* Manager::Instantiate(const std::filesystem::path& path);
+GameObject* Manager::Instantiate(
     const std::filesystem::path& path,
     const Vector3& position,
     const Vector3& rotation,

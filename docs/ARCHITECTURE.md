@@ -121,12 +121,11 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 オブジェクトは以下の経路で生成する。
 
 - `Manager::CreateEmpty()`: 空の GameObject を生成する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
-- `Manager::InstantiatePrefab()`: `.prefab`からGameObject階層、Component、Field、親子参照を復元する。引数なしでは保存済みRoot Transformを維持し、PRS指定時だけRootを上書きする。
-- `Manager::Instantiate()`: 移行期間中の登録済みPrefabFactoryからGameObjectを構築する。
+- `Manager::Instantiate()`: `.prefab`からGameObject階層、Component、Field、親子参照を復元する。引数なしでは保存済みRoot Transformを維持し、PRS指定時だけRootを上書きする。
 
 シーンの `Init()` 中に生成された GameObject は保留リストに格納される。シーン構築の完了後、同じ生成バッチの全 GameObject を稼働リストへ移してから順番に `OnStart()` を呼ぶため、別 GameObject を検索する依存関係も開始時に解決できる。通常時に生成された GameObject は生成直後から Manager の検索対象となる。
 
-新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::InstantiatePrefab()`である。`Manager::Instantiate()`は既存生成コードの移行用として残している。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::Instantiate()`である。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
 ## 描画
 
@@ -151,6 +150,8 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
 実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
+
+ゲーム固有のScript実装、Inspector調整、Scene／Prefab保存を使った標準的な開発手順は[GAME_DEVELOPMENT.md](GAME_DEVELOPMENT.md)を参照する。
 
 現在の機能完了条件には含めない拡張・最適化項目は[FUTURE_WORK.md](FUTURE_WORK.md)を参照する。
 

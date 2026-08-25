@@ -85,9 +85,4 @@ public:
     }
 };
 
-// 通常は重複追加を許可しない。クラス定義の先頭に配置して自己登録する。
-#define REGISTER_COMPONENT(type, displayName) \
-    inline static const ComponentAutoRegistrar<type> s_componentRegistration{ #type, displayName }
-
-#define REGISTER_COMPONENT_OPTIONS(type, displayName, allowMultiple, showInAddComponent) \
-    inline static const ComponentAutoRegistrar<type> s_componentRegistration{ #type, displayName, allowMultiple, showInAddComponent }
+#include "System/GameplayMacros.h"

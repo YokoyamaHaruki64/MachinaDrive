@@ -70,6 +70,24 @@ void Player::RegisterFields(FieldRegistry& fields)
 }
 ```
 
+新規のComponent／Scriptでは、宣言と定義の定型を次のマクロで省略できる。`USE_FIELDS`は`protected`な`RegisterFields()`宣言、`FIELDS_BEGIN(Type)`から`FIELDS_END()`はその定義へ展開される。既存の`GM_FIELD`、`GM_FIELD_KEY`、Accessor系マクロはこのブロック内でそのまま使用する。
+
+これらのField登録マクロと、`REGISTER_COMPONENT`、`GM_SCRIPT`、`GM_SCRIPT_OPTION`は`System/GameplayMacros.h`へまとめている。ゲーム側のComponent／Script実装は、このマクロ群を直接利用する。
+
+```cpp
+// Header
+class Player : public Script
+{
+    USE_FIELDS
+};
+
+// Source
+FIELDS_BEGIN(Player)
+    GM_FIELD(m_moveSpeed);
+    GM_FIELD(m_jumpPower);
+FIELDS_END()
+```
+
 `GM_FIELD(member)` はメンバー名を保存キーとして文字列化し、参照型から型情報を自動判定して `FieldRegistry` へ登録する。表示名は `m_moveSpeed` のようなメンバー名から `Move Speed` へ整形する。
 
 `Reflect<T>::Members()`を持つ独自型も`GM_FIELD(member)`で登録できる。FieldRegistry上は親Fieldを1つだけ保持し、Inspector描画時にReflectのtupleを再帰走査する。Reflect型の子メンバ、ネストしたReflect型、`std::vector<Reflect型>`は既存の基本型・List描画へ接続され、YAML上では親キー配下のMap構造として保存される。
