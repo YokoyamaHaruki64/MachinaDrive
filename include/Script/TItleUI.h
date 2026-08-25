@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Core/Script.h"
 
-class TitleUI : public Component
+class TitleUI : public Script
 {
+    REGISTER_COMPONENT(TitleUI, "TitleUI");
 private:
     Vector3 m_originalPosition = Vector3::Zero();
     float m_amplitude = 15.0f; // 振幅
@@ -12,7 +13,7 @@ private:
 public:
     TitleUI() = delete;
     explicit TitleUI(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void OnStart() override;

@@ -1,11 +1,12 @@
 ﻿#pragma once
 
-#include "System/Component.h"
-#include "System/GameObject.h"
+#include "System/Core/Script.h"
+#include "System/Core/GameObject.h"
 
 class Audio;
-class Player : public Component
+class Player : public Script
 {
+    REGISTER_COMPONENT(Player, "Player");
 private:
 	Vector3 m_velocity{ 0.0f, 0.0f, 0.0f };
 	bool m_isGrounded = false; // 地面に接地しているかどうかのフラグ
@@ -15,7 +16,10 @@ public:
     void OnStart() override;
     void Update() override;
     Player() = delete;
-    Player(GameObject* owner) : Component(owner)
+    Player(GameObject* owner) : Script(owner)
     {
     }
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

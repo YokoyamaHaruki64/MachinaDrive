@@ -1,13 +1,16 @@
 ﻿#pragma once
 
 #include "math/Vector3.h"
-#include "System/Component.h"
-#include "System/GameObject.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Core/GameObject.h"
 
 #include <unordered_map>
 
 class Camera : public Component
 {
+    REGISTER_COMPONENT(Camera, "Camera");
+
 public:
 
     enum CameraTag
@@ -59,5 +62,12 @@ private:
 
     static Camera* s_mainCamera;
     static std::unordered_map<CameraTag, Camera*> s_camerasByTag;
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override
+    {
+        GM_FIELD(m_target);
+        GM_FIELD(m_up);
+    }
 
 };

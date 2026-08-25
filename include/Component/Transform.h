@@ -1,66 +1,101 @@
 ﻿#pragma once
 
-#include "System/main.h"
+#include <vector>
 
-#include "System/Component.h"
+#include "System/Core/main.h"
+
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
+#include "math/Matrix4x4.h"
+#include "math/Quaternion.h"
 #include "math/Vector3.h"
+
+enum class ParentTransformMode
+{
+    KeepWorld,
+    KeepLocal,
+};
 
 class Transform : public Component
 {
-    Vector3 m_position{ 0.0f, 0.0f, 0.0f };
-    Vector3 m_rotation{ 0.0f, 0.0f, 0.0f };
-    Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
+    REGISTER_COMPONENT_OPTIONS(Transform, "Transform", false, false);
+
+    Vector3 m_localPosition{ Vector3::Zero() };
+    Quaternion m_localRotation{ Quaternion::Identity() };
+    Vector3 m_localScale{ Vector3::One() };
+
+    Transform* m_parent = nullptr;
+    std::vector<Transform*> m_children;
+
+    mutable bool m_isWorldDirty = true;
+    mutable Matrix4x4 m_worldMatrix{ Matrix4x4::Identity() };
+    mutable Vector3 m_worldPosition{ Vector3::Zero() };
+    mutable Quaternion m_worldRotation{ Quaternion::Identity() };
+    mutable Vector3 m_worldScale{ Vector3::One() };
+
+    void MarkWorldDirty();
+    void UpdateWorldCache() const;
+    void SetLocalFromMatrix(const Matrix4x4& localMatrix);
+    void SetWorldMatrix(const Matrix4x4& worldMatrix);
+    void AddChild(Transform* child);
+    void RemoveChild(Transform* child);
+    bool WouldCreateCycle(const Transform* newParent) const;
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
+
 public:
     Transform() = delete;
-    Transform(GameObject* owner) : Component(owner) {}
-    Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale)
-        : Component(owner), m_position(position), m_rotation(rotation), m_scale(scale)
-    {
-    }
+    explicit Transform(GameObject* owner) : Component(owner) {}
+    Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale);
 
     Transform(const Transform&) = delete;
     Transform& operator=(const Transform&) = delete;
 
 
-    ~Transform() {}
+    ~Transform() override;
 
-    void SetPosition(const Vector3& position) { m_position = position; }
-    void SetRotation(const Vector3& rotation) { m_rotation = rotation; }
-    void SetScale(const Vector3& scale) { m_scale = scale; }
+    bool SetParent(Transform* parent, ParentTransformMode mode = ParentTransformMode::KeepWorld);
+    Transform* GetParent() const { return m_parent; }
+    const std::vector<Transform*>& GetChildren() const { return m_children; }
+    void DestroyChildren();
 
-    void Translate(const Vector3& delta) { m_position += delta; }
-    void Rotate(const Vector3& delta) { m_rotation += delta; }
-    void Scale(const Vector3& delta) { m_scale += delta; }
+    void SetPosition(const Vector3& position);
+    void SetRotation(const Quaternion& rotation);
+    // 既存コードのEuler入力を段階的に移行するために維持する。
+    void SetRotation(const Vector3& eulerRadians) { SetEulerAngles(eulerRadians); }
+    void SetScale(const Vector3& scale);
 
-    const Vector3& GetPosition() const { return m_position; }
-    const Vector3& GetRotation() const { return m_rotation; }
-    const Vector3& GetScale() const { return m_scale; }
+    void SetEulerAngles(const Vector3& eulerRadians);
 
-    const Vector3 GetForward() const
+    void Translate(const Vector3& delta) { SetPosition(GetPosition() + delta); }
+    void Rotate(const Vector3& eulerDelta)
     {
-        XMMATRIX rotationMatrix =
-            XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
-        Vector3 forward;
-        XMStoreFloat3((XMFLOAT3*)&forward, rotationMatrix.r[2]);
-        return forward;
+        // 増分回転でEulerへ戻すとジンバルロック境界で表現が反転するため、Quaternionのまま合成する。
+        SetRotation(GetRotation() * Quaternion::EulerToQuat(eulerDelta));
     }
+    void Scale(const Vector3& delta) { SetScale(GetScale() + delta); }
 
-    const Vector3 GetRight() const
-    {
-        XMMATRIX rotationMatrix =
-            XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
-        Vector3 right;
-        XMStoreFloat3((XMFLOAT3*)&right, rotationMatrix.r[0]);
-        return right;
-    }
+    void SetLocalPosition(const Vector3& position);
+    void SetLocalRotation(const Quaternion& rotation);
+    void SetLocalScale(const Vector3& scale);
+    void SetLocalEulerAngles(const Vector3& eulerRadians);
+    void TranslateLocal(const Vector3& delta) { SetLocalPosition(m_localPosition + delta); }
+    void RotateLocal(const Vector3& eulerDelta) { SetLocalRotation(m_localRotation * Quaternion::EulerToQuat(eulerDelta)); }
+    void ScaleLocal(const Vector3& delta) { SetLocalScale(m_localScale + delta); }
 
-    const Vector3 GetUp() const
-    {
-        XMMATRIX rotationMatrix =
-            XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
-        Vector3 up;
-        XMStoreFloat3((XMFLOAT3*)&up, rotationMatrix.r[1]);
-        return up;
-    }
+    const Matrix4x4& GetWorldMatrix() const;
+    const Vector3& GetPosition() const;
+    const Quaternion& GetRotation() const;
+    const Vector3& GetScale() const;
+    Vector3 GetEulerAngles() const { return GetRotation().QuatToEuler(); }
 
+    const Vector3& GetLocalPosition() const { return m_localPosition; }
+    const Quaternion& GetLocalRotation() const { return m_localRotation; }
+    const Vector3& GetLocalScale() const { return m_localScale; }
+    Vector3 GetLocalEulerAngles() const { return m_localRotation.QuatToEuler(); }
+
+    Vector3 GetForward() const { return GetRotation().RotateVector(Vector3::Forward()); }
+    Vector3 GetRight() const { return GetRotation().RotateVector(Vector3::Right()); }
+    Vector3 GetUp() const { return GetRotation().RotateVector(Vector3::Up()); }
 };

@@ -2,7 +2,7 @@
 
 ## 概要
 
-Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント指向のゲームフレームワークである。アプリケーションループは `source/System/main.cpp` にあり、`Manager` がシーン、ゲームオブジェクト、描画、ポストエフェクトの進行を統括する。
+Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント指向のゲームフレームワークである。アプリケーションループは `source/System/Core/main.cpp` にあり、`Manager` がシーン、ゲームオブジェクト、描画、ポストエフェクトの進行を統括する。
 
 ```text
 WinMain
@@ -12,7 +12,7 @@ WinMain
   │    │         └─ Component
   │    ├─ Renderer / RendererBase
   │    ├─ PostEffect
-  │    └─ Prefab factory
+  │    └─ Prefab archive / legacy factory
   └─ 診断システム
        ├─ Logger / LogSystem / LogFileWorker
        ├─ PerformanceMonitor
@@ -23,13 +23,19 @@ WinMain
 
 | 場所 | 責務 |
 | --- | --- |
-| `include/System/`, `source/System/` | ウィンドウ、入力、時間、描画、ゲームオブジェクトとシーンの管理 |
+| `include/System/Core/`, `source/System/Core/` | ウィンドウ、入力、時間、ゲームオブジェクト、Managerなど実行時の基盤 |
+| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、フィールド登録、ファイルダイアログ |
+| `include/System/Serialization/`, `source/System/Serialization/` | YAMLの値変換、ドキュメント入出力、GameObjectのシリアライズ |
+| `include/System/Diagnostics/`, `source/System/Diagnostics/` | Logger、LogSystem、ファイルWorker、PerformanceMonitor |
+| `include/System/Rendering/`, `source/System/Rendering/` | Renderer、RendererBase、DirectXTex |
+| `include/System/SystemInc.h` | 上記System公開ヘッダーをまとめて参照するインクルード窓口 |
 | `include/Component/`, `source/Component/` | Transform、カメラ、メッシュ・スプライト描画、パーティクル、音声などの再利用可能な機能 |
 | `include/Scene/`, `source/Scene/` | タイトル、ゲーム、リザルト各シーンの構築と振る舞い |
 | `include/Script/`, `source/Script/` | プレイヤー、敵、弾、UI、演出などゲーム固有のコンポーネント |
 | `include/math/`, `include/Common/` | ベクトル、曲線、色、乱数などの共通機能 |
-| `shader/` | HLSL ソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
-| `Assets/` | 実行時に読むモデル、テクスチャ、サウンド |
+| `Assets/Shaders/` | Git管理する`.shader`アセットとHLSLソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
+| `Assets/Scenes/`、`Assets/Prefabs/`、`Assets/Materials/` | Git管理するScene、Prefab、Materialアセット |
+| `Assets/Local/` | モデル、テクスチャ、サウンドなどローカル専用リソース。Git管理対象外 |
 | `config/` | ImGui とゲーム内調整値の設定 |
 | `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
@@ -84,6 +90,30 @@ WinMain
 
 `Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 
+## Transform Hierarchy
+
+GameObjectは必ず1つ持つTransformを通じて親子関係を構成する。親子関係の正はTransformが持ち、Managerは親子に関わらずすべてのGameObjectを`std::unique_ptr`で一元所有する。GameObject側はTransformへの委譲APIと、破棄時の子孫処理を担当する。
+
+```text
+Manager
+  └─ GameObject（全Objectを一元所有）
+       └─ Transform
+            ├─ parent: Transform*（非所有）
+            └─ children: Transform*[]（非所有）
+```
+
+TransformはLocal Position、Local Quaternion Rotation、Local Scaleを保持する。Rotationの内部表現はQuaternionだけとし、Euler角を別の状態として保持しない。World行列はLocal行列と親TransformのWorld行列から求める。
+
+TransformはQuaternionを扱う`GetLocalRotation()`と`SetLocalRotation()`、Euler角を扱う`GetLocalEulerAngles()`と`SetLocalEulerAngles()`を明示して提供する。既存のEuler角APIは互換性のため後者へ転送する。InspectorはEuler角を編集値として表示し、変更時にQuaternionへ変換する。YAMLにはQuaternionを`[x, y, z, w]`として保存する。Quaternion自体のAPIと演算規約は[MATH.md](MATH.md)を参照する。
+
+Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱う。Local値を扱うAPIには必ず`Local`を含め、`GetLocalPosition()`、`SetLocalPosition()`、`GetLocalRotation()`、`SetLocalRotation()`、`GetLocalScale()`、`SetLocalScale()`とする。親を持たないTransformではWorld値とLocal値は一致する。
+
+`SetParent()`は自己親子と循環参照を拒否し、失敗時はErrorLogを記録して状態を変更しない。`nullptr`を指定するとRootへ戻す。親変更時は、見た目のWorld変換を維持する`KeepWorld`を既定とし、Local変換を維持する`KeepLocal`も指定できる。親子リストの更新はTransformが担当する。
+
+親GameObjectを`Destroy()`すると、その場で子孫にも再帰的に破棄予約を伝播する。予約されたGameObjectは同じフレームの残りの`Update()`と`LateUpdate()`を実行せず、Managerの破棄フェーズで実際に削除する。
+
+親に非一様Scale、子に回転がある組み合わせではshearが生じる。初期実装ではTRSへの近似分解として扱い、完全なshearの保存・復元は対象外とする。
+
 ## シーンと生成
 
 `Scene` は `Init()` を必須とし、必要に応じて `Uninit()`、`Update()`、`Draw()` を実装する。`Manager::ChangeScene<T>()` は次のフレームの更新時にシーンを切り替える。切替時には旧シーンの `Uninit()`、全 GameObject の `OnDestroy()`、オブジェクト群とポストエフェクトの破棄が行われる。
@@ -91,11 +121,11 @@ WinMain
 オブジェクトは以下の経路で生成する。
 
 - `Manager::CreateEmpty()`: 空の GameObject を生成する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
-- `Manager::Instantiate()`: 登録済み prefab を構築する。通常時は稼働リストへ登録してただちに `OnStart()` を呼ぶ。
+- `Manager::Instantiate()`: `.prefab`からGameObject階層、Component、Field、親子参照を復元する。引数なしでは保存済みRoot Transformを維持し、PRS指定時だけRootを上書きする。
 
 シーンの `Init()` 中に生成された GameObject は保留リストに格納される。シーン構築の完了後、同じ生成バッチの全 GameObject を稼働リストへ移してから順番に `OnStart()` を呼ぶため、別 GameObject を検索する依存関係も開始時に解決できる。通常時に生成された GameObject は生成直後から Manager の検索対象となる。
 
-prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクトリは構築済み GameObject を `std::unique_ptr` で返す。`Manager::Init()` で名前とファクトリを登録し、`Manager::Instantiate()` が返された所有権を受け取る。新しい prefab はファクトリの実装と登録の両方を追加して利用する。
+新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::Instantiate()`である。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
 ## 描画
 
@@ -111,15 +141,23 @@ prefab の実装は `include/System/PrefabFactory.h` にあり、各ファクト
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
 
+Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む復元規則は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+
 ## 診断機能
 
 ログの記録・集約・ファイル出力、性能計測、ImGuiの`Debug`ウィンドウは診断システムとして扱う。ログの記録は任意のスレッドから行い、集約と性能計測はメインスレッド、ファイル出力は専用Workerで処理する。
 
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
+実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
+
+ゲーム固有のScript実装、Inspector調整、Scene／Prefab保存を使った標準的な開発手順は[GAME_DEVELOPMENT.md](GAME_DEVELOPMENT.md)を参照する。
+
+現在の機能完了条件には含めない拡張・最適化項目は[FUTURE_WORK.md](FUTURE_WORK.md)を参照する。
+
 ## リソースとシェーダー
 
-実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。主な配置は `Assets\\Models`、`Assets\\Textures`、`Assets\\Sounds`、`BuildedShader`、`config` である。
+実行時リソースはプロセスの作業ディレクトリからの相対パスで指定する。Scene、Prefab、Material、Shader、Textureなどのアセットは`Assets/`配下であれば配置でき、種類別フォルダは推奨配置およびファイルダイアログの初期位置として扱う。ローカル専用リソースは`Assets/Local/`、Shader生成物は`BuildedShader/`、設定は`config/`に置く。
 
 HLSL は Shader Model 5.0 を対象とし、`common.hlsl` は共有定義で単体コンパイルしない。各実行用シェーダーはプロジェクト設定で `.cso` へコンパイルされ、C++ 側はそのファイルをロードする。
 

@@ -3,6 +3,9 @@
 
 class GameScene : public Scene
 {
-    public:
+    inline static const std::filesystem::path s_sceneFilePath{ "Assets/Scenes/Game.scene" };
+
+public:
+    const std::filesystem::path& GetSceneFilePath() const override { return s_sceneFilePath; }
     void Init() override;
 };

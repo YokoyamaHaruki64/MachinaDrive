@@ -6,13 +6,19 @@
 #include "Component/modelRenderer.h"
 
 #include "Graphics/Material.h"
+#include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/renderer.h"
+#include "System/Rendering/renderer.h"
 
 #include "math/MathCommon.h"
 
 #include <unordered_set>
+
+ModelRenderer::ModelRenderer(GameObject* object)
+    : RendererBase(object)
+{
+}
 
 namespace
 {
@@ -37,7 +43,7 @@ namespace
             return;
 
         Renderer::SetWorldMatrix(worldMatrix);
-        material->Bind(0);
+        material->Bind(0, renderer.FindMaterialPropertyOverride(mesh.materialSlot));
         const GraphicsShaderPass& shaderPass = material->GetShaderPass(0);
 
         // Passが要求するStreamだけを、その入力スロットへ対応付ける。
@@ -103,6 +109,7 @@ ModelRenderer::ModelRenderer(
     const char* modelFileName,
     uint8_t inverseAxisFlags)
     : RendererBase(object),
+    m_modelPath(modelFileName ? std::filesystem::path(modelFileName).generic_string() : std::string{}),
     m_inverseAxisFlags(inverseAxisFlags)
 {
     SetModel(modelFileName ? ModelManager::Load(modelFileName) : nullptr);
@@ -115,12 +122,50 @@ ModelRenderer::ModelRenderer(
     : RendererBase(object),
     m_inverseAxisFlags(inverseAxisFlags)
 {
+    m_modelPath = ModelManager::GetSourcePath(modelAsset).value_or(std::string{});
     SetModel(modelAsset);
+}
+
+void ModelRenderer::OnStart()
+{
+    if (!m_model && !m_modelPath.empty())
+    {
+        SetModel(ModelManager::Load(m_modelPath));
+    }
+
+    for (size_t index = 0; index < m_materialPaths.size() && index < m_materialOverrides.size(); ++index)
+    {
+        if (!m_materialPaths[index].empty())
+        {
+            m_materialOverrides[index] = MaterialManager::Load(m_materialPaths[index]);
+        }
+    }
+}
+
+void ModelRenderer::RegisterFields(FieldRegistry& fields)
+{
+    for (size_t index = 0; index < m_materialOverrides.size(); ++index)
+    {
+        if (Material* material = m_materialOverrides[index]; material && !material->GetFilePath().empty())
+        {
+            m_materialPaths[index] = material->GetFilePath();
+        }
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD(m_modelPath);
+    GM_FIELD_TYPE(m_materialPaths, InspectorFieldType::Hidden);
+    GM_FIELD(m_inverseAxisFlags);
 }
 
 void ModelRenderer::SetModel(ModelAsset* modelAsset)
 {
     m_model = modelAsset;
+    m_materialPropertyOverrides.clear();
+    if (const std::optional<std::string> sourcePath = ModelManager::GetSourcePath(modelAsset))
+    {
+        m_modelPath = *sourcePath;
+    }
 
     // ModelAssetを差し替えた時点で旧slotのoverrideを破棄し、新しい既定Material構成へ同期する。
     InitializeMaterialOverrides();
@@ -133,6 +178,7 @@ void ModelRenderer::InitializeMaterialOverrides()
         return;
 
     m_materialOverrides.assign(m_model->embeddedMaterials.size(), nullptr);
+    m_materialPaths.resize(m_model->embeddedMaterials.size());
 }
 
 Material* ModelRenderer::ResolveMaterial(uint32_t materialSlot) const
@@ -154,6 +200,8 @@ void ModelRenderer::SetMaterial(uint32_t materialSlot, Material* material)
 
     // nullptrを設定すると、ファイルに埋め込まれた既定Materialへ戻す。
     m_materialOverrides[materialSlot] = material;
+    m_materialPaths[materialSlot] = material ? material->GetFilePath() : std::string{};
+    ClearMaterialPropertyOverride(materialSlot);
 }
 
 Material* ModelRenderer::GetMaterial(uint32_t materialSlot)

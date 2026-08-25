@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "Component/ComponentInc.h"
+#include "Graphics/MaterialManager.h"
 
 
 #include "Script/PatternTrail.h"
@@ -35,7 +36,7 @@ void PatternTrail::LateUpdate()
     // 破棄されたトレイルヘッダーを削除
     for (int i = 0; i < m_trailHeaders.size(); ++i)
     {
-        GameObject* trail = m_trailHeaders[i];
+        const GameObjectReference& trail = m_trailHeaders[i];
         if (!trail || trail->IsDestroyed())
         {
             // スワップポップで削除
@@ -73,7 +74,10 @@ void PatternTrail::CreateTrailPattern(
         auto th = trail->AddComponent<PatternTrailHeader>();
         th->Init(m_config, normal, PatternTrailHeader::Axis::Y, angle);
 
-        auto tr = trail->AddComponent<TrailRenderer>(L"Assets/Textures/White.png");
+        auto tr = trail->AddComponent<TrailRenderer>();
+        tr->SetMaterial(
+            0,
+            MaterialManager::Load("Assets/Materials/Trail.material"));
         tr->SetFaceMode(TrailRenderer::TrailFaceMode::FixedDirection);
         tr->SetFixedDirection(normal);
         tr->SetMinSegmentDistance(0.01f);
@@ -83,7 +87,7 @@ void PatternTrail::CreateTrailPattern(
         tr->SetWidth(settings.width);
 
 
-        m_trailHeaders.push_back(trail);
+        m_trailHeaders.emplace_back(trail);
     }
 
     m_normal = normal;

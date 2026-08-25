@@ -14,7 +14,10 @@
 
 void BallManager::OnStart()
 {
-    m_walls = Manager::GetObjectsByComponent<Wall>();
+    for (GameObject* wall : Manager::GetObjectsByComponent<Wall>())
+    {
+        m_walls.emplace_back(wall);
+    }
 }
 
 void BallManager::Update()
@@ -28,7 +31,7 @@ void BallManager::CreateBoll(Vector3 position,Vector3 normal)
     // ボールを生成
     Vector3 randomVelocity = Random::RandomCone(normal, 30.0f) * 10.0f;
     Manager::Instantiate(
-        "Ball",
+        "Assets/Prefabs/BoundBall.prefab",
         position,
         Vector3::Zero(),
         Vector3(1.0f, 1.0f, 1.0f)
@@ -38,12 +41,16 @@ void BallManager::CreateBoll(Vector3 position,Vector3 normal)
 
 void BallManager::CreateBoll_Random()
 {
-    if (m_ballCount >= MAX_BALL_COUNT) return;
+    if (m_ballCount >= MAX_BALL_COUNT || m_walls.empty()) return;
 
     // 壁からランダムな位置を生成
     // intのRangeはmaxが含まれないためsize()をそのまま渡す
     int wallIndex = Random::Range(0, static_cast<int>(m_walls.size() - 1));
-    auto wall = m_walls[wallIndex];
+    const GameObjectReference& wall = m_walls[wallIndex];
+    if (!wall)
+    {
+        return;
+    }
 
     Vector3 wallPos = wall->GetTransform()->GetPosition();
     Vector3 wallScale = wall->GetTransform()->GetScale();
@@ -103,7 +110,7 @@ void BallManager::CreateBoll_Random()
     // ボールを生成
     Vector3 randomVelocity = Random::RandomCone(normal, 30.0f) * 10.0f;
     Manager::Instantiate(
-        "Ball",
+        "Assets/Prefabs/BoundBall.prefab",
         randomPos,
         Vector3::Zero(),
         Vector3(1.0f, 1.0f, 1.0f)

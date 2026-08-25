@@ -29,7 +29,7 @@ void Bullet::Update()
             enemyObj->Destroy();    // 敵を破壊
             m_owner->Destroy();     // 弾を破壊
             Manager::Instantiate(
-                "ExplosionEffect",
+                "Assets/Prefabs/Explosion.prefab",
                 enemyTransform->GetPosition() + Vector3(0.0f, 0.5f, 0.0f), // 敵の位置に少し上げてエフェクトを生成
                 Vector3::Zero(),
                 Vector3::One() * 3.0f); // 爆発エフェクトを生成

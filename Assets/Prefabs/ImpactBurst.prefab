@@ -1,0 +1,23 @@
+version: 1
+name: ImpactBurst
+gameObjects:
+  - id: 1
+    name: ImpactBurst
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: ParticleEmitter
+        fields: {}
+      - type: ParticleRenderer
+        fields:
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/Particle.material
+      - type: ImpactBurst
+        fields: {}

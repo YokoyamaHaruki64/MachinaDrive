@@ -22,16 +22,15 @@ void Ripple::OnStart()
     {
         m_renderer = m_owner->AddComponent<ModelRenderer>(
             ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad));
-        GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader");
+        GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitAdditive.shader");
         if (Material* material = shader ? MaterialManager::Create("Ripple.Fallback", *shader) : nullptr)
         {
-            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\Ripple.png"));
+            material->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\Ripple.png"));
             m_renderer->SetMaterial(0, material);
         }
     }
 
-    if (Material* material = m_renderer->GetMaterial())
-        material->SetColor("_BaseColor", c);
+    m_renderer->GetMaterialPropertyOverride().SetColor("_BaseColor", c);
 
     transform()->SetScale(Vector3(baseScale, baseScale, baseScale));
 }
@@ -42,8 +41,7 @@ void Ripple::Update()
     m_elapsedTime += Time::GetDeltaTime();
     float t = m_elapsedTime / m_lifeTime;
     Color c = m_colorCurve.Evaluate(t); // カラーを更新
-    if (Material* material = m_renderer->GetMaterial())
-        material->SetColor("_BaseColor", c);
+    m_renderer->GetMaterialPropertyOverride().SetColor("_BaseColor", c);
     float s = baseScale * (1.5f + t); // スケールを増加させる
     transform()->SetScale(Vector3(s, s, s));
 

@@ -15,7 +15,10 @@
 
 void PatternTrailManager::OnStart()
 {
-    m_walls = Manager::GetObjectsByComponent<Wall>();
+    for (GameObject* wall : Manager::GetObjectsByComponent<Wall>())
+    {
+        m_walls.emplace_back(wall);
+    }
     m_config = Manager::GetFirstObjectByComponent<EffectConfig>()->GetComponent<EffectConfig>();
 }
 
@@ -37,7 +40,11 @@ void PatternTrailManager::CreatePatternTrail_Random()
     // 壁からランダムな位置を生成
     // intのRangeはmaxが含まれないためsize()をそのまま渡す
     int wallIndex = Random::Range(0, static_cast<int>(m_walls.size() - 1));
-    auto wall = m_walls[wallIndex];
+    const GameObjectReference& wall = m_walls[wallIndex];
+    if (!wall)
+    {
+        return;
+    }
     Vector3 wallPos = wall->GetTransform()->GetPosition();
     Vector3 wallScale = wall->GetTransform()->GetScale();
     wallScale *= 0.5f; // 少し小さくして壁の端に出ないようにする

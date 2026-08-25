@@ -44,7 +44,7 @@ public:
 
 class Bloom : public PostProcess
 {
-    static constexpr const char* SHADER_FILE_PATH = "shader/PostProcessBloom.shader";
+    static constexpr const char* SHADER_FILE_PATH = "Assets/Shaders/PostProcessBloom.shader";
     TextureHandle m_bloomTexture{};
 
     size_t m_bloomExtractPassIndex{};

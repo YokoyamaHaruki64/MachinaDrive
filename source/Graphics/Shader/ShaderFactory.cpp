@@ -16,8 +16,8 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/InputLayoutBuilder.h"
 #include "Graphics/Shader/ShaderInc.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/renderer.h"
-#include "System/Logger.h"
+#include "System/Rendering/renderer.h"
+#include "System/Diagnostics/Logger.h"
 
 bool ShaderFactory::createVertexShader(
     ID3DBlob* shaderBlob,

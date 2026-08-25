@@ -13,7 +13,7 @@ Author : Yokoyama Haruki
 
 #include "Graphics/Shader/ShaderReflector.h"
 #include "Graphics/Shader/ShaderInc.h"
-#include "System/Logger.h"
+#include "System/Diagnostics/Logger.h"
 
 #include <d3dcompiler.h>
 

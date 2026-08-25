@@ -2,8 +2,8 @@
 
 #include "Scene/GameScene.h"
 
-#include "System/main.h"
-#include "System/manager.h"
+#include "System/Core/main.h"
+#include "System/Core/manager.h"
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
@@ -24,6 +24,12 @@
 
 void GameScene::Init()
 {
+    if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
+    {
+        Manager::AddPostEffect(std::make_unique<Bloom>());
+        return;
+    }
+
     // シーン初期化
     GameObject* camera = Manager::CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
     camera->AddComponent<Camera>(Camera::MainCamera);
@@ -35,11 +41,11 @@ void GameScene::Init()
     Material* fieldMaterial = MaterialManager::Get("GameScene.Field.Material");
     if (!fieldMaterial)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
         {
             fieldMaterial = MaterialManager::Create("GameScene.Field.Material", *shader);
             if (fieldMaterial)
-                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\glass2.png"));
+                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\glass2.png"));
         }
     }
     fieldRenderer->SetMaterial(0, fieldMaterial);
@@ -50,18 +56,18 @@ void GameScene::Init()
     Material* cubeMaterial = MaterialManager::Get("GameScene.Cube.Material");
     if (!cubeMaterial)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
         {
             cubeMaterial = MaterialManager::Create("GameScene.Cube.Material", *shader);
             if (cubeMaterial)
-                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\DarkMatReal.png"));
+                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\DarkMatReal.png"));
         }
     }
     cubeRenderer->SetMaterial(0, cubeMaterial);
     obj->AddComponent<RotateCube>();
 
     Manager::Instantiate(
-        "Player",
+        "Assets/Prefabs/Player.prefab",
         Vector3(0.0f, 0.0f, 1.0f),
         Vector3(0.0f, 0.0f, 0.0f),
         Vector3::One());
@@ -75,7 +81,7 @@ void GameScene::Init()
     for (const auto& pos : enemyPos)
     {
         Manager::Instantiate(
-            "Enemy",
+            "Assets/Prefabs/Enemy.prefab",
             pos,
             Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
             Vector3::One());
@@ -91,13 +97,11 @@ void GameScene::Init()
 
     for (const auto& pos : treePos)
     {
-        GameObject* tree = Manager::Instantiate(
-            "Tree",
+        Manager::Instantiate(
+            "Assets/Prefabs/Tree.prefab",
             pos,
             Vector3::Zero(),
             Vector3::One() * 5.0f);
-
-        tree->GetComponent<ModelRenderer>()->SetRenderPhase(RenderPhase::Transparent);
     }
 
     GameObject* skydome = Manager::CreateEmpty();
@@ -108,5 +112,5 @@ void GameScene::Init()
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 
-    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
+    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Local\\Sounds\\bgm.wav")->Play(true);
 }

@@ -3,6 +3,13 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/Player.h"
+#include "System/Editor/FieldRegistry.h"
+
+void Player::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD(m_velocity);
+    GM_FIELD(m_isGrounded);
+}
 
 #include "Scene/ResultScene.h"
 #include "math/MathCommon.h"
@@ -63,7 +70,7 @@ void Player::Update()
 
     if( Input::GetKeyTrigger(Input::KK_F))
     {
-        GameObject* bullet = Manager::Instantiate("Bullet",
+        GameObject* bullet = Manager::Instantiate("Assets/Prefabs/Bullet.prefab",
             transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f)
             , Vector3::Zero(), Vector3::One()); // 弾の生成
         bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f); // 弾の速度設定
@@ -77,7 +84,7 @@ void Player::Update()
 
     transform()->Translate(m_velocity * Time::GetDeltaTime()); // 位置の更新
     float targetRotationY = atan2f(m_velocity.x, m_velocity.z); // 移動方向に向く
-    const Vector3& myRot = transform()->GetRotation();
+    const Vector3 myRot = transform()->GetRotation().QuatToEuler();
     transform()->SetRotation(Vector3(myRot.x, Math::LerpAngle(myRot.y, targetRotationY, 10.0f * Time::GetDeltaTime()), myRot.z)); // 回転の更新
 
 	if(transform()->GetPosition().y < 0.0f)

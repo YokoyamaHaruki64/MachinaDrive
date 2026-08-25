@@ -4,7 +4,7 @@
 
 
 #include "Component/Camera.h"
-#include "System/Renderer.h"
+#include "System/Rendering/renderer.h"
 
 std::unordered_map<Camera::CameraTag, Camera*> Camera::s_camerasByTag;
 Camera* Camera::s_mainCamera = nullptr;

@@ -6,7 +6,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/TextureManager.h"
-#include "System/renderer.h"
+#include "System/Rendering/renderer.h"
 
 #include <Assimp/Importer.hpp>
 #include <Assimp/material.h>

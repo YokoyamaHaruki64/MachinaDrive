@@ -1,12 +1,13 @@
 ﻿#pragma once
 
-#include "System/main.h"
+#include "System/Core/main.h"
 
-#include "System/Component.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
 #include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
-#include "System/RendererBase.h"
+#include "System/Rendering/RendererBase.h"
 
 #include "math/Vector3.h"
 #include "math/Curve.h"
@@ -16,6 +17,8 @@
 
 class ParticleEmitter : public Component
 {
+    REGISTER_COMPONENT(ParticleEmitter, "Particle Emitter");
+
 public:
 
     enum VelocityType : uint8_t
@@ -73,8 +76,8 @@ public:
         // 速度タイプ
         VelocityType velocityType = VelocityType::Directional;
 
-        // Directional / Cone 
-        Vector3 direction = Vector3::Up(); 
+        // Directional / Cone
+        Vector3 direction = Vector3::Up();
 
         // Cone
         float coneAngle = 30.0f;    // Coneの角度（degrees）
@@ -108,6 +111,7 @@ public :
     ParticleEmitter(GameObject* owner): Component(owner)
     {
     }
+    void OnStart() override { SetSettings(m_settings); }
     void Update() override;
     std::vector<Particle>& GetParticles() { return m_particles; }
 
@@ -171,25 +175,32 @@ private:
     void EmitOne();
     void ActivateParticle(Particle& p);
     void UpdateParticle(Particle& p, float dt);
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };
 
 class ParticleRenderer : public RendererBase
 {
+    REGISTER_COMPONENT(ParticleRenderer, "Particle Renderer");
+
 private:
     ParticleEmitter* m_emitter{};
     const Mesh* m_mesh{};
-    Material* m_materialInstance{};
-    TextureHandle m_texture{};
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Particle.material" };
 
-    void BindMesh(const XMMATRIX& worldMatrix, const Color& color) const;
+    void BindMesh(const XMMATRIX& worldMatrix, const Color& color);
 
 public:
     ParticleRenderer() = delete;
-    ParticleRenderer(
-        GameObject* owner,
-        ParticleEmitter* emitter,
-        const wchar_t* textureFile);
+    explicit ParticleRenderer(GameObject* owner);
 
+    void OnStart() override;
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

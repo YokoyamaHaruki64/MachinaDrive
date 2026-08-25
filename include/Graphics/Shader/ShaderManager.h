@@ -25,7 +25,7 @@ class ShaderLoader;
 class ShaderManager
 {
 private:
-    static constexpr const char* DEFAULT_SHADER_FILE_PATH = "shader/DefaultLit.shader";
+    static constexpr const char* DEFAULT_SHADER_FILE_PATH = "Assets/Shaders/DefaultLit.shader";
     static std::vector<std::unique_ptr<GraphicsShader>> m_shaders;
     static std::unique_ptr<ShaderLoader> m_shaderLoader;
     static GraphicsShader* m_defaultShader;

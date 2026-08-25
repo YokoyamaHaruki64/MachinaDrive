@@ -1,13 +1,14 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Core/Script.h"
 #include "math/Vector3.h"
 
 class BallManager;
 class EffectConfig;
 
-class BoundBall : public Component
+class BoundBall : public Script
 {
+    REGISTER_COMPONENT(BoundBall, "BoundBall");
     static constexpr float RADIUS = 0.3f; // 球の半径
     static constexpr float RIPPLE_EFFECT_COOLDOWN = 0.2f; // Rippleエフェクトのクールダウン時間
     Vector3 m_velocity;
@@ -20,7 +21,7 @@ class BoundBall : public Component
 
     void CreateRippleEffect(Vector3 normal, Vector3 position);
 public:
-    BoundBall(GameObject* owner) : Component(owner), m_velocity(Vector3::Zero()) {}
+    BoundBall(GameObject* owner) : Script(owner), m_velocity(Vector3::Zero()) {}
     virtual ~BoundBall() override {};
     virtual void OnStart() override;
     virtual void Update() override;

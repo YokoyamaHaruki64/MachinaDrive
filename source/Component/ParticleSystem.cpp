@@ -3,15 +3,12 @@
 #include "Component/ComponentInc.h"
 
 
-#include "System/Renderer.h"
+#include "System/Rendering/renderer.h"
 #include "Common/Random.h"
 #include "Component/ParticleSystem.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
-#include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "Graphics/TextureManager.h"
-
 #include "Common/Random.h"
 
 void ParticleEmitter::Update()
@@ -180,46 +177,104 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
         p.color = m_settings.colorOverLifetime.Evaluate(normalizedAge);
     }
 }
-
-
-ParticleRenderer::ParticleRenderer(
-    GameObject* owner,
-    ParticleEmitter* emitter,
-    const wchar_t* textureFile)
-    : RendererBase(owner),
-    m_emitter(emitter)
+void ParticleEmitter::RegisterFields(FieldRegistry& fields)
 {
+    GM_FIELD_KEY("offset", m_settings.offset);
+    GM_FIELD_KEY("maxParticles", m_settings.maxParticles);
+    GM_FIELD_KEY("burst", m_settings.burst);
+    GM_FIELD_KEY("burstCount", m_settings.burstCount);
+    GM_FIELD_KEY("burstTime", m_settings.burstTime);
+    GM_FIELD_KEY("finishedDestroy", m_settings.finishedDestroy);
+    GM_FIELD_KEY("emitRate", m_settings.emitRate);
+    GM_FIELD_KEY("lifetimeMin", m_settings.lifetimeMin);
+    GM_FIELD_KEY("lifetimeMax", m_settings.lifetimeMax);
+    GM_FIELD_KEY("gravity", m_settings.gravity);
+    GM_FIELD_KEY("drag", m_settings.drag);
+    GM_FIELD_KEY("size", m_settings.size);
+    GM_FIELD_KEY_TYPE("scaleOverLifetime", m_settings.scaleOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY_TYPE("colorOverLifetime", m_settings.colorOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
+    GM_FIELD_KEY("speed", m_settings.speed);
+    GM_FIELD_KEY("speedMin", m_settings.speedMin);
+    GM_FIELD_KEY("speedMax", m_settings.speedMax);
+    GM_FIELD_KEY("direction", m_settings.direction);
+    GM_FIELD_KEY("coneAngle", m_settings.coneAngle);
+    GM_FIELD_KEY("spawnRadius", m_settings.spawnRadius);
+    GM_FIELD_KEY("spawnNormal", m_settings.spawnNormal);
+    fields.AddAccessor<int>("velocityType",
+        [this] { return static_cast<int>(m_settings.velocityType); },
+        [this](int value) { m_settings.velocityType = static_cast<VelocityType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+    fields.AddAccessor<int>("spawnType",
+        [this] { return static_cast<int>(m_settings.spawnType); },
+        [this](int value) { m_settings.spawnType = static_cast<SpawnType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+}
+
+ParticleRenderer::ParticleRenderer(GameObject* owner)
+    : RendererBase(owner)
+{
+    m_billboardType = BillboardType::CameraFacing;
+    m_renderPhase = RenderPhase::Transparent;
+}
+
+void ParticleRenderer::OnStart()
+{
+    if (!m_emitter)
+    {
+        m_emitter = GetComponent<ParticleEmitter>();
+    }
+
     ModelAsset* quadModel = ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad);
     if (quadModel && !quadModel->meshes.empty())
         m_mesh = &quadModel->meshes.front();
 
-    static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitAdditive.shader"))
-        m_materialInstance = MaterialManager::Create("Particle." + std::to_string(materialInstanceIndex++), *shader);
+    m_material = MaterialManager::Load(m_materialPath);
+}
 
-    m_texture = textureFile ? TextureManager::LoadTexture(std::wstring(textureFile)) : TextureHandle{};
-    m_billboardType = BillboardType::CameraFacing;
-    m_renderPhase = RenderPhase::Transparent;
+void ParticleRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_material && !m_material->GetFilePath().empty())
+    {
+        m_materialPath = m_material->GetFilePath();
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
 }
 
 Material* ParticleRenderer::GetMaterial(uint32_t slot)
 {
     // Particleは単一Materialのみを持つ。
-    return slot == 0 ? m_materialInstance : nullptr;
+    return slot == 0 ? m_material : nullptr;
 }
 
-void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color) const
+void ParticleRenderer::SetMaterial(uint32_t slot, Material* material)
 {
-    if (!m_mesh || !m_materialInstance)
+    if (slot == 0)
+    {
+        m_material = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
+        ClearMaterialPropertyOverride();
+    }
+}
+
+void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color)
+{
+    if (!m_mesh || !m_material)
         return;
 
     Renderer::SetWorldMatrix(worldMatrix);
-    m_materialInstance->SetColor("_BaseColor", color);
-    m_materialInstance->SetTexture("_MainTex", m_texture);
-    m_materialInstance->Bind(0);
+    MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
+    propertyOverride.SetColor("_BaseColor", color);
+    m_material->Bind(0, &propertyOverride);
 
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
-    for (const InputSlotBinding& binding : m_materialInstance->GetShaderPass(0).GetInputSlotBindings())
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
     {
         ID3D11Buffer* vertexBuffer = m_mesh->GetVertexBuffer(binding.streamType);
         if (!vertexBuffer)
@@ -238,7 +293,7 @@ void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color)
 
 void ParticleRenderer::Draw()
 {
-    if (!m_emitter || !m_mesh || !m_materialInstance)
+    if (!m_emitter || !m_mesh || !m_material)
         return;
 
     const ParticleEmitter::EmitterSettings& settings = m_emitter->GetSettingsRef();

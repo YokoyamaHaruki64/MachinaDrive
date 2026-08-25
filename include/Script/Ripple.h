@@ -1,13 +1,14 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Core/Script.h"
 #include "Common/Color.h"
 #include "math/Curve.h"
 
 class ModelRenderer;
 
-class Ripple : public Component
+class Ripple : public Script
 {
+    REGISTER_COMPONENT(Ripple, "Ripple");
     ModelRenderer* m_renderer = nullptr;
 
     float m_lifeTime = 1.0f; // 波紋の寿命
@@ -27,7 +28,7 @@ class Ripple : public Component
     Curve<Color> m_colorCurve{};
 
 public:
-    Ripple(GameObject* owner) :Component(owner)
+    Ripple(GameObject* owner) : Script(owner)
     {}
     virtual ~Ripple() override {}
     virtual void OnStart() override;

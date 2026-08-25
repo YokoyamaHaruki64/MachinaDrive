@@ -102,10 +102,15 @@ void Audio::Load(const char *FileName)
 
 void Audio::Uninit()
 {
-	m_SourceVoice->Stop();
-	m_SourceVoice->DestroyVoice();
+    if (m_SourceVoice)
+    {
+        m_SourceVoice->Stop();
+        m_SourceVoice->DestroyVoice();
+        m_SourceVoice = nullptr;
+    }
 
-	delete[] m_SoundData;
+    delete[] m_SoundData;
+    m_SoundData = nullptr;
 }
 
 
@@ -114,6 +119,16 @@ void Audio::Uninit()
 
 void Audio::Play(bool Loop)
 {
+    if (m_owner && !m_owner->IsStarted())
+    {
+        m_playOnStart = true;
+        m_loop = Loop;
+    }
+    if (!m_SourceVoice)
+    {
+        return;
+    }
+
 	m_SourceVoice->Stop();
 	m_SourceVoice->FlushSourceBuffers();
 
@@ -147,6 +162,25 @@ void Audio::Play(bool Loop)
 	// 再生
 	m_SourceVoice->Start();
 
+}
+
+void Audio::OnStart()
+{
+    if (!m_SourceVoice && !m_filePath.empty())
+    {
+        Load(m_filePath.c_str());
+    }
+    if (m_playOnStart)
+    {
+        Play(m_loop);
+    }
+}
+
+void Audio::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD(m_filePath);
+    GM_FIELD(m_playOnStart);
+    GM_FIELD(m_loop);
 }
 
 

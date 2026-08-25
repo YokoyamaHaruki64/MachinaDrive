@@ -3,7 +3,8 @@
 #include "Common/Color.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
-#include "System/RendererBase.h"
+#include "System/Rendering/RendererBase.h"
+#include "System/Core/ComponentRegistry.h"
 #include "math/Curve.h"
 #include "math/Vector3.h"
 
@@ -11,6 +12,8 @@
 
 class TrailRenderer : public RendererBase
 {
+    REGISTER_COMPONENT(TrailRenderer, "Trail Renderer");
+
 public:
     enum TrailFaceMode
     {
@@ -34,8 +37,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
 
-    Material* m_materialInstance{};
-    TextureHandle m_texture{};
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Trail.material" };
 
     std::deque<TrailSegment> m_segments;
     Curve<float> m_widthCurve = Curve<float>(1.0f, 0.0f);
@@ -53,10 +56,12 @@ private:
 
 public:
     TrailRenderer() = delete;
-    explicit TrailRenderer(GameObject* owner, const wchar_t* textureFile);
+    explicit TrailRenderer(GameObject* owner);
     virtual ~TrailRenderer() {}
+    void OnStart() override;
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
 
     const Curve<float>& GetWidthCurve() const { return m_widthCurve; }
     const CurveColor& GetColorCurve() const { return m_colorCurve; }
@@ -76,4 +81,7 @@ public:
     void SetMinSegmentDistance(float distance) { m_minSegmentDistance = distance; }
     void SetTrailLifetime(float lifetime) { m_trailLifetime = lifetime; }
     void SetWidth(float width) { m_width = width; }
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

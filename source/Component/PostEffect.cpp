@@ -9,7 +9,7 @@
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
-#include "System/renderer.h"
+#include "System/Rendering/renderer.h"
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_positionBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_texCoordBuffer;

@@ -11,7 +11,7 @@ Author : Yokoyama Haruki
 ===============================================================================*/
 
 #include "Graphics/Shader/ShaderCompiler.h"
-#include "System/Logger.h"
+#include "System/Diagnostics/Logger.h"
 
 #include <d3dcompiler.h>
 #include <wrl/client.h>

@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Graphics/GraphicInc.h"
+#include <optional>
+#include <string>
 #include <unordered_map>
 #include <wrl/client.h>
 
@@ -13,6 +15,7 @@ class TextureManager
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
         UINT width{};
         UINT height{};
+        std::string sourcePath;
     };
 
     static std::unordered_map<TextureID, TextureResource> m_textures;
@@ -38,4 +41,5 @@ public:
     static ID3D11RenderTargetView* GetRenderTargetView(TextureHandle texture);
     static ID3D11Texture2D* GetTexture(TextureHandle texture);
     static bool GetTextureSize(TextureHandle texture, UINT& outWidth, UINT& outHeight);
+    static std::optional<std::string> GetSourcePath(TextureHandle texture);
 };

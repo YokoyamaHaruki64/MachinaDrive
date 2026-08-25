@@ -1,6 +1,7 @@
 ﻿#include "Score.h"
 
 #include "Component/ComponentInc.h"
+#include "Graphics/MaterialManager.h"
 
 
 void Score::OnStart()
@@ -13,12 +14,15 @@ void Score::OnStart()
             transform()->GetPosition().y,
             transform()->GetPosition().z);
         GameObject* digitObj = Manager::CreateEmpty(pos);
-        digitObj->AddComponent<SpriteRenderer>(
-            L"Assets\\Textures\\number.png")->SetUVSize(1.0f / 5.0f, 1.0f / 5.0f);
+        SpriteRenderer* digitRenderer = digitObj->AddComponent<SpriteRenderer>();
+        digitRenderer->SetMaterial(
+            0,
+            MaterialManager::Load("Assets/Materials/Number.material"));
+        digitRenderer->SetUVSize(1.0f / 5.0f, 1.0f / 5.0f);
 
         digitObj->GetTransform()->SetScale(Vector3(100.0f, 100.0f, 1.0f));
 
-        m_scoreObjects.push_back(digitObj);
+        m_scoreObjects.emplace_back(digitObj);
     }
 }
 
@@ -29,7 +33,13 @@ void Score::Update()
     {
         int digit = score % 10;
         score /= 10;
-        SpriteRenderer* renderer = m_scoreObjects[i]->GetComponent<SpriteRenderer>();
+        const GameObjectReference& digitObject = m_scoreObjects[i];
+        if (!digitObject)
+        {
+            continue;
+        }
+
+        SpriteRenderer* renderer = digitObject->GetComponent<SpriteRenderer>();
         if(renderer)
         {
             float uvOffsetX = digit % 5 * 0.2f;

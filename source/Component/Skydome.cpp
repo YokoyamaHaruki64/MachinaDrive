@@ -17,16 +17,16 @@ void Skydome::OnStart()
 
     m_domeObject = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(1000.0f, 1000.0f, 1000.0f));
     auto mr = m_domeObject->AddComponent<ModelRenderer>(
-        "Assets\\Models\\sky.obj");
+        "Assets\\Local\\Models\\sky.obj");
 
     Material* skydomeMaterial = MaterialManager::Get("Skydome.Material");
     if(!skydomeMaterial)
     {
-        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("shader/UnlitTexture.shader"))
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
         {
             skydomeMaterial = MaterialManager::Create("Skydome.Material", *shader);
             if (skydomeMaterial)
-                skydomeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Textures\\sky.jpg"));
+                skydomeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\sky.jpg"));
         }
     }
 }

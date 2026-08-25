@@ -1,11 +1,18 @@
 ﻿#include "pch.h"
 #include "Graphics/Material.h"
+
+#include "Graphics/MaterialPropertyOverride.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
-#include "System/renderer.h"
+#include "System/Editor/FileSystem.h"
+#include "System/Diagnostics/Logger.h"
+#include "System/Rendering/renderer.h"
+#include "imgui.h"
 
 #include <algorithm>
+#include <array>
 #include <cstring>
+#include <type_traits>
 
 namespace
 {
@@ -23,6 +30,8 @@ Material::Material(std::string name, const GraphicsShader& shader)
     // Resource値はShaderPropertyIDを添字として保持する。
     const std::vector<ShaderPropertyDesc>& shaderProperties = shader.GetProperties();
     m_resourceValues.resize(shaderProperties.size());
+    m_resourcePaths.resize(shaderProperties.size());
+    m_resourceErrors.resize(shaderProperties.size());
 
     // Reflectionで確定した各Propertyの末尾から、b3に必要なバイト列のサイズを求める。
     UINT propertiesSize = 0;
@@ -99,56 +108,153 @@ void Material::CreatePropertiesBuffer()
     Renderer::GetDevice()->CreateBuffer(&bufferDesc, nullptr, &m_propertiesBuffer);
 }
 
-bool Material::SetConstantBufferValue(MaterialPropertyID id, PropertyType type, const void* value, size_t valueSize)
+bool Material::WriteConstantBufferValue(
+    std::vector<uint8_t>& propertyData,
+    const ShaderPropertyDesc& property,
+    const PropertyValue& value)
 {
-    // ID・Storage・型を検証して、Resourceや別MaterialのPropertyへの書き込みを防ぐ。
-    const ShaderPropertyDesc* property = FindShaderProperty(id);
-    if (!property || property->storage != MaterialPropertyStorage::ConstantBuffer || property->type != type)
-        return false;
-
-    if (property->offset == INVALID_PROPERTY_OFFSET || property->offset + property->size > m_propertyData.size())
-        return false;
-
-    // HLSLの行列は列ごとに16バイト境界へ配置されるため、通常のmemcpyでは格納しない。
-    if (type == PropertyType::Matrix3x3)
+    if (property.storage != MaterialPropertyStorage::ConstantBuffer ||
+        property.offset == INVALID_PROPERTY_OFFSET ||
+        property.offset + property.size > propertyData.size())
     {
-        const Matrix3x3& matrix = *static_cast<const Matrix3x3*>(value);
+        return false;
+    }
+
+    if (property.type == PropertyType::Matrix3x3)
+    {
+        const Matrix3x3* matrix = std::get_if<Matrix3x3>(&value);
+        if (!matrix)
+            return false;
+
         for (UINT column = 0; column < 3; ++column)
         {
             const float packedColumn[3]
             {
-                matrix.m[0][column],
-                matrix.m[1][column],
-                matrix.m[2][column],
+                matrix->m[0][column],
+                matrix->m[1][column],
+                matrix->m[2][column],
             };
-            std::memcpy(m_propertyData.data() + property->offset + (column * 16), packedColumn, sizeof(packedColumn));
+            std::memcpy(propertyData.data() + property.offset + (column * 16), packedColumn, sizeof(packedColumn));
         }
         return true;
     }
 
-    if (type == PropertyType::Matrix4x4)
+    if (property.type == PropertyType::Matrix4x4)
     {
-        const Matrix4x4& matrix = *static_cast<const Matrix4x4*>(value);
+        const Matrix4x4* matrix = std::get_if<Matrix4x4>(&value);
+        if (!matrix)
+            return false;
+
         for (UINT column = 0; column < 4; ++column)
         {
             const float packedColumn[4]
             {
-                matrix.m[0][column],
-                matrix.m[1][column],
-                matrix.m[2][column],
-                matrix.m[3][column],
+                matrix->m[0][column],
+                matrix->m[1][column],
+                matrix->m[2][column],
+                matrix->m[3][column],
             };
-            std::memcpy(m_propertyData.data() + property->offset + (column * 16), packedColumn, sizeof(packedColumn));
+            std::memcpy(propertyData.data() + property.offset + (column * 16), packedColumn, sizeof(packedColumn));
         }
         return true;
     }
 
-    // スカラー・ベクトル・ColorはReflectionが返したoffsetへ直接格納できる。
-    if (valueSize > property->size)
+    const void* source{};
+    size_t sourceSize{};
+    UINT packedBool{};
+    if (property.type == PropertyType::Float)
+    {
+        if (const float* typedValue = std::get_if<float>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Int)
+    {
+        if (const int* typedValue = std::get_if<int>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Bool)
+    {
+        if (const bool* typedValue = std::get_if<bool>(&value))
+        {
+            packedBool = *typedValue ? 1u : 0u;
+            source = &packedBool;
+            sourceSize = sizeof(packedBool);
+        }
+    }
+    else if (property.type == PropertyType::Vector2)
+    {
+        if (const Vector2* typedValue = std::get_if<Vector2>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Vector3)
+    {
+        if (const Vector3* typedValue = std::get_if<Vector3>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Vector4)
+    {
+        if (const Vector4* typedValue = std::get_if<Vector4>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+    else if (property.type == PropertyType::Color)
+    {
+        if (const Color* typedValue = std::get_if<Color>(&value))
+        {
+            source = typedValue;
+            sourceSize = sizeof(*typedValue);
+        }
+    }
+
+    if (!source || sourceSize > property.size)
         return false;
 
-    std::memcpy(m_propertyData.data() + property->offset, value, valueSize);
+    std::memcpy(propertyData.data() + property.offset, source, sourceSize);
     return true;
+}
+
+bool Material::SetConstantBufferValue(MaterialPropertyID id, PropertyType type, const void* value, size_t)
+{
+    // 共有FallbackはRenderer固有値で上書きせず、常にエラー表示用のマゼンタを維持する。
+    if (!m_isValid)
+    {
+        return true;
+    }
+
+    const ShaderPropertyDesc* property = FindShaderProperty(id);
+    if (!property || property->type != type)
+        return false;
+
+    PropertyValue propertyValue;
+    switch (type)
+    {
+    case PropertyType::Float: propertyValue = *static_cast<const float*>(value); break;
+    case PropertyType::Int: propertyValue = *static_cast<const int*>(value); break;
+    case PropertyType::Bool: propertyValue = *static_cast<const UINT*>(value) != 0; break;
+    case PropertyType::Vector2: propertyValue = *static_cast<const Vector2*>(value); break;
+    case PropertyType::Vector3: propertyValue = *static_cast<const Vector3*>(value); break;
+    case PropertyType::Vector4: propertyValue = *static_cast<const Vector4*>(value); break;
+    case PropertyType::Matrix3x3: propertyValue = *static_cast<const Matrix3x3*>(value); break;
+    case PropertyType::Matrix4x4: propertyValue = *static_cast<const Matrix4x4*>(value); break;
+    case PropertyType::Color: propertyValue = *static_cast<const Color*>(value); break;
+    default: return false;
+    }
+
+    return WriteConstantBufferValue(m_propertyData, *property, propertyValue);
 }
 
 bool Material::GetConstantBufferValue(MaterialPropertyID id, PropertyType type, void* outValue, size_t valueSize) const
@@ -378,6 +484,11 @@ Color Material::SetColor(std::string_view name, const Color& value)
 
 TextureHandle Material::SetTexture(MaterialPropertyID id, TextureHandle texture)
 {
+    if (!m_isValid)
+    {
+        return texture;
+    }
+
     // Textureは定数バッファに詰めず、ShaderPropertyIDで対応付けたResource値として保持する。
     const ShaderPropertyDesc* property = FindShaderProperty(id);
     if (!property || property->storage != MaterialPropertyStorage::Resource || property->type != PropertyType::Texture2D)
@@ -387,12 +498,52 @@ TextureHandle Material::SetTexture(MaterialPropertyID id, TextureHandle texture)
     }
 
     m_resourceValues[property->id] = texture;
+    const std::optional<std::string> sourcePath = TextureManager::GetSourcePath(texture);
+    m_resourcePaths[property->id] = sourcePath.value_or(std::string{});
+    m_resourceErrors[property->id] = false;
     return texture;
 }
 
 TextureHandle Material::SetTexture(std::string_view name, TextureHandle texture)
 {
     return SetTexture(GetPropertyID(name), texture);
+}
+
+bool Material::SetTexturePath(MaterialPropertyID id, std::string path)
+{
+    if (!m_isValid)
+    {
+        return false;
+    }
+
+    const ShaderPropertyDesc* property = FindShaderProperty(id);
+    if (!property || property->storage != MaterialPropertyStorage::Resource || property->type != PropertyType::Texture2D)
+    {
+        ShowPropertyError("SetTexturePath", id);
+        return false;
+    }
+
+    TextureHandle texture;
+    bool hasError = false;
+    if (!path.empty())
+    {
+        texture = TextureManager::LoadTexture(path);
+        hasError = !texture.IsValid();
+        if (hasError)
+        {
+            Logger::Error("Material Textureを読み込めません。\nTexture: " + path);
+        }
+    }
+
+    m_resourceValues[property->id] = texture;
+    m_resourcePaths[property->id] = std::move(path);
+    m_resourceErrors[property->id] = hasError;
+    return !hasError;
+}
+
+bool Material::SetTexturePath(std::string_view name, std::string path)
+{
+    return SetTexturePath(GetPropertyID(name), std::move(path));
 }
 
 float Material::GetFloat(MaterialPropertyID id) const
@@ -543,7 +694,94 @@ TextureHandle Material::GetTexture(std::string_view name) const
     return GetTexture(GetPropertyID(name));
 }
 
-void Material::BindProperties(const GraphicsShaderPass& shaderPass)
+const std::string& Material::GetTexturePath(MaterialPropertyID id) const
+{
+    static const std::string emptyPath;
+    const ShaderPropertyDesc* property = FindShaderProperty(id);
+    if (!property || property->storage != MaterialPropertyStorage::Resource || property->id >= m_resourcePaths.size())
+    {
+        return emptyPath;
+    }
+    return m_resourcePaths[property->id];
+}
+
+bool Material::HasTextureError(MaterialPropertyID id) const
+{
+    const ShaderPropertyDesc* property = FindShaderProperty(id);
+    return property &&
+        property->storage == MaterialPropertyStorage::Resource &&
+        property->id < m_resourceErrors.size() &&
+        m_resourceErrors[property->id];
+}
+
+bool Material::GetPropertyValue(const ShaderPropertyDesc& property, PropertyValue& value) const
+{
+    value = property.defaultValue;
+    if (property.storage == MaterialPropertyStorage::ConstantBuffer && property.offset == INVALID_PROPERTY_OFFSET)
+    {
+        return true;
+    }
+
+    const MaterialPropertyID id = GetPropertyID(property.id);
+    bool succeeded = true;
+    std::visit([this, id, &property, &succeeded](auto& typedValue)
+    {
+        using T = std::decay_t<decltype(typedValue)>;
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            UINT packedValue{};
+            succeeded = GetConstantBufferValue(id, property.type, &packedValue, sizeof(packedValue));
+            typedValue = packedValue != 0;
+        }
+        else if constexpr (std::is_same_v<T, TextureHandle>)
+        {
+            typedValue = GetTexture(id);
+        }
+        else
+        {
+            succeeded = GetConstantBufferValue(id, property.type, &typedValue, sizeof(typedValue));
+        }
+    }, value);
+    return succeeded;
+}
+
+bool Material::SetPropertyValue(const ShaderPropertyDesc& property, const PropertyValue& value)
+{
+    if (value.index() != property.defaultValue.index())
+    {
+        return false;
+    }
+
+    if (property.storage == MaterialPropertyStorage::ConstantBuffer && property.offset == INVALID_PROPERTY_OFFSET)
+    {
+        return true;
+    }
+
+    const MaterialPropertyID id = GetPropertyID(property.id);
+    bool succeeded = true;
+    std::visit([this, id, &property, &succeeded](const auto& typedValue)
+    {
+        using T = std::decay_t<decltype(typedValue)>;
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            const UINT packedValue = typedValue ? 1u : 0u;
+            succeeded = SetConstantBufferValue(id, property.type, &packedValue, sizeof(packedValue));
+        }
+        else if constexpr (std::is_same_v<T, TextureHandle>)
+        {
+            SetTexture(id, typedValue);
+        }
+        else
+        {
+            succeeded = SetConstantBufferValue(id, property.type, &typedValue, sizeof(typedValue));
+        }
+    }, value);
+    return succeeded;
+}
+
+void Material::BindProperties(
+    const GraphicsShaderPass& shaderPass,
+    const MaterialPropertyOverride* propertyOverride)
 {
     // Propertiesを参照しないPassでは、b3への更新・Bindは不要である。
     if (!m_propertiesBuffer)
@@ -553,9 +791,25 @@ void Material::BindProperties(const GraphicsShaderPass& shaderPass)
     if (!propertiesInfo)
         return;
 
-    // CPU側の最新バイト列をGPUバッファへ転送し、Reflectionで確定した各ステージへBindする。
+    const std::vector<uint8_t>* propertyData = &m_propertyData;
+    if (propertyOverride && !propertyOverride->Empty())
+    {
+        // Materialが保持する再利用バッファで、Particleごとの描画でもヒープ確保を発生させない。
+        m_overridePropertyData = m_propertyData;
+        for (const auto& [name, value] : propertyOverride->GetValues())
+        {
+            const ShaderPropertyDesc* property = m_shader->GetProperty(name);
+            if (property && property->storage == MaterialPropertyStorage::ConstantBuffer)
+            {
+                WriteConstantBufferValue(m_overridePropertyData, *property, value);
+            }
+        }
+        propertyData = &m_overridePropertyData;
+    }
+
+    // 共有Materialは書き換えず、この描画で解決した値だけをGPUへ転送する。
     ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
-    deviceContext->UpdateSubresource(m_propertiesBuffer.Get(), 0, nullptr, m_propertyData.data(), 0, 0);
+    deviceContext->UpdateSubresource(m_propertiesBuffer.Get(), 0, nullptr, propertyData->data(), 0, 0);
 
     ID3D11Buffer* propertiesBuffer = m_propertiesBuffer.Get();
     if (propertiesInfo->vsSlot >= 0)
@@ -565,7 +819,7 @@ void Material::BindProperties(const GraphicsShaderPass& shaderPass)
         deviceContext->PSSetConstantBuffers(propertiesInfo->psSlot, 1, &propertiesBuffer);
 }
 
-void Material::Bind(size_t passIndex)
+void Material::Bind(size_t passIndex, const MaterialPropertyOverride* propertyOverride)
 {
     const GraphicsShaderPass& shaderPass = GetShaderPass(passIndex);
     ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
@@ -574,7 +828,7 @@ void Material::Bind(size_t passIndex)
     shaderPass.Bind();
 
     // Propertiesの定数値を先にb3へ反映する。
-    BindProperties(shaderPass);
+    BindProperties(shaderPass, propertyOverride);
 
     // Resource PropertyはPassごとのReflection結果に従って各シェーダーステージへ設定する。
     for (const ShaderTextureInfo& binding : shaderPass.GetTextureInfo())
@@ -583,7 +837,17 @@ void Material::Bind(size_t passIndex)
         if (!property || property->storage != MaterialPropertyStorage::Resource)
             continue;
 
-        const TextureHandle texture = m_resourceValues[property->id];
+        TextureHandle texture = m_resourceValues[property->id];
+        if (propertyOverride)
+        {
+            if (const PropertyValue* value = propertyOverride->Find(property->name))
+            {
+                if (const TextureHandle* overriddenTexture = std::get_if<TextureHandle>(value))
+                {
+                    texture = *overriddenTexture;
+                }
+            }
+        }
         ID3D11ShaderResourceView* resource = TextureManager::GetShaderResourceView(texture);
 
         if (binding.vsSlot >= 0)
@@ -594,12 +858,155 @@ void Material::Bind(size_t passIndex)
     }
 }
 
-bool Material::Bind(std::string_view passTag)
+bool Material::Bind(std::string_view passTag, const MaterialPropertyOverride* propertyOverride)
 {
     const std::optional<size_t> passIndex = m_shader->GetShaderPassIndex(passTag);
     if (!passIndex)
         return false;
 
-    Bind(*passIndex);
+    Bind(*passIndex, propertyOverride);
     return true;
+}
+
+void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
+{
+    const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
+    const std::string& path = GetTexturePath(id);
+    if (HasTextureError(id))
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "%s: Error", label);
+    }
+    else
+    {
+        ImGui::Text("%s: %s", label, path.empty() ? "None" : path.c_str());
+    }
+
+    if (ImGui::Button("Select"))
+    {
+        static constexpr std::array<std::string_view, 9> textureExtensions
+        {
+            ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".gif", ".wdp", ".jxr",
+        };
+        const std::optional<std::filesystem::path> selectedPath =
+            FileSystem::OpenFileDialog("Assets", textureExtensions);
+        if (selectedPath)
+        {
+            if (!FileSystem::IsUnderDirectory(*selectedPath, "Assets"))
+            {
+                Logger::Error("TextureはAssetsフォルダ配下に配置してください。");
+            }
+            else if (const std::optional<std::filesystem::path> assetPath =
+                FileSystem::ToProjectRelative(*selectedPath))
+            {
+                SetTexturePath(id, assetPath->generic_string());
+            }
+        }
+    }
+
+    if (!path.empty())
+    {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+        {
+            SetTexturePath(id, {});
+        }
+    }
+}
+
+void Material::DrawInspectorImGui()
+{
+    if (!m_isValid)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "Status: Error");
+    }
+
+    for (const ShaderPropertyDesc& property : m_shader->GetProperties())
+    {
+        const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
+        const MaterialPropertyID id = GetPropertyID(property.id);
+
+        ImGui::PushID(static_cast<int>(property.id));
+        if (property.storage == MaterialPropertyStorage::ConstantBuffer && property.offset == INVALID_PROPERTY_OFFSET)
+        {
+            ImGui::Text("%s: シェーダーで未使用", label);
+        }
+        else if (property.type == ValueType::Float)
+        {
+            float value = GetFloat(id);
+            if (ImGui::DragFloat(label, &value, 0.01f)) SetFloat(id, value);
+        }
+        else if (property.type == ValueType::Int)
+        {
+            int value = GetInt(id);
+            if (ImGui::DragInt(label, &value)) SetInt(id, value);
+        }
+        else if (property.type == ValueType::Bool)
+        {
+            bool value = GetBool(id);
+            if (ImGui::Checkbox(label, &value)) SetBool(id, value);
+        }
+        else if (property.type == ValueType::Color)
+        {
+            Color value = GetColor(id);
+            if (ImGui::ColorEdit4(label, &value.r)) SetColor(id, value);
+        }
+        else if (property.type == ValueType::Vector2)
+        {
+            Vector2 value = GetVector2(id);
+            if (ImGui::DragFloat2(label, &value.x, 0.01f)) SetVector2(id, value);
+        }
+        else if (property.type == ValueType::Vector3)
+        {
+            Vector3 value = GetVector3(id);
+            if (ImGui::DragFloat3(label, &value.x, 0.01f)) SetVector3(id, value);
+        }
+        else if (property.type == ValueType::Vector4)
+        {
+            Vector4 value = GetVector4(id);
+            if (ImGui::DragFloat4(label, &value.x, 0.01f)) SetVector4(id, value);
+        }
+        else if (property.type == ValueType::Matrix3x3)
+        {
+            Matrix3x3 value = GetMatrix3x3(id);
+            bool changed = false;
+
+            ImGui::TextUnformatted(label);
+            ImGui::Indent();
+            for (int row = 0; row < 3; ++row)
+            {
+                ImGui::PushID(row);
+                changed |= ImGui::DragFloat3("##Row", value.m[row], 0.01f);
+                ImGui::PopID();
+            }
+            ImGui::Unindent();
+
+            if (changed) SetMatrix3x3(id, value);
+        }
+        else if (property.type == ValueType::Matrix4x4)
+        {
+            Matrix4x4 value = GetMatrix4x4(id);
+            bool changed = false;
+
+            ImGui::TextUnformatted(label);
+            ImGui::Indent();
+            for (int row = 0; row < 4; ++row)
+            {
+                ImGui::PushID(row);
+                changed |= ImGui::DragFloat4("##Row", value.m[row], 0.01f);
+                ImGui::PopID();
+            }
+            ImGui::Unindent();
+
+            if (changed) SetMatrix4x4(id, value);
+        }
+        else if (property.type == ValueType::Texture2D)
+        {
+            DrawTexturePropertyImGui(property, id);
+        }
+        else
+        {
+            ImGui::Text("%s: 未対応", label);
+        }
+        ImGui::PopID();
+    }
 }

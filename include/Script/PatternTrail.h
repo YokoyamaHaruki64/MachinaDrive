@@ -1,12 +1,14 @@
 ﻿#pragma once
 
-#include "System/Component.h"
+#include "System/Core/Script.h"
+#include "System/Core/GameObjectReference.h"
 
 class EffectConfig;
 
-class PatternTrail : public Component
+class PatternTrail : public Script
 {
-    std::vector<GameObject*> m_trailHeaders;
+    REGISTER_COMPONENT(PatternTrail, "PatternTrail");
+    std::vector<GameObjectReference> m_trailHeaders;
     Vector3 m_normal = Vector3::Up();
     EffectConfig* m_config = nullptr;
 
@@ -14,7 +16,7 @@ class PatternTrail : public Component
 public:
     PatternTrail() = delete;
     explicit PatternTrail(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     virtual ~PatternTrail() {}
