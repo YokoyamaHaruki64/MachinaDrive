@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include "System/main.h"
+#include "System/Core/main.h"
 
-#include "System/Component.h"
-#include "System/ComponentRegistry.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
 #include "math/Matrix4x4.h"
 #include "math/Quaternion.h"
 #include "math/Vector3.h"

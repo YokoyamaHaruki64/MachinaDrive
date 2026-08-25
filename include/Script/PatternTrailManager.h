@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "System/Script.h"
-#include "System/GameObjectReference.h"
+#include "System/Core/Script.h"
+#include "System/Core/GameObjectReference.h"
 #include "math/Vector3.h"
 #include "math/Curve.h"
 

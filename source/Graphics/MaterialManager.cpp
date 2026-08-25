@@ -5,9 +5,9 @@
 #include "Graphics/Material.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/Logger.h"
-#include "System/YAMLDocumentIO.h"
-#include "System/YAMLValueConverter.h"
+#include "System/Diagnostics/Logger.h"
+#include "System/Serialization/YAMLDocumentIO.h"
+#include "System/Serialization/YAMLValueConverter.h"
 
 std::unordered_map<MaterialID, std::unique_ptr<Material>> MaterialManager::m_materials;
 std::unordered_map<std::string, Material*> MaterialManager::m_materialsByName;

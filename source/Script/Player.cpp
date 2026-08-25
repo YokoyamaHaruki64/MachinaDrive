@@ -3,7 +3,7 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/Player.h"
-#include "System/FieldRegistry.h"
+#include "System/Editor/FieldRegistry.h"
 
 void Player::RegisterFields(FieldRegistry& fields)
 {
@@ -70,7 +70,7 @@ void Player::Update()
 
     if( Input::GetKeyTrigger(Input::KK_F))
     {
-        GameObject* bullet = Manager::InstantiatePrefab("Assets/Prefabs/Bullet.prefab",
+        GameObject* bullet = Manager::Instantiate("Assets/Prefabs/Bullet.prefab",
             transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f)
             , Vector3::Zero(), Vector3::One()); // 弾の生成
         bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f); // 弾の速度設定

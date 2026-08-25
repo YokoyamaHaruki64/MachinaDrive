@@ -2,7 +2,7 @@
 
 ## 概要
 
-Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント指向のゲームフレームワークである。アプリケーションループは `source/System/main.cpp` にあり、`Manager` がシーン、ゲームオブジェクト、描画、ポストエフェクトの進行を統括する。
+Project_Drive は、Windows / DirectX 11 を基盤とするコンポーネント指向のゲームフレームワークである。アプリケーションループは `source/System/Core/main.cpp` にあり、`Manager` がシーン、ゲームオブジェクト、描画、ポストエフェクトの進行を統括する。
 
 ```text
 WinMain
@@ -23,7 +23,12 @@ WinMain
 
 | 場所 | 責務 |
 | --- | --- |
-| `include/System/`, `source/System/` | ウィンドウ、入力、時間、描画、ゲームオブジェクトとシーンの管理 |
+| `include/System/Core/`, `source/System/Core/` | ウィンドウ、入力、時間、ゲームオブジェクト、Managerなど実行時の基盤 |
+| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、フィールド登録、ファイルダイアログ |
+| `include/System/Serialization/`, `source/System/Serialization/` | YAMLの値変換、ドキュメント入出力、GameObjectのシリアライズ |
+| `include/System/Diagnostics/`, `source/System/Diagnostics/` | Logger、LogSystem、ファイルWorker、PerformanceMonitor |
+| `include/System/Rendering/`, `source/System/Rendering/` | Renderer、RendererBase、DirectXTex |
+| `include/System/SystemInc.h` | 上記System公開ヘッダーをまとめて参照するインクルード窓口 |
 | `include/Component/`, `source/Component/` | Transform、カメラ、メッシュ・スプライト描画、パーティクル、音声などの再利用可能な機能 |
 | `include/Scene/`, `source/Scene/` | タイトル、ゲーム、リザルト各シーンの構築と振る舞い |
 | `include/Script/`, `source/Script/` | プレイヤー、敵、弾、UI、演出などゲーム固有のコンポーネント |
@@ -121,7 +126,7 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 
 シーンの `Init()` 中に生成された GameObject は保留リストに格納される。シーン構築の完了後、同じ生成バッチの全 GameObject を稼働リストへ移してから順番に `OnStart()` を呼ぶため、別 GameObject を検索する依存関係も開始時に解決できる。通常時に生成された GameObject は生成直後から Manager の検索対象となる。
 
-新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::InstantiatePrefab()`である。`include/System/PrefabFactory.h`と`Manager::Instantiate()`は既存生成コードの移行用として残している。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+新規Prefabの標準経路は、Hierarchyから保存した`Assets/`配下の`.prefab`と`Manager::InstantiatePrefab()`である。`Manager::Instantiate()`は既存生成コードの移行用として残している。Prefab Archiveの保存形式と復元順序は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
 ## 描画
 

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 
 #include "Component/ComponentInc.h"
-#include "System/FieldRegistry.h"
+#include "System/Editor/FieldRegistry.h"
 
 
 

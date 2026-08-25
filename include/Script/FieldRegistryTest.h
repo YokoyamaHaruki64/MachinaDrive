@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 
-#include "System/GameObjectReference.h"
-#include "System/PrefabReference.h"
-#include "System/Script.h"
-#include "System/Logger.h"
-#include "System/YAMLDocumentIO.h"
+#include "System/Core/GameObjectReference.h"
+#include "System/Core/PrefabReference.h"
+#include "System/Core/Script.h"
+#include "System/Diagnostics/Logger.h"
+#include "System/Serialization/YAMLDocumentIO.h"
 #include "math/Matrix3x3.h"
 #include "math/Matrix4x4.h"
 #include "math/Quaternion.h"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "System/Script.h"
+#include "System/Core/Script.h"
 
 class ExplosionEffect : public Script
 {

@@ -2,7 +2,7 @@
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderLoader.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/Logger.h"
+#include "System/Diagnostics/Logger.h"
 
 std::vector<std::unique_ptr<GraphicsShader>> ShaderManager::m_shaders;
 std::unique_ptr<ShaderLoader> ShaderManager::m_shaderLoader;

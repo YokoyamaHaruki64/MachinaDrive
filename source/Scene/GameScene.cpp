@@ -2,8 +2,8 @@
 
 #include "Scene/GameScene.h"
 
-#include "System/main.h"
-#include "System/manager.h"
+#include "System/Core/main.h"
+#include "System/Core/manager.h"
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
@@ -66,7 +66,7 @@ void GameScene::Init()
     cubeRenderer->SetMaterial(0, cubeMaterial);
     obj->AddComponent<RotateCube>();
 
-    Manager::InstantiatePrefab(
+    Manager::Instantiate(
         "Assets/Prefabs/Player.prefab",
         Vector3(0.0f, 0.0f, 1.0f),
         Vector3(0.0f, 0.0f, 0.0f),
@@ -80,7 +80,7 @@ void GameScene::Init()
 
     for (const auto& pos : enemyPos)
     {
-        Manager::InstantiatePrefab(
+        Manager::Instantiate(
             "Assets/Prefabs/Enemy.prefab",
             pos,
             Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
@@ -97,7 +97,7 @@ void GameScene::Init()
 
     for (const auto& pos : treePos)
     {
-        Manager::InstantiatePrefab(
+        Manager::Instantiate(
             "Assets/Prefabs/Tree.prefab",
             pos,
             Vector3::Zero(),

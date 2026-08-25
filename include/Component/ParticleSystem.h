@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "System/main.h"
+#include "System/Core/main.h"
 
-#include "System/Component.h"
-#include "System/ComponentRegistry.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
 #include "Component/Transform.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
-#include "System/RendererBase.h"
+#include "System/Rendering/RendererBase.h"
 
 #include "math/Vector3.h"
 #include "math/Curve.h"

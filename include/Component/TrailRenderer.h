@@ -3,8 +3,8 @@
 #include "Common/Color.h"
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
-#include "System/RendererBase.h"
-#include "System/ComponentRegistry.h"
+#include "System/Rendering/RendererBase.h"
+#include "System/Core/ComponentRegistry.h"
 #include "math/Curve.h"
 #include "math/Vector3.h"
 

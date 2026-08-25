@@ -17,7 +17,7 @@ Author : Yokoyama Haruki
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/Shader/ShaderFactory.h"
 #include "Graphics/Shader/ShaderInc.h"
-#include "System/Logger.h"
+#include "System/Diagnostics/Logger.h"
 
 #include <fstream>
 #include <unordered_set>

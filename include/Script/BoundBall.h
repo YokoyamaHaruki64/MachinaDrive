@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "System/Script.h"
+#include "System/Core/Script.h"
 #include "math/Vector3.h"
 
 class BallManager;

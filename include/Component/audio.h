@@ -2,8 +2,8 @@
 
 #include <xaudio2.h>
 #include <string>
-#include "System/Component.h"
-#include "System/ComponentRegistry.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
 
 
 class Audio : public Component

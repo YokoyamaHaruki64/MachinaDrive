@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "System/Script.h"
+#include "System/Core/Script.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
 #include "imgui.h"

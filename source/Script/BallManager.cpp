@@ -30,7 +30,7 @@ void BallManager::CreateBoll(Vector3 position,Vector3 normal)
 
     // ボールを生成
     Vector3 randomVelocity = Random::RandomCone(normal, 30.0f) * 10.0f;
-    Manager::InstantiatePrefab(
+    Manager::Instantiate(
         "Assets/Prefabs/BoundBall.prefab",
         position,
         Vector3::Zero(),
@@ -109,7 +109,7 @@ void BallManager::CreateBoll_Random()
 
     // ボールを生成
     Vector3 randomVelocity = Random::RandomCone(normal, 30.0f) * 10.0f;
-    Manager::InstantiatePrefab(
+    Manager::Instantiate(
         "Assets/Prefabs/BoundBall.prefab",
         randomPos,
         Vector3::Zero(),

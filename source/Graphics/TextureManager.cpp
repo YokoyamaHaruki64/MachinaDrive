@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/TextureManager.h"
-#include "System/renderer.h"
+#include "System/Rendering/renderer.h"
 
 std::unordered_map<TextureID, TextureManager::TextureResource> TextureManager::m_textures;
 std::unordered_map<std::wstring, TextureID> TextureManager::m_textureIDsByPath;

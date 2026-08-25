@@ -10,8 +10,8 @@ Author : Yokoyama Haruki
 
 ===============================================================================*/
 
-#include "System/renderer.h"
-#include "System/Logger.h"
+#include "System/Rendering/renderer.h"
+#include "System/Diagnostics/Logger.h"
 
 #include "Graphics\Shader\InputLayoutBuilder.h"
 

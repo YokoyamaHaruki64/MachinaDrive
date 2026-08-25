@@ -10,7 +10,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>
-#include "System/DirectXTex.h"
+#include "System/Rendering/DirectXTex.h"
 
 // C++標準ライブラリ
 #include <vector>
@@ -35,5 +35,5 @@
 
 // 独自のヘッダーファイル
 #include "math/MathCommon.h"
-#include "System/GameObject.h"
-#include "System/Component.h"
+#include "System/Core/GameObject.h"
+#include "System/Core/component.h"

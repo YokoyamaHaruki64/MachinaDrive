@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "math/Vector3.h"
-#include "System/Component.h"
-#include "System/ComponentRegistry.h"
-#include "System/GameObject.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Core/GameObject.h"
 
 #include <unordered_map>
 

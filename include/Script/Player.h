@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "System/Script.h"
-#include "System/GameObject.h"
+#include "System/Core/Script.h"
+#include "System/Core/GameObject.h"
 
 class Audio;
 class Player : public Script

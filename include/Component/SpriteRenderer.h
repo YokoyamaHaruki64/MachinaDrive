@@ -2,7 +2,7 @@
 
 #include "Graphics/Material.h"
 #include "Graphics/ModelAsset.h"
-#include "System/RendererBase.h"
+#include "System/Rendering/RendererBase.h"
 
 class SpriteRenderer : public RendererBase
 {

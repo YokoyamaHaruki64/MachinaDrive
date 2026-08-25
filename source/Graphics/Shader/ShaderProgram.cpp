@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/renderer.h"
+#include "System/Rendering/renderer.h"
 
 void GraphicsShaderPass::Bind() const
 {

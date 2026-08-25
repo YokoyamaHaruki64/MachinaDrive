@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "System/Script.h"
-#include "System/GameObjectReference.h"
+#include "System/Core/Script.h"
+#include "System/Core/GameObjectReference.h"
 
 class EffectConfig;
 

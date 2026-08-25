@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "System/component.h"
-#include "System/ComponentRegistry.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
 
 class Camera;
 class GameObject;

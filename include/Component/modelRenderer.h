@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Graphics/ModelAsset.h"
-#include "System/ComponentRegistry.h"
-#include "System/RendererBase.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Rendering/RendererBase.h"
 
 #include <string>
 

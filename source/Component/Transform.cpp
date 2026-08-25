@@ -3,9 +3,9 @@
 #include <algorithm>
 
 #include "Component/Transform.h"
-#include "System/FieldRegistry.h"
-#include "System/GameObject.h"
-#include "System/Logger.h"
+#include "System/Editor/FieldRegistry.h"
+#include "System/Core/GameObject.h"
+#include "System/Diagnostics/Logger.h"
 #include "math/MathCommon.h"
 
 Transform::Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale)

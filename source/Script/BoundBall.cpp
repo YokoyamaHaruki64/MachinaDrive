@@ -12,7 +12,7 @@
 
 void BoundBall::CreateRippleEffect(Vector3 normal, Vector3 position)
 {
-    GameObject* ripple = Manager::InstantiatePrefab(
+    GameObject* ripple = Manager::Instantiate(
         "Assets/Prefabs/Ripple.prefab",
         position,
         Vector3::Zero(),
@@ -101,7 +101,7 @@ void BoundBall::Update()
             if (m_rippleEffectCooldown <= 0.0f)
             {
                 CreateRippleEffect(normal, closestPoint);
-                auto e = Manager::InstantiatePrefab(
+                auto e = Manager::Instantiate(
                     "Assets/Prefabs/ImpactBurst.prefab",
                     closestPoint,
                     Vector3::Zero(),
@@ -127,7 +127,7 @@ void BoundBall::Update()
         Vector3 p = Random::InsideUnitSphere() * 2.0f + Vector3(0.0f, 1.0f, 0.0f);
         Vector3 v = Random::OnUnitSphere() * 10.0f;
 
-        Manager::InstantiatePrefab(
+        Manager::Instantiate(
             "Assets/Prefabs/Firework.prefab",
             pos,
             Vector3::Zero(),

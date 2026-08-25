@@ -2,8 +2,8 @@
 
 #include "Scene/TitleScene.h"
 
-#include "System/main.h"
-#include "System/manager.h"
+#include "System/Core/main.h"
+#include "System/Core/manager.h"
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Graphics/MaterialManager.h"
