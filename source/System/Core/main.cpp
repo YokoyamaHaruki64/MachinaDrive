@@ -55,20 +55,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 
 		RECT rc = { 0, 0, (LONG)SCREEN_WIDTH, (LONG)SCREEN_HEIGHT };
-		AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+		const DWORD windowStyle = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
+		AdjustWindowRect(&rc, windowStyle, FALSE);
 
-		g_Window = CreateWindowEx(0, CLASS_NAME, WINDOW_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		g_Window = CreateWindowEx(0, CLASS_NAME, WINDOW_NAME, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
 			rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 	}
 
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
 
-	// 初期化前に最大化しておき、Rendererが実際のクライアント領域でSwapChainを作成できるようにする。
-	// 通常のウィンドウ枠は維持するため、最大化解除後の移動・リサイズも可能である。
-	ShowWindow(g_Window, nCmdShow);
-	ShowWindow(g_Window, SW_MAXIMIZE);
-	UpdateWindow(g_Window);
+	// WS_MAXIMIZE により、表示せずに最大化状態のクライアント領域を確定させる。
+	// 初期化が終わるまで ShowWindow を呼ばず、OS の未描画領域を見せない。
 
 	LogSystem::Init();
 	if (!Manager::Init())
@@ -76,8 +74,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         LogSystem::Shutdown();
         CoUninitialize();
         UnregisterClass(CLASS_NAME, wcex.hInstance);
-        return EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
+
+	// 描画済みのフレームから最大化状態で表示する。
+	ShowWindow(g_Window, SW_SHOWMAXIMIZED);
+	UpdateWindow(g_Window);
 
 	DWORD dwExecLastTime;
 	DWORD dwCurrentTime;
