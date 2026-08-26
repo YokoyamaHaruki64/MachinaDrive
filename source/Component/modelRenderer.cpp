@@ -126,12 +126,14 @@ ModelRenderer::ModelRenderer(
     SetModel(modelAsset);
 }
 
-void ModelRenderer::OnStart()
+void ModelRenderer::OnLoaded()
 {
     if (!m_model && !m_modelPath.empty())
     {
         SetModel(ModelManager::Load(m_modelPath));
     }
+
+    m_loadedModelPath = m_modelPath;
 
     for (size_t index = 0; index < m_materialPaths.size() && index < m_materialOverrides.size(); ++index)
     {
@@ -140,6 +142,16 @@ void ModelRenderer::OnStart()
             m_materialOverrides[index] = MaterialManager::Load(m_materialPaths[index]);
         }
     }
+}
+
+void ModelRenderer::OnEditorUpdate()
+{
+    if (m_loadedModelPath == m_modelPath)
+        return;
+
+    m_model = nullptr;
+    m_materialOverrides.clear();
+    OnLoaded();
 }
 
 void ModelRenderer::RegisterFields(FieldRegistry& fields)

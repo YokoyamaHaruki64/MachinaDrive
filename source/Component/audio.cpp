@@ -164,12 +164,22 @@ void Audio::Play(bool Loop)
 
 }
 
-void Audio::OnStart()
+void Audio::OnLoaded()
 {
     if (!m_SourceVoice && !m_filePath.empty())
     {
         Load(m_filePath.c_str());
     }
+}
+
+void Audio::OnEditorUpdate()
+{
+    Uninit();
+    OnLoaded();
+}
+
+void Audio::OnStart()
+{
     if (m_playOnStart)
     {
         Play(m_loop);

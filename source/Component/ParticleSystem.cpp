@@ -222,7 +222,7 @@ ParticleRenderer::ParticleRenderer(GameObject* owner)
     m_renderPhase = RenderPhase::Transparent;
 }
 
-void ParticleRenderer::OnStart()
+void ParticleRenderer::OnLoaded()
 {
     if (!m_emitter)
     {
@@ -233,7 +233,15 @@ void ParticleRenderer::OnStart()
     if (quadModel && !quadModel->meshes.empty())
         m_mesh = &quadModel->meshes.front();
 
-    m_material = MaterialManager::Load(m_materialPath);
+    if (!m_material && !m_materialPath.empty())
+    {
+        m_material = MaterialManager::Load(m_materialPath);
+    }
+}
+
+void ParticleRenderer::OnEditorUpdate()
+{
+    OnLoaded();
 }
 
 void ParticleRenderer::RegisterFields(FieldRegistry& fields)

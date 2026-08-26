@@ -21,6 +21,7 @@ public:
 private:
     ModelAsset* m_model{};
     std::string m_modelPath;
+    std::string m_loadedModelPath;
     std::vector<Material*> m_materialOverrides{};
     std::vector<std::string> m_materialPaths{};
     int m_inverseAxisFlags{};
@@ -49,7 +50,8 @@ public:
     uint32_t GetMeshID() const override;
 
     void Draw() override;
-    void OnStart() override;
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;

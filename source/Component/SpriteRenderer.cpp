@@ -37,9 +37,12 @@ SpriteRenderer::SpriteRenderer(
     m_renderPhase = RenderPhase::Overlay;
 }
 
-void SpriteRenderer::OnStart()
+void SpriteRenderer::OnLoaded()
 {
-    m_material = MaterialManager::Load(m_materialPath);
+    if (!m_material && !m_materialPath.empty())
+    {
+        m_material = MaterialManager::Load(m_materialPath);
+    }
 
     const std::vector<PositionVertex> positions
     {
@@ -57,6 +60,11 @@ void SpriteRenderer::OnStart()
     m_texCoordBuffer = CreateSpriteVertexBuffer(texCoords);
     m_colorBuffer = CreateSpriteVertexBuffer(colors);
 
+}
+
+void SpriteRenderer::OnEditorUpdate()
+{
+    OnLoaded();
 }
 
 void SpriteRenderer::RegisterFields(FieldRegistry& fields)

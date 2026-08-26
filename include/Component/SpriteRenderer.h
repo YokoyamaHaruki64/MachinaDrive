@@ -21,7 +21,8 @@ public:
     explicit SpriteRenderer(GameObject* owner);
 
     virtual ~SpriteRenderer() {}
-    void OnStart() override;
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
     void SetMaterial(uint32_t slot, Material* material) override;
