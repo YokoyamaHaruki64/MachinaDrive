@@ -161,6 +161,8 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 
 実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
 
+Edit状態とPlay状態の分離、ライフサイクルの設計、将来のScript DLLホットリロードに向けた境界は[PLAY_MODE.md](PLAY_MODE.md)を参照する。
+
 ゲーム固有のScript実装、Inspector調整、Scene／Prefab保存を使った標準的な開発手順は[GAME_DEVELOPMENT.md](GAME_DEVELOPMENT.md)を参照する。
 
 現在の機能完了条件には含めない拡張・最適化項目は[FUTURE_WORK.md](FUTURE_WORK.md)を参照する。
