@@ -3,32 +3,39 @@ name: Game
 gameObjects:
   - id: 1
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,2,-10]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [0.999995232,1,0.999995232]
       - type: Camera
         fields:
+          enabled: true
           m_target: [0,0,2.61216004e-15]
           m_up: [0,1,0]
       - type: CameraController
-        fields: {}
+        fields:
+          enabled: true
   - id: 2
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,0,0]
           m_localRotation: [0,0,0,1]
           m_localScale: [10,1,10]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -38,16 +45,19 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 3
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,1,-5]
-          m_localRotation: [-0.0682410076,-0.0643375143,-0.0641506985,0.99352324]
+          m_localRotation: [-0.0682410151,-0.0643375218,-0.0641507059,0.9935233]
           m_localScale: [1.00055456,1.00062096,1.00062978]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -56,19 +66,23 @@ gameObjects:
             - Assets/Materials/Mateo.material
           m_inverseAxisFlags: 0
       - type: RotateCube
-        fields: {}
+        fields:
+          enabled: true
   - id: 4
     name: Player
+    active: true
     prefab: Assets/Prefabs/Player.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,0,2.61216004e-15]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1.00034523,1,1.00034523]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -81,25 +95,30 @@ gameObjects:
           m_inverseAxisFlags: 0
       - type: Player
         fields:
+          enabled: true
           m_velocity: [0,0,0]
           m_isGrounded: true
       - type: Audio
         fields:
+          enabled: true
           m_filePath: Assets/Local/Sounds/wan.wav
           m_playOnStart: false
           m_loop: false
   - id: 5
     name: Enemy(Instance)
+    active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [4,0,4]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -111,19 +130,23 @@ gameObjects:
             - ''
           m_inverseAxisFlags: 0
       - type: Enemy
-        fields: {}
+        fields:
+          enabled: true
   - id: 6
     name: Enemy(Instance)
+    active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [-4,0,4]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -135,19 +158,23 @@ gameObjects:
             - ''
           m_inverseAxisFlags: 0
       - type: Enemy
-        fields: {}
+        fields:
+          enabled: true
   - id: 7
     name: Enemy(Instance)
+    active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,0,6]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -159,19 +186,23 @@ gameObjects:
             - ''
           m_inverseAxisFlags: 0
       - type: Enemy
-        fields: {}
+        fields:
+          enabled: true
   - id: 8
     name: Tree(Instance)
+    active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [5,3.5,12]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [5,5,5]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 2
           billboardType: 2
@@ -181,16 +212,19 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 9
     name: Tree(Instance)
+    active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [-5,3.5,12]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [5,5,5]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 2
           billboardType: 2
@@ -200,16 +234,19 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 10
     name: Tree(Instance)
+    active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [7,3.5,8]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [5,5,5]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 2
           billboardType: 2
@@ -219,16 +256,19 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 11
     name: Tree(Instance)
+    active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent: 
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [-7,3.5,8]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [5,5,5]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 2
           billboardType: 2
@@ -238,55 +278,67 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 12
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,0,0]
           m_localRotation: [0,0,0,1]
           m_localScale: [1,1,1]
       - type: Skydome
-        fields: {}
+        fields:
+          enabled: true
   - id: 13
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [100,100,0]
           m_localRotation: [0,0,0,1]
           m_localScale: [1,1,1]
       - type: Score
-        fields: {}
+        fields:
+          enabled: true
   - id: 14
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,0,0]
           m_localRotation: [0,0,0,1]
           m_localScale: [1,1,1]
       - type: Audio
         fields:
+          enabled: true
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
   - id: 15
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [-7.79153204,2,-7.78195763]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1000,1000,1000]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -297,16 +349,19 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 16
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,2,-10]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1000,1000,1000]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -317,80 +372,95 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 17
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [100,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 18
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [160,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 19
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [220,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 20
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [280,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 21
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [0,2,-10]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1000,1000,1000]
       - type: ModelRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -401,64 +471,76 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 22
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [100,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 23
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [160,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 24
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [220,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
           m_materialPath: Assets/Materials/Number.material
   - id: 25
     name: Empty
-    prefab: 
-    parent: 
+    active: true
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
+          enabled: true
           m_localPosition: [280,100,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [100,100,1]
       - type: SpriteRenderer
         fields:
+          enabled: true
           m_drawLayer: 0
           renderPhase: 4
           billboardType: 0
