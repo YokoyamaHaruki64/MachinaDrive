@@ -1,11 +1,16 @@
 ﻿#include "pch.h"
 
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
 #include "imgui_curve_custom.h"
+#endif
 
 #include "System/Editor/FieldRegistry.h"
 #include "System/Core/manager.h"
 #include "System/Diagnostics/Logger.h"
+#include "System/Editor/FileSystem.h"
+
+#include <array>
 
 void FieldRegistry::ReportConversionMessage(
     const YAMLValueConversionResult& result,
@@ -27,6 +32,7 @@ void FieldRegistry::ReportConversionMessage(
     }
 }
 
+#if GM_ENABLE_EDITOR
 int FieldRegistry::ResizeStringInputCallback(ImGuiInputTextCallbackData* data)
 {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
@@ -74,6 +80,7 @@ void FieldRegistry::DrawMatrix4x4(const char* label, Matrix4x4& value)
     }
     ImGui::Unindent();
 }
+#endif
 
 std::string FieldRegistry::CreateDisplayName(std::string_view key)
 {
@@ -100,6 +107,7 @@ std::string FieldRegistry::CreateDisplayName(std::string_view key)
     return result;
 }
 
+#if GM_ENABLE_EDITOR
 bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
 {
     switch (field.valueType)
@@ -107,7 +115,12 @@ bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
     case ValueType::Bool: return ImGui::Checkbox(field.displayName.c_str(), static_cast<bool*>(value));
     case ValueType::Int: return ImGui::DragInt(field.displayName.c_str(), static_cast<int*>(value));
     case ValueType::Float: return ImGui::DragFloat(field.displayName.c_str(), static_cast<float*>(value), 0.01f);
-    case ValueType::String: return InputText(field.displayName.c_str(), *static_cast<std::string*>(value));
+    case ValueType::String:
+        if (field.inspectorType == InspectorFieldType::FilePath)
+        {
+            return DrawFilePath(field, *static_cast<std::string*>(value));
+        }
+        return InputText(field.displayName.c_str(), *static_cast<std::string*>(value));
     case ValueType::Vector2: return ImGui::DragFloat2(field.displayName.c_str(), &static_cast<Vector2*>(value)->x, 0.01f);
     case ValueType::Vector3: return ImGui::DragFloat3(field.displayName.c_str(), &static_cast<Vector3*>(value)->x, 0.01f);
     case ValueType::Vector4: return ImGui::DragFloat4(field.displayName.c_str(), &static_cast<Vector4*>(value)->x, 0.01f);
@@ -173,7 +186,8 @@ bool FieldRegistry::DrawGameObjectReference(const char* label, GameObjectReferen
 bool FieldRegistry::DrawPrefabReference(const char* label, PrefabReference& value)
 {
     std::string path = value.GetPath();
-    const bool changed = InputText(label, path);
+    static constexpr std::array<std::string_view, 1> prefabExtensions{ ".prefab" };
+    const bool changed = DrawPathDialog(label, path, "Assets/Prefabs", prefabExtensions);
     if (changed)
     {
         value.SetPath(std::move(path));
@@ -187,6 +201,64 @@ bool FieldRegistry::DrawPrefabReference(const char* label, PrefabReference& valu
     {
         ImGui::TextDisabled("None");
     }
+    return changed;
+}
+
+bool FieldRegistry::DrawFilePath(const FieldDescriptor& field, std::string& value)
+{
+    std::vector<std::string_view> extensions;
+    extensions.reserve(field.pathExtensions.size());
+    for (const std::string& extension : field.pathExtensions)
+    {
+        extensions.emplace_back(extension);
+    }
+
+    return DrawPathDialog(
+        field.displayName.c_str(),
+        value,
+        field.pathInitialDirectory,
+        extensions);
+}
+
+bool FieldRegistry::DrawPathDialog(
+    const char* label,
+    std::string& value,
+    const std::filesystem::path& initialDirectory,
+    std::span<const std::string_view> extensions)
+{
+    ImGui::Text("%s: %s", label, value.empty() ? "None" : value.c_str());
+    ImGui::SameLine();
+
+    bool changed = false;
+    if (ImGui::Button("Select"))
+    {
+        const std::optional<std::filesystem::path> selectedPath =
+            FileSystem::OpenFileDialog(initialDirectory, extensions);
+        if (selectedPath)
+        {
+            if (!FileSystem::IsUnderDirectory(*selectedPath, "Assets"))
+            {
+                Logger::Error("選択したパスはAssetsフォルダ配下に配置してください。");
+            }
+            else if (const std::optional<std::filesystem::path> relativePath =
+                FileSystem::ToProjectRelative(*selectedPath))
+            {
+                value = relativePath->generic_string();
+                changed = true;
+            }
+        }
+    }
+
+    if (!value.empty())
+    {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+        {
+            value.clear();
+            changed = true;
+        }
+    }
+
     return changed;
 }
 
@@ -216,6 +288,17 @@ void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
         ImGui::PopID();
     }
 }
+#else
+bool FieldRegistry::DrawValue(const FieldDescriptor&, void*)
+{
+    return false;
+}
+
+void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
+{
+    (void)inspectorSpace;
+}
+#endif
 
 bool FieldRegistry::ToYAMLValue(
     YAMLValue& output,

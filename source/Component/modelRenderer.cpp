@@ -153,7 +153,7 @@ void ModelRenderer::RegisterFields(FieldRegistry& fields)
     }
 
     RendererBase::RegisterFields(fields);
-    GM_FIELD(m_modelPath);
+    GM_FIELD_PATH(m_modelPath, "Assets/Local/Models", ".obj", ".fbx", ".gltf");
     GM_FIELD_TYPE(m_materialPaths, InspectorFieldType::Hidden);
     GM_FIELD(m_inverseAxisFlags);
 }

@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include <functional>
+#include <filesystem>
+#include <initializer_list>
+#include <span>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -22,6 +25,7 @@ enum class InspectorFieldType
     Slider,
     List,
     Curve,
+    FilePath,
     Hidden,
 };
 
@@ -46,6 +50,8 @@ struct FieldDescriptor
         const YAMLValue&,
         const YAMLValueConversionContext&,
         std::function<void()>&)> fromYAMLValue;
+    std::filesystem::path pathInitialDirectory{};
+    std::vector<std::string> pathExtensions{};
 };
 
 template <typename T>
@@ -72,6 +78,12 @@ class FieldRegistry
     static bool DrawQuaternion(const char* label, Quaternion& value);
     static bool DrawGameObjectReference(const char* label, GameObjectReference& value);
     static bool DrawPrefabReference(const char* label, PrefabReference& value);
+    static bool DrawFilePath(const FieldDescriptor& field, std::string& value);
+    static bool DrawPathDialog(
+        const char* label,
+        std::string& value,
+        const std::filesystem::path& initialDirectory,
+        std::span<const std::string_view> extensions);
     static void DrawMatrix3x3(const char* label, Matrix3x3& value);
     static void DrawMatrix4x4(const char* label, Matrix4x4& value);
     template <typename T>
@@ -181,6 +193,29 @@ public:
             DrawList(field, *static_cast<std::vector<T>*>(field.value));
         };
         ConfigureSerialization(descriptor, values);
+        m_fields.push_back(std::move(descriptor));
+    }
+
+    void AddPath(
+        std::string_view key,
+        std::string& value,
+        std::filesystem::path initialDirectory,
+        std::initializer_list<std::string_view> extensions)
+    {
+        FieldDescriptor descriptor{
+            std::string(key),
+            CreateDisplayName(key),
+            &value,
+            ValueType::String,
+            InspectorFieldType::FilePath,
+        };
+        descriptor.pathInitialDirectory = std::move(initialDirectory);
+        descriptor.pathExtensions.reserve(extensions.size());
+        for (std::string_view extension : extensions)
+        {
+            descriptor.pathExtensions.emplace_back(extension);
+        }
+        ConfigureSerialization(descriptor, value);
         m_fields.push_back(std::move(descriptor));
     }
 

@@ -178,7 +178,7 @@ void Audio::OnStart()
 
 void Audio::RegisterFields(FieldRegistry& fields)
 {
-    GM_FIELD(m_filePath);
+    GM_FIELD_PATH(m_filePath, "Assets/Local/Sounds", ".wav");
     GM_FIELD(m_playOnStart);
     GM_FIELD(m_loop);
 }

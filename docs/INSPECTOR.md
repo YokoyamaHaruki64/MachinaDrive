@@ -102,6 +102,13 @@ Reflectによる自動展開は基本的な値表示を対象とする。World�
 GM_FIELD_KEY("moveSpeed", m_moveSpeed);
 ```
 
+ファイルパスを扱う`std::string`は通常の文字入力にせず、`GM_FIELD_PATH`で登録する。Inspectorには現在のプロジェクト相対パスと`Select`／`Clear`を表示し、`Assets/`配下のファイルだけを拡張子フィルター付きダイアログから選択する。
+
+```cpp
+GM_FIELD_PATH(m_filePath, "Assets/Local/Sounds", ".wav");
+GM_FIELD_PATH(m_modelPath, "Assets/Local/Models", ".obj", ".fbx", ".gltf");
+```
+
 getter／setterを通す必要がある値も、一行のAccessorマクロで登録できる。Transformはこの経路でWorld／Local値の編集、角度変換、dirty伝播を維持する。
 
 ```cpp
@@ -135,6 +142,7 @@ GM_FIELD_TYPE(m_motionCurve, InspectorFieldType::Curve);
 | `Slider` | 範囲を持つ数値のスライダー表示 |
 | `List` | 配列・コンテナの一覧表示 |
 | `Curve` | Curve 型専用の編集UI |
+| `FilePath` | `Assets/`配下のファイルを拡張子フィルター付きダイアログから選択 |
 | `Hidden` | YAML対象として登録するがInspectorには表示しない値 |
 
 `Auto` では少なくとも `bool`、`int`、`float`、`std::string`、`Vector2`、`Vector3`、`Vector4`、`Color`、`Matrix3x3`、`Matrix4x4` を扱う。`enum class` は選択肢の名前を C++ から自動取得できないため、後に `EnumTraits<T>` で表示名を登録して List 表示する。
