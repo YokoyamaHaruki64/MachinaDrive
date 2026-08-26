@@ -6,6 +6,12 @@
 
 全体の実行順、所有関係、Transformの規約は[ARCHITECTURE.md](ARCHITECTURE.md)、Inspectorとフィールド登録の詳細は[INSPECTOR.md](INSPECTOR.md)、保存形式は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
+## Editor と Runtime
+
+Editorでの調整は`GM_ENABLE_EDITOR=1`のDebug構成で行う。Game画面はGame RenderTextureを`GameWindow`へ表示し、Freeまたは16:9の表示比率を選択できる。SceneやPrefabは通常どおり共通のYAMLアセットとして保存する。
+
+出荷時は`GM_ENABLE_EDITOR=0`のRelease構成を使用する。この構成ではImGui、Docking、Inspector、GameWindowを初期化せず、ImGui本体とbackendもコンパイル対象から除外する。ゲーム描画はGame RenderTextureからBackBufferへ転送されるため、PrefabやSceneをRuntime用に変換する作業は不要である。
+
 ## 開発の基本単位
 
 | 作りたいもの | 置き場所 | 基底型 | 例 |
@@ -82,6 +88,8 @@ void SampleMoveScript::Update()
 ```
 
 `GM_FIELD`に登録しない値はInspectorにもYAMLにも含まれない。実行時キャッシュ、取得済みComponentポインタ、一時タイマーなどは通常登録しない。
+
+ファイルパスを設定値として持つ場合は、通常の`GM_FIELD`ではなく`GM_FIELD_PATH`を使う。Inspectorから直接文字列を編集せず、初期フォルダと許可拡張子を指定したファイルダイアログで`Assets/`配下のファイルを選択する。`PrefabReference`はPrefab専用の同じ選択規則を自動で使用する。
 
 ## 有効状態とライフサイクル
 

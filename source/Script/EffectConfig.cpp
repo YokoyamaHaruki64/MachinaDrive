@@ -2,8 +2,10 @@
 
 #include "Component/ComponentInc.h"
 
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
 #include "imgui_curve_custom.h"
+#endif
 
 
 void EffectConfig::OnStart()
@@ -23,6 +25,7 @@ void EffectConfig::OnStart()
 
 void EffectConfig::Update()
 {
+#if GM_ENABLE_EDITOR
     float fps = 1.0f / Time::GetDeltaTime();
     ImGui::Text("FPS: %.1f", fps);
     ImGui::Text("DeltaTime: %.4f", Time::GetDeltaTime());
@@ -95,8 +98,10 @@ void EffectConfig::Update()
 
         ImGui::EndTabBar();
     }
+#endif
 }
 
+#if GM_ENABLE_EDITOR
 void EffectConfig::BoundBallConfigImGui()
 {
     // ImGuiで設定を表示
@@ -291,6 +296,7 @@ void EffectConfig::ImpactBurstConfigImGui()
     ImGui::EditCurveColor("Color", m_impactBurstConfig.colorCurve);
     ImGui::EditCurveFloat("Scale", m_impactBurstConfig.scaleCurve);
 }
+#endif
 
 void EffectConfig::AllSaveToFile()
 {

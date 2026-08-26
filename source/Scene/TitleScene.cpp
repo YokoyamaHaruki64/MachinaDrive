@@ -7,6 +7,7 @@
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Graphics/MaterialManager.h"
+#include "System/Rendering/renderer.h"
 
 #include "Script/TItleUI.h"
 #include "Script/FieldRegistryTest.h"
@@ -20,14 +21,19 @@ void TitleScene::Init()
     }
 
     // シーン初期化
-    GameObject* titleBG = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f));
+    const float gameWidth = static_cast<float>(
+        Renderer::GetGameWidth() > 0 ? Renderer::GetGameWidth() : SCREEN_WIDTH);
+    const float gameHeight = static_cast<float>(
+        Renderer::GetGameHeight() > 0 ? Renderer::GetGameHeight() : SCREEN_HEIGHT);
+
+    GameObject* titleBG = Manager::CreateEmpty(Vector3(gameWidth / 2.0f, gameHeight / 2.0f, 0.0f));
     titleBG->AddComponent<SpriteRenderer>()->SetMaterial(
         0,
         MaterialManager::Load("Assets/Materials/TitleBG.material"));
-    titleBG->GetTransform()->SetScale(Vector3(SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f));
+    titleBG->GetTransform()->SetScale(Vector3(gameWidth, gameHeight, 1.0f));
 
     const float LOGO_SCALE = 300.0f;
-    GameObject* titleLogo = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f, 0.0f));
+    GameObject* titleLogo = Manager::CreateEmpty(Vector3(gameWidth / 2.0f, gameHeight / 3.0f, 0.0f));
     titleLogo->AddComponent<SpriteRenderer>()->SetMaterial(
         0,
         MaterialManager::Load("Assets/Materials/TitleLogo.material"));
@@ -35,8 +41,8 @@ void TitleScene::Init()
 
     GameObject* titleUI =
         Manager::CreateEmpty(
-            Vector3(SCREEN_WIDTH / 2.0f,
-                    SCREEN_HEIGHT - SCREEN_HEIGHT / 4.0f,
+            Vector3(gameWidth / 2.0f,
+                    gameHeight - gameHeight / 4.0f,
                     0.0f));
 
     titleUI->AddComponent<SpriteRenderer>()->SetMaterial(

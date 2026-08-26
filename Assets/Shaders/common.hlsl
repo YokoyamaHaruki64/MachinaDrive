@@ -16,6 +16,7 @@ cbuffer PerObject : register(b1)
 
 SamplerState LinearSampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
+SamplerState ClampSampler : register(s2);
 
 
 

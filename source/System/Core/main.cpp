@@ -5,9 +5,12 @@
 #include "System/Core/GM_Time.h"
 #include "System/Diagnostics/LogSystem.h"
 #include "System/Diagnostics/PerformanceMonitor.h"
+#include "System/Rendering/renderer.h"
+#if GM_ENABLE_EDITOR
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui.h"
+#endif
 #include <thread>
 
 
@@ -16,7 +19,9 @@ const char* WINDOW_NAME = "DX11ゲーム";
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#if GM_ENABLE_EDITOR
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
 
 HWND g_Window;
@@ -59,6 +64,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
 
+	// 初期化前に最大化しておき、Rendererが実際のクライアント領域でSwapChainを作成できるようにする。
+	// 通常のウィンドウ枠は維持するため、最大化解除後の移動・リサイズも可能である。
+	ShowWindow(g_Window, nCmdShow);
+	ShowWindow(g_Window, SW_MAXIMIZE);
+	UpdateWindow(g_Window);
+
 	LogSystem::Init();
 	if (!Manager::Init())
 	{
@@ -67,14 +78,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         UnregisterClass(CLASS_NAME, wcex.hInstance);
         return EXIT_FAILURE;
 	}
-
-
-
-	ShowWindow(g_Window, nCmdShow);
-	UpdateWindow(g_Window);
-
-
-
 
 	DWORD dwExecLastTime;
 	DWORD dwCurrentTime;
@@ -132,13 +135,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+#if GM_ENABLE_EDITOR
+    if (ImGui::GetCurrentContext() && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         return true;
+#endif
 
 	switch(uMsg)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		break;
+
+	case WM_SIZE:
+		if (wParam != SIZE_MINIMIZED)
+			Renderer::ResizeBackBuffer(LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_KEYDOWN:

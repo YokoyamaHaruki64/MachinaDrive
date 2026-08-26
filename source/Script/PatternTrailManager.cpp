@@ -10,9 +10,6 @@
 #include "Script/PatternTrail.h"
 #include "Script/EffectConfig.h"
 
-#include "imgui.h"
-#include "imgui_curve_custom.h"
-
 void PatternTrailManager::OnStart()
 {
     for (GameObject* wall : Manager::GetObjectsByComponent<Wall>())

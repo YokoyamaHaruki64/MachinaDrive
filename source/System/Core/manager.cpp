@@ -2,7 +2,9 @@
 
 #include "System/Core/manager.h"
 
-#include "System/Editor/DebugWindow.h"
+#if GM_ENABLE_EDITOR
+#include "System/Editor/EditorSystem.h"
+#endif
 #include "System/Serialization/GameObjectYamlSerializer.h"
 #include "System/Core/input.h"
 #include "System/Diagnostics/Logger.h"
@@ -21,10 +23,12 @@
 #include "Component/Transform.h"
 #include "Component/audio.h"
 
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui_curve_custom.h"
+#endif
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
@@ -289,6 +293,7 @@ bool Manager::Init()
     PostProcess::Init();
     Audio::InitMaster();
 
+#if GM_ENABLE_EDITOR
     // ImGuiの初期化
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -318,9 +323,12 @@ bool Manager::Init()
     style.FrameBorderSize = 0.0f;
     style.ItemSpacing = ImVec2(8, 6);
     style.WindowPadding = ImVec2(10, 10);
+#endif
 
     m_nextScene = std::make_unique<TitleScene>();
+#if !GM_ENABLE_EDITOR
     InitScene();
+#endif
 
     return true;
 }
@@ -338,9 +346,11 @@ void Manager::Uninit()
     m_nextScene.reset();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
 
+#if GM_ENABLE_EDITOR
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+#endif
 
     // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
     m_postEffects.clear();
@@ -360,18 +370,31 @@ void Manager::Update()
     PerformanceMonitor::BeginUpdate();
 
 	Input::Update();
-    ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
+#if GM_ENABLE_EDITOR
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 
-    // メインビューポートの全面をDockSpaceとして確保する。InspectorやHierarchyはここへDockできる。
+    // DockSpaceは各EditorWindowを描く前に構築しておく。
     ImGui::DockSpaceOverViewport(
         0,
         ImGui::GetMainViewport(),
         ImGuiDockNodeFlags_PassthruCentralNode);
 
+	if (EditorSystem::ApplyGameWindowRenderTargetSize())
+	{
+		for (const std::unique_ptr<PostProcess>& postEffect : m_postEffects)
+		{
+			postEffect->Resize(Renderer::GetGameWidth(), Renderer::GetGameHeight());
+		}
+	}
+#endif
+
     if (m_nextScene)
     {
+#if GM_ENABLE_EDITOR
+        if (EditorSystem::IsGameWindowReady())
+#endif
         InitScene();
     }
     else
@@ -472,13 +495,17 @@ void Manager::Draw()
         m_postEffects[i]->Apply();
     }
 
-    DebugWindow::DrawImGui();
+#if GM_ENABLE_EDITOR
+    EditorSystem::DrawImGui();
 
+	Renderer::BeginEditorFrame();
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+#endif
 
 	Renderer::End();
 
+#if GM_ENABLE_EDITOR
     // Dock解除したウィンドウは、各プラットフォームのネイティブウィンドウへ描画する。
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -486,6 +513,7 @@ void Manager::Draw()
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
+#endif
 
 	// Presentの待機時間もフレームの描画負荷として扱う。
 	PerformanceMonitor::EndRender();

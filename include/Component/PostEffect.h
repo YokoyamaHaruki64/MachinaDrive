@@ -39,6 +39,7 @@ public:
     static void Uninit();
 
     virtual ~PostProcess() = default;
+    virtual void Resize(UINT width, UINT height) { (void)width; (void)height; }
     virtual void Apply() = 0;
 };
 
@@ -52,5 +53,6 @@ class Bloom : public PostProcess
 
 public:
     Bloom();
+    void Resize(UINT width, UINT height) override;
     void Apply() override;
 };

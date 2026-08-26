@@ -3,16 +3,13 @@
 #include "imgui.h"
 
 #include "System/Editor/DebugWindow.h"
-#include "System/Editor/EditorSystem.h"
 #include "System/Diagnostics/LogSystem.h"
 #include "System/Diagnostics/PerformanceMonitor.h"
 
 
 void DebugWindow::DrawImGui()
 {
-    EditorSystem::DrawImGui();
-    ImGui::SetNextWindowSize(ImVec2(700.0f, 350.0f), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Debug"))
+    if (BeginWindow("Debug", Vector2(700.0f, 350.0f)))
     {
         if (ImGui::BeginTabBar("DebugTabs"))
         {
@@ -22,5 +19,5 @@ void DebugWindow::DrawImGui()
             ImGui::EndTabBar();
         }
     }
-    ImGui::End();
+    EndWindow();
 }

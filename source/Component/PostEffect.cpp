@@ -192,7 +192,9 @@ Bloom::Bloom()
     : PostProcess(SHADER_FILE_PATH)
 {
     // 中間RTはTextureManagerが所有し、Material Propertyへ共通Handleで渡す。
-    m_bloomTexture = TextureManager::CreateRenderTexture("PostProcess/Bloom", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+    const UINT bloomWidth = std::max<UINT>(Renderer::GetGameWidth() / 2, 1);
+    const UINT bloomHeight = std::max<UINT>(Renderer::GetGameHeight() / 2, 1);
+    m_bloomTexture = TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
     if (!m_bloomTexture.IsValid())
         return;
 
@@ -203,6 +205,20 @@ Bloom::Bloom()
         m_compositePassIndex = material->GetShader().GetShaderPassIndex("Composite").value_or(-1);
     }
 
+}
+
+void Bloom::Resize(UINT width, UINT height)
+{
+    const UINT bloomWidth = std::max<UINT>(width / 2, 1);
+    const UINT bloomHeight = std::max<UINT>(height / 2, 1);
+    const TextureHandle resizedTexture =
+        TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
+    if (!resizedTexture.IsValid())
+        return;
+
+    m_bloomTexture = resizedTexture;
+    if (Material* material = GetMaterial())
+        material->SetTexture("_Bloom", m_bloomTexture);
 }
 
 void Bloom::Apply()

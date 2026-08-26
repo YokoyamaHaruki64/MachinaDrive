@@ -4,10 +4,14 @@
 #include "Graphics/MaterialPropertyOverride.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#if GM_ENABLE_EDITOR
 #include "System/Editor/FileSystem.h"
+#endif
 #include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -868,6 +872,7 @@ bool Material::Bind(std::string_view passTag, const MaterialPropertyOverride* pr
     return true;
 }
 
+#if GM_ENABLE_EDITOR
 void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
 {
     const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
@@ -912,7 +917,9 @@ void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, Mate
         }
     }
 }
+#endif
 
+#if GM_ENABLE_EDITOR
 void Material::DrawInspectorImGui()
 {
     if (!m_isValid)
@@ -1010,3 +1017,4 @@ void Material::DrawInspectorImGui()
         ImGui::PopID();
     }
 }
+#endif

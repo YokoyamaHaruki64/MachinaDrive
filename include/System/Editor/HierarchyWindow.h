@@ -3,9 +3,11 @@
 #include <filesystem>
 #include <optional>
 
+#include "System/Editor/EditorWindow.h"
+
 class GameObject;
 
-class HierarchyWindow final
+class HierarchyWindow final : public EditorWindow
 {
     void DrawGameObjectNode(GameObject& gameObject, GameObject*& selectedGameObject);
     void DrawRootDropTarget(GameObject*& selectedGameObject);

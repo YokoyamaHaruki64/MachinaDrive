@@ -3,7 +3,9 @@
 #include "System/Core/Script.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
+#endif
 
 class EffectConfig : public Script
 {
@@ -123,7 +125,9 @@ public:
 
 private:
 
+#if GM_ENABLE_EDITOR
     static constexpr ImVec2 BUTTON_SIZE = ImVec2(80, 0);
+#endif
 
     PatternTrailConfig m_patternTrailConfig;
     PatternTrailConfig m_defaultPatternTrailConfig; // デフォルト設定を保持するメンバ変数
@@ -134,10 +138,12 @@ private:
     ImpactBurstConfig m_impactBurstConfig;
     ImpactBurstConfig m_defaultImpactBurstConfig;   // デフォルト設定を保持するメンバ変数
 
+#if GM_ENABLE_EDITOR
     void BoundBallConfigImGui();
     void TrailConfigImGui();
     void FireWorkConfigImGui();
     void ImpactBurstConfigImGui();
+#endif
 
     void AllSaveToFile();
     void AllLoadFromFile();

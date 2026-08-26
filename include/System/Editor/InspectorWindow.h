@@ -6,12 +6,14 @@
 #include <optional>
 #include <unordered_map>
 
+#include "System/Editor/EditorWindow.h"
+
 class GameObject;
 class Material;
 class RendererBase;
 
 // 選択中GameObjectの詳細とComponentごとの項目を表示する。
-class InspectorWindow final
+class InspectorWindow final : public EditorWindow
 {
     bool m_showLocalTransform = false;
     std::unordered_map<const Material*, std::array<char, 256>> m_materialNameBuffers;

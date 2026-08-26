@@ -10,8 +10,6 @@
 
 #include "Script/PatternTrail.h"
 
-#include "imgui.h"
-
 void BallManager::OnStart()
 {
     for (GameObject* wall : Manager::GetObjectsByComponent<Wall>())

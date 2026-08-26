@@ -3,7 +3,9 @@
 #include <iomanip>
 #include <optional>
 
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
+#endif
 
 #include "System/Diagnostics/LogFileWorker.h"
 #include "System/Diagnostics/LogSystem.h"
@@ -129,6 +131,7 @@ bool IsVisibleLevel(
 }
 
 
+#if GM_ENABLE_EDITOR
 ImVec4 GetLevelColor(LogLevel level)
 {
     switch (level)
@@ -143,6 +146,7 @@ ImVec4 GetLevelColor(LogLevel level)
         return ImGui::GetStyleColorVec4(ImGuiCol_Text);
     }
 }
+#endif
 
 
 int64_t GetLogSecond(const std::chrono::system_clock::time_point& timestamp)
@@ -193,6 +197,7 @@ void LogSystem::FlushAll()
 }
 
 
+#if GM_ENABLE_EDITOR
 void LogSystem::DrawImGuiTab()
 {
     if (!s_aggregationState)
@@ -313,6 +318,7 @@ void LogSystem::DrawImGuiTab()
         ImGui::EndTabItem();
     }
 }
+#endif
 
 
 void LogSystem::Shutdown()

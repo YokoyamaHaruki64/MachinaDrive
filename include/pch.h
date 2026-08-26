@@ -5,6 +5,10 @@
 #define NOMINMAX
 #define IMGUI_DEFINE_MATH_OPERATORS
 
+#ifndef GM_ENABLE_EDITOR
+#define GM_ENABLE_EDITOR 1
+#endif
+
 // Windows APIとDirectX関連のヘッダーファイル
 #include <windows.h>
 #include <d3d11.h>

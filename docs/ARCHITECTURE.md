@@ -24,7 +24,7 @@ WinMain
 | 場所 | 責務 |
 | --- | --- |
 | `include/System/Core/`, `source/System/Core/` | ウィンドウ、入力、時間、ゲームオブジェクト、Managerなど実行時の基盤 |
-| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、フィールド登録、ファイルダイアログ |
+| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、GameWindow、フィールド登録、ファイルダイアログ |
 | `include/System/Serialization/`, `source/System/Serialization/` | YAMLの値変換、ドキュメント入出力、GameObjectのシリアライズ |
 | `include/System/Diagnostics/`, `source/System/Diagnostics/` | Logger、LogSystem、ファイルWorker、PerformanceMonitor |
 | `include/System/Rendering/`, `source/System/Rendering/` | Renderer、RendererBase、DirectXTex |
@@ -47,11 +47,13 @@ WinMain
 起動
   ├─ LogSystem::Init でファイル出力Workerを開始
   └─ Manager::Init
-       ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
+       ├─ Renderer / Input / PostEffect / Audio を初期化
+       ├─ Editor構成では ImGui / Docking / Inspector / GameWindow を初期化
        └─ TitleScene を初期化
 
 毎フレーム: Manager::Update
-  ├─ 入力と ImGui フレームを更新
+  ├─ 入力を更新
+  ├─ Editor構成では Game View の要求サイズを適用し、ImGui フレームを更新
   ├─ 保留中シーンがあれば切替、なければ保留中オブジェクトを有効化
   ├─ Scene::Update
   ├─ GameObject::Update
@@ -59,15 +61,15 @@ WinMain
   └─ Destroy 指定済みオブジェクトを OnDestroy 後に削除
 
 毎フレーム: Manager::Draw
-  ├─ レンダーターゲットを開始し、メインカメラの View / Projection を設定
+  ├─ Game RenderTarget を開始し、メインカメラの View / Projection を設定
   ├─ RendererBase を描画コマンドとして送信・ソート・描画
   ├─ PostEffect を適用
-  ├─ ImGui を描画
-  └─ 表示
+  ├─ Editor構成では BackBuffer RTV に切り替えて GameWindow / Inspector / Debug を描画
+  └─ Editor構成は Present、Runtime構成は Game RenderTarget を BackBuffer へ CopyResource して Present
 
 フレーム終端: LogSystem::Flush
   ├─ 最大100件を取り出して現在秒のログへ集約
-  ├─ 現在秒の件数をImGuiへ反映
+  ├─ Editor構成では現在秒の件数をImGuiへ反映
   └─ 秒が変わったら確定ログをファイルWorkerへ配送
 
 終了
@@ -141,7 +143,11 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 - `Transparent`: 描画レイヤーの後、カメラ前方方向の距離を用いて奥から手前へ描画する。
 - `Overlay`: 描画レイヤーを優先して前面要素を描画する。
 
-描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
+描画後には `PostEffect` を順に適用する。Editor構成ではその後にImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへ転送する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
+
+Game描画はRenderer所有の可変サイズPing-Pong RenderTextureへ行う。Editor構成の`GameWindow`はこのSRVをImGui Imageとして表示し、表示領域に合わせて次フレームのRenderTargetサイズを要求する。`Free`は領域全体、`16:9`はレターボックス付きで表示する。3D Cameraのアスペクト比とBloomの中間RenderTextureは現在のGame RenderTargetサイズへ追従し、2Dの射影と初期UI配置も現在のサイズへ追従する。`SCREEN_WIDTH`／`SCREEN_HEIGHT`は初期値・フォールバックとしてのみ使用する。
+
+Editor / Runtime は`GM_ENABLE_EDITOR`で分岐する。Debug構成では`GM_ENABLE_EDITOR=1`としてImGui、Docking、GameWindowを有効にし、Release構成では`GM_ENABLE_EDITOR=0`としてImGui本体・backend・Editorウィンドウ群をコンパイル対象から外す。Prefab、Scene、Component、Renderer、PostEffectなどのゲームデータと実行時処理は両構成で共通に扱う。
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
 

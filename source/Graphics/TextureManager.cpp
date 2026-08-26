@@ -149,7 +149,9 @@ TextureHandle TextureManager::CreateTextureFromBGRA8(const void* pixels, UINT wi
 
 TextureHandle TextureManager::CreateRenderTexture(const std::string& name)
 {
-    return CreateRenderTexture(name, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const UINT width = Renderer::GetGameWidth() > 0 ? Renderer::GetGameWidth() : SCREEN_WIDTH;
+    const UINT height = Renderer::GetGameHeight() > 0 ? Renderer::GetGameHeight() : SCREEN_HEIGHT;
+    return CreateRenderTexture(name, width, height);
 }
 
 TextureHandle TextureManager::CreateRenderTexture(const std::string& name, UINT width, UINT height)
@@ -161,10 +163,35 @@ TextureHandle TextureManager::CreateRenderTexture(const std::string& name, UINT 
     const auto existing = m_textureIDsByName.find(name);
     if (existing != m_textureIDsByName.end())
     {
-        const TextureResource& resource = m_textures.at(existing->second);
-        if (resource.width != width || resource.height != height)
-            MessageBoxA(nullptr, "同名のRenderTextureに異なるサイズを指定しています。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+        TextureResource& resource = m_textures.at(existing->second);
+        if (resource.width == width && resource.height == height)
+            return TextureHandle(existing->second);
 
+        // Handleを保持したままGPUリソースだけ置き換え、Material側の参照を無効化しない。
+        D3D11_TEXTURE2D_DESC description{};
+        description.Width = width;
+        description.Height = height;
+        description.MipLevels = 1;
+        description.ArraySize = 1;
+        description.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        description.SampleDesc.Count = 1;
+        description.Usage = D3D11_USAGE_DEFAULT;
+        description.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+        TextureResource replacement{};
+        if (FAILED(Renderer::GetDevice()->CreateTexture2D(&description, nullptr, replacement.texture.GetAddressOf())) ||
+            FAILED(Renderer::GetDevice()->CreateRenderTargetView(
+                replacement.texture.Get(), nullptr, replacement.renderTargetView.GetAddressOf())) ||
+            FAILED(Renderer::GetDevice()->CreateShaderResourceView(
+                replacement.texture.Get(), nullptr, replacement.shaderResourceView.GetAddressOf())))
+        {
+            MessageBoxA(nullptr, "RenderTextureの再生成に失敗しました。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+            return TextureHandle{};
+        }
+
+        replacement.width = width;
+        replacement.height = height;
+        resource = std::move(replacement);
         return TextureHandle(existing->second);
     }
 

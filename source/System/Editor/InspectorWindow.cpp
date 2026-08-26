@@ -199,13 +199,12 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
 
 void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
 {
-    ImGui::SetNextWindowSize(ImVec2(360.0f, 500.0f), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Inspector");
+    BeginWindow("Inspector", Vector2(360.0f, 500.0f));
 
     if (!selectedGameObject)
     {
         ImGui::TextUnformatted("GameObjectを選択してください。");
-        ImGui::End();
+        EndWindow();
         return;
     }
 
@@ -302,5 +301,5 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
         ImGui::EndPopup();
     }
 
-    ImGui::End();
+    EndWindow();
 }

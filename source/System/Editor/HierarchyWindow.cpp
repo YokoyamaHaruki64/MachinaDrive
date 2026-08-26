@@ -127,8 +127,7 @@ void HierarchyWindow::DrawRootDropTarget(GameObject*& selectedGameObject)
 
 void HierarchyWindow::DrawImGui(GameObject*& selectedGameObject)
 {
-    ImGui::SetNextWindowSize(ImVec2(260.0f, 400.0f), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Hierarchy");
+    BeginWindow("Hierarchy", Vector2(260.0f, 400.0f));
 
     if (ImGui::Button("Save Scene"))
     {
@@ -167,5 +166,5 @@ void HierarchyWindow::DrawImGui(GameObject*& selectedGameObject)
         ImGui::EndPopup();
     }
 
-    ImGui::End();
+    EndWindow();
 }
