@@ -253,7 +253,10 @@ void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
                 inspectorSpace = m_showLocalTransform ? InspectorFieldSpace::Local : InspectorFieldSpace::World;
             }
 
-            component->DrawInspectorImGui(inspectorSpace);
+            if (component->DrawInspectorImGui(inspectorSpace))
+            {
+                component->OnEditorUpdate();
+            }
 
             if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
             {

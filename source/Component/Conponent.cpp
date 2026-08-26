@@ -24,13 +24,13 @@ void Component::SetEnabled(bool enabled)
     }
 }
 
-void Component::DrawInspectorImGui(InspectorFieldSpace inspectorSpace)
+bool Component::DrawInspectorImGui(InspectorFieldSpace inspectorSpace)
 {
     FieldRegistry fields;
     // InspectorではComponentヘッダーに表示するため、ここでは保存だけ行う。
     fields.Add("enabled", m_isEnabled, InspectorFieldType::Hidden);
     RegisterFields(fields);
-    fields.DrawImGui(inspectorSpace);
+    return fields.DrawImGui(inspectorSpace);
 }
 
 bool Component::ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context)

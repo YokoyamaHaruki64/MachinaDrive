@@ -44,7 +44,7 @@ struct FieldDescriptor
     ValueType valueType{};
     InspectorFieldType inspectorType{ InspectorFieldType::Auto };
     InspectorFieldSpace inspectorSpace{ InspectorFieldSpace::All };
-    std::function<void(const FieldDescriptor&)> drawAccessor;
+    std::function<bool(const FieldDescriptor&)> drawAccessor;
     std::function<YAMLValueConversionResult(YAMLValue&, const YAMLValueConversionContext&)> toYAMLValue;
     std::function<YAMLValueConversionResult(
         const YAMLValue&,
@@ -170,7 +170,7 @@ public:
             T* target = &value;
             descriptor.drawAccessor = [target](const FieldDescriptor& field)
             {
-                DrawReflectValue(field.displayName, *target);
+                return DrawReflectValue(field.displayName, *target);
             };
         }
 
@@ -190,7 +190,7 @@ public:
         };
         descriptor.drawAccessor = [](const FieldDescriptor& field)
         {
-            DrawList(field, *static_cast<std::vector<T>*>(field.value));
+            return DrawList(field, *static_cast<std::vector<T>*>(field.value));
         };
         ConfigureSerialization(descriptor, values);
         m_fields.push_back(std::move(descriptor));
@@ -243,7 +243,9 @@ public:
             if (DrawValue(field, &value))
             {
                 setter(value);
+                return true;
             }
+            return false;
         };
 
         if (serialize)
@@ -272,7 +274,7 @@ public:
         m_fields.push_back(std::move(descriptor));
     }
 
-    void DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+    bool DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
 
     // 登録Field全体をYAMLValueのMapへ変換する。
     bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {}) const;

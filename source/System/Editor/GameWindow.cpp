@@ -4,6 +4,7 @@
 
 #include "imgui.h"
 
+#include "System/Core/manager.h"
 #include "System/Rendering/renderer.h"
 
 namespace
@@ -43,11 +44,21 @@ void GameWindow::DrawImGui()
         return;
     }
 
-    if (ImGui::Button("Free"))
-        m_aspectMode = AspectMode::Free;
+    if (Manager::IsPlayMode())
+    {
+        if (ImGui::Button("Stop"))
+        {
+            Manager::StopPlayMode();
+        }
+    }
+    else if (ImGui::Button("Play"))
+    {
+        Manager::EnterPlayMode();
+    }
+
     ImGui::SameLine();
-    if (ImGui::Button("16:9"))
-        m_aspectMode = AspectMode::Ratio16x9;
+    m_aspectMode = Manager::IsPlayMode() ? AspectMode::Ratio16x9 : AspectMode::Free;
+    ImGui::TextUnformatted(Manager::IsPlayMode() ? "16:9" : "Free");
     ImGui::SameLine();
     ImGui::Text("Render: %u x %u", Renderer::GetGameWidth(), Renderer::GetGameHeight());
 

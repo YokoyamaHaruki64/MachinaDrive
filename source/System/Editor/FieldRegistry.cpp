@@ -262,8 +262,9 @@ bool FieldRegistry::DrawPathDialog(
     return changed;
 }
 
-void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
+bool FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
 {
+    bool changed = false;
     for (FieldDescriptor& field : m_fields)
     {
         if (field.inspectorType == InspectorFieldType::Hidden)
@@ -279,14 +280,15 @@ void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
         ImGui::PushID(field.key.c_str());
         if (field.drawAccessor)
         {
-            field.drawAccessor(field);
+            changed |= field.drawAccessor(field);
         }
         else
         {
-            DrawValue(field, field.value);
+            changed |= DrawValue(field, field.value);
         }
         ImGui::PopID();
     }
+    return changed;
 }
 #else
 bool FieldRegistry::DrawValue(const FieldDescriptor&, void*)
@@ -294,9 +296,10 @@ bool FieldRegistry::DrawValue(const FieldDescriptor&, void*)
     return false;
 }
 
-void FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
+bool FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
 {
     (void)inspectorSpace;
+    return false;
 }
 #endif
 

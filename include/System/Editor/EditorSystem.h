@@ -21,4 +21,7 @@ public:
     static bool ApplyGameWindowRenderTargetSize();
     static bool IsGameWindowReady();
     static void DrawImGui();
+
+private:
+    static void DrawToolbar();
 };
