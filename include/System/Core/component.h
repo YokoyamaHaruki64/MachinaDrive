@@ -21,6 +21,8 @@ public:
     }
     virtual ~Component() {}
 
+    virtual void OnLoaded() {};
+    virtual void OnEditorUpdate() {};
     virtual void OnStart() {};
     // GameObjectが有効になった遷移で呼び出される。
     virtual void OnActive() {};
@@ -32,7 +34,7 @@ public:
     virtual void LateUpdate() {};
 	virtual void Draw() {};
 
-    void DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+    bool DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
     bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {});
     bool FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context = {});
 

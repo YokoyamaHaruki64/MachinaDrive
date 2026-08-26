@@ -37,6 +37,13 @@ std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポ
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
 Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTransitionPhase::None;
+Manager::GameMode Manager::m_gameMode =
+#if GM_ENABLE_EDITOR
+    Manager::GameMode::Edit;
+#else
+    Manager::GameMode::Play;
+#endif
+bool Manager::m_stopPlayRequested = false;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
@@ -65,12 +72,22 @@ void Manager::StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> ga
 
     for (size_t index = firstLoadedIndex; index < m_GameObjects.size(); ++index)
     {
-        m_GameObjects[index]->OnStart();
+        m_GameObjects[index]->OnLoaded();
+        if (m_gameMode == GameMode::Play)
+        {
+            m_GameObjects[index]->OnStart();
+        }
     }
 }
 
 bool Manager::SaveCurrentScene()
 {
+    if (m_gameMode == GameMode::Play)
+    {
+        Logger::Error("Play中はSceneを保存できません。");
+        return false;
+    }
+
     if (!m_currentScene)
     {
         Logger::Error("保存対象のSceneがありません。");
@@ -81,6 +98,12 @@ bool Manager::SaveCurrentScene()
 
 bool Manager::SaveSceneObjects(const std::filesystem::path& path)
 {
+    if (m_gameMode == GameMode::Play)
+    {
+        Logger::Error("Play中はSceneを保存できません。");
+        return false;
+    }
+
     std::vector<GameObject*> gameObjects;
     gameObjects.reserve(m_GameObjects.size());
     for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
@@ -123,6 +146,12 @@ bool Manager::LoadSceneObjects(const std::filesystem::path& path)
 
 bool Manager::SavePrefab(GameObject& root, const std::filesystem::path& path)
 {
+    if (m_gameMode == GameMode::Play)
+    {
+        Logger::Error("Play中はPrefabを保存できません。");
+        return false;
+    }
+
     std::vector<GameObject*> gameObjects;
     std::vector<GameObject*> remaining{ &root };
     while (!remaining.empty())
@@ -265,6 +294,101 @@ void Manager::InitScene()
     PendingGameObjectsProcess();
 }
 
+void Manager::ReloadCurrentScene()
+{
+    if (!m_currentScene)
+    {
+        return;
+    }
+
+    m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
+    m_currentScene->Uninit();
+    DestroyGameObjects();
+    m_postEffects.clear();
+
+    m_sceneTransitionPhase = SceneTransitionPhase::Initializing;
+    m_currentScene->Init();
+    m_sceneTransitionPhase = SceneTransitionPhase::None;
+    PendingGameObjectsProcess();
+}
+
+bool Manager::EnterPlayMode()
+{
+    if (m_gameMode == GameMode::Play)
+    {
+        return true;
+    }
+
+    if (!m_currentScene || !SaveCurrentScene())
+    {
+        return false;
+    }
+
+    m_gameMode = GameMode::Play;
+    for (size_t index = 0; index < m_GameObjects.size(); ++index)
+    {
+        if (!m_GameObjects[index]->IsDestroyed())
+        {
+            m_GameObjects[index]->OnStart();
+        }
+    }
+    return true;
+}
+
+std::filesystem::path Manager::GetCurrentSceneFilePath()
+{
+    return m_currentScene ? m_currentScene->GetSceneFilePath() : std::filesystem::path{};
+}
+
+bool Manager::StopPlayMode()
+{
+    if (m_gameMode == GameMode::Edit)
+    {
+        return true;
+    }
+
+    // 描画途中のRendererを破棄しないよう、次のUpdate冒頭で処理する。
+    m_stopPlayRequested = true;
+    return true;
+}
+
+#if GM_ENABLE_EDITOR
+namespace
+{
+    class SerializedScene final : public Scene
+    {
+        std::filesystem::path m_path;
+
+    public:
+        explicit SerializedScene(std::filesystem::path path)
+            : m_path(std::move(path))
+        {
+        }
+
+        const std::filesystem::path& GetSceneFilePath() const override
+        {
+            return m_path;
+        }
+
+        void Init() override
+        {
+            Manager::LoadSceneObjects(m_path);
+        }
+    };
+}
+
+bool Manager::LoadEditorScene(const std::filesystem::path& path)
+{
+    if (m_gameMode == GameMode::Play || path.extension() != ".scene" || !std::filesystem::exists(path))
+    {
+        return false;
+    }
+
+    m_nextScene = std::make_unique<SerializedScene>(path);
+    return true;
+}
+#endif
+
 bool Manager::Init()
 {
     Renderer::Init();
@@ -370,6 +494,16 @@ void Manager::Update()
     PerformanceMonitor::BeginUpdate();
 
 	Input::Update();
+
+    if (m_stopPlayRequested)
+    {
+        m_stopPlayRequested = false;
+        // Play中に予約されたScene遷移は、編集対象Sceneへ戻るため破棄する。
+        m_nextScene.reset();
+        m_gameMode = GameMode::Edit;
+        ReloadCurrentScene();
+    }
+
 #if GM_ENABLE_EDITOR
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -402,29 +536,32 @@ void Manager::Update()
         PendingGameObjectsProcess();
     }
 
-    if (m_currentScene)
+    if (m_gameMode == GameMode::Play && m_currentScene)
     {
         m_currentScene->Update();
     }
 
-    for (size_t i = 0; i < m_GameObjects.size(); ++i)
+    if (m_gameMode == GameMode::Play)
     {
-        if (!m_GameObjects[i]->IsDestroyed())
+        for (size_t i = 0; i < m_GameObjects.size(); ++i)
         {
-            m_GameObjects[i]->Update();
+            if (!m_GameObjects[i]->IsDestroyed())
+            {
+                m_GameObjects[i]->Update();
+            }
         }
-    }
 
-    // Manager::Update全体からLateUpdateだけを分離して計測する。
-    PerformanceMonitor::BeginLateUpdate();
-    for (size_t i = 0; i < m_GameObjects.size(); ++i)
-    {
-        if (!m_GameObjects[i]->IsDestroyed())
+        // Manager::Update全体からLateUpdateだけを分離して計測する。
+        PerformanceMonitor::BeginLateUpdate();
+        for (size_t i = 0; i < m_GameObjects.size(); ++i)
         {
-            m_GameObjects[i]->LateUpdate();
+            if (!m_GameObjects[i]->IsDestroyed())
+            {
+                m_GameObjects[i]->LateUpdate();
+            }
         }
+        PerformanceMonitor::EndLateUpdate();
     }
-    PerformanceMonitor::EndLateUpdate();
 
     // 破棄されたオブジェクトの削除
     for (size_t i = 0; i < m_GameObjects.size();)

@@ -13,6 +13,9 @@ public:
     }
 
     ~Script() override = default;
+
+    void OnLoaded() override final {}
+    void OnEditorUpdate() override final {}
 };
 
 #include "System/Core/ComponentRegistry.h"

@@ -105,9 +105,10 @@ public:
 	T* AddComponent(Args&&... args)
 	{
         m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
-		T* componentPtr = static_cast<T*>(m_components.back().get());
+        T* componentPtr = static_cast<T*>(m_components.back().get());
         if (m_isStarted)
         {
+            componentPtr->OnLoaded();
             componentPtr->OnStart();
             if (m_isActive && !m_isDestroyRequested && !m_isDestroyed)
             {
@@ -168,6 +169,19 @@ public:
         }
     }
 
+    void OnLoaded()
+    {
+        if (m_isDestroyRequested || m_isDestroyed)
+        {
+            return;
+        }
+
+        for (const std::unique_ptr<Component>& component : m_components)
+        {
+            component->OnLoaded();
+        }
+    }
+
     void OnStart()
     {
         if (m_isStarted || m_isDestroyRequested || m_isDestroyed)
@@ -187,6 +201,22 @@ public:
         if (m_isActive)
         {
             NotifyActiveState();
+        }
+    }
+
+    void OnEditorUpdate()
+    {
+        if (!m_isActive || m_isDestroyRequested || m_isDestroyed)
+        {
+            return;
+        }
+
+        for (const std::unique_ptr<Component>& component : m_components)
+        {
+            if (component->IsEnabled())
+            {
+                component->OnEditorUpdate();
+            }
         }
     }
 

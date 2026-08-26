@@ -16,6 +16,13 @@ class Scene;
 
 class Manager
 {
+public:
+    enum class GameMode
+    {
+        Edit,
+        Play,
+    };
+
 private:
     enum class SceneTransitionPhase
     {
@@ -32,6 +39,8 @@ private:
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
     static SceneTransitionPhase m_sceneTransitionPhase;
+    static GameMode m_gameMode;
+    static bool m_stopPlayRequested;
 
 
     static void PendingGameObjectsProcess()
@@ -49,12 +58,17 @@ private:
         {
             if (!m_GameObjects[i]->IsDestroyed())
             {
-                m_GameObjects[i]->OnStart();
+                m_GameObjects[i]->OnLoaded();
+                if (m_gameMode == GameMode::Play)
+                {
+                    m_GameObjects[i]->OnStart();
+                }
             }
         }
     }
 
     static void InitScene();
+    static void ReloadCurrentScene();
     static void DestroyGameObjects();
     static void StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects);
     static GameObject* InstantiatePrefabInternal(
@@ -68,6 +82,15 @@ public:
 	static void Uninit();
 	static void Update();
 	static void Draw();
+
+    static GameMode GetGameMode() { return m_gameMode; }
+    static bool IsPlayMode() { return m_gameMode == GameMode::Play; }
+    static std::filesystem::path GetCurrentSceneFilePath();
+    static bool EnterPlayMode();
+    static bool StopPlayMode();
+#if GM_ENABLE_EDITOR
+    static bool LoadEditorScene(const std::filesystem::path& path);
+#endif
 
     static bool SaveCurrentScene();
     static bool SaveSceneObjects(const std::filesystem::path& path);
@@ -121,7 +144,11 @@ public:
         if (m_sceneTransitionPhase == SceneTransitionPhase::None)
         {
             m_GameObjects.emplace_back(std::move(newObject));
-            newObj->OnStart();
+            newObj->OnLoaded();
+            if (m_gameMode == GameMode::Play)
+            {
+                newObj->OnStart();
+            }
 
             return newObj;
         }
