@@ -3,6 +3,7 @@
 #include "System/Editor/EditorSystem.h"
 #include "System/Core/manager.h"
 #include "System/Editor/FileSystem.h"
+#include "System/Editor/ImGuiStyleConfig.h"
 #include "System/Diagnostics/Logger.h"
 
 #include "imgui.h"
@@ -36,6 +37,17 @@ bool EditorSystem::IsGameWindowReady()
     return m_gameWindow.IsRenderTargetReady();
 }
 
+void EditorSystem::ReloadStyle()
+{
+    if (!ImGuiStyleConfig::Reload())
+    {
+        return;
+    }
+
+    ImGuiStyleConfig::Apply();
+    ImGui::GetIO().IniFilename = ImGuiStyleConfig::GetIniPathString().c_str();
+}
+
 void EditorSystem::DrawToolbar()
 {
     if (!ImGui::BeginMainMenuBar())
@@ -62,6 +74,15 @@ void EditorSystem::DrawToolbar()
                 Logger::Error("Sceneを読み込めません: " + projectPath->generic_string());
             }
         }
+    }
+
+    if (ImGui::BeginMenu("Settings"))
+    {
+        if (ImGui::MenuItem("Style Reload"))
+        {
+            ReloadStyle();
+        }
+        ImGui::EndMenu();
     }
 
     ImGui::EndMainMenuBar();

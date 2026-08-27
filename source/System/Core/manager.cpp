@@ -425,7 +425,9 @@ bool Manager::Init()
     ImGuiIO& io = ImGui::GetIO();
 
     // Editor専用フォントを先に登録し、初回のDX11フォントアトラス生成へ反映する。
-    const std::filesystem::path imguiFontPath = L"config/NotoSansJP-Medium.ttf";
+    ImGuiStyleConfig::Load("config/imgui_style.toml");
+
+    const std::filesystem::path& imguiFontPath = ImGuiStyleConfig::GetFontPath();
     const std::u8string imguiFontPathUtf8 = imguiFontPath.u8string();
     std::string imguiFontPathString;
     imguiFontPathString.reserve(imguiFontPathUtf8.size());
@@ -462,9 +464,9 @@ bool Manager::Init()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // MainWindow外のプラットフォームウィンドウ
     io.ConfigWindowsMoveFromTitleBarOnly = true; // 中身をドラッグして誤移動しにくくする
 
-    io.IniFilename = "config/imgui.ini"; // 設定ファイルの保存先を指定
+    io.IniFilename = ImGuiStyleConfig::GetIniPathString().c_str(); // 設定ファイルの保存先を指定
 
-    ImGuiStyleConfig::Apply("config/imgui_style.toml");
+    ImGuiStyleConfig::Apply();
 #endif
 
     m_nextScene = std::make_unique<TitleScene>();

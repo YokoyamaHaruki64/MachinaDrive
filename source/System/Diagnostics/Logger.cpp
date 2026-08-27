@@ -14,7 +14,7 @@ std::wstring ToWideString(std::string_view message)
     }
 
     const int requiredLength = MultiByteToWideChar(
-        CP_ACP,
+        CP_UTF8,
         0,
         message.data(),
         static_cast<int>(message.size()),
@@ -27,7 +27,7 @@ std::wstring ToWideString(std::string_view message)
 
     std::wstring result(static_cast<size_t>(requiredLength), L'\0');
     MultiByteToWideChar(
-        CP_ACP,
+        CP_UTF8,
         0,
         message.data(),
         static_cast<int>(message.size()),

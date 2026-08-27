@@ -1,8 +1,13 @@
 # ImGui Editor Style
 # 色は "#RRGGBB" または "#RRGGBBAA"、余白は [x, y] で指定する。
 
+# 日本語フォントのパス
+FontPath = "config/NotoSansJP-Medium.ttf"
+# ImGuiレイアウト保存先
+IniPath = "config/imgui.ini"
+
 # 通常の文字色
-Text = "#D4D4D4"
+Text = "#ff0000"
 # 無効化された文字色
 TextDisabled = "#8B8B8B"
 

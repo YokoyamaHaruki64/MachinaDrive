@@ -178,17 +178,34 @@ namespace
 
         return false;
     }
+
+    std::filesystem::path ToUtf8Path(std::string_view value)
+    {
+        const auto* begin = reinterpret_cast<const char8_t*>(value.data());
+        const std::u8string utf8Value(begin, begin + value.size());
+        return std::filesystem::path(utf8Value);
+    }
 }
 
-void ImGuiStyleConfig::Apply(const std::filesystem::path& path)
+std::filesystem::path ImGuiStyleConfig::s_configPath = "config/imgui_style.toml";
+std::filesystem::path ImGuiStyleConfig::s_fontPath = "config/NotoSansJP-Medium.ttf";
+std::filesystem::path ImGuiStyleConfig::s_iniPath = "config/imgui.ini";
+std::string ImGuiStyleConfig::s_iniPathString = "config/imgui.ini";
+std::vector<std::pair<std::string, std::string>> ImGuiStyleConfig::s_styleValues;
+
+bool ImGuiStyleConfig::Load(const std::filesystem::path& path)
 {
-    ImGui::StyleColorsDark();
+    s_configPath = path;
+    s_fontPath = "config/NotoSansJP-Medium.ttf";
+    s_iniPath = "config/imgui.ini";
+    s_iniPathString = "config/imgui.ini";
+    s_styleValues.clear();
 
     std::ifstream stream(path);
     if (!stream)
     {
         Logger::Warning("ImGuiスタイル設定が見つかりません。既定テーマを使用します: " + path.string());
-        return;
+        return false;
     }
 
     std::string line;
@@ -217,12 +234,58 @@ void ImGuiStyleConfig::Apply(const std::filesystem::path& path)
             continue;
         }
 
-        // キーと値をトリムして適用する
+        // キーと値をトリムして設定オブジェクトへ保持する。
         const std::string key = Trim(std::string_view(content).substr(0, separator));
         const std::string value = Trim(std::string_view(content).substr(separator + 1));
-        if (key.empty() || !ApplyStyleValue(key, value))
+        if (key.empty())
         {
-            Logger::Warning("ImGuiスタイル設定を適用できません: " + key + " (" + std::to_string(lineNumber) + ")");
+            Logger::Warning("ImGuiスタイル設定のキーが空です (" + std::to_string(lineNumber) + ")");
+            continue;
+        }
+
+        if (key == "FontPath" || key == "IniPath")
+        {
+            std::string parsedPath;
+            if (!TryParseString(value, parsedPath) || parsedPath.empty())
+            {
+                Logger::Warning("ImGuiパス設定を解析できません: " + key + " (" + std::to_string(lineNumber) + ")");
+                continue;
+            }
+
+            if (key == "FontPath")
+            {
+                s_fontPath = ToUtf8Path(parsedPath);
+            }
+            else
+            {
+                s_iniPath = ToUtf8Path(parsedPath);
+                // ImGuiはUTF-8のファイル名を受け取るため、元のUTF-8表現を保持する。
+                s_iniPathString = parsedPath;
+            }
+            continue;
+        }
+
+        // 重複キーも記述順に保持し、Apply時に後の値で上書きする。
+        s_styleValues.emplace_back(key, value);
+    }
+
+    return true;
+}
+
+bool ImGuiStyleConfig::Reload()
+{
+    return Load(s_configPath);
+}
+
+void ImGuiStyleConfig::Apply()
+{
+    ImGui::StyleColorsDark();
+
+    for (const auto& [key, value] : s_styleValues)
+    {
+        if (!ApplyStyleValue(key, value))
+        {
+            Logger::Warning("ImGuiスタイル設定を適用できません: " + key);
         }
     }
 }

@@ -18,6 +18,7 @@ class EditorSystem final
     static LogWindow m_logWindow;
 
     static bool IsActiveGameObject(GameObject* gameObject);
+    static void ReloadStyle();
 
 public:
     static bool ApplyGameWindowRenderTargetSize();
