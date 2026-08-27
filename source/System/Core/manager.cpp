@@ -4,6 +4,7 @@
 
 #if GM_ENABLE_EDITOR
 #include "System/Editor/EditorSystem.h"
+#include "System/Editor/ImGuiStyleConfig.h"
 #endif
 #include "System/Serialization/GameObjectYamlSerializer.h"
 #include "System/Core/input.h"
@@ -421,10 +422,38 @@ bool Manager::Init()
     // ImGuiの初期化
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Editor専用フォントを先に登録し、初回のDX11フォントアトラス生成へ反映する。
+    const std::filesystem::path imguiFontPath = L"config/NotoSansJP-Medium.ttf";
+    const std::u8string imguiFontPathUtf8 = imguiFontPath.u8string();
+    std::string imguiFontPathString;
+    imguiFontPathString.reserve(imguiFontPathUtf8.size());
+    for (const char8_t character : imguiFontPathUtf8)
+    {
+        imguiFontPathString.push_back(static_cast<char>(character));
+    }
+    constexpr float imguiFontSize = 18.0f;
+    ImFontConfig fontConfig;
+    fontConfig.OversampleH = 0;
+    fontConfig.OversampleV = 0;
+
+    ImFont* font = io.Fonts->AddFontFromFileTTF(
+        imguiFontPathString.c_str(),
+        imguiFontSize,
+        &fontConfig,
+        io.Fonts->GetGlyphRangesJapanese());
+    if (font)
+    {
+        io.FontDefault = font;
+    }
+    else
+    {
+        Logger::Warning("ImGuiフォントの読み込みに失敗しました。既定フォントを使用します: " + imguiFontPathString);
+    }
+
     ImGui_ImplWin32_Init(GetWindow());
     ImGui_ImplDX11_Init(Renderer::GetDevice(), Renderer::GetDeviceContext());
-    ImGui::SetCurrentContext(ImGui::GetCurrentContext());
-    ImGuiIO& io = ImGui::GetIO();
 
     // 入力
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Tab / 矢印 / Space / Enter
@@ -435,18 +464,7 @@ bool Manager::Init()
 
     io.IniFilename = "config/imgui.ini"; // 設定ファイルの保存先を指定
 
-    // スタイル
-    ImGui::StyleColorsDark();
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowRounding = 3.0f;
-    style.FrameRounding = 4.0f;
-    style.PopupRounding = 4.0f;
-    style.ScrollbarRounding = 6.0f;
-    style.WindowBorderSize = 2.0f;
-    style.FrameBorderSize = 0.0f;
-    style.ItemSpacing = ImVec2(8, 6);
-    style.WindowPadding = ImVec2(10, 10);
+    ImGuiStyleConfig::Apply("config/imgui_style.toml");
 #endif
 
     m_nextScene = std::make_unique<TitleScene>();

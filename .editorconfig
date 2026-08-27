@@ -39,7 +39,7 @@ trim_trailing_whitespace = true
 # 実行時に読み込むテキストデータ
 # Parser間のBOM対応差を避けるため、BOMなしUTF-8に統一する
 # ---------------------------------------------------
-[*.{json,yml,yaml,scene,prefab,material,shader,ini}]
+[*.{json,yml,yaml,scene,prefab,material,shader,ini,toml}]
 charset = utf-8
 
 # ---------------------------------------------------

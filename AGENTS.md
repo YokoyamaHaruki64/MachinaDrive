@@ -19,7 +19,7 @@
 - `.editorconfig` を正とし、変更直後に変更箇所を含む対象ファイルごとに文字コード・BOM・改行・末尾改行・行末空白を確認する。共通設定は UTF-8 BOM、CRLF、最終改行あり、行末空白の削除である。ただし、実行時に読み込むテキストデータとHLSLはBOMなしUTF-8とする。
 - C++ ソース / ヘッダー（`.cpp`、`.cxx`、`.cc`、`.c`、`.h`、`.hpp`、`.hxx`、`.inl`）は UTF-8 BOM・CRLF・スペース4個インデントとする。
 - HLSL（`.hlsl`、`.hlsli`、`.fx`、`.fxh`）は BOM なし UTF-8・CRLF・スペース4個インデントとする。fxc互換性のため BOM を付けない。
-- 実行時に読み込むテキストデータ（`.json`、`.yml`、`.yaml`、`.scene`、`.prefab`、`.material`、`.shader`、`.ini`）は BOM なし UTF-8・CRLFとする。Parser間のBOM対応差を避けるため、BOMを付けない。
+- 実行時に読み込むテキストデータ（`.json`、`.yml`、`.yaml`、`.scene`、`.prefab`、`.material`、`.shader`、`.ini`、`.toml`）は BOM なし UTF-8・CRLFとする。Parser間のBOM対応差を避けるため、BOMを付けない。
 - Visual Studio プロジェクト設定（`.vcxproj`、`.vcxproj.filters`、`.vcxproj.props`、`.props`、`.targets`）と XML、CMake、JSON、YAML、Markdown はスペース2個インデントとする。ソリューション（`.sln`、`.slnx`）はタブインデントとする。
 - Markdown は行末空白を保持してよいが、その他の対象ファイルでは行末空白を残さない。
 - Visual Studio のフィルタ構造は実際の `source/`・`include/` 配下のフォルダ構造に対応させる。ファイル追加・移動時は、`.vcxproj.filters` の登録先も同じ階層へ更新する。
@@ -52,7 +52,7 @@
 
 ## 変更時の注意
 
-- `Assets/`、`BuildedShader/`、`config/`、`.vs/` は `.gitignore` 対象。生成物やローカル設定を追跡対象へ変更しない。
+- `Assets/`、`BuildedShader/`、`.vs/` は `.gitignore` 対象。`config/`はテーマ・実行時設定・同梱フォントを追跡し、開発者ごとの差分になる`config/imgui.ini`だけを追跡しない。
 - 既存の未コミット変更には触れず、対象外の整形やファイル名変更は行わない。
 - 外部ライブラリや SDK を追加・更新する前に確認を取る。
 - コミット、push、外部サービスへの操作はユーザーの明示的な承認後に行う。

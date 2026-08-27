@@ -1,0 +1,141 @@
+# ImGui Editor Style
+# 色は "#RRGGBB" または "#RRGGBBAA"、余白は [x, y] で指定する。
+
+# 通常の文字色
+Text = "#D4D4D4"
+# 無効化された文字色
+TextDisabled = "#8B8B8B"
+
+# 通常ウィンドウの背景色
+WindowBg = "#272727"
+# 子ウィンドウの背景色
+ChildBg = "#272727"
+# ポップアップの背景色
+PopupBg = "#313131"
+# ウィンドウ枠線の色
+Border = "#4b4b4b"
+# ウィンドウ枠線の影色
+BorderShadow = "#00000000"
+
+# 入力欄・コンボボックスなどの背景色
+FrameBg = "#1E1E1E"
+# 入力欄にカーソルを合わせたときの背景色
+FrameBgHovered = "#242424"
+# 入力欄を操作中の背景色
+FrameBgActive = "#2B2B2B"
+
+# 非アクティブなタイトルバーの背景色
+TitleBg = "#202020"
+# アクティブなタイトルバーの背景色
+TitleBgActive = "#313131"
+# 折りたたまれたタイトルバーの背景色
+TitleBgCollapsed = "#202020"
+# メニューバーの背景色
+MenuBarBg = "#303030"
+
+# スクロールバー全体の背景色
+ScrollbarBg = "#202020"
+# スクロールバーつまみの通常色
+ScrollbarGrab = "#4B4B4B"
+# スクロールバーつまみのホバー色
+ScrollbarGrabHovered = "#666666"
+# スクロールバーつまみの操作中色
+ScrollbarGrabActive = "#888888"
+
+# チェックボックスのチェック色
+CheckMark = "#D4D4D4"
+# 選択状態のチェックボックス背景色
+CheckboxSelectedBg = "#00000000"
+# スライダーつまみの通常色
+SliderGrab = "#5EA9DD"
+# スライダーつまみの操作中色
+SliderGrabActive = "#85C4EB"
+
+# ボタンの通常背景色
+Button = "#303030"
+# ボタンのホバー背景色
+ButtonHovered = "#414141"
+# ボタンの押下背景色
+ButtonActive = "#525252"
+
+# ツリー・選択行などの通常背景色
+Header = "#414141"
+# ツリー・選択行などのホバー背景色
+HeaderHovered = "#525252"
+# ツリー・選択行などの選択背景色
+HeaderActive = "#696969"
+
+# 区切り線の通常色
+Separator = "#474747"
+# 区切り線のホバー色
+SeparatorHovered = "#5EA9DD"
+# 区切り線のドラッグ中色
+SeparatorActive = "#85C4EB"
+
+# ウィンドウリサイズ用グリップの通常色
+ResizeGrip = "#47474766"
+# ウィンドウリサイズ用グリップのホバー色
+ResizeGripHovered = "#888888B3"
+# ウィンドウリサイズ用グリップの操作中色
+ResizeGripActive = "#d6d6d6FF"
+# テキスト入力欄のキャレット色
+InputTextCursor = "#D4D4D4"
+
+# 非アクティブなタブの背景色
+Tab = "#2B2B2B"
+# タブのホバー背景色
+TabHovered = "#525252"
+# アクティブなタブの背景色
+TabSelected = "#3D3D3D"
+# アクティブなタブ上線の色
+TabSelectedOverline = "#5EA9DD"
+# フォーカス外の非アクティブタブ背景色
+TabDimmed = "#252525"
+# フォーカス外のアクティブタブ背景色
+TabDimmedSelected = "#3d3d3d"
+# フォーカス外のアクティブタブ上線の色
+TabDimmedSelectedOverline = "#3E718F"
+
+# Docking時の配置先プレビュー色
+DockingPreview = "#5EA9DD66"
+# Docking領域に何もないときの背景色
+DockingEmptyBg = "#202020"
+# キーボード操作時の選択ハイライト色
+NavCursor = "#5EA9DD"
+# Ctrl+Tab操作時のウィンドウ枠ハイライト色
+NavWindowingHighlight = "#5EA9DD"
+# Ctrl+Tab操作時に背面へかける暗幕色
+NavWindowingDimBg = "#00000080"
+# 入力欄で選択した文字列の背景色
+TextSelectedBg = "#5EA9DD66"
+# ドラッグ&ドロップ先の枠線色
+DragDropTarget = "#5EA9DD"
+# ドラッグ&ドロップ先の背景色
+DragDropTargetBg = "#5EA9DD33"
+# モーダル表示時に背面へかける暗幕色
+ModalWindowDimBg = "#00000080"
+
+# ウィンドウ角丸の半径
+WindowRounding = 3.0
+# 入力欄・ボタン角丸の半径
+FrameRounding = 3.0
+# ポップアップ角丸の半径
+PopupRounding = 4.0
+# スクロールバー角丸の半径
+ScrollbarRounding = 5.0
+# タブ上側の角丸半径。0で角丸なし
+TabRounding = 0.0
+# タブ外周枠線の太さ。0で枠線なし
+TabBorderSize = 1.0
+# タブバー下部の境界線の太さ。0で境界線なし
+TabBarBorderSize = 0.0
+# 選択タブ上線の太さ。0で上線なし
+TabBarOverlineSize = 2.0
+# ウィンドウ枠線の太さ
+WindowBorderSize = 1.0
+# 入力欄・ボタン枠線の太さ
+FrameBorderSize = 1.0
+# 部品同士の横・縦の間隔
+ItemSpacing = [8.0, 6.0]
+# ウィンドウ内側の横・縦の余白
+WindowPadding = [10.0, 10.0]

@@ -153,6 +153,9 @@
     <ClCompile Include="source\System\Editor\InspectorWindow.cpp">
       <Filter>ソース ファイル\System\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Editor\ImGuiStyleConfig.cpp">
+      <Filter>ソース ファイル\System\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Editor\FieldRegistry.cpp">
       <Filter>ソース ファイル\System\Editor</Filter>
     </ClCompile>
@@ -420,6 +423,9 @@
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Editor\HierarchyWindow.h">
+      <Filter>ヘッダー ファイル\System\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h">
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Editor\InspectorWindow.h">

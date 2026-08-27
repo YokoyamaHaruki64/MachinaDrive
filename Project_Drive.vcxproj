@@ -258,6 +258,9 @@
     <ClCompile Include="source\System\Editor\InspectorWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="source\System\Editor\ImGuiStyleConfig.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\System\Editor\FieldRegistry.cpp">
     </ClCompile>
     <ClCompile Include="source\System\Editor\FileSystem.cpp">
@@ -441,6 +444,7 @@
     <ClInclude Include="include\System\Editor\DebugWindow.h" />
     <ClInclude Include="include\System\Editor\EditorWindow.h" />
     <ClInclude Include="include\System\Editor\EditorSystem.h" />
+    <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h" />
     <ClInclude Include="include\System\Editor\GameWindow.h" />
     <ClInclude Include="include\System\Editor\HierarchyWindow.h" />
     <ClInclude Include="include\System\Editor\InspectorWindow.h" />
