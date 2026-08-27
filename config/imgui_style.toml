@@ -144,3 +144,5 @@ FrameBorderSize = 1.0
 ItemSpacing = [8.0, 6.0]
 # ウィンドウ内側の横・縦の余白
 WindowPadding = [10.0, 10.0]
+# Docking分割で確保する最小の横・縦サイズ。0で空の中央領域を残さない
+WindowMinSize = [0.0, 0.0]

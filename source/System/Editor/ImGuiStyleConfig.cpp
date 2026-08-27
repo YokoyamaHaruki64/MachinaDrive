@@ -173,6 +173,7 @@ namespace
         if (key == "TabBarOverlineSize") return TryParseFloat(value, style.TabBarOverlineSize);
         if (key == "WindowBorderSize") return TryParseFloat(value, style.WindowBorderSize);
         if (key == "FrameBorderSize") return TryParseFloat(value, style.FrameBorderSize);
+        if (key == "WindowMinSize") return TryParseVec2(value, style.WindowMinSize);
         if (key == "ItemSpacing") return TryParseVec2(value, style.ItemSpacing);
         if (key == "WindowPadding") return TryParseVec2(value, style.WindowPadding);
 
