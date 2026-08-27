@@ -139,6 +139,11 @@ void HierarchyWindow::DrawImGui()
     {
         Manager::SaveCurrentScene();
     }
+    ImGui::SameLine();
+
+    const std::filesystem::path scenePath = Manager::GetCurrentSceneFilePath();
+    const std::string sceneName = scenePath.empty() ? "(None)" : scenePath.filename().string();
+    ImGui::Text("Scene: %s", sceneName.c_str());
     ImGui::Separator();
 
     for (const std::unique_ptr<GameObject>& gameObject : Manager::GetActiveGameObjects())

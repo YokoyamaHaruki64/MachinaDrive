@@ -7,7 +7,7 @@ FontPath = "config/NotoSansJP-Medium.ttf"
 IniPath = "config/imgui.ini"
 
 # 通常の文字色
-Text = "#ff0000"
+Text = "#D4D4D4"
 # 無効化された文字色
 TextDisabled = "#8B8B8B"
 

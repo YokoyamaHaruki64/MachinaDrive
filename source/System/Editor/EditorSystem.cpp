@@ -55,10 +55,14 @@ void EditorSystem::DrawToolbar()
         return;
     }
 
-    const std::filesystem::path scenePath = Manager::GetCurrentSceneFilePath();
-    const std::string sceneName = scenePath.empty() ? "(None)" : scenePath.filename().string();
-    ImGui::Text("Scene: %s", sceneName.c_str());
-    ImGui::Separator();
+    if (ImGui::BeginMenu("Settings"))
+    {
+        if (ImGui::MenuItem("Style Reload"))
+        {
+            ReloadStyle();
+        }
+        ImGui::EndMenu();
+    }
 
     if (!Manager::IsPlayMode())
     {
@@ -74,15 +78,6 @@ void EditorSystem::DrawToolbar()
                 Logger::Error("Sceneを読み込めません: " + projectPath->generic_string());
             }
         }
-    }
-
-    if (ImGui::BeginMenu("Settings"))
-    {
-        if (ImGui::MenuItem("Style Reload"))
-        {
-            ReloadStyle();
-        }
-        ImGui::EndMenu();
     }
 
     ImGui::EndMainMenuBar();
