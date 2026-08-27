@@ -4,11 +4,11 @@
 
 この資料は、ゲーム固有の機能を追加するときの標準的な流れをまとめる。フレームワーク側の再利用可能な機能は`Component`、ゲームごとに変わる振る舞いは`Script`として実装する。実行中の調整はInspector、保存はScene／Prefab／MaterialのYAMLアセットを使う。
 
-全体の実行順、所有関係、Transformの規約は[ARCHITECTURE.md](ARCHITECTURE.md)、Inspectorとフィールド登録の詳細は[INSPECTOR.md](INSPECTOR.md)、保存形式は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+全体の実行順、所有関係、Transformの規約は[ARCHITECTURE.md](ARCHITECTURE.md)、Editor／Inspectorとフィールド登録の詳細は[EDITOR.md](EDITOR.md)、保存形式は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
 
 ## Editor と Runtime
 
-Editorでの調整は`GM_ENABLE_EDITOR=1`のDebug構成で行う。Game画面はGame RenderTextureを`GameWindow`へ表示し、Freeまたは16:9の表示比率を選択できる。SceneやPrefabは通常どおり共通のYAMLアセットとして保存する。
+Editorでの調整は`GM_ENABLE_EDITOR=1`のDebug構成で行う。Game画面はGame RenderTextureを`GameWindow`へ表示し、Edit中はFree、Play中は16:9の表示比率で表示する。SceneやPrefabは通常どおり共通のYAMLアセットとして保存する。
 
 出荷時は`GM_ENABLE_EDITOR=0`のRelease構成を使用する。この構成ではImGui、Docking、Inspector、GameWindowを初期化せず、ImGui本体とbackendもコンパイル対象から除外する。ゲーム描画はGame RenderTextureからBackBufferへ転送されるため、PrefabやSceneをRuntime用に変換する作業は不要である。
 

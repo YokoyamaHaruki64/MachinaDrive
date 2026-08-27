@@ -13,10 +13,13 @@ WinMain
   │    ├─ Renderer / RendererBase
   │    ├─ PostEffect
   │    └─ Prefab archive / legacy factory
+  ├─ EditorSystem（Debug構成のみ）
+  │    ├─ Game / Hierarchy / Inspector
+  │    └─ Performance / Log
   └─ 診断システム
        ├─ Logger / LogSystem / LogFileWorker
        ├─ PerformanceMonitor
-       └─ DebugWindow
+       └─ PerformanceWindow / LogWindow
 ```
 
 ## モジュール構成
@@ -36,7 +39,7 @@ WinMain
 | `Assets/Shaders/` | Git管理する`.shader`アセットとHLSLソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
 | `Assets/Scenes/`、`Assets/Prefabs/`、`Assets/Materials/` | Git管理するScene、Prefab、Materialアセット |
 | `Assets/Local/` | モデル、テクスチャ、サウンドなどローカル専用リソース。Git管理対象外 |
-| `config/` | ImGui とゲーム内調整値の設定 |
+| `config/` | ImGuiテーマ、フォント、レイアウト保存先とゲーム内調整値の設定 |
 | `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
 ## 実行フロー
@@ -48,13 +51,14 @@ WinMain
   ├─ LogSystem::Init でファイル出力Workerを開始
   └─ Manager::Init
        ├─ Renderer / Input / PostEffect / Audio を初期化
-       ├─ Editor構成では ImGui / Docking / Inspector / GameWindow を初期化
-       └─ TitleScene を初期化
+       ├─ Editor構成では ImGui / Docking / Viewport / EditorWindow群を初期化
+       └─ TitleScene を予約
 
 毎フレーム: Manager::Update
   ├─ 入力を更新
   ├─ Editor構成では Game View の要求サイズを適用し、ImGui フレームを更新
-  ├─ 保留中シーンがあれば切替、なければ保留中オブジェクトを有効化
+  ├─ Editor構成ではGameWindowのレイアウト確定とRenderTargetサイズ適用後に保留中Sceneを初期化
+  ├─ 保留中シーンがなければ、保留中オブジェクトを有効化
   ├─ Scene::Update
   ├─ GameObject::Update
   ├─ GameObject::LateUpdate
@@ -159,7 +163,7 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
-実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
+実行中のGameObject、Component、Materialを調整するInspector、フィールド登録、Docking、分離Viewport、Game View、テーマ設定を含むEditor全体の構成は[EDITOR.md](EDITOR.md)を参照する。
 
 Edit状態とPlay状態の分離、ライフサイクルの設計、将来のScript DLLホットリロードに向けた境界は[PLAY_MODE.md](PLAY_MODE.md)を参照する。
 

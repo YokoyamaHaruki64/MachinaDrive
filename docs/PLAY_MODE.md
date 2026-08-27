@@ -4,7 +4,7 @@
 
 Editor上の編集状態（Edit）と、ゲーム実行中の状態（Play）を分離する。Edit中にSceneやPrefabの構成、Inspectorで設定した値だけを静的データとして扱い、Play中に生成・破棄・移動したGameObjectや変化したFieldが編集データやSceneファイルへ混入しないようにする。
 
-本資料は設計方針であり、ここに記載するモード分離とライフサイクルは未実装である。
+本資料は現在実装済みの基本運用と、今後の拡張方針を扱う。実装済み範囲はSceneの自動保存・再読込によるEdit / Play分離、Scene選択、必要時のEditor再評価である。
 
 ## モード
 
@@ -17,7 +17,7 @@ Editor上の編集状態（Edit）と、ゲーム実行中の状態（Play）を
 
 ## EditからPlayへの遷移
 
-Play開始時に、現在のEdit状態を現在選択中のSceneファイルへ自動保存する。Stop時は同じSceneファイルを再読込し、Play中に発生した生成・破棄・Field変更を破棄する。これにより、Play開始前のInspector編集は保持しつつ、Edit用とPlay用のObject群を常時二重化する必要がない。
+Play開始時に、現在のEdit状態を現在選択中のSceneファイルへ自動保存する。続いて全GameObjectの`OnStart()`を呼び、Play中の更新を有効にする。Stopは描画中にオブジェクトを破棄しないよう次の`Manager::Update()`冒頭で処理し、同じSceneを再初期化して自動保存した内容へ戻す。これにより、Play開始前のInspector編集は保持しつつ、Edit用とPlay用のObject群を常時二重化する必要がない。
 
 ```text
 Edit
@@ -40,7 +40,7 @@ Play中の`SaveCurrentScene()`、Scene保存、Prefab保存は無効化する。
 
 ## Scene選択
 
-Editorには現在の編集対象となるSceneを選択する操作を設ける。ファイルダイアログで`.scene`を選択し、Editモードで読み込む。選択したパスを`Manager`の現在Sceneとして保持し、Play開始時の自動保存とStop時の再読込に使用する。
+Editorのメニューバーには`Open Scene`を設ける。ファイルダイアログで`Assets/Scenes`配下の`.scene`を選択し、Editモードで読み込む。選択したパスを`Manager`の現在Sceneとして保持し、Play開始時の自動保存とStop時の再読込に使用する。
 
 Play中はScene選択を無効化する。Sceneを切り替える場合はStopしてから選択する。
 
@@ -74,7 +74,7 @@ Inspectorでパスを編集した直後など、再解決が必要な時は対�
 
 Edit中は`Scene::Update()`、`GameObject::Update()`、`GameObject::LateUpdate()`を呼ばない。毎フレームの代替更新も行わない。Editor側が再評価を要求した時だけ、対象Componentの`OnEditorUpdate()`を呼ぶ。これにより、通常の更新処理は静的編集状態を変更せず、Editor用の振る舞いだけを明示的に実装できる。
 
-`OnStart()`を呼ばないだけでは不十分である。`Manager::CreateEmpty()`、`Instantiate()`、`AddComponent()`は開始済みObjectへ追加する際に`OnStart()`を即時実行するため、モードに応じて開始を保留する必要がある。
+`Manager::CreateEmpty()`と`Instantiate()`は、生成直後に`OnLoaded()`を呼ぶ。`OnStart()`はPlay中だけ呼ぶ。Edit中に追加したComponentはPlay開始時に、Play中に追加したComponentは追加時に開始する。
 
 ## 将来のScript DLLホットリロード
 
@@ -90,13 +90,14 @@ ScriptをDLLへ分離してホットリロードする構想は、Edit / Play分
 
 将来のDLL境界では、`typeid`をモジュール間の識別子に使わず、YAMLと共通の文字列型名を正とする。C++ ABI、RTTI、`std::function`をDLL境界へ露出しない。
 
-## 実装順序
+## 実装状況と次の段階
 
-- [ ] `GameMode`とEditorのPlay / Stop操作、Scene選択ダイアログを追加する。
-- [ ] Play開始時のScene自動保存とStop時の再読込を実装する。
-- [ ] Edit中に更新・開始コールバックを実行しないよう`Manager`と`GameObject`の開始処理を分離する。
-- [ ] YAML復元完了後の`OnLoaded()`を追加し、描画・音声Componentのリソース解決を移す。
-- [ ] `OnEditorUpdate()`を追加し、Inspector変更時など必要な契機から対象Componentだけを呼ぶ。
-- [ ] Play中のScene / Prefab保存を無効化する。
-- [ ] Edit / Playの生成、破棄、有効化、保存、Stop復元を手動検証する。
+- [x] `GameMode`とGameWindowのPlay / Stop操作、Scene選択ダイアログを追加する。
+- [x] Play開始時のScene自動保存とStop時の再読込を実装する。
+- [x] Edit中に更新・開始コールバックを実行しないよう`Manager`と`GameObject`の開始処理を分離する。
+- [x] YAML復元完了後の`OnLoaded()`を追加する。
+- [x] `OnEditorUpdate()`を追加し、InspectorのField変更時に対象Componentだけを呼ぶ。
+- [x] Play中のScene / Prefab保存を無効化する。
+- [x] Edit / Playの生成、破棄、有効化、保存、Stop復元を実機確認する。
+- [ ] 描画・音声Componentのリソース解決を必要に応じて`OnLoaded()`へ移し切る。
 - [ ] 上記が安定した後、Script DLLの登録・解除APIを設計する。
