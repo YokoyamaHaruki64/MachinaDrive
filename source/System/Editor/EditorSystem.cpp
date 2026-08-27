@@ -7,11 +7,14 @@
 
 #include "imgui.h"
 
+#include <array>
+
 GameObject* EditorSystem::m_selectedGameObject{};
 GameWindow EditorSystem::m_gameWindow{};
-DebugWindow EditorSystem::m_debugWindow{};
 HierarchyWindow EditorSystem::m_hierarchyWindow{};
 InspectorWindow EditorSystem::m_inspectorWindow{};
+PerformanceWindow EditorSystem::m_performanceWindow{};
+LogWindow EditorSystem::m_logWindow{};
 
 bool EditorSystem::IsActiveGameObject(GameObject* gameObject)
 {
@@ -68,12 +71,21 @@ void EditorSystem::DrawImGui()
 {
     DrawToolbar();
 
-    m_gameWindow.DrawImGui();
-
     if (m_selectedGameObject && !IsActiveGameObject(m_selectedGameObject))
         m_selectedGameObject = nullptr;
 
-    m_hierarchyWindow.DrawImGui(m_selectedGameObject);
-    m_inspectorWindow.DrawImGui(m_selectedGameObject);
-    m_debugWindow.DrawImGui();
+    m_hierarchyWindow.SetSelectedGameObject(m_selectedGameObject);
+    m_inspectorWindow.SetSelectedGameObject(m_selectedGameObject);
+
+    const std::array<EditorWindow*, 5> windows = {
+        &m_gameWindow,
+        &m_hierarchyWindow,
+        &m_inspectorWindow,
+        &m_performanceWindow,
+        &m_logWindow,
+    };
+    for (EditorWindow* window : windows)
+    {
+        window->DrawImGui();
+    }
 }

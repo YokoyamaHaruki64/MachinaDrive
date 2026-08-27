@@ -10,6 +10,8 @@ class EditorWindow
 public:
     virtual ~EditorWindow() = default;
 
+    virtual void DrawImGui() = 0;
+
     const Vector2& GetWindowSize() const { return m_windowSize; }
     const Vector2& GetContentSize() const { return m_contentSize; }
     bool IsLayoutReady() const { return m_layoutFrameCount >= 2; }

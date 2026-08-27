@@ -239,9 +239,6 @@
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
-    <ClCompile Include="source\System\Editor\DebugWindow.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="source\System\Editor\EditorWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
@@ -259,6 +256,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="source\System\Editor\ImGuiStyleConfig.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\LogWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\PerformanceWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="source\System\Editor\FieldRegistry.cpp">
@@ -441,13 +444,14 @@
     <ClInclude Include="include\System\Core\component.h" />
     <ClInclude Include="include\System\Core\component.inl" />
     <ClInclude Include="include\System\Core\ComponentRegistry.h" />
-    <ClInclude Include="include\System\Editor\DebugWindow.h" />
     <ClInclude Include="include\System\Editor\EditorWindow.h" />
     <ClInclude Include="include\System\Editor\EditorSystem.h" />
-    <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h" />
     <ClInclude Include="include\System\Editor\GameWindow.h" />
     <ClInclude Include="include\System\Editor\HierarchyWindow.h" />
     <ClInclude Include="include\System\Editor\InspectorWindow.h" />
+    <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h" />
+    <ClInclude Include="include\System\Editor\LogWindow.h" />
+    <ClInclude Include="include\System\Editor\PerformanceWindow.h" />
     <ClInclude Include="include\System\Editor\FieldRegistry.h" />
     <ClInclude Include="include\System\Editor\FieldRegistry.inl" />
     <ClInclude Include="include\System\Editor\FileSystem.h" />

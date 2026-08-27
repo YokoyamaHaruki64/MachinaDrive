@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include "System/Editor/DebugWindow.h"
 #include "System/Editor/GameWindow.h"
 #include "System/Editor/HierarchyWindow.h"
 #include "System/Editor/InspectorWindow.h"
+#include "System/Editor/LogWindow.h"
+#include "System/Editor/PerformanceWindow.h"
 
 class GameObject;
 
@@ -11,9 +12,10 @@ class EditorSystem final
 {
     static GameObject* m_selectedGameObject;
     static GameWindow m_gameWindow;
-    static DebugWindow m_debugWindow;
     static HierarchyWindow m_hierarchyWindow;
     static InspectorWindow m_inspectorWindow;
+    static PerformanceWindow m_performanceWindow;
+    static LogWindow m_logWindow;
 
     static bool IsActiveGameObject(GameObject* gameObject);
 

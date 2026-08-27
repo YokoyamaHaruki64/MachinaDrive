@@ -15,6 +15,7 @@ class RendererBase;
 // 選択中GameObjectの詳細とComponentごとの項目を表示する。
 class InspectorWindow final : public EditorWindow
 {
+    GameObject** m_selectedGameObject = nullptr;
     bool m_showLocalTransform = false;
     std::unordered_map<const Material*, std::array<char, 256>> m_materialNameBuffers;
 
@@ -29,5 +30,6 @@ class InspectorWindow final : public EditorWindow
         const char* assetName);
 
 public:
-    void DrawImGui(GameObject* selectedGameObject);
+    void SetSelectedGameObject(GameObject*& selectedGameObject) { m_selectedGameObject = &selectedGameObject; }
+    void DrawImGui() override;
 };

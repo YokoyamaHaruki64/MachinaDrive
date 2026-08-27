@@ -22,7 +22,7 @@ public:
     static void EndRender();
 
     static void SetObjectCounts(size_t activeCount, size_t pendingCount);
-    static void DrawImGuiTab();
+    static void DrawImGui();
 
 private:
     using Clock = std::chrono::steady_clock;

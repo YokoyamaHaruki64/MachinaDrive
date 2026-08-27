@@ -135,9 +135,6 @@
     <ClCompile Include="source\System\Diagnostics\LogSystem.cpp">
       <Filter>ソース ファイル\System\Diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\System\Editor\DebugWindow.cpp">
-      <Filter>ソース ファイル\System\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="source\System\Editor\EditorWindow.cpp">
       <Filter>ソース ファイル\System\Editor</Filter>
     </ClCompile>
@@ -154,6 +151,12 @@
       <Filter>ソース ファイル\System\Editor</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Editor\ImGuiStyleConfig.cpp">
+      <Filter>ソース ファイル\System\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\LogWindow.cpp">
+      <Filter>ソース ファイル\System\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\PerformanceWindow.cpp">
       <Filter>ソース ファイル\System\Editor</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Editor\FieldRegistry.cpp">
@@ -410,9 +413,6 @@
     <ClInclude Include="include\System\Diagnostics\LogSystem.h">
       <Filter>ヘッダー ファイル\System\Diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\Editor\DebugWindow.h">
-      <Filter>ヘッダー ファイル\System\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="include\System\Editor\EditorWindow.h">
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
@@ -425,10 +425,16 @@
     <ClInclude Include="include\System\Editor\HierarchyWindow.h">
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\Editor\InspectorWindow.h">
+      <Filter>ヘッダー ファイル\System\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h">
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="include\System\Editor\InspectorWindow.h">
+    <ClInclude Include="include\System\Editor\LogWindow.h">
+      <Filter>ヘッダー ファイル\System\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Editor\PerformanceWindow.h">
       <Filter>ヘッダー ファイル\System\Editor</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Editor\FieldRegistry.h">

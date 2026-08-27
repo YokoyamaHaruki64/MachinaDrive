@@ -8,7 +8,7 @@ class GameWindow final : public EditorWindow
 public:
     bool ApplyRenderTargetSize();
     bool IsRenderTargetReady() const;
-    void DrawImGui();
+    void DrawImGui() override;
 
 private:
     enum class AspectMode

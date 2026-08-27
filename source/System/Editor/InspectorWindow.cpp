@@ -197,17 +197,18 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
     ImGui::PopID();
 }
 
-void InspectorWindow::DrawImGui(GameObject* selectedGameObject)
+void InspectorWindow::DrawImGui()
 {
     BeginWindow("Inspector", Vector2(360.0f, 500.0f));
 
-    if (!selectedGameObject)
+    if (!m_selectedGameObject || !*m_selectedGameObject)
     {
         ImGui::TextUnformatted("GameObjectを選択してください。");
         EndWindow();
         return;
     }
 
+    GameObject*& selectedGameObject = *m_selectedGameObject;
     ImGui::Text("Name: %s", selectedGameObject->GetName().c_str());
     bool active = selectedGameObject->IsActive();
     if (ImGui::Checkbox("Active", &active))
