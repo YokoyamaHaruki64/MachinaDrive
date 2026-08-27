@@ -12,6 +12,9 @@ Release構成は`GM_ENABLE_EDITOR=0`でビルドする。ImGui本体、Win32 / D
 
 ```text
 メニューバー
+  ├─ Edit
+  │   ├─ Undo
+  │   └─ Redo
   ├─ Settings
   │   └─ Style Reload
   └─ Open Scene（Edit中のみ）
@@ -45,6 +48,32 @@ Hierarchyは稼働中のGameObjectをTransformの親子関係に沿って再帰�
 Inspectorでは選択中GameObjectの名前、Active、開始状態、破棄予約状態、Transform、追加順のComponentを編集する。`CreateEmpty()`の既定名は`Empty`、PrefabのInstantiate後のRoot名は`<Prefab名>(Instance)`とする。各Componentのヘッダーには`Enabled`チェックを表示し、有効化時は通常のライフサイクル規則に従って`OnActive()`または`OnEnable()`が呼ばれる。TransformはWorld／Localを切り替えてPosition、Rotation、Scaleを編集できる。
 
 ComponentとMaterial SlotのTreeは初回表示時に開いた状態とし、その後の開閉状態はImGuiレイアウトファイルへ保存する。Fieldを編集した時だけ対象Componentの`OnEditorUpdate()`を呼び、毎フレームのEditor更新は行わない。
+
+## 編集状態、履歴、選択
+
+### 未保存変更
+
+Editorは現在のSceneに未保存変更があるかを保持する。Inspectorでの値・名前・Active / Enabledの変更、Transform親子関係の変更、GameObject / Componentの生成・削除をScene変更として扱う。Sceneを切り替える`Open Scene`とアプリ終了時に未保存変更があれば、保存して続行、保存せず続行、キャンセルを選べる確認ダイアログを表示する。
+
+Play開始時は確認を表示しない。現在の規則どおりSceneを自動保存してPlayへ移行し、Stop時にはその保存内容からEdit状態を復元する。MaterialはSceneとは独立したアセットのため、未保存状態もSceneとは分けて管理する。
+
+### Undo / Redo
+
+Editor操作は`EditorCommand`の`Execute()`と`Undo()`で表し、EditorSystemがUndo / Redoスタックを所有する。新しいコマンドを実行した時はRedoスタックを破棄する。`Ctrl+Z`でUndo、`Ctrl+Y`でRedoを実行し、メニューバーの`Edit`にも同じ操作を表示する。
+
+数値入力やドラッグは編集開始時の値と編集完了時の値を1つのコマンドとして記録する。これにより、1回のスライダー操作で履歴が多数作られることを避ける。値変更は汎用コマンドで扱えるが、GameObject / Componentの生成・削除、親子変更は復元に必要な情報を保持する専用コマンドとする。
+
+Undo / Redoの対象は、Inspectorの値、名前、Active / Enabled、Transform、親子変更、GameObject / Componentの生成・削除とする。コマンド実行、Undo、RedoのいずれもSceneをdirtyにし、必要なComponentだけ`OnEditorUpdate()`を呼ぶ。
+
+### Hierarchyの複数選択
+
+選択状態は単一の`GameObject*`ではなく、選択順を保持するGameObject配列と範囲選択の起点で管理する。
+
+- 通常クリックは単一選択へ置き換える。
+- `Ctrl`クリックは対象を選択へ追加または解除する。
+- `Shift`クリックは起点からクリック位置まで、Hierarchyに表示されている行を範囲選択する。
+
+初期段階では複数選択中のInspectorは選択数だけを表示し、複数Objectへの一括Field編集は扱わない。複数選択での生成・削除などの操作は、Undo / Redoコマンドとしてまとめて扱う。
 
 ## Field登録
 
