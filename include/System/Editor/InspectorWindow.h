@@ -17,10 +17,13 @@ class InspectorWindow final : public EditorWindow
 {
     GameObject** m_selectedGameObject = nullptr;
     bool m_showLocalTransform = false;
+    GameObject* m_gameObjectNameTarget = nullptr;
+    std::array<char, 256> m_gameObjectNameBuffer{};
     std::unordered_map<const Material*, std::array<char, 256>> m_materialNameBuffers;
 
     void DrawMaterialInspector(RendererBase& renderer, uint32_t slot);
     void DrawMaterialName(Material& material);
+    static void SelectShader(Material& material);
     static void CreateMaterial(RendererBase& renderer, uint32_t slot);
     static void SelectMaterial(RendererBase& renderer, uint32_t slot);
     static std::optional<std::filesystem::path> ToAssetRelativePath(

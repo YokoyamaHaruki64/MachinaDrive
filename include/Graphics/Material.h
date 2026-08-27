@@ -32,6 +32,7 @@ class Material
     void SetDefaultValue(const ShaderPropertyDesc& property);
     void ShowPropertyError(const char* operation, MaterialPropertyID id) const;
     void CreatePropertiesBuffer();
+    void InitializeShaderState(const GraphicsShader& shader);
     static bool WriteConstantBufferValue(
         std::vector<uint8_t>& propertyData,
         const ShaderPropertyDesc& property,
@@ -54,6 +55,7 @@ public:
     MaterialPropertyID GetPropertyID(std::string_view name) const;
 
     const GraphicsShader& GetShader() const;
+    bool SetShader(const GraphicsShader& shader);
     const GraphicsShaderPass& GetShaderPass(size_t passIndex) const;
 
     float SetFloat(MaterialPropertyID id, float value);

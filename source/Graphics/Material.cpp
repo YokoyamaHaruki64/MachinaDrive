@@ -17,6 +17,7 @@
 #include <array>
 #include <cstring>
 #include <type_traits>
+#include <unordered_map>
 
 namespace
 {
@@ -31,6 +32,13 @@ namespace
 Material::Material(std::string name, const GraphicsShader& shader)
     : m_shader(&shader), m_id(g_nextMaterialID++), m_name(std::move(name))
 {
+    InitializeShaderState(shader);
+}
+
+void Material::InitializeShaderState(const GraphicsShader& shader)
+{
+    m_shader = &shader;
+
     // Resource値はShaderPropertyIDを添字として保持する。
     const std::vector<ShaderPropertyDesc>& shaderProperties = shader.GetProperties();
     m_resourceValues.resize(shaderProperties.size());
@@ -56,6 +64,76 @@ Material::Material(std::string name, const GraphicsShader& shader)
 const GraphicsShader& Material::GetShader() const
 {
     return *m_shader;
+}
+
+bool Material::SetShader(const GraphicsShader& shader)
+{
+    if (!m_isValid || !shader.IsValid())
+    {
+        return false;
+    }
+    if (m_shader == &shader)
+    {
+        return true;
+    }
+
+    // 同名かつ同型のPropertyは、Shader切り替え後も編集内容を引き継ぐ。
+    std::unordered_map<std::string, PropertyValue> previousValues;
+    std::unordered_map<std::string, std::string> previousResourcePaths;
+    std::unordered_map<std::string, TextureHandle> previousTextures;
+    if (m_shader)
+    {
+        for (const ShaderPropertyDesc& property : m_shader->GetProperties())
+        {
+            if (property.storage == MaterialPropertyStorage::Resource)
+            {
+                const MaterialPropertyID id = GetPropertyID(property.id);
+                previousResourcePaths.emplace(property.name, GetTexturePath(id));
+                previousTextures.emplace(property.name, GetTexture(id));
+                continue;
+            }
+
+            PropertyValue value;
+            if (GetPropertyValue(property, value))
+            {
+                previousValues.emplace(property.name, std::move(value));
+            }
+        }
+    }
+
+    m_propertiesBuffer.Reset();
+    m_propertyData.clear();
+    m_overridePropertyData.clear();
+    m_resourceValues.clear();
+    m_resourcePaths.clear();
+    m_resourceErrors.clear();
+    InitializeShaderState(shader);
+
+    for (const ShaderPropertyDesc& property : shader.GetProperties())
+    {
+        if (property.storage == MaterialPropertyStorage::Resource)
+        {
+            const auto path = previousResourcePaths.find(property.name);
+            if (path != previousResourcePaths.end() && !path->second.empty())
+            {
+                SetTexturePath(property.name, path->second);
+            }
+            else if (const auto texture = previousTextures.find(property.name);
+                texture != previousTextures.end() && texture->second.IsValid())
+            {
+                SetTexture(property.name, texture->second);
+            }
+            continue;
+        }
+
+        const auto value = previousValues.find(property.name);
+        if (value != previousValues.end() && value->second.index() == property.defaultValue.index())
+        {
+            SetPropertyValue(property, value->second);
+        }
+    }
+
+    return true;
 }
 
 const GraphicsShaderPass& Material::GetShaderPass(size_t passIndex) const

@@ -96,6 +96,32 @@ void InspectorWindow::SelectMaterial(RendererBase& renderer, uint32_t slot)
     }
 }
 
+void InspectorWindow::SelectShader(Material& material)
+{
+    const std::optional<std::filesystem::path> selectedPath =
+        FileSystem::OpenFileDialog("Assets/Shaders", ".shader");
+    if (!selectedPath)
+    {
+        return;
+    }
+
+    const std::optional<std::filesystem::path> shaderPath = ToAssetRelativePath(
+        *selectedPath,
+        "Assets",
+        L".shader",
+        "Shader");
+    if (!shaderPath)
+    {
+        return;
+    }
+
+    GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderPath->generic_string());
+    if (!shader || !material.SetShader(*shader))
+    {
+        Logger::Error("MaterialのShaderを設定できませんでした。\nShader: " + shaderPath->generic_string());
+    }
+}
+
 void InspectorWindow::DrawMaterialName(Material& material)
 {
     auto [bufferIterator, inserted] = m_materialNameBuffers.try_emplace(&material);
@@ -142,6 +168,7 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
         label += " (Error)";
     }
 
+    ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
     if (ImGui::TreeNode(label.c_str()))
     {
         if (ImGui::Button("Select Material"))
@@ -160,6 +187,11 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
         else
         {
             DrawMaterialName(*material);
+            ImGui::Text("Shader: %s", material->GetShader().GetFilePath().c_str());
+            if (ImGui::Button("Select Shader"))
+            {
+                SelectShader(*material);
+            }
             material->DrawInspectorImGui();
 
             const std::string& materialPath = material->GetFilePath();
@@ -203,13 +235,31 @@ void InspectorWindow::DrawImGui()
 
     if (!m_selectedGameObject || !*m_selectedGameObject)
     {
+        m_gameObjectNameTarget = nullptr;
         ImGui::TextUnformatted("GameObjectを選択してください。");
         EndWindow();
         return;
     }
 
     GameObject*& selectedGameObject = *m_selectedGameObject;
-    ImGui::Text("Name: %s", selectedGameObject->GetName().c_str());
+    if (m_gameObjectNameTarget != selectedGameObject)
+    {
+        m_gameObjectNameTarget = selectedGameObject;
+        std::fill(m_gameObjectNameBuffer.begin(), m_gameObjectNameBuffer.end(), '\0');
+        const std::string& name = selectedGameObject->GetName();
+        const size_t length = std::min(name.size(), m_gameObjectNameBuffer.size() - 1);
+        std::copy_n(name.data(), length, m_gameObjectNameBuffer.data());
+    }
+
+    const bool nameSubmitted = ImGui::InputText(
+        "Name",
+        m_gameObjectNameBuffer.data(),
+        m_gameObjectNameBuffer.size(),
+        ImGuiInputTextFlags_EnterReturnsTrue);
+    if (nameSubmitted || ImGui::IsItemDeactivatedAfterEdit())
+    {
+        selectedGameObject->SetName(m_gameObjectNameBuffer.data());
+    }
     bool active = selectedGameObject->IsActive();
     if (ImGui::Checkbox("Active", &active))
     {
@@ -232,11 +282,14 @@ void InspectorWindow::DrawImGui()
         ImGui::Separator();
     }
 
-    for (Component* component : selectedGameObject->GetComponents())
+    const std::vector<Component*> components = selectedGameObject->GetComponents();
+    for (size_t componentIndex = 0; componentIndex < components.size(); ++componentIndex)
     {
-        ImGui::PushID(component);
+        Component* component = components[componentIndex];
+        ImGui::PushID(static_cast<int>(componentIndex));
         const ComponentRegistration* registration = ComponentRegistry::Find(typeid(*component));
         const char* componentName = registration ? registration->displayName.c_str() : typeid(*component).name();
+        ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
         const bool componentOpen = ImGui::TreeNode(componentName);
         ImGui::SameLine();
         bool enabled = component->IsEnabled();
