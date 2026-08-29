@@ -22,4 +22,7 @@ private:
 
     // BOM対応にばらつきがある外部Parserへ渡す前にUTF-8 BOMを除去する。
     static void RemoveUtf8Bom(std::string& source);
+
+    // rapidyamlのLF出力を、プロジェクト規約のCRLFへ変換する。
+    static void NormalizeLineEndings(std::string& source);
 };

@@ -164,12 +164,22 @@ void Audio::Play(bool Loop)
 
 }
 
-void Audio::OnStart()
+void Audio::OnLoaded()
 {
     if (!m_SourceVoice && !m_filePath.empty())
     {
         Load(m_filePath.c_str());
     }
+}
+
+void Audio::OnEditorUpdate()
+{
+    Uninit();
+    OnLoaded();
+}
+
+void Audio::OnStart()
+{
     if (m_playOnStart)
     {
         Play(m_loop);
@@ -178,7 +188,7 @@ void Audio::OnStart()
 
 void Audio::RegisterFields(FieldRegistry& fields)
 {
-    GM_FIELD(m_filePath);
+    GM_FIELD_PATH(m_filePath, "Assets/Local/Sounds", ".wav");
     GM_FIELD(m_playOnStart);
     GM_FIELD(m_loop);
 }

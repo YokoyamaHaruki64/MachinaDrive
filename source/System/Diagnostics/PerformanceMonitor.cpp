@@ -2,7 +2,9 @@
 
 #include <algorithm>
 
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
+#endif
 
 #include "System/Diagnostics/PerformanceMonitor.h"
 
@@ -29,6 +31,7 @@ float PerformanceMonitor::GetElapsedMilliseconds(
 }
 
 
+#if GM_ENABLE_EDITOR
 void PerformanceMonitor::DrawTimeRow(const char* label, const SampleHistory& history)
 {
     ImGui::TableNextRow();
@@ -41,6 +44,7 @@ void PerformanceMonitor::DrawTimeRow(const char* label, const SampleHistory& his
     ImGui::TableSetColumnIndex(3);
     ImGui::Text("%.3f ms", history.GetMax());
 }
+#endif
 
 
 void PerformanceMonitor::RecordFrameTime(float seconds)
@@ -96,13 +100,9 @@ void PerformanceMonitor::SetObjectCounts(size_t activeCount, size_t pendingCount
 }
 
 
-void PerformanceMonitor::DrawImGuiTab()
+#if GM_ENABLE_EDITOR
+void PerformanceMonitor::DrawImGui()
 {
-    if (!ImGui::BeginTabItem("Performance"))
-    {
-        return;
-    }
-
     const float averageFrameTime = s_frameTime.GetAverage();
     const float fps = averageFrameTime > 0.0f ? 1000.0f / averageFrameTime : 0.0f;
     ImGui::Text("FPS: %.1f", fps);
@@ -126,9 +126,8 @@ void PerformanceMonitor::DrawImGuiTab()
 
     ImGui::Separator();
     ImGui::Text("Objects: Active %zu / Pending %zu", s_activeObjectCount, s_pendingObjectCount);
-
-    ImGui::EndTabItem();
 }
+#endif
 
 
 void PerformanceMonitor::SampleHistory::Add(float milliseconds)

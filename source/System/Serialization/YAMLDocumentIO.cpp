@@ -18,6 +18,34 @@ void YAMLDocumentIO::RemoveUtf8Bom(std::string& source)
     }
 }
 
+void YAMLDocumentIO::NormalizeLineEndings(std::string& source)
+{
+    std::string normalized;
+    normalized.reserve(source.size());
+
+    for (size_t index = 0; index < source.size(); ++index)
+    {
+        if (source[index] == '\r')
+        {
+            if (index + 1 < source.size() && source[index + 1] == '\n')
+            {
+                ++index;
+            }
+            normalized += "\r\n";
+        }
+        else if (source[index] == '\n')
+        {
+            normalized += "\r\n";
+        }
+        else
+        {
+            normalized += source[index];
+        }
+    }
+
+    source = std::move(normalized);
+}
+
 template <typename Node>
 void YAMLDocumentIO::WriteValue(Node node, const YAMLValue& value)
 {
@@ -125,6 +153,17 @@ bool YAMLDocumentIO::Save(const std::filesystem::path& path, const YAMLValue& do
             std::filesystem::create_directories(parent);
         }
 
+        std::ostringstream serialized;
+        serialized << tree;
+        if (!serialized)
+        {
+            Logger::Error("YAMLのシリアライズに失敗しました: " + path.string());
+            return false;
+        }
+
+        std::string source = serialized.str();
+        NormalizeLineEndings(source);
+
         std::ofstream stream(path, std::ios::binary | std::ios::trunc);
         if (!stream)
         {
@@ -132,7 +171,7 @@ bool YAMLDocumentIO::Save(const std::filesystem::path& path, const YAMLValue& do
             return false;
         }
 
-        stream << tree;
+        stream.write(source.data(), static_cast<std::streamsize>(source.size()));
         if (!stream)
         {
             Logger::Error("YAMLファイルの書き込みに失敗しました: " + path.string());

@@ -58,7 +58,8 @@ public:
     TrailRenderer() = delete;
     explicit TrailRenderer(GameObject* owner);
     virtual ~TrailRenderer() {}
-    void OnStart() override;
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
     void SetMaterial(uint32_t slot, Material* material) override;

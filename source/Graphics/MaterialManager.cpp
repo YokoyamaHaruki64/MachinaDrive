@@ -351,6 +351,7 @@ bool MaterialManager::Save(Material& material, const std::filesystem::path& path
     }
     material.m_filePath = normalizedPath;
     m_materialsByPath[normalizedPath] = &material;
+    material.m_isDirty = false;
     return true;
 }
 

@@ -1,11 +1,14 @@
 ﻿#pragma once
 
+#if GM_ENABLE_EDITOR
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
 #include "imgui.h"
+#endif
 
+#if GM_ENABLE_EDITOR
 template <typename T>
 bool FieldRegistry::DrawStructuredValue(std::string_view label, T& value)
 {
@@ -109,7 +112,6 @@ bool FieldRegistry::DrawList(const FieldDescriptor& field, std::vector<T>& value
     }
     return changed;
 }
-
 template <>
 inline bool FieldRegistry::DrawList<bool>(const FieldDescriptor& field, std::vector<bool>& values)
 {
@@ -147,3 +149,28 @@ inline bool FieldRegistry::DrawList<bool>(const FieldDescriptor& field, std::vec
     }
     return changed;
 }
+#else
+template <typename T>
+bool FieldRegistry::DrawStructuredValue(std::string_view, T&)
+{
+    return false;
+}
+
+template <typename T>
+bool FieldRegistry::DrawReflectValue(std::string_view, T&)
+{
+    return false;
+}
+
+template <typename Owner, typename Member>
+bool FieldRegistry::DrawReflectMember(Owner&, const Member&)
+{
+    return false;
+}
+
+template <typename T>
+bool FieldRegistry::DrawList(const FieldDescriptor&, std::vector<T>&)
+{
+    return false;
+}
+#endif

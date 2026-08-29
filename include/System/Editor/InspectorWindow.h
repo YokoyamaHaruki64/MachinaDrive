@@ -5,19 +5,29 @@
 #include <filesystem>
 #include <optional>
 #include <unordered_map>
+#include <vector>
+
+#include "System/Editor/EditorWindow.h"
+#include "System/Serialization/YAMLTypes.h"
 
 class GameObject;
+class Component;
 class Material;
 class RendererBase;
 
 // 選択中GameObjectの詳細とComponentごとの項目を表示する。
-class InspectorWindow final
+class InspectorWindow final : public EditorWindow
 {
+    const std::vector<GameObject*>* m_selectedGameObjects = nullptr;
     bool m_showLocalTransform = false;
+    GameObject* m_gameObjectNameTarget = nullptr;
+    std::array<char, 256> m_gameObjectNameBuffer{};
     std::unordered_map<const Material*, std::array<char, 256>> m_materialNameBuffers;
+    std::unordered_map<Component*, YAMLValue> m_componentEditSnapshots;
 
     void DrawMaterialInspector(RendererBase& renderer, uint32_t slot);
-    void DrawMaterialName(Material& material);
+    bool DrawMaterialName(Material& material);
+    static bool SelectShader(Material& material);
     static void CreateMaterial(RendererBase& renderer, uint32_t slot);
     static void SelectMaterial(RendererBase& renderer, uint32_t slot);
     static std::optional<std::filesystem::path> ToAssetRelativePath(
@@ -27,5 +37,6 @@ class InspectorWindow final
         const char* assetName);
 
 public:
-    void DrawImGui(GameObject* selectedGameObject);
+    void SetSelectedGameObjects(const std::vector<GameObject*>& selectedGameObjects) { m_selectedGameObjects = &selectedGameObjects; }
+    void DrawImGui() override;
 };

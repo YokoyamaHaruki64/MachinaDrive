@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <filesystem>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include "math/vector3.h"
@@ -11,11 +12,19 @@
 
 class Camera;
 class Component;
+class EditorCommand;
 class RendererBase;
 class Scene;
 
 class Manager
 {
+public:
+    enum class GameMode
+    {
+        Edit,
+        Play,
+    };
+
 private:
     enum class SceneTransitionPhase
     {
@@ -32,6 +41,40 @@ private:
     static std::unique_ptr<Scene> m_currentScene;
     static std::unique_ptr<Scene> m_nextScene;
     static SceneTransitionPhase m_sceneTransitionPhase;
+    static GameMode m_gameMode;
+    static bool m_stopPlayRequested;
+    static bool m_sceneDirty;
+    static uint64_t m_nextGameObjectId;
+
+    static uint64_t AllocateGameObjectId();
+    static void EnsureGameObjectIds(
+        std::vector<std::unique_ptr<GameObject>>& gameObjects,
+        bool assignNewIds);
+
+#if GM_ENABLE_EDITOR
+    struct EditorDetachedGameObjects
+    {
+        struct Entry
+        {
+            std::unique_ptr<GameObject> gameObject;
+            GameObject* previousParent = nullptr;
+        };
+
+        std::vector<Entry> entries;
+
+        bool Empty() const { return entries.empty(); }
+    };
+
+    class EditorObjectLifetimeCommand;
+    class EditorComponentDeletionCommand;
+
+    static EditorDetachedGameObjects DetachForEditor(const std::vector<GameObject*>& gameObjects);
+    static void RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects);
+    static void DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameObjects);
+    static std::unique_ptr<Component> DetachComponentForEditor(GameObject& gameObject, Component& component);
+    static void RestoreComponentForEditor(GameObject& gameObject, std::unique_ptr<Component>& component);
+    static void DestroyDetachedComponentForEditor(std::unique_ptr<Component>& component);
+#endif
 
 
     static void PendingGameObjectsProcess()
@@ -49,14 +92,21 @@ private:
         {
             if (!m_GameObjects[i]->IsDestroyed())
             {
-                m_GameObjects[i]->OnStart();
+                m_GameObjects[i]->OnLoaded();
+                if (m_gameMode == GameMode::Play)
+                {
+                    m_GameObjects[i]->OnStart();
+                }
             }
         }
     }
 
     static void InitScene();
+    static void ReloadCurrentScene();
     static void DestroyGameObjects();
-    static void StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects);
+    static void StartLoadedGameObjects(
+        std::vector<std::unique_ptr<GameObject>> gameObjects,
+        bool assignNewIds = false);
     static GameObject* InstantiatePrefabInternal(
         const std::filesystem::path& path,
         const Vector3* position,
@@ -68,6 +118,18 @@ public:
 	static void Uninit();
 	static void Update();
 	static void Draw();
+
+    static GameMode GetGameMode() { return m_gameMode; }
+    static bool IsPlayMode() { return m_gameMode == GameMode::Play; }
+    static bool IsCurrentSceneDirty() { return m_sceneDirty; }
+    static void MarkCurrentSceneDirty();
+    static void ClearCurrentSceneDirty();
+    static std::filesystem::path GetCurrentSceneFilePath();
+    static bool EnterPlayMode();
+    static bool StopPlayMode();
+#if GM_ENABLE_EDITOR
+    static bool LoadEditorScene(const std::filesystem::path& path);
+#endif
 
     static bool SaveCurrentScene();
     static bool SaveSceneObjects(const std::filesystem::path& path);
@@ -82,6 +144,16 @@ public:
         const Vector3& scale);
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
+
+#if GM_ENABLE_EDITOR
+    static std::unique_ptr<EditorCommand> CreateEditorCreationCommand(
+        const std::vector<GameObject*>& gameObjects);
+    static std::unique_ptr<EditorCommand> CreateEditorDeletionCommand(
+        const std::vector<GameObject*>& selectedGameObjects);
+    static std::unique_ptr<EditorCommand> CreateEditorComponentDeletionCommand(
+        GameObject& gameObject,
+        Component& component);
+#endif
 
     static void RegisterRenderer(RendererBase* renderer)
     {
@@ -117,11 +189,16 @@ public:
     {
         std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(std::move(name), position, rotation, scale);
         GameObject* newObj = newObject.get();
+        newObj->SetId(AllocateGameObjectId());
 
         if (m_sceneTransitionPhase == SceneTransitionPhase::None)
         {
             m_GameObjects.emplace_back(std::move(newObject));
-            newObj->OnStart();
+            newObj->OnLoaded();
+            if (m_gameMode == GameMode::Play)
+            {
+                newObj->OnStart();
+            }
 
             return newObj;
         }

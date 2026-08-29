@@ -35,6 +35,10 @@ using namespace DirectX;
 #define SCREEN_WIDTH	(1600)
 #define SCREEN_HEIGHT	(900)
 
+#ifndef GM_ENABLE_EDITOR
+#define GM_ENABLE_EDITOR 1
+#endif
+
 
 HWND GetWindow();
 

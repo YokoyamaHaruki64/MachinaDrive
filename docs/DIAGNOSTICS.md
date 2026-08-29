@@ -11,13 +11,13 @@
   ├─ LogSystem
   │    ├─ 秒単位の同一ログ集約
   │    ├─ LogFileWorkerへの配送
-  │    └─ ImGui Logタブ
+  │    └─ ImGui LogWindow
   ├─ PerformanceMonitor
   │    ├─ フレーム処理時間の計測
   │    ├─ オブジェクト数の記録
-  │    └─ ImGui Performanceタブ
-  └─ DebugWindow
-       └─ 診断用ImGuiタブの統括
+  │    └─ ImGui PerformanceWindow
+  └─ EditorSystem
+       └─ 診断用Windowの描画順を統括
 ```
 
 ## 責務
@@ -25,12 +25,12 @@
 | クラス | 責務 |
 | --- | --- |
 | `Logger` | 任意のスレッドからログを記録する公開API |
-| `LogSystem` | ログキューの取り出し、同一ログの集約、各出力先への配送、Logタブの描画 |
+| `LogSystem` | ログキューの取り出し、同一ログの集約、各出力先への配送、LogWindowの描画 |
 | `LogFileWorker` | 確定したログを専用スレッドでファイルへ書き出す |
-| `PerformanceMonitor` | メインループの処理時間とオブジェクト数を記録し、Performanceタブを描画する |
-| `DebugWindow` | `Debug`ウィンドウとタブバーを所有し、各診断タブを配置する |
+| `PerformanceMonitor` | メインループの処理時間とオブジェクト数を記録し、PerformanceWindowを描画する |
+| `EditorSystem` | Game、Hierarchy、Inspector、Performance、Logの描画順を統括する |
 
-`DebugWindow`だけがImGuiの`Debug`ウィンドウとタブバーを開始・終了する。`LogSystem`と`PerformanceMonitor`は、それぞれが担当するタブの内容だけを描画する。新しい診断表示を追加する場合も同じ構造に従う。
+`PerformanceWindow`と`LogWindow`はそれぞれ独立したDocking可能なImGui Windowである。`EditorSystem`はこれらを他のEditorWindowと同じフレームで描画する。新しい診断表示も、独立Windowとして追加する。
 
 ## 実行フロー
 
@@ -50,7 +50,7 @@
   │    └─ Active / Pendingオブジェクト数を記録
   ├─ Manager::Draw
   │    ├─ Render区間を計測
-  │    └─ DebugWindowからPerformance / Logタブを描画
+  │    └─ EditorSystemからPerformance / Log Windowを描画
   └─ LogSystem::Flush
        └─ 最大LogsPerFrame件を処理
 
@@ -88,9 +88,7 @@ FIFOは最大`Logger::MaxQueuedLogs`件とする。上限到達時は古い低�
 
 ### Fatal MessageBoxの文字コード
 
-現在のx64構成は`CharacterSet=MultiByte`であり、コンパイルオプション`/utf-8`を指定していない。UTF-8 BOMで保存したソースであっても、狭い文字列リテラルは実行コードページ（日本語Windowsでは通常CP932）として生成される。
-
-このため`Logger::Fatal()`がMessageBox用に狭い文字列を`std::wstring`へ変換する際は、`MultiByteToWideChar(CP_ACP, 0, ...)`を使用する。`CP_UTF8`と`MB_ERR_INVALID_CHARS`を使うとCP932の日本語文字列を不正UTF-8として扱い、必要な文字数が0になる。将来、プロジェクト全体で`/utf-8`を採用する場合は、変換コードも`CP_UTF8`へ合わせて見直す。
+現在のx64構成は`/utf-8`でコンパイルし、C++ソースはUTF-8 BOMで管理する。狭い文字列リテラルはUTF-8として扱うため、`Logger::Fatal()`はMessageBox用のUTF-16変換に`MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, ...)`を使用する。
 
 ## 同一ログの集約
 
@@ -142,5 +140,5 @@ Render TimeにはSceneとRendererの描画、ポストエフェクト、ImGui描
 ## スレッド境界
 
 - `Logger`の記録APIは任意のスレッドから呼び出せる。
-- ログの取り出しと集約、ImGui履歴の更新、性能計測、Debugウィンドウの描画はメインスレッドで行う。
+- ログの取り出しと集約、ImGui履歴の更新、性能計測、PerformanceWindowとLogWindowの描画はメインスレッドで行う。
 - ログファイルの文字列整形と書き込みは`LogFileWorker`の専用スレッドで行う。

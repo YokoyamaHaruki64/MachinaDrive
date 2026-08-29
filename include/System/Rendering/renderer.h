@@ -66,12 +66,15 @@ private:
 	static ID3D11DeviceContext*    m_DeviceContext;
 	static IDXGISwapChain*         m_SwapChain;
     static ID3D11Texture2D*        m_BackBufferTexture;
+    static ID3D11RenderTargetView* m_BackBufferRTV;
 	static ID3D11DepthStencilView* m_DepthStencilView;
 
     // 画面描画用のPing-PongバッファはRendererが所有する。
     static ID3D11Texture2D* m_bufferTexture[2];
     static ID3D11RenderTargetView* m_bufferRTV[2];
     static ID3D11ShaderResourceView* m_bufferSRV[2];
+    static UINT m_gameWidth;
+    static UINT m_gameHeight;
     static int srcBufferIndex;
     static int dstBufferIndex;
 
@@ -90,6 +93,7 @@ private:
     static ID3D11BlendState*        m_BlendStateAdd;
 	static ID3D11BlendState*		m_BlendStateATC;
 	static ID3D11SamplerState*		m_LinearSampler;
+	static ID3D11SamplerState*		m_ClampSampler;
 	static ID3D11SamplerState*		m_ShadowSampler;
 
     static XMMATRIX m_ViewMatrix;
@@ -105,6 +109,8 @@ private:
 
     static void CreateDepthStencilStates();
     static void CreateFallbackVertexBuffers();
+    static bool CreateGameRenderTargets(UINT width, UINT height);
+    static void ReleaseGameRenderTargets();
     static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);
 
 public:
@@ -113,6 +119,9 @@ public:
 	static void Begin();
     static void Draw();
 	static void End();
+    static bool ResizeBackBuffer(UINT width, UINT height);
+	static bool ResizeGameRenderTarget(UINT width, UINT height);
+    static void BeginEditorFrame();
 
 	static void SetDepthEnable(bool Enable);
 	static void SetATCEnable(bool Enable);
@@ -140,6 +149,8 @@ public:
     static bool SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil = false);
     static void SetDstRTV();
     static ID3D11ShaderResourceView* GetSrcSRV() { return m_bufferSRV[srcBufferIndex]; }
+    static UINT GetGameWidth() { return m_gameWidth; }
+    static UINT GetGameHeight() { return m_gameHeight; }
 
     static void SwapBuffers() { std::swap(srcBufferIndex, dstBufferIndex); }
 };

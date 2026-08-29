@@ -20,7 +20,7 @@ PostProcess ──> Material と Renderer 所有の画面 Ping-Pong バッファ
 
 ## フレームの描画フロー
 
-`Manager::Draw()` は RenderTarget の開始後、各 `RendererBase` の `Submit()` を呼ぶ。`Renderer` は Phase ごとにキューを安定ソートし、各 Component の `Draw()` を実行する。その後に PostProcess、ImGui、バックバッファへのコピーと Present を行う。
+`Manager::Draw()` は Game RenderTarget の開始後、各 `RendererBase` の `Submit()` を呼ぶ。`Renderer` は Phase ごとにキューを安定ソートし、各 Component の `Draw()` を実行する。その後に PostProcessを適用する。Editor構成ではBackBuffer RTVへ切り替えてImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへコピーしてPresentする。
 
 ```text
 Renderer::Begin
@@ -28,7 +28,8 @@ Renderer::Begin
        └─ Phase 別 DrawItem キュー
             └─ Renderer::Draw（ソートして Component::Draw）
                  └─ PostProcess::Apply
-                      └─ ImGui / Renderer::End
+                      ├─ Editor: BackBuffer RTV / GameWindow::DrawImGui / Renderer::End
+                      └─ Runtime: CopyResource / Renderer::End
 ```
 
 `DrawItem` は Renderer、sortKey、代表 MeshID、提出順を持つ。提出順は同じ sortKey の安定した順序を保つために使う。現在のキュー単位は Renderer であり、ModelRenderer 内の複数 Mesh や Material Pass へはまだ分割しない。
@@ -45,7 +46,7 @@ Mesh を持たない Renderer の MeshID は `0` とする。ModelRenderer は�
 
 ## Renderer と共通 GPU 状態
 
-`Renderer` は D3D11 Device、Context、SwapChain、画面用 Ping-Pong バッファ、共通定数バッファ、Sampler、Depth / Blend / Rasterizer State を所有する。Depth State は `DepthTestMode` と `DepthWriteMode` の全組み合わせを初期化時に生成・キャッシュし、描画中に生成しない。
+`Renderer` は D3D11 Device、Context、SwapChain、BackBuffer RTV、可変サイズのGame用Ping-Pongバッファ、共通定数バッファ、Sampler、Depth / Blend / Rasterizer State を所有する。Depth State は `DepthTestMode` と `DepthWriteMode` の全組み合わせを初期化時に生成・キャッシュし、描画中に生成しない。
 
 共通 HLSL 定義は `shader/common.hlsl` に置く。予約スロットは次のとおりである。
 
@@ -83,7 +84,9 @@ Property は定数バッファへ入る値と Resource に分かれる。現在�
 
 `TextureManager` はファイル Texture、メモリから読み込む Texture、実行時 RenderTexture を `TextureHandle` で一元管理する。Material は Handle のみを保存し、Bind 時に Manager から SRV を取得する。無効 Handle またはロード失敗時には 1x1 の白いフォールバック Texture を使う。マゼンタは将来の Material 自体のフォールバック表示用に予約する。
 
-`CreateRenderTexture(name, width, height)` は SRV と RTV を持つ Texture を生成する。`Renderer::SetRenderTarget()` は TextureHandle から RTV を解決し、RenderTarget サイズに合わせて Viewport も設定する。画面用 Ping-Pong バッファは TextureManager ではなく Renderer が所有する。
+`CreateRenderTexture(name, width, height)` は SRV と RTV を持つ Texture を生成する。同名RenderTextureへ異なるサイズを要求した場合は、既存Handleを維持したままGPUリソースを置き換える。`Renderer::SetRenderTarget()` は TextureHandle から RTV を解決し、RenderTarget サイズに合わせて Viewport も設定する。画面用 Ping-Pong バッファは TextureManager ではなく Renderer が所有する。
+
+Game Viewの表示領域が変わると、RendererはGame RenderTargetのPing-PongテクスチャとDepthStencilを再生成する。3D Cameraは現在のGame RenderTargetからアスペクト比を求め、Bloomなどの中間RenderTextureも同じサイズ変更通知を受ける。2D描画の射影も現在のGame RenderTargetサイズを使用し、`SCREEN_WIDTH`／`SCREEN_HEIGHT`は初期値・フォールバックとしてのみ使用する。
 
 ## ModelAsset と ModelLoader
 

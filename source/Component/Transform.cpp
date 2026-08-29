@@ -114,7 +114,16 @@ void Transform::SetWorldMatrix(const Matrix4x4& worldMatrix)
 
 void Transform::AddChild(Transform* child)
 {
-    m_children.push_back(child);
+    // Hierarchyの兄弟表示順を親の付け替え前後で安定させる。
+    const auto insertionPosition = std::lower_bound(
+        m_children.begin(),
+        m_children.end(),
+        child,
+        [](const Transform* left, const Transform* right)
+        {
+            return left->GetOwner()->GetId() < right->GetOwner()->GetId();
+        });
+    m_children.insert(insertionPosition, child);
 }
 
 void Transform::RemoveChild(Transform* child)

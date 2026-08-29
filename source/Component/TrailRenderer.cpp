@@ -64,11 +64,19 @@ TrailRenderer::TrailRenderer(GameObject* owner)
     m_renderPhase = RenderPhase::Transparent;
 }
 
-void TrailRenderer::OnStart()
+void TrailRenderer::OnLoaded()
 {
-    m_material = MaterialManager::Load(m_materialPath);
+    if (!m_material && !m_materialPath.empty())
+    {
+        m_material = MaterialManager::Load(m_materialPath);
+    }
     CreateVertexStreams();
 
+}
+
+void TrailRenderer::OnEditorUpdate()
+{
+    OnLoaded();
 }
 
 void TrailRenderer::RegisterFields(FieldRegistry& fields)

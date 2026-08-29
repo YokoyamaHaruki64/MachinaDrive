@@ -14,11 +14,14 @@ ID3D11Device*           Renderer::m_Device{};
 ID3D11DeviceContext*    Renderer::m_DeviceContext{};
 IDXGISwapChain*         Renderer::m_SwapChain{};
 ID3D11Texture2D*        Renderer::m_BackBufferTexture{};
+ID3D11RenderTargetView* Renderer::m_BackBufferRTV{};
 ID3D11DepthStencilView* Renderer::m_DepthStencilView{};
 
 ID3D11Texture2D*            Renderer::m_bufferTexture[2]{};
 ID3D11RenderTargetView*     Renderer::m_bufferRTV[2]{};
 ID3D11ShaderResourceView*   Renderer::m_bufferSRV[2]{};
+UINT Renderer::m_gameWidth{};
+UINT Renderer::m_gameHeight{};
 int Renderer::srcBufferIndex = 0;
 int Renderer::dstBufferIndex = 1;
 
@@ -41,6 +44,7 @@ ID3D11BlendState*		Renderer::m_BlendState{};
 ID3D11BlendState*       Renderer::m_BlendStateAdd{};
 ID3D11BlendState*		Renderer::m_BlendStateATC{};
 ID3D11SamplerState*		Renderer::m_LinearSampler{};
+ID3D11SamplerState*		Renderer::m_ClampSampler{};
 ID3D11SamplerState*		Renderer::m_ShadowSampler{};
 
 XMMATRIX Renderer::m_ViewMatrix{};
@@ -103,6 +107,99 @@ namespace
     }
 }
 
+bool Renderer::CreateGameRenderTargets(UINT width, UINT height)
+{
+    if (!m_Device || !m_BackBufferTexture || width == 0 || height == 0)
+        return false;
+
+    D3D11_TEXTURE2D_DESC backBufferDescription{};
+    m_BackBufferTexture->GetDesc(&backBufferDescription);
+
+    D3D11_TEXTURE2D_DESC renderTargetDescription{};
+    renderTargetDescription.Width = width;
+    renderTargetDescription.Height = height;
+    renderTargetDescription.MipLevels = 1;
+    renderTargetDescription.ArraySize = 1;
+    renderTargetDescription.Format = backBufferDescription.Format;
+    renderTargetDescription.SampleDesc = backBufferDescription.SampleDesc;
+    renderTargetDescription.Usage = D3D11_USAGE_DEFAULT;
+    renderTargetDescription.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2];
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetViews[2];
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceViews[2];
+    for (int i = 0; i < 2; ++i)
+    {
+        if (FAILED(m_Device->CreateTexture2D(&renderTargetDescription, nullptr, textures[i].GetAddressOf())) ||
+            FAILED(m_Device->CreateRenderTargetView(textures[i].Get(), nullptr, renderTargetViews[i].GetAddressOf())) ||
+            FAILED(m_Device->CreateShaderResourceView(textures[i].Get(), nullptr, shaderResourceViews[i].GetAddressOf())))
+        {
+            return false;
+        }
+    }
+
+    D3D11_TEXTURE2D_DESC depthDescription{};
+    depthDescription.Width = width;
+    depthDescription.Height = height;
+    depthDescription.MipLevels = 1;
+    depthDescription.ArraySize = 1;
+    depthDescription.Format = DXGI_FORMAT_D16_UNORM;
+    depthDescription.SampleDesc = renderTargetDescription.SampleDesc;
+    depthDescription.Usage = D3D11_USAGE_DEFAULT;
+    depthDescription.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
+    if (FAILED(m_Device->CreateTexture2D(&depthDescription, nullptr, depthTexture.GetAddressOf())))
+        return false;
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthViewDescription{};
+    depthViewDescription.Format = depthDescription.Format;
+    depthViewDescription.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    if (FAILED(m_Device->CreateDepthStencilView(
+        depthTexture.Get(), &depthViewDescription, depthStencilView.GetAddressOf())))
+    {
+        return false;
+    }
+
+    ReleaseGameRenderTargets();
+    for (int i = 0; i < 2; ++i)
+    {
+        m_bufferTexture[i] = textures[i].Detach();
+        m_bufferRTV[i] = renderTargetViews[i].Detach();
+        m_bufferSRV[i] = shaderResourceViews[i].Detach();
+    }
+    m_DepthStencilView = depthStencilView.Detach();
+    m_gameWidth = width;
+    m_gameHeight = height;
+    srcBufferIndex = 0;
+    dstBufferIndex = 1;
+    return true;
+}
+
+void Renderer::ReleaseGameRenderTargets()
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        if (m_bufferSRV[i])
+            m_bufferSRV[i]->Release();
+        if (m_bufferRTV[i])
+            m_bufferRTV[i]->Release();
+        if (m_bufferTexture[i])
+            m_bufferTexture[i]->Release();
+
+        m_bufferSRV[i] = nullptr;
+        m_bufferRTV[i] = nullptr;
+        m_bufferTexture[i] = nullptr;
+    }
+
+    if (m_DepthStencilView)
+        m_DepthStencilView->Release();
+    m_DepthStencilView = nullptr;
+    m_gameWidth = 0;
+    m_gameHeight = 0;
+}
+
 void Renderer::CreateFallbackVertexBuffers()
 {
     // Positionだけは形状を定義できないため補完せず、描画側でエラーとして扱う。
@@ -132,9 +229,17 @@ void Renderer::Init()
 
 	// デバイス、スワップチェーン作成
 	DXGI_SWAP_CHAIN_DESC swapChainDesc{};
+	RECT clientRect{};
+	GetClientRect(GetWindow(), &clientRect);
+	const UINT clientWidth = clientRect.right > clientRect.left
+		? static_cast<UINT>(clientRect.right - clientRect.left)
+		: SCREEN_WIDTH;
+	const UINT clientHeight = clientRect.bottom > clientRect.top
+		? static_cast<UINT>(clientRect.bottom - clientRect.top)
+		: SCREEN_HEIGHT;
 	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Width = SCREEN_WIDTH;
-	swapChainDesc.BufferDesc.Height = SCREEN_HEIGHT;
+	swapChainDesc.BufferDesc.Width = clientWidth;
+	swapChainDesc.BufferDesc.Height = clientHeight;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -163,60 +268,21 @@ void Renderer::Init()
     D3D11_TEXTURE2D_DESC backBufferDesc{};
     m_BackBufferTexture->GetDesc(&backBufferDesc);
 
-	// バッファテクスチャ作成
-    D3D11_TEXTURE2D_DESC bufferTexDesc{};
-    bufferTexDesc.Width = backBufferDesc.Width;
-    bufferTexDesc.Height = backBufferDesc.Height;
-    bufferTexDesc.MipLevels = 1;
-    bufferTexDesc.ArraySize = 1;
-    bufferTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    bufferTexDesc.SampleDesc = backBufferDesc.SampleDesc;
-    bufferTexDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
-    for (int i = 0; i < 2; ++i)
+	// ImGui と Runtime の最終出力先になる BackBuffer の RTV を作成する。
+    if (FAILED(m_Device->CreateRenderTargetView(m_BackBufferTexture, nullptr, &m_BackBufferRTV)) ||
+        !CreateGameRenderTargets(backBufferDesc.Width, backBufferDesc.Height))
     {
-        m_Device->CreateTexture2D(&bufferTexDesc, NULL, &m_bufferTexture[i]);
-        m_Device->CreateRenderTargetView(m_bufferTexture[i], NULL, &m_bufferRTV[i]);
-        m_Device->CreateShaderResourceView(m_bufferTexture[i], NULL, &m_bufferSRV[i]);
+        return;
     }
-	//ID3D11Texture2D* renderTarget{};
-	//m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&renderTarget );
-	//m_Device->CreateRenderTargetView( renderTarget, NULL, &m_RenderTargetView );
-	//renderTarget->Release();
-
-
-	// デプスステンシルバッファ作成
-	ID3D11Texture2D* depthStencile{};
-	D3D11_TEXTURE2D_DESC textureDesc{};
-	textureDesc.Width = swapChainDesc.BufferDesc.Width;
-	textureDesc.Height = swapChainDesc.BufferDesc.Height;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_D16_UNORM;
-	textureDesc.SampleDesc = swapChainDesc.SampleDesc;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-	m_Device->CreateTexture2D(&textureDesc, NULL, &depthStencile);
-
-	// デプスステンシルビュー作成
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
-	depthStencilViewDesc.Format = textureDesc.Format;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Flags = 0;
-	m_Device->CreateDepthStencilView(depthStencile, &depthStencilViewDesc, &m_DepthStencilView);
-	depthStencile->Release();
 
 
 	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
 
 
-	// ビューポート設定
+	// 初期描画先とビューポートを Game RenderTarget に設定する。
 	D3D11_VIEWPORT viewport;
-	viewport.Width = (FLOAT)SCREEN_WIDTH;
-	viewport.Height = (FLOAT)SCREEN_HEIGHT;
+	viewport.Width = static_cast<FLOAT>(m_gameWidth);
+	viewport.Height = static_cast<FLOAT>(m_gameHeight);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0;
@@ -253,8 +319,10 @@ void Renderer::Init()
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	// Game RenderTextureは最終的に画面全体として表示するため、色の合成後も出力Alphaは背景を保持する。
+	// これにより、EditorのImGui::ImageがSpriteの透過部分でシーン全体を抜かない。
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
@@ -294,6 +362,13 @@ void Renderer::Init()
 	m_Device->CreateSamplerState(&samplerDesc, &m_LinearSampler);
 	m_DeviceContext->VSSetSamplers(0, 1, &m_LinearSampler);
 	m_DeviceContext->PSSetSamplers(0, 1, &m_LinearSampler);
+
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	m_Device->CreateSamplerState(&samplerDesc, &m_ClampSampler);
+	m_DeviceContext->VSSetSamplers(2, 1, &m_ClampSampler);
+	m_DeviceContext->PSSetSamplers(2, 1, &m_ClampSampler);
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -370,6 +445,7 @@ void Renderer::Uninit()
     m_FallbackVertexBuffers = {};
 
 	m_LinearSampler->Release();
+	m_ClampSampler->Release();
 	m_ShadowSampler->Release();
 
     for (ID3D11DepthStencilState* depthState : m_DepthStates)
@@ -378,23 +454,26 @@ void Renderer::Uninit()
             depthState->Release();
     }
 
-    m_RasterizerState->Release();
-    m_RasterizerStateNoCull->Release();
-    m_RasterizerStateFront->Release();
+	m_RasterizerState->Release();
+	m_RasterizerStateNoCull->Release();
+	m_RasterizerStateFront->Release();
 
 
 	m_DeviceContext->ClearState();
+	ReleaseGameRenderTargets();
+	if (m_BackBufferRTV)
+	{
+		m_BackBufferRTV->Release();
+		m_BackBufferRTV = nullptr;
+	}
 	m_BackBufferTexture->Release();
+	m_BackBufferTexture = nullptr;
 	m_SwapChain->Release();
+	m_SwapChain = nullptr;
 	m_DeviceContext->Release();
+	m_DeviceContext = nullptr;
 	m_Device->Release();
-
-    for (int i = 0; i < 2; ++i)
-    {
-        m_bufferTexture[i]->Release();
-        m_bufferRTV[i]->Release();
-        m_bufferSRV[i]->Release();
-    }
+	m_Device = nullptr;
 }
 
 
@@ -402,6 +481,16 @@ void Renderer::Uninit()
 
 void Renderer::Begin()
 {
+	// ImGuiの外部Viewport描画がD3D11コンテキストのRTVを変更するため、毎フレームの描画先を明示的に復元する。
+	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
+
+	D3D11_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(m_gameWidth);
+	viewport.Height = static_cast<float>(m_gameHeight);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	m_DeviceContext->RSSetViewports(1, &viewport);
+
 	float clearColor[4] = {
 		0 / 255.0f,
 		0 / 255.0f,
@@ -470,24 +559,106 @@ void Renderer::SetDstRTV()
 {
     m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[dstBufferIndex], m_DepthStencilView);
 
-    // Renderer所有の画面バッファへ戻す場合も、RT全体のViewportへ復帰する。
-    D3D11_TEXTURE2D_DESC description{};
-    m_bufferTexture[dstBufferIndex]->GetDesc(&description);
-
-    D3D11_VIEWPORT viewport{};
-    viewport.Width = static_cast<float>(description.Width);
-    viewport.Height = static_cast<float>(description.Height);
+	// Renderer所有の画面バッファへ戻す場合も、RT全体のViewportへ復帰する。
+	D3D11_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(m_gameWidth);
+	viewport.Height = static_cast<float>(m_gameHeight);
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
-    m_DeviceContext->RSSetViewports(1, &viewport);
+	m_DeviceContext->RSSetViewports(1, &viewport);
+}
+
+
+bool Renderer::ResizeBackBuffer(UINT width, UINT height)
+{
+    width = std::max<UINT>(width, 1);
+    height = std::max<UINT>(height, 1);
+    if (!m_SwapChain || !m_Device || !m_DeviceContext)
+        return false;
+
+    D3D11_TEXTURE2D_DESC currentDescription{};
+    if (m_BackBufferTexture)
+        m_BackBufferTexture->GetDesc(&currentDescription);
+    if (currentDescription.Width == width && currentDescription.Height == height)
+        return true;
+
+    // SwapChainのResizeBuffers前に、BackBufferとGame RTの参照を解除する。
+    // ClearStateは共通定数バッファやSamplerまで解除してしまうため、Resize後の描画状態を壊さない。
+    m_DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    ID3D11ShaderResourceView* nullResources[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+    m_DeviceContext->VSSetShaderResources(
+        0,
+        D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT,
+        nullResources);
+    m_DeviceContext->PSSetShaderResources(
+        0,
+        D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT,
+        nullResources);
+    m_DeviceContext->Flush();
+    ReleaseGameRenderTargets();
+    if (m_BackBufferRTV)
+    {
+        m_BackBufferRTV->Release();
+        m_BackBufferRTV = nullptr;
+    }
+    if (m_BackBufferTexture)
+    {
+        m_BackBufferTexture->Release();
+        m_BackBufferTexture = nullptr;
+    }
+
+    if (FAILED(m_SwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0)) ||
+        FAILED(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&m_BackBufferTexture))) ||
+        FAILED(m_Device->CreateRenderTargetView(m_BackBufferTexture, nullptr, &m_BackBufferRTV)) ||
+        !CreateGameRenderTargets(width, height))
+    {
+        return false;
+    }
+
+    m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
+    return true;
+}
+
+
+bool Renderer::ResizeGameRenderTarget(UINT width, UINT height)
+{
+	width = std::max<UINT>(width, 1);
+	height = std::max<UINT>(height, 1);
+	if (width == m_gameWidth && height == m_gameHeight)
+		return true;
+
+	return CreateGameRenderTargets(width, height);
+}
+
+void Renderer::BeginEditorFrame()
+{
+	if (!m_DeviceContext || !m_BackBufferRTV)
+		return;
+
+	// Game RT から切り替えた後、ImGui は BackBuffer へ描画する。
+	m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferRTV, nullptr);
+
+	D3D11_TEXTURE2D_DESC description{};
+	m_BackBufferTexture->GetDesc(&description);
+	D3D11_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(description.Width);
+	viewport.Height = static_cast<float>(description.Height);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	m_DeviceContext->RSSetViewports(1, &viewport);
+
+	const float clearColor[4] = { 0.0f, 0.0f, 16.0f / 255.0f, 1.0f };
+	m_DeviceContext->ClearRenderTargetView(m_BackBufferRTV, clearColor);
 }
 
 
 
 void Renderer::End()
 {
-    // RTVのデータをバックバッファにコピーする
+#if !GM_ENABLE_EDITOR
+    // Runtime は ImGui を介さず、完成した Game RenderTexture を BackBuffer へコピーする。
     m_DeviceContext->CopyResource(m_BackBufferTexture, m_bufferTexture[srcBufferIndex]);
+#endif
 
     // バッファを入れ替える
 	m_SwapChain->Present( 1, 0 );
@@ -522,8 +693,10 @@ void Renderer::SetWorldViewProjection2D()
 	SetWorldMatrix(XMMatrixIdentity());
 	SetViewMatrix(XMMatrixIdentity());
 
+	const float width = static_cast<float>(m_gameWidth > 0 ? m_gameWidth : SCREEN_WIDTH);
+	const float height = static_cast<float>(m_gameHeight > 0 ? m_gameHeight : SCREEN_HEIGHT);
 	XMMATRIX projection;
-	projection = XMMatrixOrthographicOffCenterLH(0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 0.0f, 1.0f);
+	projection = XMMatrixOrthographicOffCenterLH(0.0f, width, height, 0.0f, 0.0f, 1.0f);
 	SetProjectionMatrix(projection);
 }
 

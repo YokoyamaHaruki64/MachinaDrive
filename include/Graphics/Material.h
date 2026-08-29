@@ -18,6 +18,7 @@ class Material
     std::string m_name{};
     std::string m_filePath{};
     bool m_isValid = true;
+    bool m_isDirty = false;
     std::vector<uint8_t> m_propertyData{};
     std::vector<uint8_t> m_overridePropertyData{};
     std::vector<TextureHandle> m_resourceValues{};
@@ -32,6 +33,7 @@ class Material
     void SetDefaultValue(const ShaderPropertyDesc& property);
     void ShowPropertyError(const char* operation, MaterialPropertyID id) const;
     void CreatePropertiesBuffer();
+    void InitializeShaderState(const GraphicsShader& shader);
     static bool WriteConstantBufferValue(
         std::vector<uint8_t>& propertyData,
         const ShaderPropertyDesc& property,
@@ -39,7 +41,7 @@ class Material
     void BindProperties(
         const GraphicsShaderPass& shaderPass,
         const MaterialPropertyOverride* propertyOverride);
-    void DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id);
+    bool DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id);
 
     friend class MaterialManager;
 
@@ -50,10 +52,13 @@ public:
     const std::string& GetName() const { return m_name; }
     const std::string& GetFilePath() const { return m_filePath; }
     bool IsValid() const { return m_isValid; }
+    bool IsDirty() const { return m_isDirty; }
+    void MarkDirty() { m_isDirty = true; }
     MaterialPropertyID GetPropertyID(ShaderPropertyID shaderPropertyID) const;
     MaterialPropertyID GetPropertyID(std::string_view name) const;
 
     const GraphicsShader& GetShader() const;
+    bool SetShader(const GraphicsShader& shader);
     const GraphicsShaderPass& GetShaderPass(size_t passIndex) const;
 
     float SetFloat(MaterialPropertyID id, float value);
@@ -105,7 +110,7 @@ public:
     bool GetPropertyValue(const ShaderPropertyDesc& property, PropertyValue& value) const;
     bool SetPropertyValue(const ShaderPropertyDesc& property, const PropertyValue& value);
 
-    void DrawInspectorImGui();
+    bool DrawInspectorImGui();
 
     void Bind(size_t passIndex, const MaterialPropertyOverride* propertyOverride = nullptr);
     bool Bind(std::string_view passTag, const MaterialPropertyOverride* propertyOverride = nullptr);

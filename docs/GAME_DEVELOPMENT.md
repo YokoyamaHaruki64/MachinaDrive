@@ -4,7 +4,13 @@
 
 この資料は、ゲーム固有の機能を追加するときの標準的な流れをまとめる。フレームワーク側の再利用可能な機能は`Component`、ゲームごとに変わる振る舞いは`Script`として実装する。実行中の調整はInspector、保存はScene／Prefab／MaterialのYAMLアセットを使う。
 
-全体の実行順、所有関係、Transformの規約は[ARCHITECTURE.md](ARCHITECTURE.md)、Inspectorとフィールド登録の詳細は[INSPECTOR.md](INSPECTOR.md)、保存形式は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+全体の実行順、所有関係、Transformの規約は[ARCHITECTURE.md](ARCHITECTURE.md)、Editor／Inspectorとフィールド登録の詳細は[EDITOR.md](EDITOR.md)、保存形式は[SERIALIZATION.md](SERIALIZATION.md)を参照する。
+
+## Editor と Runtime
+
+Editorでの調整は`GM_ENABLE_EDITOR=1`のDebug構成で行う。Game画面はGame RenderTextureを`GameWindow`へ表示し、Edit中はFree、Play中は16:9の表示比率で表示する。SceneやPrefabは通常どおり共通のYAMLアセットとして保存する。
+
+出荷時は`GM_ENABLE_EDITOR=0`のRelease構成を使用する。この構成ではImGui、Docking、Inspector、GameWindowを初期化せず、ImGui本体とbackendもコンパイル対象から除外する。ゲーム描画はGame RenderTextureからBackBufferへ転送されるため、PrefabやSceneをRuntime用に変換する作業は不要である。
 
 ## 開発の基本単位
 
@@ -23,7 +29,7 @@
 2. `include/Script/`と`source/Script/`に同名の`.h`／`.cpp`を作り、Visual StudioプロジェクトとFilterの`Script`へ追加する。
 3. Scriptを`Script`から継承し、`System/GameplayMacros.h`が提供する`GM_SCRIPT(Type, "表示名")`をクラス定義の先頭で宣言する。これによりInspectorの`Add Component`とYAML復元から型を利用できる。重複追加や一覧表示を変えたい場合は`GM_SCRIPT_OPTION(Type, "表示名", allowMultiple, showInAddComponent)`を使う。
 4. Inspectorで調整・保存したいメンバーを`USE_FIELDS`と`FIELDS_BEGIN`／`FIELDS_END`内の`GM_FIELD`で登録する。
-5. `OnStart()`で同一GameObjectの必要Component取得や、シーン内参照の初期解決を行う。全Prefabの復元とフィールド適用は`OnStart()`より先に完了する。
+5. `OnStart()`で同一GameObjectの必要Component取得や、シーン内参照の初期解決を行う。全Prefabの復元とフィールド適用は`OnStart()`より先に完了する。開始時に有効なObject／Componentでは、その後に`OnActive()`／`OnEnable()`が呼び出される。
 6. `Update()`には毎フレームのゲームロジック、`LateUpdate()`には他のUpdate結果を利用する後段処理を書く。時間に依存する量は`Time::GetDeltaTime()`を掛ける。
 7. Hierarchy／InspectorでGameObjectへ追加して値を調整する。配置を残すならScene保存、再利用したい階層ならPrefab保存を使う。
 
@@ -82,6 +88,24 @@ void SampleMoveScript::Update()
 ```
 
 `GM_FIELD`に登録しない値はInspectorにもYAMLにも含まれない。実行時キャッシュ、取得済みComponentポインタ、一時タイマーなどは通常登録しない。
+
+ファイルパスを設定値として持つ場合は、通常の`GM_FIELD`ではなく`GM_FIELD_PATH`を使う。Inspectorから直接文字列を編集せず、初期フォルダと許可拡張子を指定したファイルダイアログで`Assets/`配下のファイルを選択する。`PrefabReference`はPrefab専用の同じ選択規則を自動で使用する。
+
+## 有効状態とライフサイクル
+
+GameObjectとComponentは、それぞれ実行時の有効状態を持つ。Inspectorの`Active`と`Enabled`、または次のアクセサから切り替える。
+
+```cpp
+gameObject->SetActive(false);
+component->SetEnabled(false);
+
+if (gameObject->IsActive() && component->IsEnabled())
+{
+    // 有効なComponentのUpdate／LateUpdateが実行される
+}
+```
+
+GameObjectが無効な間は、そのGameObjectに属するComponentの`Update()`、`LateUpdate()`、Renderer描画を実行しない。Componentが無効な場合も、そのComponentの更新とRenderer描画を実行しない。独自の有効化時処理が必要なComponentは`OnActive()`、Component自身の有効化時処理が必要な場合は`OnEnable()`をオーバーライドする。`OnEnable()`はComponentと所有GameObjectの両方が有効になった時だけ呼び出される。
 
 ## 参照と生成
 

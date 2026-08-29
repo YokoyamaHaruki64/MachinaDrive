@@ -76,7 +76,17 @@ public:
             m_materialPropertyOverrides[slot].Clear();
         }
     }
-    bool IsOwnerStarted() const { return m_owner && m_owner->IsStarted(); }
+    bool IsOwnerStarted() const
+    {
+        if (!m_owner)
+        {
+            return false;
+        }
+
+        return (m_owner->IsStarted() || Manager::GetGameMode() == Manager::GameMode::Edit) &&
+            m_owner->IsActive() &&
+            IsEnabled();
+    }
     void Submit();
 
     int GetDrawLayer() const { return m_drawLayer; }

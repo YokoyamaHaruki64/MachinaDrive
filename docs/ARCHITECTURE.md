@@ -13,10 +13,13 @@ WinMain
   │    ├─ Renderer / RendererBase
   │    ├─ PostEffect
   │    └─ Prefab archive / legacy factory
+  ├─ EditorSystem（Debug構成のみ）
+  │    ├─ Game / Hierarchy / Inspector
+  │    └─ Performance / Log
   └─ 診断システム
        ├─ Logger / LogSystem / LogFileWorker
        ├─ PerformanceMonitor
-       └─ DebugWindow
+       └─ PerformanceWindow / LogWindow
 ```
 
 ## モジュール構成
@@ -24,7 +27,7 @@ WinMain
 | 場所 | 責務 |
 | --- | --- |
 | `include/System/Core/`, `source/System/Core/` | ウィンドウ、入力、時間、ゲームオブジェクト、Managerなど実行時の基盤 |
-| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、フィールド登録、ファイルダイアログ |
+| `include/System/Editor/`, `source/System/Editor/` | EditorSystem、Hierarchy/Inspector、GameWindow、フィールド登録、ファイルダイアログ |
 | `include/System/Serialization/`, `source/System/Serialization/` | YAMLの値変換、ドキュメント入出力、GameObjectのシリアライズ |
 | `include/System/Diagnostics/`, `source/System/Diagnostics/` | Logger、LogSystem、ファイルWorker、PerformanceMonitor |
 | `include/System/Rendering/`, `source/System/Rendering/` | Renderer、RendererBase、DirectXTex |
@@ -36,7 +39,7 @@ WinMain
 | `Assets/Shaders/` | Git管理する`.shader`アセットとHLSLソース。コンパイル済み `.cso` は `BuildedShader/` に出力 |
 | `Assets/Scenes/`、`Assets/Prefabs/`、`Assets/Materials/` | Git管理するScene、Prefab、Materialアセット |
 | `Assets/Local/` | モデル、テクスチャ、サウンドなどローカル専用リソース。Git管理対象外 |
-| `config/` | ImGui とゲーム内調整値の設定 |
+| `config/` | ImGuiテーマ、フォント、レイアウト保存先とゲーム内調整値の設定 |
 | `Logs/` | 実行ごとに生成されるログファイル。Git管理対象外 |
 
 ## 実行フロー
@@ -47,27 +50,30 @@ WinMain
 起動
   ├─ LogSystem::Init でファイル出力Workerを開始
   └─ Manager::Init
-       ├─ Renderer / Input / PostEffect / Audio / ImGui を初期化
-       └─ TitleScene を初期化
+       ├─ Renderer / Input / PostEffect / Audio を初期化
+       ├─ Editor構成では ImGui / Docking / Viewport / EditorWindow群を初期化
+       └─ TitleScene を予約
 
 毎フレーム: Manager::Update
-  ├─ 入力と ImGui フレームを更新
-  ├─ 保留中シーンがあれば切替、なければ保留中オブジェクトを有効化
+  ├─ 入力を更新
+  ├─ Editor構成では Game View の要求サイズを適用し、ImGui フレームを更新
+  ├─ Editor構成ではGameWindowのレイアウト確定とRenderTargetサイズ適用後に保留中Sceneを初期化
+  ├─ 保留中シーンがなければ、保留中オブジェクトを有効化
   ├─ Scene::Update
   ├─ GameObject::Update
   ├─ GameObject::LateUpdate
   └─ Destroy 指定済みオブジェクトを OnDestroy 後に削除
 
 毎フレーム: Manager::Draw
-  ├─ レンダーターゲットを開始し、メインカメラの View / Projection を設定
+  ├─ Game RenderTarget を開始し、メインカメラの View / Projection を設定
   ├─ RendererBase を描画コマンドとして送信・ソート・描画
   ├─ PostEffect を適用
-  ├─ ImGui を描画
-  └─ 表示
+  ├─ Editor構成では BackBuffer RTV に切り替えて GameWindow / Inspector / Debug を描画
+  └─ Editor構成は Present、Runtime構成は Game RenderTarget を BackBuffer へ CopyResource して Present
 
 フレーム終端: LogSystem::Flush
   ├─ 最大100件を取り出して現在秒のログへ集約
-  ├─ 現在秒の件数をImGuiへ反映
+  ├─ Editor構成では現在秒の件数をImGuiへ反映
   └─ 秒が変わったら確定ログをファイルWorkerへ配送
 
 終了
@@ -82,11 +88,15 @@ WinMain
 | フック | 呼び出しタイミング |
 | --- | --- |
 | `OnStart()` | 所有 GameObject の開始時、または開始済み GameObject への追加時 |
+| `OnActive()` | GameObject が開始時に有効、または無効から有効へ遷移した時 |
+| `OnEnable()` | Component が開始時に有効、または無効から有効へ遷移した時（所有 GameObject も有効な場合） |
 | `Update()` | 毎フレームの主処理 |
 | `LateUpdate()` | 全 `Update()` 後の後段処理 |
 | `OnDestroy()` | オブジェクトまたはシーンの破棄時 |
 
 `AddComponent()` は所有 GameObject が開始済みの場合だけ、追加したコンポーネントの `OnStart()` を即時実行する。開始前の GameObject ではコンポーネントを保持するだけで、GameObject の `OnStart()` が各コンポーネントを追加順に開始する。prefab は必要なコンポーネントをすべて追加してから `Manager::Instantiate()` が GameObject を開始するため、コンポーネント間の依存関係を構築時に解決できる。
+
+GameObject の有効状態は `m_isActive`、Component の有効状態は `m_isEnabled` で管理し、どちらも既定値は `true` とする。`SetActive(false)` は対象 GameObject の `Update()`、`LateUpdate()`、所有 Renderer の描画を停止する。開始済み GameObject を `SetActive(true)` にすると、全 Component の `OnActive()` を呼び出し、そのうち有効な Component の `OnEnable()` を呼び出す。`SetEnabled(false)` は対象 Component の更新と描画を停止し、開始済みかつ所有 GameObject が有効な状態で `SetEnabled(true)` にすると `OnEnable()` を呼び出す。開始時の有効状態も同じ規則でコールバック対象となり、GameObject が無効な間に Component を有効化した場合の `OnEnable()` は GameObject の再有効化まで保留する。
 
 `Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 
@@ -137,7 +147,11 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 - `Transparent`: 描画レイヤーの後、カメラ前方方向の距離を用いて奥から手前へ描画する。
 - `Overlay`: 描画レイヤーを優先して前面要素を描画する。
 
-描画後には `PostEffect` を順に適用し、最後に ImGui を描画する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
+描画後には `PostEffect` を順に適用する。Editor構成ではその後にImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへ転送する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
+
+Game描画はRenderer所有の可変サイズPing-Pong RenderTextureへ行う。Editor構成の`GameWindow`はこのSRVをImGui Imageとして表示し、表示領域に合わせて次フレームのRenderTargetサイズを要求する。`Free`は領域全体、`16:9`はレターボックス付きで表示する。3D Cameraのアスペクト比とBloomの中間RenderTextureは現在のGame RenderTargetサイズへ追従し、2Dの射影と初期UI配置も現在のサイズへ追従する。`SCREEN_WIDTH`／`SCREEN_HEIGHT`は初期値・フォールバックとしてのみ使用する。
+
+Editor / Runtime は`GM_ENABLE_EDITOR`で分岐する。Debug構成では`GM_ENABLE_EDITOR=1`としてImGui、Docking、GameWindowを有効にし、Release構成では`GM_ENABLE_EDITOR=0`としてImGui本体・backend・Editorウィンドウ群をコンパイル対象から外す。Prefab、Scene、Component、Renderer、PostEffectなどのゲームデータと実行時処理は両構成で共通に扱う。
 
 Material、ModelAsset、Phase別キュー、PostProcess の現行設計は [RENDERING.md](RENDERING.md) を参照する。
 
@@ -149,7 +163,9 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
-実行中のGameObject、Component、Materialを調整するImGui InspectorのUI構成、フィールド登録、将来のシリアライズとの共用規則は[INSPECTOR.md](INSPECTOR.md)を参照する。
+実行中のGameObject、Component、Materialを調整するInspector、フィールド登録、Docking、分離Viewport、Game View、テーマ設定を含むEditor全体の構成は[EDITOR.md](EDITOR.md)を参照する。
+
+Edit状態とPlay状態の分離、ライフサイクルの設計、将来のScript DLLホットリロードに向けた境界は[PLAY_MODE.md](PLAY_MODE.md)を参照する。
 
 ゲーム固有のScript実装、Inspector調整、Scene／Prefab保存を使った標準的な開発手順は[GAME_DEVELOPMENT.md](GAME_DEVELOPMENT.md)を参照する。
 

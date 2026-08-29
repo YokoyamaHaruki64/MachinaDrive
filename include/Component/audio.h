@@ -47,6 +47,8 @@ public:
     ~Audio() override { Uninit(); }
 
     void Play(bool Loop = false);
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
     void OnStart() override;
 
 protected:

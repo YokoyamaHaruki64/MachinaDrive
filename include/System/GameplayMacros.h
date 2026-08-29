@@ -35,6 +35,8 @@ public: \
 #define GM_FIELD_KEY(key, member) fields.Add(key, member)
 #define GM_FIELD_KEY_TYPE(key, member, type) fields.Add(key, member, type)
 #define GM_FIELD_TYPE(member, type) fields.Add(#member, member, type)
+#define GM_FIELD_PATH(member, initialDirectory, ...) \
+    fields.AddPath(#member, member, initialDirectory, { __VA_ARGS__ })
 
 // Field登録フックを使うComponent／Scriptの宣言を簡潔にする。
 // USE_FIELDSは宣言後にprivateへ戻す。クラス本体ではセミコロンなしで使用する。

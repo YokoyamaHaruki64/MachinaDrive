@@ -4,15 +4,20 @@
 #include "Graphics/MaterialPropertyOverride.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#if GM_ENABLE_EDITOR
 #include "System/Editor/FileSystem.h"
+#endif
 #include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
+#if GM_ENABLE_EDITOR
 #include "imgui.h"
+#endif
 
 #include <algorithm>
 #include <array>
 #include <cstring>
 #include <type_traits>
+#include <unordered_map>
 
 namespace
 {
@@ -27,6 +32,13 @@ namespace
 Material::Material(std::string name, const GraphicsShader& shader)
     : m_shader(&shader), m_id(g_nextMaterialID++), m_name(std::move(name))
 {
+    InitializeShaderState(shader);
+}
+
+void Material::InitializeShaderState(const GraphicsShader& shader)
+{
+    m_shader = &shader;
+
     // Resource値はShaderPropertyIDを添字として保持する。
     const std::vector<ShaderPropertyDesc>& shaderProperties = shader.GetProperties();
     m_resourceValues.resize(shaderProperties.size());
@@ -52,6 +64,76 @@ Material::Material(std::string name, const GraphicsShader& shader)
 const GraphicsShader& Material::GetShader() const
 {
     return *m_shader;
+}
+
+bool Material::SetShader(const GraphicsShader& shader)
+{
+    if (!m_isValid || !shader.IsValid())
+    {
+        return false;
+    }
+    if (m_shader == &shader)
+    {
+        return true;
+    }
+
+    // 同名かつ同型のPropertyは、Shader切り替え後も編集内容を引き継ぐ。
+    std::unordered_map<std::string, PropertyValue> previousValues;
+    std::unordered_map<std::string, std::string> previousResourcePaths;
+    std::unordered_map<std::string, TextureHandle> previousTextures;
+    if (m_shader)
+    {
+        for (const ShaderPropertyDesc& property : m_shader->GetProperties())
+        {
+            if (property.storage == MaterialPropertyStorage::Resource)
+            {
+                const MaterialPropertyID id = GetPropertyID(property.id);
+                previousResourcePaths.emplace(property.name, GetTexturePath(id));
+                previousTextures.emplace(property.name, GetTexture(id));
+                continue;
+            }
+
+            PropertyValue value;
+            if (GetPropertyValue(property, value))
+            {
+                previousValues.emplace(property.name, std::move(value));
+            }
+        }
+    }
+
+    m_propertiesBuffer.Reset();
+    m_propertyData.clear();
+    m_overridePropertyData.clear();
+    m_resourceValues.clear();
+    m_resourcePaths.clear();
+    m_resourceErrors.clear();
+    InitializeShaderState(shader);
+
+    for (const ShaderPropertyDesc& property : shader.GetProperties())
+    {
+        if (property.storage == MaterialPropertyStorage::Resource)
+        {
+            const auto path = previousResourcePaths.find(property.name);
+            if (path != previousResourcePaths.end() && !path->second.empty())
+            {
+                SetTexturePath(property.name, path->second);
+            }
+            else if (const auto texture = previousTextures.find(property.name);
+                texture != previousTextures.end() && texture->second.IsValid())
+            {
+                SetTexture(property.name, texture->second);
+            }
+            continue;
+        }
+
+        const auto value = previousValues.find(property.name);
+        if (value != previousValues.end() && value->second.index() == property.defaultValue.index())
+        {
+            SetPropertyValue(property, value->second);
+        }
+    }
+
+    return true;
 }
 
 const GraphicsShaderPass& Material::GetShaderPass(size_t passIndex) const
@@ -868,8 +950,10 @@ bool Material::Bind(std::string_view passTag, const MaterialPropertyOverride* pr
     return true;
 }
 
-void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
+#if GM_ENABLE_EDITOR
+bool Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
 {
+    bool changed = false;
     const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
     const std::string& path = GetTexturePath(id);
     if (HasTextureError(id))
@@ -899,6 +983,7 @@ void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, Mate
                 FileSystem::ToProjectRelative(*selectedPath))
             {
                 SetTexturePath(id, assetPath->generic_string());
+                changed = true;
             }
         }
     }
@@ -909,12 +994,18 @@ void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, Mate
         if (ImGui::Button("Clear"))
         {
             SetTexturePath(id, {});
+            changed = true;
         }
     }
-}
 
-void Material::DrawInspectorImGui()
+    return changed;
+}
+#endif
+
+#if GM_ENABLE_EDITOR
+bool Material::DrawInspectorImGui()
 {
+    bool edited = false;
     if (!m_isValid)
     {
         ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "Status: Error");
@@ -933,37 +1024,65 @@ void Material::DrawInspectorImGui()
         else if (property.type == ValueType::Float)
         {
             float value = GetFloat(id);
-            if (ImGui::DragFloat(label, &value, 0.01f)) SetFloat(id, value);
+            if (ImGui::DragFloat(label, &value, 0.01f))
+            {
+                SetFloat(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Int)
         {
             int value = GetInt(id);
-            if (ImGui::DragInt(label, &value)) SetInt(id, value);
+            if (ImGui::DragInt(label, &value))
+            {
+                SetInt(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Bool)
         {
             bool value = GetBool(id);
-            if (ImGui::Checkbox(label, &value)) SetBool(id, value);
+            if (ImGui::Checkbox(label, &value))
+            {
+                SetBool(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Color)
         {
             Color value = GetColor(id);
-            if (ImGui::ColorEdit4(label, &value.r)) SetColor(id, value);
+            if (ImGui::ColorEdit4(label, &value.r))
+            {
+                SetColor(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector2)
         {
             Vector2 value = GetVector2(id);
-            if (ImGui::DragFloat2(label, &value.x, 0.01f)) SetVector2(id, value);
+            if (ImGui::DragFloat2(label, &value.x, 0.01f))
+            {
+                SetVector2(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector3)
         {
             Vector3 value = GetVector3(id);
-            if (ImGui::DragFloat3(label, &value.x, 0.01f)) SetVector3(id, value);
+            if (ImGui::DragFloat3(label, &value.x, 0.01f))
+            {
+                SetVector3(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector4)
         {
             Vector4 value = GetVector4(id);
-            if (ImGui::DragFloat4(label, &value.x, 0.01f)) SetVector4(id, value);
+            if (ImGui::DragFloat4(label, &value.x, 0.01f))
+            {
+                SetVector4(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Matrix3x3)
         {
@@ -980,7 +1099,11 @@ void Material::DrawInspectorImGui()
             }
             ImGui::Unindent();
 
-            if (changed) SetMatrix3x3(id, value);
+            if (changed)
+            {
+                SetMatrix3x3(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Matrix4x4)
         {
@@ -997,11 +1120,15 @@ void Material::DrawInspectorImGui()
             }
             ImGui::Unindent();
 
-            if (changed) SetMatrix4x4(id, value);
+            if (changed)
+            {
+                SetMatrix4x4(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Texture2D)
         {
-            DrawTexturePropertyImGui(property, id);
+            edited |= DrawTexturePropertyImGui(property, id);
         }
         else
         {
@@ -1009,4 +1136,11 @@ void Material::DrawInspectorImGui()
         }
         ImGui::PopID();
     }
+
+    if (edited)
+    {
+        MarkDirty();
+    }
+    return edited;
 }
+#endif

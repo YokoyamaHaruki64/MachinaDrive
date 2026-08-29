@@ -28,8 +28,12 @@ void Camera::SetViewProjection()
         XMLoadFloat3((XMFLOAT3*)&m_up)
     );
 
-    XMMATRIX projMatrix =
-        XMMatrixPerspectiveFovLH(1.0f, static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 1000.0f);
+    const float renderWidth = static_cast<float>(Renderer::GetGameWidth());
+    const float renderHeight = static_cast<float>(Renderer::GetGameHeight());
+    const float aspectRatio = renderHeight > 0.0f
+        ? renderWidth / renderHeight
+        : static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
+    XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(1.0f, aspectRatio, 0.1f, 1000.0f);
 
     Renderer::SetViewMatrix(viewMatrix);
     Renderer::SetProjectionMatrix(projMatrix);

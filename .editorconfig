@@ -1,4 +1,4 @@
-# EditorConfig - DirectX 開発用設定 (FXC ベース)
+﻿# EditorConfig - DirectX 開発用設定 (FXC ベース)
 # https://editorconfig.org
 root = true
 
@@ -39,7 +39,7 @@ trim_trailing_whitespace = true
 # 実行時に読み込むテキストデータ
 # Parser間のBOM対応差を避けるため、BOMなしUTF-8に統一する
 # ---------------------------------------------------
-[*.{json,yml,yaml,scene,prefab,material,shader,ini}]
+[*.{json,yml,yaml,scene,prefab,material,shader,ini,toml}]
 charset = utf-8
 
 # ---------------------------------------------------
@@ -77,6 +77,10 @@ indent_size  = 2
 [*.{yml,yaml}]
 indent_style = space
 indent_size  = 2
+
+# YAML出力ライブラリがNullを`key: `として出力する形式をそのまま保持する
+[*.{yml,yaml,scene,prefab,material}]
+trim_trailing_whitespace = false
 
 # ---------------------------------------------------
 # Markdown / ドキュメント

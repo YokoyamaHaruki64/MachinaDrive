@@ -119,7 +119,9 @@ Shader "PostProcessBloom"
             float3 bloom = 0.0f;
             [unroll]
             for (int y = -8; y <= 8; ++y)
-                bloom += _Bloom.Sample(LinearSampler, input.texCoord + float2(0.0f, y * texelSize.y * _BlurRadius)).rgb * weights[abs(y)];
+                bloom += _Bloom.Sample(
+                    ClampSampler,
+                    input.texCoord + float2(0.0f, y * texelSize.y * _BlurRadius)).rgb * weights[abs(y)];
 
             return float4(saturate(SamplePostProcessSource(input.texCoord).rgb + bloom * _Intensity), 1.0f);
         }

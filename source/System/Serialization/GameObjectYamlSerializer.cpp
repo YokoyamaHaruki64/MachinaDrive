@@ -177,12 +177,19 @@ bool GameObjectYamlSerializer::SaveToFile(
     const std::vector<GameObject*>& gameObjects,
     PrefabReferenceSaveMode prefabReferenceMode)
 {
-    // 実行時ポインタを永続化しないため、保存範囲内だけで有効な連番IDを割り当てる。
+    // Managerが割り当てたIDをそのまま永続化し、同一Scene内の参照解決にも利用する。
     std::unordered_map<const GameObject*, ObjectId> objectIds;
+    std::unordered_set<ObjectId> usedIds;
     objectIds.reserve(gameObjects.size());
-    for (size_t index = 0; index < gameObjects.size(); ++index)
+    usedIds.reserve(gameObjects.size());
+    for (const GameObject* gameObject : gameObjects)
     {
-        objectIds.emplace(gameObjects[index], static_cast<ObjectId>(index + 1));
+        if (!gameObject || gameObject->GetId() == 0 || !usedIds.emplace(gameObject->GetId()).second)
+        {
+            Logger::Error("GameObjectのIDが不正または重複しています: " + path.string());
+            return false;
+        }
+        objectIds.emplace(gameObject, gameObject->GetId());
     }
 
     YAMLValueConversionContext context;
@@ -207,6 +214,7 @@ bool GameObjectYamlSerializer::SaveToFile(
         YAMLValue object = YAMLValue::Map();
         object.Add("id", ToYAMLValue(objectIds.at(gameObject)));
         object.Add("name", YAMLValue::Scalar(gameObject->GetName(), true));
+        object.Add("active", ToYAMLValue(gameObject->IsActive()));
 
         if (prefabReferenceMode == PrefabReferenceSaveMode::Include && !gameObject->GetPrefabPath().empty())
         {
@@ -309,6 +317,18 @@ bool GameObjectYamlSerializer::LoadFromFile(
         // GameObjectを生成
         std::unique_ptr<GameObject> gameObject = std::make_unique<GameObject>(std::move(objectName));
         GameObject* gameObjectPointer = gameObject.get();
+        gameObjectPointer->SetId(id);
+        if (const YAMLValue* active = sourceObject.Find("active"))
+        {
+            bool decodedActive{};
+            if (!YAMLValueConverter<bool>::FromYAMLValue(*active, decodedActive, {}).success)
+            {
+                Logger::Error("GameObjectのactiveが不正です: " + gameObjectPointer->GetName());
+                return false;
+            }
+            gameObjectPointer->SetActive(decodedActive);
+        }
+
         if (sourcePathMode == PrefabSourcePathMode::UseSourceFilePath)
         {// .prefabはファイル自身がPrefabのソースであるため、Prefab参照を保存する。
             gameObjectPointer->SetPrefabPath(path.generic_string());
