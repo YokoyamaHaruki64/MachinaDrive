@@ -66,10 +66,14 @@ private:
     };
 
     class EditorObjectLifetimeCommand;
+    class EditorComponentDeletionCommand;
 
     static EditorDetachedGameObjects DetachForEditor(const std::vector<GameObject*>& gameObjects);
     static void RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects);
     static void DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameObjects);
+    static std::unique_ptr<Component> DetachComponentForEditor(GameObject& gameObject, Component& component);
+    static void RestoreComponentForEditor(GameObject& gameObject, std::unique_ptr<Component>& component);
+    static void DestroyDetachedComponentForEditor(std::unique_ptr<Component>& component);
 #endif
 
 
@@ -146,6 +150,9 @@ public:
         const std::vector<GameObject*>& gameObjects);
     static std::unique_ptr<EditorCommand> CreateEditorDeletionCommand(
         const std::vector<GameObject*>& selectedGameObjects);
+    static std::unique_ptr<EditorCommand> CreateEditorComponentDeletionCommand(
+        GameObject& gameObject,
+        Component& component);
 #endif
 
     static void RegisterRenderer(RendererBase* renderer)

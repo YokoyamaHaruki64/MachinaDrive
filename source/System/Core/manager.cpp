@@ -267,6 +267,59 @@ void Manager::DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameOb
     detachedGameObjects.entries.clear();
 }
 
+std::unique_ptr<Component> Manager::DetachComponentForEditor(GameObject& gameObject, Component& component)
+{
+    if (m_gameMode != GameMode::Edit || &component == gameObject.GetTransform())
+    {
+        return nullptr;
+    }
+
+    const auto iterator = std::find_if(
+        gameObject.m_components.begin(),
+        gameObject.m_components.end(),
+        [&component](const std::unique_ptr<Component>& candidate)
+        {
+            return candidate.get() == &component;
+        });
+    if (iterator == gameObject.m_components.end())
+    {
+        return nullptr;
+    }
+
+    if (RendererBase* renderer = dynamic_cast<RendererBase*>(&component))
+    {
+        UnregisterRenderer(renderer);
+    }
+
+    std::unique_ptr<Component> detachedComponent = std::move(*iterator);
+    gameObject.m_components.erase(iterator);
+    return detachedComponent;
+}
+
+void Manager::RestoreComponentForEditor(GameObject& gameObject, std::unique_ptr<Component>& component)
+{
+    if (m_gameMode != GameMode::Edit || !component)
+    {
+        return;
+    }
+
+    Component* const restoredComponent = component.get();
+    gameObject.m_components.emplace_back(std::move(component));
+    if (RendererBase* renderer = dynamic_cast<RendererBase*>(restoredComponent))
+    {
+        RegisterRenderer(renderer);
+    }
+}
+
+void Manager::DestroyDetachedComponentForEditor(std::unique_ptr<Component>& component)
+{
+    if (component)
+    {
+        component->OnDestroy();
+        component.reset();
+    }
+}
+
 class Manager::EditorObjectLifetimeCommand final : public EditorCommand
 {
     bool m_isCreation;
@@ -312,6 +365,45 @@ public:
     }
 };
 
+class Manager::EditorComponentDeletionCommand final : public EditorCommand
+{
+    GameObject* m_gameObject = nullptr;
+    Component* m_component = nullptr;
+    std::unique_ptr<Component> m_detachedComponent;
+
+public:
+    EditorComponentDeletionCommand(
+        GameObject& gameObject,
+        Component& component,
+        std::unique_ptr<Component> detachedComponent)
+        : m_gameObject(&gameObject)
+        , m_component(&component)
+        , m_detachedComponent(std::move(detachedComponent))
+    {
+    }
+
+    ~EditorComponentDeletionCommand() override
+    {
+        Manager::DestroyDetachedComponentForEditor(m_detachedComponent);
+    }
+
+    void Execute() override
+    {
+        if (m_gameObject && m_component)
+        {
+            m_detachedComponent = Manager::DetachComponentForEditor(*m_gameObject, *m_component);
+        }
+    }
+
+    void Undo() override
+    {
+        if (m_gameObject)
+        {
+            Manager::RestoreComponentForEditor(*m_gameObject, m_detachedComponent);
+        }
+    }
+};
+
 std::unique_ptr<EditorCommand> Manager::CreateEditorCreationCommand(
     const std::vector<GameObject*>& gameObjects)
 {
@@ -336,6 +428,22 @@ std::unique_ptr<EditorCommand> Manager::CreateEditorDeletionCommand(
         false,
         selectedGameObjects,
         std::move(detachedGameObjects));
+}
+
+std::unique_ptr<EditorCommand> Manager::CreateEditorComponentDeletionCommand(
+    GameObject& gameObject,
+    Component& component)
+{
+    std::unique_ptr<Component> detachedComponent = DetachComponentForEditor(gameObject, component);
+    if (!detachedComponent)
+    {
+        return nullptr;
+    }
+
+    return std::make_unique<EditorComponentDeletionCommand>(
+        gameObject,
+        component,
+        std::move(detachedComponent));
 }
 #endif
 

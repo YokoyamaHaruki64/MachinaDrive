@@ -325,6 +325,39 @@ void InspectorWindow::DrawImGui()
         const char* componentName = registration ? registration->displayName.c_str() : typeid(*component).name();
         ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
         const bool componentOpen = ImGui::TreeNode(componentName);
+        bool componentDeleted = false;
+        if (ImGui::BeginPopupContextItem("ComponentContext"))
+        {
+            const bool isTransform = component == selectedGameObject->GetTransform();
+            ImGui::BeginDisabled(isTransform);
+            if (ImGui::MenuItem("Remove Component"))
+            {
+                std::unique_ptr<EditorCommand> command =
+                    Manager::CreateEditorComponentDeletionCommand(*selectedGameObject, *component);
+                if (command)
+                {
+                    m_componentEditSnapshots.erase(component);
+                    EditorSystem::RecordExecutedCommand(std::move(command));
+                    componentDeleted = true;
+                }
+            }
+            ImGui::EndDisabled();
+            if (isTransform)
+            {
+                ImGui::TextDisabled("Transform cannot be removed.");
+            }
+            ImGui::EndPopup();
+        }
+
+        if (componentDeleted)
+        {
+            if (componentOpen)
+            {
+                ImGui::TreePop();
+            }
+            ImGui::PopID();
+            continue;
+        }
         ImGui::SameLine();
         bool enabled = component->IsEnabled();
         if (ImGui::Checkbox("Enabled", &enabled))

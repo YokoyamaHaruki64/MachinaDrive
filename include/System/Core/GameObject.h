@@ -291,6 +291,7 @@ private:
     void ClearReferences();
 
     friend class GameObjectReference;
+    friend class Manager;
 };
 
 // テンプレート関数インクルード（循環参照回避）
