@@ -1,0 +1,109 @@
+version: 1
+name: Title
+gameObjects:
+  - id: 1
+    name: Empty
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [525.109985,278,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1045,556,1]
+      - type: SpriteRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 4
+          billboardType: 0
+          m_materialPath: Assets/Materials/TitleBG.material
+  - id: 2
+    name: Empty
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [522.5,185.333328,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [900,600,1]
+      - type: SpriteRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 4
+          billboardType: 0
+          m_materialPath: Assets/Materials/TitleLogo.material
+  - id: 3
+    name: Empty
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [522.5,417,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [800,200,1]
+      - type: SpriteRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 4
+          billboardType: 0
+          m_materialPath: Assets/Materials/TitleUI.material
+      - type: TitleUI
+        fields:
+          enabled: true
+  - id: 4
+    name: FieldRegistry Test
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: FieldRegistryTest
+        fields:
+          enabled: true
+          m_reflectSettings:
+            m_integer: 7
+            m_offset: [1,2,3]
+            m_nested:
+              m_id: 2
+              m_offset: [4,5,6]
+            m_items:
+              - m_id: 3
+                m_offset: [7,8,9]
+              - m_id: 4
+                m_offset: [10,11,12]
+          m_boolValue: true
+          m_intValue: 42
+          m_floatValue: 0.5
+          m_stringValue: Inspector test
+          m_matrix3x3Value: [1,0,0,0,1,0,0,0,1]
+          m_matrix4x4Value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+          m_quaternionValue: [0,0,0,1]
+          m_gameObjectReference: 4
+          m_missingGameObjectReference:
+          m_prefabReference: Assets/Prefabs/Test.prefab
+          m_missingPrefabReference: Assets/Prefabs/Missing.prefab
+          m_intValues:
+            - 1
+            - 2
+            - 3
+          m_vectorValues:
+            - [0,0,0]
+            - [1,1,1]
+          m_quaternionValues:
+            - [0,0,0,1]
