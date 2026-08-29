@@ -6,6 +6,7 @@
 
 #include "Component/Transform.h"
 #include "System/Editor/FileSystem.h"
+#include "System/Editor/EditorSystem.h"
 #include "System/Editor/HierarchyWindow.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Core/manager.h"
@@ -28,8 +29,13 @@ std::optional<std::filesystem::path> HierarchyWindow::ToAssetRelativePath(
     return FileSystem::ToProjectRelative(selectedPath);
 }
 
-void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& selectedGameObject)
+void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject)
 {
+    if (gameObject.IsDestroyed())
+    {
+        return;
+    }
+
     Transform* transform = gameObject.GetTransform();
     const std::vector<Transform*>& children = transform->GetChildren();
 
@@ -38,22 +44,43 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& se
     {
         flags |= ImGuiTreeNodeFlags_Leaf;
     }
-    if (selectedGameObject == &gameObject)
+    if (std::find(m_selectedGameObjects->begin(), m_selectedGameObjects->end(), &gameObject) != m_selectedGameObjects->end())
     {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
 
     ImGui::PushID(&gameObject);
     const bool isOpen = ImGui::TreeNodeEx(gameObject.GetName().c_str(), flags);
+    m_visibleGameObjects.push_back(&gameObject);
     if (ImGui::IsItemClicked())
     {
-        selectedGameObject = &gameObject;
+        const ImGuiIO& io = ImGui::GetIO();
+        m_selectionRequest = SelectionRequest{ &gameObject, io.KeyCtrl, io.KeyShift };
     }
 
     if (ImGui::BeginDragDropSource())
     {
-        GameObject* draggedGameObject = &gameObject;
-        ImGui::SetDragDropPayload("HierarchyGameObject", &draggedGameObject, sizeof(draggedGameObject));
+        // クリック選択を確定する前にドラッグが始まった場合は、選択変更を取り消す。
+        m_selectionRequest.reset();
+        m_draggedGameObjects.clear();
+        if (std::find(m_selectedGameObjects->begin(), m_selectedGameObjects->end(), &gameObject)
+            != m_selectedGameObjects->end())
+        {
+            for (GameObject* selectedGameObject : *m_selectedGameObjects)
+            {
+                if (selectedGameObject && !selectedGameObject->IsDestroyed())
+                {
+                    m_draggedGameObjects.push_back(selectedGameObject);
+                }
+            }
+        }
+        if (m_draggedGameObjects.empty())
+        {
+            m_draggedGameObjects.push_back(&gameObject);
+        }
+
+        std::vector<GameObject*>* draggedGameObjects = &m_draggedGameObjects;
+        ImGui::SetDragDropPayload("HierarchyGameObject", &draggedGameObjects, sizeof(draggedGameObjects));
         ImGui::TextUnformatted(gameObject.GetName().c_str());
         ImGui::EndDragDropSource();
     }
@@ -62,10 +89,11 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& se
     {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HierarchyGameObject"))
         {
-            GameObject* draggedGameObject = *static_cast<GameObject* const*>(payload->Data);
-            if (draggedGameObject != &gameObject)
+            std::vector<GameObject*>* const draggedGameObjects =
+                *static_cast<std::vector<GameObject*>* const*>(payload->Data);
+            if (draggedGameObjects)
             {
-                draggedGameObject->SetParent(&gameObject);
+                ApplyParentToDraggedGameObjects(*draggedGameObjects, &gameObject);
             }
         }
         ImGui::EndDragDropTarget();
@@ -81,17 +109,23 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& se
             {
                 if (const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(*selectedPath))
                 {
-                    Manager::SavePrefab(gameObject, *assetPath);
+                    if (Manager::SavePrefab(gameObject, *assetPath))
+                    {
+                        Manager::MarkCurrentSceneDirty();
+                        EditorSystem::ClearCommandHistory();
+                    }
                 }
             }
         }
         if (ImGui::MenuItem("Delete"))
         {
-            gameObject.Destroy();
-            if (selectedGameObject == &gameObject)
+            if (std::find(m_selectedGameObjects->begin(), m_selectedGameObjects->end(), &gameObject)
+                == m_selectedGameObjects->end())
             {
-                selectedGameObject = nullptr;
+                m_selectedGameObjects->assign(1, &gameObject);
+                *m_selectionAnchor = &gameObject;
             }
+            DeleteSelectedGameObjects();
         }
         ImGui::EndPopup();
     }
@@ -100,14 +134,17 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject, GameObject*& se
     {
         for (Transform* child : children)
         {
-            DrawGameObjectNode(*child->GetOwner(), selectedGameObject);
+            if (child && child->GetOwner() && !child->GetOwner()->IsDestroyed())
+            {
+                DrawGameObjectNode(*child->GetOwner());
+            }
         }
         ImGui::TreePop();
     }
     ImGui::PopID();
 }
 
-void HierarchyWindow::DrawRootDropTarget(GameObject*& selectedGameObject)
+void HierarchyWindow::DrawRootDropTarget()
 {
     ImGui::Separator();
     ImGui::TextUnformatted("Root (drop here)");
@@ -117,9 +154,12 @@ void HierarchyWindow::DrawRootDropTarget(GameObject*& selectedGameObject)
     {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HierarchyGameObject"))
         {
-            GameObject* draggedGameObject = *static_cast<GameObject* const*>(payload->Data);
-            draggedGameObject->SetParent(nullptr);
-            selectedGameObject = draggedGameObject;
+            std::vector<GameObject*>* const draggedGameObjects =
+                *static_cast<std::vector<GameObject*>* const*>(payload->Data);
+            if (draggedGameObjects)
+            {
+                ApplyParentToDraggedGameObjects(*draggedGameObjects, nullptr);
+            }
         }
         ImGui::EndDragDropTarget();
     }
@@ -127,12 +167,11 @@ void HierarchyWindow::DrawRootDropTarget(GameObject*& selectedGameObject)
 
 void HierarchyWindow::DrawImGui()
 {
-    if (!m_selectedGameObject)
+    if (!m_selectedGameObjects || !m_selectionAnchor)
     {
         return;
     }
 
-    GameObject*& selectedGameObject = *m_selectedGameObject;
     BeginWindow("Hierarchy", Vector2(260.0f, 400.0f));
 
     if (ImGui::Button("Save Scene"))
@@ -146,21 +185,34 @@ void HierarchyWindow::DrawImGui()
     ImGui::Text("Scene: %s", sceneName.c_str());
     ImGui::Separator();
 
+    m_visibleGameObjects.clear();
     for (const std::unique_ptr<GameObject>& gameObject : Manager::GetActiveGameObjects())
     {
         if (!gameObject->GetTransform()->GetParent())
         {
-            DrawGameObjectNode(*gameObject, selectedGameObject);
+            DrawGameObjectNode(*gameObject);
         }
     }
 
-    DrawRootDropTarget(selectedGameObject);
+    DrawRootDropTarget();
+    ApplySelectionRequest();
+
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)
+        && !ImGui::GetIO().WantTextInput
+        && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+    {
+        DeleteSelectedGameObjects();
+    }
 
     if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
     {
         if (ImGui::MenuItem("Create Empty"))
         {
-            selectedGameObject = Manager::CreateEmpty();
+            GameObject* const createdGameObject = Manager::CreateEmpty();
+            m_selectedGameObjects->assign(1, createdGameObject);
+            *m_selectionAnchor = createdGameObject;
+            EditorSystem::RecordExecutedCommand(
+                Manager::CreateEditorCreationCommand({ createdGameObject }));
         }
         if (ImGui::MenuItem("Instantiate Prefab"))
         {
@@ -170,7 +222,14 @@ void HierarchyWindow::DrawImGui()
             {
                 if (const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(*selectedPath))
                 {
-                    selectedGameObject = Manager::Instantiate(*assetPath);
+                    GameObject* const instantiatedGameObject = Manager::Instantiate(*assetPath);
+                    if (instantiatedGameObject)
+                    {
+                        m_selectedGameObjects->assign(1, instantiatedGameObject);
+                        *m_selectionAnchor = instantiatedGameObject;
+                        EditorSystem::RecordExecutedCommand(
+                            Manager::CreateEditorCreationCommand({ instantiatedGameObject }));
+                    }
                 }
             }
         }
@@ -178,4 +237,143 @@ void HierarchyWindow::DrawImGui()
     }
 
     EndWindow();
+}
+
+void HierarchyWindow::ApplySelectionRequest()
+{
+    if (!m_selectionRequest)
+    {
+        return;
+    }
+
+    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    {
+        m_selectionRequest.reset();
+        return;
+    }
+
+    // IsItemClickedは押下時に通知されるため、解放されるまで選択を保留する。
+    if (!ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    {
+        return;
+    }
+
+    const SelectionRequest request = *m_selectionRequest;
+    m_selectionRequest.reset();
+    if (request.range && *m_selectionAnchor)
+    {
+        const auto anchor = std::find(m_visibleGameObjects.begin(), m_visibleGameObjects.end(), *m_selectionAnchor);
+        const auto target = std::find(m_visibleGameObjects.begin(), m_visibleGameObjects.end(), request.gameObject);
+        if (anchor != m_visibleGameObjects.end() && target != m_visibleGameObjects.end())
+        {
+            const auto first = std::min(anchor, target);
+            const auto last = std::max(anchor, target);
+            m_selectedGameObjects->assign(first, std::next(last));
+            return;
+        }
+    }
+
+    if (request.toggle)
+    {
+        const auto selected = std::find(m_selectedGameObjects->begin(), m_selectedGameObjects->end(), request.gameObject);
+        if (selected == m_selectedGameObjects->end())
+        {
+            m_selectedGameObjects->push_back(request.gameObject);
+            *m_selectionAnchor = request.gameObject;
+        }
+        else
+        {
+            m_selectedGameObjects->erase(selected);
+            if (*m_selectionAnchor == request.gameObject)
+            {
+                *m_selectionAnchor = m_selectedGameObjects->empty() ? nullptr : m_selectedGameObjects->back();
+            }
+        }
+        return;
+    }
+
+    m_selectedGameObjects->assign(1, request.gameObject);
+    *m_selectionAnchor = request.gameObject;
+}
+
+void HierarchyWindow::DeleteSelectedGameObjects()
+{
+    if (!m_selectedGameObjects || m_selectedGameObjects->empty())
+    {
+        return;
+    }
+
+    const std::vector<GameObject*> selectedGameObjects = *m_selectedGameObjects;
+    std::unique_ptr<EditorCommand> command = Manager::CreateEditorDeletionCommand(selectedGameObjects);
+    if (!command)
+    {
+        return;
+    }
+
+    m_selectedGameObjects->clear();
+    *m_selectionAnchor = nullptr;
+    EditorSystem::RecordExecutedCommand(std::move(command));
+}
+
+void HierarchyWindow::ApplyParentToDraggedGameObjects(
+    const std::vector<GameObject*>& draggedGameObjects,
+    GameObject* newParent)
+{
+    struct ParentChange
+    {
+        GameObject* gameObject = nullptr;
+        GameObject* previousParent = nullptr;
+    };
+
+    std::vector<ParentChange> changes;
+    changes.reserve(draggedGameObjects.size());
+    for (GameObject* gameObject : draggedGameObjects)
+    {
+        if (!gameObject || gameObject->IsDestroyed() || gameObject == newParent)
+        {
+            continue;
+        }
+
+        Transform* const previousParentTransform = gameObject->GetTransform()->GetParent();
+        GameObject* const previousParent = previousParentTransform
+            ? previousParentTransform->GetOwner()
+            : nullptr;
+        if (previousParent == newParent)
+        {
+            continue;
+        }
+
+        if (gameObject->SetParent(newParent))
+        {
+            changes.push_back({ gameObject, previousParent });
+        }
+    }
+
+    if (changes.empty())
+    {
+        return;
+    }
+
+    const std::vector<ParentChange> undoChanges = changes;
+    EditorSystem::RecordExecutedCommand(
+        [changes = std::move(changes), newParent]()
+        {
+            for (const ParentChange& change : changes)
+            {
+                if (!change.gameObject->IsDestroyed())
+                {
+                    change.gameObject->SetParent(newParent);
+                }
+            }
+        },
+        [undoChanges]()
+        {
+            for (auto iterator = undoChanges.rbegin(); iterator != undoChanges.rend(); ++iterator)
+            {
+                if (!iterator->gameObject->IsDestroyed())
+                {
+                    iterator->gameObject->SetParent(iterator->previousParent);
+                }
+            }
+        });
 }

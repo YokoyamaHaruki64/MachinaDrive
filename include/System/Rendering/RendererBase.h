@@ -78,8 +78,12 @@ public:
     }
     bool IsOwnerStarted() const
     {
-        return m_owner &&
-            (m_owner->IsStarted() || Manager::GetGameMode() == Manager::GameMode::Edit) &&
+        if (!m_owner)
+        {
+            return false;
+        }
+
+        return (m_owner->IsStarted() || Manager::GetGameMode() == Manager::GameMode::Edit) &&
             m_owner->IsActive() &&
             IsEnabled();
     }

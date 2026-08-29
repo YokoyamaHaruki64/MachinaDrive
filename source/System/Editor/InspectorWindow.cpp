@@ -9,6 +9,8 @@
 #include "Graphics/Shader/ShaderProgram.h"
 #include "System/Core/ComponentRegistry.h"
 #include "System/Editor/FileSystem.h"
+#include "System/Editor/EditorSystem.h"
+#include "System/Serialization/YAMLTypes.h"
 #include "System/Editor/InspectorWindow.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Core/manager.h"
@@ -158,6 +160,7 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
     ImGui::PushID(static_cast<int>(slot));
 
     Material* material = renderer.GetMaterial(slot);
+    const std::string materialPathBefore = material ? material->GetFilePath() : std::string{};
     std::string label = "Material Slot " + std::to_string(slot);
     if (!material)
     {
@@ -226,6 +229,14 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
         ImGui::TreePop();
     }
 
+    Material* const materialAfter = renderer.GetMaterial(slot);
+    if (materialAfter != material || (materialAfter && materialAfter->GetFilePath() != materialPathBefore))
+    {
+        // Materialの割り当てと未保存Materialの保存先はScene側にも保持する。
+        Manager::MarkCurrentSceneDirty();
+        EditorSystem::ClearCommandHistory();
+    }
+
     ImGui::PopID();
 }
 
@@ -233,18 +244,29 @@ void InspectorWindow::DrawImGui()
 {
     BeginWindow("Inspector", Vector2(360.0f, 500.0f));
 
-    if (!m_selectedGameObject || !*m_selectedGameObject)
+    if (!m_selectedGameObjects || m_selectedGameObjects->empty())
     {
         m_gameObjectNameTarget = nullptr;
+        m_componentEditSnapshots.clear();
         ImGui::TextUnformatted("GameObjectを選択してください。");
         EndWindow();
         return;
     }
 
-    GameObject*& selectedGameObject = *m_selectedGameObject;
+    if (m_selectedGameObjects->size() > 1)
+    {
+        m_gameObjectNameTarget = nullptr;
+        m_componentEditSnapshots.clear();
+        ImGui::Text("%zu 個のGameObjectを選択中です。", m_selectedGameObjects->size());
+        EndWindow();
+        return;
+    }
+
+    GameObject* selectedGameObject = m_selectedGameObjects->front();
     if (m_gameObjectNameTarget != selectedGameObject)
     {
         m_gameObjectNameTarget = selectedGameObject;
+        m_componentEditSnapshots.clear();
         std::fill(m_gameObjectNameBuffer.begin(), m_gameObjectNameBuffer.end(), '\0');
         const std::string& name = selectedGameObject->GetName();
         const size_t length = std::min(name.size(), m_gameObjectNameBuffer.size() - 1);
@@ -258,12 +280,24 @@ void InspectorWindow::DrawImGui()
         ImGuiInputTextFlags_EnterReturnsTrue);
     if (nameSubmitted || ImGui::IsItemDeactivatedAfterEdit())
     {
-        selectedGameObject->SetName(m_gameObjectNameBuffer.data());
+        const std::string name = m_gameObjectNameBuffer.data();
+        if (name != selectedGameObject->GetName())
+        {
+            const std::string previousName = selectedGameObject->GetName();
+            selectedGameObject->SetName(name);
+            EditorSystem::RecordExecutedCommand(
+                [gameObject = selectedGameObject, name]() { gameObject->SetName(name); },
+                [gameObject = selectedGameObject, previousName]() { gameObject->SetName(previousName); });
+        }
     }
     bool active = selectedGameObject->IsActive();
     if (ImGui::Checkbox("Active", &active))
     {
+        const bool previousActive = selectedGameObject->IsActive();
         selectedGameObject->SetActive(active);
+        EditorSystem::RecordExecutedCommand(
+            [gameObject = selectedGameObject, active]() { gameObject->SetActive(active); },
+            [gameObject = selectedGameObject, previousActive]() { gameObject->SetActive(previousActive); });
     }
     ImGui::Text("Started: %s", selectedGameObject->IsStarted() ? "Yes" : "No");
     ImGui::Text("Destroy Requested: %s", selectedGameObject->IsDestroyed() ? "Yes" : "No");
@@ -295,11 +329,19 @@ void InspectorWindow::DrawImGui()
         bool enabled = component->IsEnabled();
         if (ImGui::Checkbox("Enabled", &enabled))
         {
+            const bool previousEnabled = component->IsEnabled();
             component->SetEnabled(enabled);
+            EditorSystem::RecordExecutedCommand(
+                [component, enabled]() { component->SetEnabled(enabled); },
+                [component, previousEnabled]() { component->SetEnabled(previousEnabled); });
         }
 
         if (componentOpen)
         {
+            YAMLValue before;
+            const bool canUndo = EditorSystem::CaptureComponentState(*component, before);
+            bool editStarted = false;
+            bool editFinished = false;
             InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All;
             if (dynamic_cast<Transform*>(component))
             {
@@ -307,9 +349,26 @@ void InspectorWindow::DrawImGui()
                 inspectorSpace = m_showLocalTransform ? InspectorFieldSpace::Local : InspectorFieldSpace::World;
             }
 
-            if (component->DrawInspectorImGui(inspectorSpace))
+            if (component->DrawInspectorImGui(inspectorSpace, &editStarted, &editFinished))
             {
                 component->OnEditorUpdate();
+                Manager::MarkCurrentSceneDirty();
+            }
+
+            if (editStarted && canUndo && !m_componentEditSnapshots.contains(component))
+            {
+                m_componentEditSnapshots.emplace(component, std::move(before));
+            }
+
+            if (editFinished)
+            {
+                YAMLValue after;
+                const auto snapshot = m_componentEditSnapshots.find(component);
+                if (snapshot != m_componentEditSnapshots.end() && EditorSystem::CaptureComponentState(*component, after))
+                {
+                    EditorSystem::RecordComponentChange(*component, std::move(snapshot->second), std::move(after));
+                    m_componentEditSnapshots.erase(snapshot);
+                }
             }
 
             if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
@@ -348,6 +407,8 @@ void InspectorWindow::DrawImGui()
                     if (ImGui::MenuItem(registration.displayName.c_str()))
                     {
                         ComponentRegistry::Add(registration, *selectedGameObject);
+                        Manager::MarkCurrentSceneDirty();
+                        EditorSystem::ClearCommandHistory();
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::EndDisabled();

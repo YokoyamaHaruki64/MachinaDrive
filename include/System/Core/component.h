@@ -34,7 +34,10 @@ public:
     virtual void LateUpdate() {};
 	virtual void Draw() {};
 
-    bool DrawInspectorImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+    bool DrawInspectorImGui(
+        InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All,
+        bool* editStarted = nullptr,
+        bool* editFinished = nullptr);
     bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {});
     bool FromYAMLValue(const YAMLValue& input, const YAMLValueConversionContext& context = {});
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <cstdint>
 #include <vector>
 #include <memory>
 #include <string>
@@ -13,6 +14,7 @@ enum class ParentTransformMode;
 class GameObject
 {
 protected:
+    uint64_t m_id = 0;
     std::string m_name{ "Empty" };
     std::string m_prefabPath;
     bool m_isPrefabResolutionError = false;
@@ -35,6 +37,16 @@ public:
         const Vector3& position = Vector3::Zero(),
         const Vector3& rotation = Vector3::Zero(),
         const Vector3& scale = Vector3::One());
+
+    uint64_t GetId() const
+    {
+        return m_id;
+    }
+
+    void SetId(uint64_t id)
+    {
+        m_id = id;
+    }
 
     const std::string& GetName() const
     {

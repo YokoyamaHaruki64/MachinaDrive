@@ -274,7 +274,10 @@ public:
         m_fields.push_back(std::move(descriptor));
     }
 
-    bool DrawImGui(InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All);
+    bool DrawImGui(
+        InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All,
+        bool* editStarted = nullptr,
+        bool* editFinished = nullptr);
 
     // 登録Field全体をYAMLValueのMapへ変換する。
     bool ToYAMLValue(YAMLValue& output, const YAMLValueConversionContext& context = {}) const;

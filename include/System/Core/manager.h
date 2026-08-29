@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <filesystem>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include "math/vector3.h"
@@ -11,6 +12,7 @@
 
 class Camera;
 class Component;
+class EditorCommand;
 class RendererBase;
 class Scene;
 
@@ -41,6 +43,34 @@ private:
     static SceneTransitionPhase m_sceneTransitionPhase;
     static GameMode m_gameMode;
     static bool m_stopPlayRequested;
+    static bool m_sceneDirty;
+    static uint64_t m_nextGameObjectId;
+
+    static uint64_t AllocateGameObjectId();
+    static void EnsureGameObjectIds(
+        std::vector<std::unique_ptr<GameObject>>& gameObjects,
+        bool assignNewIds);
+
+#if GM_ENABLE_EDITOR
+    struct EditorDetachedGameObjects
+    {
+        struct Entry
+        {
+            std::unique_ptr<GameObject> gameObject;
+            GameObject* previousParent = nullptr;
+        };
+
+        std::vector<Entry> entries;
+
+        bool Empty() const { return entries.empty(); }
+    };
+
+    class EditorObjectLifetimeCommand;
+
+    static EditorDetachedGameObjects DetachForEditor(const std::vector<GameObject*>& gameObjects);
+    static void RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects);
+    static void DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameObjects);
+#endif
 
 
     static void PendingGameObjectsProcess()
@@ -70,7 +100,9 @@ private:
     static void InitScene();
     static void ReloadCurrentScene();
     static void DestroyGameObjects();
-    static void StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects);
+    static void StartLoadedGameObjects(
+        std::vector<std::unique_ptr<GameObject>> gameObjects,
+        bool assignNewIds = false);
     static GameObject* InstantiatePrefabInternal(
         const std::filesystem::path& path,
         const Vector3* position,
@@ -85,6 +117,9 @@ public:
 
     static GameMode GetGameMode() { return m_gameMode; }
     static bool IsPlayMode() { return m_gameMode == GameMode::Play; }
+    static bool IsCurrentSceneDirty() { return m_sceneDirty; }
+    static void MarkCurrentSceneDirty();
+    static void ClearCurrentSceneDirty();
     static std::filesystem::path GetCurrentSceneFilePath();
     static bool EnterPlayMode();
     static bool StopPlayMode();
@@ -105,6 +140,13 @@ public:
         const Vector3& scale);
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
+
+#if GM_ENABLE_EDITOR
+    static std::unique_ptr<EditorCommand> CreateEditorCreationCommand(
+        const std::vector<GameObject*>& gameObjects);
+    static std::unique_ptr<EditorCommand> CreateEditorDeletionCommand(
+        const std::vector<GameObject*>& selectedGameObjects);
+#endif
 
     static void RegisterRenderer(RendererBase* renderer)
     {
@@ -140,6 +182,7 @@ public:
     {
         std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(std::move(name), position, rotation, scale);
         GameObject* newObj = newObject.get();
+        newObj->SetId(AllocateGameObjectId());
 
         if (m_sceneTransitionPhase == SceneTransitionPhase::None)
         {

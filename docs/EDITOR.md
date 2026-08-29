@@ -61,9 +61,9 @@ Play開始時は確認を表示しない。現在の規則どおりSceneを自�
 
 Editor操作は`EditorCommand`の`Execute()`と`Undo()`で表し、EditorSystemがUndo / Redoスタックを所有する。新しいコマンドを実行した時はRedoスタックを破棄する。`Ctrl+Z`でUndo、`Ctrl+Y`でRedoを実行し、メニューバーの`Edit`にも同じ操作を表示する。
 
-数値入力やドラッグは編集開始時の値と編集完了時の値を1つのコマンドとして記録する。これにより、1回のスライダー操作で履歴が多数作られることを避ける。値変更は汎用コマンドで扱えるが、GameObject / Componentの生成・削除、親子変更は復元に必要な情報を保持する専用コマンドとする。
+数値入力やドラッグは編集開始時の値と編集完了時の値を1つのコマンドとして記録する。これにより、1回のスライダー操作で履歴が多数作られることを避ける。値変更は汎用コマンドで扱えるが、GameObjectの生成・削除と親子変更は復元に必要な情報を保持する専用コマンドとする。
 
-Undo / Redoの対象は、Inspectorの値、名前、Active / Enabled、Transform、親子変更、GameObject / Componentの生成・削除とする。コマンド実行、Undo、RedoのいずれもSceneをdirtyにし、必要なComponentだけ`OnEditorUpdate()`を呼ぶ。
+Undo / Redoの対象は、Inspectorの値、名前、Active / Enabled、Transform、親子変更、GameObjectの生成・削除とする。削除時はManagerの所有リストから取り外し、Undoでは同じGameObjectとIDを末尾へ戻す。履歴から破棄された削除対象だけが`OnDestroy()`を受ける。Componentの生成・削除は後続の対象とする。コマンド実行、Undo、RedoのいずれもSceneをdirtyにし、必要なComponentだけ`OnEditorUpdate()`を呼ぶ。
 
 ### Hierarchyの複数選択
 
@@ -72,8 +72,10 @@ Undo / Redoの対象は、Inspectorの値、名前、Active / Enabled、Transfor
 - 通常クリックは単一選択へ置き換える。
 - `Ctrl`クリックは対象を選択へ追加または解除する。
 - `Shift`クリックは起点からクリック位置まで、Hierarchyに表示されている行を範囲選択する。
+- 複数選択中の`Delete`は、選択中のGameObjectをまとめて削除する。
+- 選択中のGameObjectをドラッグして親へドロップすると、選択対象全体の親を一括変更する。
 
-初期段階では複数選択中のInspectorは選択数だけを表示し、複数Objectへの一括Field編集は扱わない。複数選択での生成・削除などの操作は、Undo / Redoコマンドとしてまとめて扱う。
+初期段階では複数選択中のInspectorは選択数だけを表示し、複数Objectへの一括Field編集は扱わない。複数選択の親変更と削除は、それぞれ1つのUndo / Redoコマンドとして扱う。Componentの構造操作のUndo対応は後続とする。
 
 ## Field登録
 

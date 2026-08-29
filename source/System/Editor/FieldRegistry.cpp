@@ -262,7 +262,10 @@ bool FieldRegistry::DrawPathDialog(
     return changed;
 }
 
-bool FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
+bool FieldRegistry::DrawImGui(
+    InspectorFieldSpace inspectorSpace,
+    bool* editStarted,
+    bool* editFinished)
 {
     bool changed = false;
     for (FieldDescriptor& field : m_fields)
@@ -286,6 +289,14 @@ bool FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
         {
             changed |= DrawValue(field, field.value);
         }
+        if (editStarted && ImGui::IsItemActivated())
+        {
+            *editStarted = true;
+        }
+        if (editFinished && ImGui::IsItemDeactivatedAfterEdit())
+        {
+            *editFinished = true;
+        }
         ImGui::PopID();
     }
     return changed;
@@ -296,9 +307,14 @@ bool FieldRegistry::DrawValue(const FieldDescriptor&, void*)
     return false;
 }
 
-bool FieldRegistry::DrawImGui(InspectorFieldSpace inspectorSpace)
+bool FieldRegistry::DrawImGui(
+    InspectorFieldSpace inspectorSpace,
+    bool* editStarted,
+    bool* editFinished)
 {
     (void)inspectorSpace;
+    (void)editStarted;
+    (void)editFinished;
     return false;
 }
 #endif

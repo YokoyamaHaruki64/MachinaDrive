@@ -7,6 +7,7 @@
 #include "System/Diagnostics/PerformanceMonitor.h"
 #include "System/Rendering/renderer.h"
 #if GM_ENABLE_EDITOR
+#include "System/Editor/EditorSystem.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui.h"
@@ -144,6 +145,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch(uMsg)
 	{
+	case WM_CLOSE:
+#if GM_ENABLE_EDITOR
+        if (hWnd == GetWindow() && EditorSystem::RequestApplicationClose())
+        {
+            return 0;
+        }
+#endif
+        DestroyWindow(hWnd);
+        return 0;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -157,7 +168,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(wParam)
 		{
 		case VK_ESCAPE:
-			DestroyWindow(hWnd);
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
 		}
 		break;

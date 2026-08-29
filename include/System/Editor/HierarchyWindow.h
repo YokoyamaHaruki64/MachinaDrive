@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <vector>
 
 #include "System/Editor/EditorWindow.h"
 
@@ -9,13 +10,33 @@ class GameObject;
 
 class HierarchyWindow final : public EditorWindow
 {
-    GameObject** m_selectedGameObject = nullptr;
+    struct SelectionRequest
+    {
+        GameObject* gameObject = nullptr;
+        bool toggle = false;
+        bool range = false;
+    };
 
-    void DrawGameObjectNode(GameObject& gameObject, GameObject*& selectedGameObject);
-    void DrawRootDropTarget(GameObject*& selectedGameObject);
+    std::vector<GameObject*>* m_selectedGameObjects = nullptr;
+    GameObject** m_selectionAnchor = nullptr;
+    std::vector<GameObject*> m_visibleGameObjects;
+    std::vector<GameObject*> m_draggedGameObjects;
+    std::optional<SelectionRequest> m_selectionRequest;
+
+    void DrawGameObjectNode(GameObject& gameObject);
+    void DrawRootDropTarget();
+    void ApplySelectionRequest();
+    void DeleteSelectedGameObjects();
+    void ApplyParentToDraggedGameObjects(
+        const std::vector<GameObject*>& draggedGameObjects,
+        GameObject* newParent);
     static std::optional<std::filesystem::path> ToAssetRelativePath(const std::filesystem::path& selectedPath);
 
 public:
-    void SetSelectedGameObject(GameObject*& selectedGameObject) { m_selectedGameObject = &selectedGameObject; }
+    void SetSelectedGameObjects(std::vector<GameObject*>& selectedGameObjects, GameObject*& selectionAnchor)
+    {
+        m_selectedGameObjects = &selectedGameObjects;
+        m_selectionAnchor = &selectionAnchor;
+    }
     void DrawImGui() override;
 };

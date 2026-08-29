@@ -12,7 +12,7 @@
 - 保存形式には`version`を持たせ、互換性が必要になった時はバージョンごとに読み込み処理を分岐できるようにする。
 - 値の型はフィールド登録情報から決定する。YAMLへ型名は保存しない。
 - 実行時のGPUハンドルやTextureHandleなどの一時IDは保存しない。再生成可能なプロジェクト相対パスを保存する。
-- GameObject参照と親子関係は、ファイル内で一意な`id`で表す。`id`は実行時IDではなく、ファイルのロード時に解決するための値である。
+- GameObject参照と親子関係は、Managerが生成時に割り当てる一意な`id`で表す。`id`はScene／Prefabへ保存され、ロード後も同じObjectを識別する永続IDである。
 - 参照値が未設定または`null`の場合は`None`として扱う。ファイルに参照先が明記されているにもかかわらず解決できない場合はErrorLogを記録し、Inspectorでは`Error`として表示する。
 
 ## クラス構成
@@ -128,6 +128,8 @@ gameObjects:
 
 `gameObjects`は親子の並び順に依存しない。ロードでは、全GameObjectとコンポーネントを生成してフィールドを適用してから、`parent`のIDを解決して親子関係を復元する。すべての復元が完了した後に`OnStart()`を呼ぶ。
 
+既存の`.scene`に保存された`id`はそのまま読み込み、以後の保存でも維持する。現在のシリアライズ形式では`id`を必須とし、IDを持たない旧形式の移行は別途行う。
+
 GameObjectの`active`はオブジェクトの有効状態、Componentの`fields.enabled`はComponentの有効状態を表す。どちらも保存時に出力し、ロード時に`OnStart()`より前へ適用する。`active`がない旧形式のGameObjectは`true`、`enabled`がない旧形式のComponentは`true`として復元するため、既存のScene／Prefabとの互換性を維持する。ロード後の開始時および実行中の再有効化では、[ARCHITECTURE.md](ARCHITECTURE.md)に記載した`OnActive()`／`OnEnable()`の規則を適用する。
 
 ### Sceneファイルの入出力
@@ -166,7 +168,7 @@ gameObjects:
     components: []
 ```
 
-PrefabをInstantiateする時は、ファイル内の`id`を新しいGameObject群に対応付けて参照を解決する。ファイルの`id`を実行中のGameObjectへそのまま持ち込まない。
+PrefabをInstantiateする時は、ファイル内の`id`でPrefab内部の参照を解決した後、Managerが新しい一意なIDを割り当て直す。PrefabテンプレートのIDを実行中のGameObjectへそのまま持ち込まない。
 
 `Instantiate(path)`は、Prefabに保存されたRoot Transformをそのまま使用する。配置を明示するオーバーロードだけが、復元後のRootへ指定したWorld Position、Euler Rotation、Scaleを適用する。子GameObjectは保存されたLocal Transformを維持する。
 

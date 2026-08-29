@@ -2,6 +2,9 @@
 
 #include "System/Core/manager.h"
 
+#include <algorithm>
+#include <unordered_set>
+
 #if GM_ENABLE_EDITOR
 #include "System/Editor/EditorSystem.h"
 #include "System/Editor/ImGuiStyleConfig.h"
@@ -45,8 +48,85 @@ Manager::GameMode Manager::m_gameMode =
     Manager::GameMode::Play;
 #endif
 bool Manager::m_stopPlayRequested = false;
+bool Manager::m_sceneDirty = false;
+uint64_t Manager::m_nextGameObjectId = 1;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
+
+uint64_t Manager::AllocateGameObjectId()
+{
+    auto isUsed = [](uint64_t id)
+    {
+        for (const auto& gameObject : m_GameObjects)
+        {
+            if (gameObject->GetId() == id)
+            {
+                return true;
+            }
+        }
+        for (const auto& gameObject : m_pendingGameObjects)
+        {
+            if (gameObject->GetId() == id)
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    if (m_nextGameObjectId == 0)
+    {
+        m_nextGameObjectId = 1;
+    }
+
+    while (isUsed(m_nextGameObjectId))
+    {
+        ++m_nextGameObjectId;
+        if (m_nextGameObjectId == 0)
+        {
+            m_nextGameObjectId = 1;
+        }
+    }
+
+    const uint64_t allocatedId = m_nextGameObjectId;
+    ++m_nextGameObjectId;
+    if (m_nextGameObjectId == 0)
+    {
+        m_nextGameObjectId = 1;
+    }
+    return allocatedId;
+}
+
+void Manager::EnsureGameObjectIds(
+    std::vector<std::unique_ptr<GameObject>>& gameObjects,
+    bool assignNewIds)
+{
+    if (assignNewIds)
+    {
+        for (const auto& gameObject : gameObjects)
+        {
+            gameObject->SetId(0);
+        }
+    }
+
+    for (const auto& gameObject : gameObjects)
+    {
+        if (gameObject->GetId() == 0)
+        {
+            gameObject->SetId(AllocateGameObjectId());
+            continue;
+        }
+
+        if (gameObject->GetId() >= m_nextGameObjectId)
+        {
+            m_nextGameObjectId = gameObject->GetId() + 1;
+            if (m_nextGameObjectId == 0)
+            {
+                m_nextGameObjectId = 1;
+            }
+        }
+    }
+}
 
 void Manager::DestroyGameObjects()
 {
@@ -63,8 +143,208 @@ void Manager::DestroyGameObjects()
     m_pendingGameObjects.clear();
 }
 
-void Manager::StartLoadedGameObjects(std::vector<std::unique_ptr<GameObject>> gameObjects)
+#if GM_ENABLE_EDITOR
+Manager::EditorDetachedGameObjects Manager::DetachForEditor(const std::vector<GameObject*>& gameObjects)
 {
+    EditorDetachedGameObjects detachedGameObjects;
+    if (m_gameMode != GameMode::Edit)
+    {
+        return detachedGameObjects;
+    }
+
+    std::unordered_set<GameObject*> selectedGameObjects;
+    selectedGameObjects.reserve(gameObjects.size());
+    for (GameObject* gameObject : gameObjects)
+    {
+        if (gameObject && !gameObject->IsDestroyed())
+        {
+            selectedGameObjects.emplace(gameObject);
+        }
+    }
+
+    if (selectedGameObjects.empty())
+    {
+        return detachedGameObjects;
+    }
+
+    std::unordered_set<GameObject*> detachedGameObjectSet;
+    detachedGameObjectSet.reserve(m_GameObjects.size());
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        bool shouldDetach = selectedGameObjects.contains(gameObject.get());
+        for (Transform* parent = gameObject->GetTransform()->GetParent(); !shouldDetach && parent; parent = parent->GetParent())
+        {
+            shouldDetach = selectedGameObjects.contains(parent->GetOwner());
+        }
+        if (shouldDetach)
+        {
+            detachedGameObjectSet.emplace(gameObject.get());
+        }
+    }
+
+    std::vector<std::unique_ptr<GameObject>> remainingGameObjects;
+    remainingGameObjects.reserve(m_GameObjects.size());
+    for (std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (detachedGameObjectSet.contains(gameObject.get()))
+        {
+            Transform* const previousParentTransform = gameObject->GetTransform()->GetParent();
+            GameObject* const previousParent = previousParentTransform ? previousParentTransform->GetOwner() : nullptr;
+            if (previousParent && !detachedGameObjectSet.contains(previousParent))
+            {
+                gameObject->SetParent(nullptr, ParentTransformMode::KeepLocal);
+            }
+
+            for (Component* component : gameObject->GetComponents())
+            {
+                if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
+                {
+                    UnregisterRenderer(renderer);
+                }
+            }
+            detachedGameObjects.entries.push_back({ std::move(gameObject), previousParent });
+        }
+        else
+        {
+            remainingGameObjects.emplace_back(std::move(gameObject));
+        }
+    }
+    m_GameObjects = std::move(remainingGameObjects);
+
+    return detachedGameObjects;
+}
+
+void Manager::RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects)
+{
+    if (m_gameMode != GameMode::Edit || detachedGameObjects.Empty())
+    {
+        return;
+    }
+
+    std::vector<std::pair<GameObject*, GameObject*>> restoredGameObjects;
+    restoredGameObjects.reserve(detachedGameObjects.entries.size());
+    for (EditorDetachedGameObjects::Entry& entry : detachedGameObjects.entries)
+    {
+        GameObject* const restoredGameObject = entry.gameObject.get();
+        m_GameObjects.emplace_back(std::move(entry.gameObject));
+        restoredGameObjects.emplace_back(restoredGameObject, entry.previousParent);
+    }
+
+    // HierarchyのRoot表示をUndo前後で安定させるため、復元時だけ永続ID順へ戻す。
+    std::sort(m_GameObjects.begin(), m_GameObjects.end(),
+        [](const std::unique_ptr<GameObject>& left, const std::unique_ptr<GameObject>& right)
+        {
+            return left->GetId() < right->GetId();
+        });
+
+    for (const auto& [gameObject, previousParent] : restoredGameObjects)
+    {
+        if (previousParent)
+        {
+            gameObject->SetParent(previousParent, ParentTransformMode::KeepLocal);
+        }
+
+        for (Component* component : gameObject->GetComponents())
+        {
+            if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
+            {
+                RegisterRenderer(renderer);
+            }
+        }
+    }
+    detachedGameObjects.entries.clear();
+}
+
+void Manager::DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameObjects)
+{
+    for (EditorDetachedGameObjects::Entry& entry : detachedGameObjects.entries)
+    {
+        if (entry.gameObject)
+        {
+            entry.gameObject->OnDestroy();
+        }
+    }
+    detachedGameObjects.entries.clear();
+}
+
+class Manager::EditorObjectLifetimeCommand final : public EditorCommand
+{
+    bool m_isCreation;
+    std::vector<GameObject*> m_gameObjects;
+    EditorDetachedGameObjects m_detachedGameObjects;
+
+public:
+    EditorObjectLifetimeCommand(
+        bool isCreation,
+        std::vector<GameObject*> gameObjects,
+        EditorDetachedGameObjects detachedGameObjects = {})
+        : m_isCreation(isCreation)
+        , m_gameObjects(std::move(gameObjects))
+        , m_detachedGameObjects(std::move(detachedGameObjects))
+    {
+    }
+
+    ~EditorObjectLifetimeCommand() override
+    {
+        Manager::DestroyDetachedForEditor(m_detachedGameObjects);
+    }
+
+    void Execute() override
+    {
+        if (m_isCreation)
+        {
+            Manager::RestoreForEditor(m_detachedGameObjects);
+            return;
+        }
+
+        m_detachedGameObjects = Manager::DetachForEditor(m_gameObjects);
+    }
+
+    void Undo() override
+    {
+        if (m_isCreation)
+        {
+            m_detachedGameObjects = Manager::DetachForEditor(m_gameObjects);
+            return;
+        }
+
+        Manager::RestoreForEditor(m_detachedGameObjects);
+    }
+};
+
+std::unique_ptr<EditorCommand> Manager::CreateEditorCreationCommand(
+    const std::vector<GameObject*>& gameObjects)
+{
+    if (gameObjects.empty())
+    {
+        return nullptr;
+    }
+
+    return std::make_unique<EditorObjectLifetimeCommand>(true, gameObjects);
+}
+
+std::unique_ptr<EditorCommand> Manager::CreateEditorDeletionCommand(
+    const std::vector<GameObject*>& selectedGameObjects)
+{
+    EditorDetachedGameObjects detachedGameObjects = DetachForEditor(selectedGameObjects);
+    if (detachedGameObjects.Empty())
+    {
+        return nullptr;
+    }
+
+    return std::make_unique<EditorObjectLifetimeCommand>(
+        false,
+        selectedGameObjects,
+        std::move(detachedGameObjects));
+}
+#endif
+
+void Manager::StartLoadedGameObjects(
+    std::vector<std::unique_ptr<GameObject>> gameObjects,
+    bool assignNewIds)
+{
+    EnsureGameObjectIds(gameObjects, assignNewIds);
+
     const size_t firstLoadedIndex = m_GameObjects.size();
     for (std::unique_ptr<GameObject>& gameObject : gameObjects)
     {
@@ -94,7 +374,26 @@ bool Manager::SaveCurrentScene()
         Logger::Error("保存対象のSceneがありません。");
         return false;
     }
-    return SaveSceneObjects(m_currentScene->GetSceneFilePath());
+    if (!SaveSceneObjects(m_currentScene->GetSceneFilePath()))
+    {
+        return false;
+    }
+
+    ClearCurrentSceneDirty();
+    return true;
+}
+
+void Manager::MarkCurrentSceneDirty()
+{
+    if (m_gameMode == GameMode::Edit)
+    {
+        m_sceneDirty = true;
+    }
+}
+
+void Manager::ClearCurrentSceneDirty()
+{
+    m_sceneDirty = false;
 }
 
 bool Manager::SaveSceneObjects(const std::filesystem::path& path)
@@ -137,6 +436,7 @@ bool Manager::LoadSceneObjects(const std::filesystem::path& path)
     }
     else
     {
+        EnsureGameObjectIds(loaded.gameObjects, false);
         for (std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
         {
             m_pendingGameObjects.emplace_back(std::move(gameObject));
@@ -259,10 +559,11 @@ GameObject* Manager::InstantiatePrefabInternal(
 
     if (m_sceneTransitionPhase == SceneTransitionPhase::None)
     {
-        StartLoadedGameObjects(std::move(loaded.gameObjects));
+        StartLoadedGameObjects(std::move(loaded.gameObjects), true);
     }
     else
     {
+        EnsureGameObjectIds(loaded.gameObjects, true);
         for (std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
         {
             m_pendingGameObjects.emplace_back(std::move(gameObject));
@@ -293,6 +594,10 @@ void Manager::InitScene()
 
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ClearCurrentSceneDirty();
+#if GM_ENABLE_EDITOR
+    EditorSystem::ClearCommandHistory();
+#endif
 }
 
 void Manager::ReloadCurrentScene()
@@ -311,6 +616,10 @@ void Manager::ReloadCurrentScene()
     m_currentScene->Init();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ClearCurrentSceneDirty();
+#if GM_ENABLE_EDITOR
+    EditorSystem::ClearCommandHistory();
+#endif
 }
 
 bool Manager::EnterPlayMode()
@@ -480,6 +789,10 @@ bool Manager::Init()
 
 void Manager::Uninit()
 {
+#if GM_ENABLE_EDITOR
+    EditorSystem::ClearCommandHistory();
+#endif
+
     m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
     if (m_currentScene)
     {
