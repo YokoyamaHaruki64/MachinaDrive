@@ -98,13 +98,13 @@ void InspectorWindow::SelectMaterial(RendererBase& renderer, uint32_t slot)
     }
 }
 
-void InspectorWindow::SelectShader(Material& material)
+bool InspectorWindow::SelectShader(Material& material)
 {
     const std::optional<std::filesystem::path> selectedPath =
         FileSystem::OpenFileDialog("Assets/Shaders", ".shader");
     if (!selectedPath)
     {
-        return;
+        return false;
     }
 
     const std::optional<std::filesystem::path> shaderPath = ToAssetRelativePath(
@@ -114,17 +114,30 @@ void InspectorWindow::SelectShader(Material& material)
         "Shader");
     if (!shaderPath)
     {
-        return;
+        return false;
     }
 
     GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderPath->generic_string());
-    if (!shader || !material.SetShader(*shader))
+    if (!shader)
     {
         Logger::Error("MaterialのShaderを設定できませんでした。\nShader: " + shaderPath->generic_string());
+        return false;
     }
+    if (&material.GetShader() == shader)
+    {
+        return false;
+    }
+    if (!material.SetShader(*shader))
+    {
+        Logger::Error("MaterialのShaderを設定できませんでした。\nShader: " + shaderPath->generic_string());
+        return false;
+    }
+
+    material.MarkDirty();
+    return true;
 }
 
-void InspectorWindow::DrawMaterialName(Material& material)
+bool InspectorWindow::DrawMaterialName(Material& material)
 {
     auto [bufferIterator, inserted] = m_materialNameBuffers.try_emplace(&material);
     std::array<char, 256>& buffer = bufferIterator->second;
@@ -143,41 +156,55 @@ void InspectorWindow::DrawMaterialName(Material& material)
         ImGuiInputTextFlags_EnterReturnsTrue);
     if (!submitted && !ImGui::IsItemDeactivatedAfterEdit())
     {
-        return;
+        return false;
     }
 
-    if (!MaterialManager::Rename(material, buffer.data()))
+    const std::string name = buffer.data();
+    if (name == material.GetName())
+    {
+        return false;
+    }
+
+    if (!MaterialManager::Rename(material, name))
     {
         const std::string& name = material.GetName();
         const size_t length = std::min(name.size(), buffer.size() - 1);
         std::fill(buffer.begin(), buffer.end(), '\0');
         std::copy_n(name.data(), length, buffer.data());
+        return false;
     }
+
+    material.MarkDirty();
+    return true;
 }
 
 void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slot)
 {
     ImGui::PushID(static_cast<int>(slot));
 
-    Material* material = renderer.GetMaterial(slot);
-    const std::string materialPathBefore = material ? material->GetFilePath() : std::string{};
+    Material* const materialBefore = renderer.GetMaterial(slot);
+    const std::string materialPathBefore = materialBefore ? materialBefore->GetFilePath() : std::string{};
     std::string label = "Material Slot " + std::to_string(slot);
-    if (!material)
+    if (!materialBefore)
     {
         label += " (None)";
     }
-    else if (!material->IsValid())
+    else if (!materialBefore->IsValid())
     {
         label += " (Error)";
     }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
-    if (ImGui::TreeNode(label.c_str()))
+    const bool materialSlotOpen = ImGui::TreeNode(label.c_str());
+
+
+    if (materialSlotOpen)
     {
         if (ImGui::Button("Select Material"))
         {
             SelectMaterial(renderer, slot);
         }
+        Material* material = renderer.GetMaterial(slot);
 
         if (!material || !material->IsValid())
         {
@@ -190,47 +217,60 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
         else
         {
             DrawMaterialName(*material);
-            ImGui::Text("Shader: %s", material->GetShader().GetFilePath().c_str());
+            ImGui::Separator();
+
+            const std::string& materialPath = material->GetFilePath();
+            ImGui::Text("Path: %s", materialPath.empty() ? "Unsaved" : materialPath.c_str());
+            ImGui::SameLine();
+            const bool isUnsaved = materialPath.empty();
+            ImGui::TextColored(
+                isUnsaved || material->IsDirty()
+                    ? ImVec4(1.0f, 0.75f, 0.2f, 1.0f)
+                    : ImVec4(0.45f, 0.9f, 0.45f, 1.0f),
+                isUnsaved ? "Unsaved" : material->IsDirty() ? "Modified" : "Saved");
+            if (!materialPath.empty() && ImGui::Button("Save"))
+            {
+                MaterialManager::Save(*material, materialPath);
+            }
+            if (!materialPath.empty())
+            {
+                ImGui::SameLine();
+            }
+            if (ImGui::Button("New Save"))
+            {
+                const std::string defaultFileName = material->GetName() + ".material";
+                const std::optional<std::filesystem::path> selectedPath =
+                    FileSystem::SaveFileDialog("Assets/Materials", ".material", defaultFileName);
+                if (selectedPath)
+                {
+                    const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(
+                        *selectedPath,
+                        "Assets",
+                        L".material",
+                        "Material");
+                    if (assetPath)
+                    {
+                        MaterialManager::Save(*material, *assetPath);
+                    }
+                }
+            }
+
+            ImGui::Separator();
             if (ImGui::Button("Select Shader"))
             {
                 SelectShader(*material);
             }
-            material->DrawInspectorImGui();
+            ImGui::Text("Shader: %s", material->GetShader().GetShaderName().c_str());
 
-            const std::string& materialPath = material->GetFilePath();
-            ImGui::Text("Path: %s", materialPath.empty() ? "Unsaved" : materialPath.c_str());
-            if (materialPath.empty())
-            {
-                if (ImGui::Button("Save Material As"))
-                {
-                    const std::string defaultFileName = material->GetName() + ".material";
-                    const std::optional<std::filesystem::path> selectedPath =
-                        FileSystem::SaveFileDialog("Assets/Materials", ".material", defaultFileName);
-                    if (selectedPath)
-                    {
-                        const std::optional<std::filesystem::path> assetPath = ToAssetRelativePath(
-                            *selectedPath,
-                            "Assets",
-                            L".material",
-                            "Material");
-                        if (assetPath)
-                        {
-                            MaterialManager::Save(*material, *assetPath);
-                        }
-                    }
-                }
-            }
-            else if (ImGui::Button("Save Material"))
-            {
-                MaterialManager::Save(*material, materialPath);
-            }
+            ImGui::Separator();
+            material->DrawInspectorImGui();
         }
 
         ImGui::TreePop();
     }
 
     Material* const materialAfter = renderer.GetMaterial(slot);
-    if (materialAfter != material || (materialAfter && materialAfter->GetFilePath() != materialPathBefore))
+    if (materialAfter != materialBefore || (materialAfter && materialAfter->GetFilePath() != materialPathBefore))
     {
         // Materialの割り当てと未保存Materialの保存先はScene側にも保持する。
         Manager::MarkCurrentSceneDirty();

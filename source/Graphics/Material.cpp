@@ -951,8 +951,9 @@ bool Material::Bind(std::string_view passTag, const MaterialPropertyOverride* pr
 }
 
 #if GM_ENABLE_EDITOR
-void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
+bool Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, MaterialPropertyID id)
 {
+    bool changed = false;
     const char* label = property.displayName.empty() ? property.name.c_str() : property.displayName.c_str();
     const std::string& path = GetTexturePath(id);
     if (HasTextureError(id))
@@ -982,6 +983,7 @@ void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, Mate
                 FileSystem::ToProjectRelative(*selectedPath))
             {
                 SetTexturePath(id, assetPath->generic_string());
+                changed = true;
             }
         }
     }
@@ -992,14 +994,18 @@ void Material::DrawTexturePropertyImGui(const ShaderPropertyDesc& property, Mate
         if (ImGui::Button("Clear"))
         {
             SetTexturePath(id, {});
+            changed = true;
         }
     }
+
+    return changed;
 }
 #endif
 
 #if GM_ENABLE_EDITOR
-void Material::DrawInspectorImGui()
+bool Material::DrawInspectorImGui()
 {
+    bool edited = false;
     if (!m_isValid)
     {
         ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "Status: Error");
@@ -1018,37 +1024,65 @@ void Material::DrawInspectorImGui()
         else if (property.type == ValueType::Float)
         {
             float value = GetFloat(id);
-            if (ImGui::DragFloat(label, &value, 0.01f)) SetFloat(id, value);
+            if (ImGui::DragFloat(label, &value, 0.01f))
+            {
+                SetFloat(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Int)
         {
             int value = GetInt(id);
-            if (ImGui::DragInt(label, &value)) SetInt(id, value);
+            if (ImGui::DragInt(label, &value))
+            {
+                SetInt(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Bool)
         {
             bool value = GetBool(id);
-            if (ImGui::Checkbox(label, &value)) SetBool(id, value);
+            if (ImGui::Checkbox(label, &value))
+            {
+                SetBool(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Color)
         {
             Color value = GetColor(id);
-            if (ImGui::ColorEdit4(label, &value.r)) SetColor(id, value);
+            if (ImGui::ColorEdit4(label, &value.r))
+            {
+                SetColor(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector2)
         {
             Vector2 value = GetVector2(id);
-            if (ImGui::DragFloat2(label, &value.x, 0.01f)) SetVector2(id, value);
+            if (ImGui::DragFloat2(label, &value.x, 0.01f))
+            {
+                SetVector2(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector3)
         {
             Vector3 value = GetVector3(id);
-            if (ImGui::DragFloat3(label, &value.x, 0.01f)) SetVector3(id, value);
+            if (ImGui::DragFloat3(label, &value.x, 0.01f))
+            {
+                SetVector3(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Vector4)
         {
             Vector4 value = GetVector4(id);
-            if (ImGui::DragFloat4(label, &value.x, 0.01f)) SetVector4(id, value);
+            if (ImGui::DragFloat4(label, &value.x, 0.01f))
+            {
+                SetVector4(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Matrix3x3)
         {
@@ -1065,7 +1099,11 @@ void Material::DrawInspectorImGui()
             }
             ImGui::Unindent();
 
-            if (changed) SetMatrix3x3(id, value);
+            if (changed)
+            {
+                SetMatrix3x3(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Matrix4x4)
         {
@@ -1082,11 +1120,15 @@ void Material::DrawInspectorImGui()
             }
             ImGui::Unindent();
 
-            if (changed) SetMatrix4x4(id, value);
+            if (changed)
+            {
+                SetMatrix4x4(id, value);
+                edited = true;
+            }
         }
         else if (property.type == ValueType::Texture2D)
         {
-            DrawTexturePropertyImGui(property, id);
+            edited |= DrawTexturePropertyImGui(property, id);
         }
         else
         {
@@ -1094,5 +1136,11 @@ void Material::DrawInspectorImGui()
         }
         ImGui::PopID();
     }
+
+    if (edited)
+    {
+        MarkDirty();
+    }
+    return edited;
 }
 #endif

@@ -144,7 +144,7 @@ GM_FIELD_PATH(m_modelPath, "Assets/Local/Models", ".obj", ".fbx", ".gltf");
 
 Renderer ComponentのInspectorは、固定Material SlotごとにMaterialを表示する。`Select Material`で`Assets/`配下の`.material`を割り当て、Material未設定または参照エラー時は`Create Material`からShaderを選択して未保存Materialを作成する。
 
-有効なMaterialは名前、Shader、Property、保存先を表示する。`Select Shader`はShaderパスをダイアログから選び、現在のMaterialへ適用する。未保存Materialには`Save Material As`、保存済みMaterialには`Save Material`を表示する。
+有効なMaterialは名前、Shader、Property、保存先を表示する。保存先があるMaterialには`Save`と`New Save`、未保存Materialには`New Save`を表示する。`Select Shader`はShaderパスをダイアログから選び、現在のMaterialへ適用する。Inspectorで名前、Shader、Property、Textureを変更すると`Modified`を表示し、保存成功後は`Saved`へ戻る。Materialの変更状態はSceneのdirtyとは独立し、Materialの割り当て変更だけをScene変更として扱う。
 
 Material Propertyの型別描画はMaterial側へ集約し、Renderer Component側は保持Materialを選んで表示する。SpriteRendererなどが毎フレーム供給するPropertyは、Inspectorで変更しても次の供給時に上書きされる。
 

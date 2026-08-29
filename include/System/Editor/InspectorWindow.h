@@ -26,8 +26,8 @@ class InspectorWindow final : public EditorWindow
     std::unordered_map<Component*, YAMLValue> m_componentEditSnapshots;
 
     void DrawMaterialInspector(RendererBase& renderer, uint32_t slot);
-    void DrawMaterialName(Material& material);
-    static void SelectShader(Material& material);
+    bool DrawMaterialName(Material& material);
+    static bool SelectShader(Material& material);
     static void CreateMaterial(RendererBase& renderer, uint32_t slot);
     static void SelectMaterial(RendererBase& renderer, uint32_t slot);
     static std::optional<std::filesystem::path> ToAssetRelativePath(
