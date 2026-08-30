@@ -5,12 +5,13 @@
 #include "Script/TItleUI.h"
 
 #include "Scene/GameScene.h"
+#include "Component/UITransform.h"
 
 
 void TitleUI::OnStart()
 {
     m_elapsedTime = 0.0f;
-    m_originalPosition = transform()->GetPosition();
+    m_originalOffset = m_owner->GetUITransform()->GetOffset();
 }
 
 void TitleUI::Update()
@@ -19,8 +20,7 @@ void TitleUI::Update()
     // サイン波の計算
     float offsetY = std::sin(m_elapsedTime * Math::PI_2 * m_frequency) * m_amplitude;
     // 元の位置にオフセットを加える
-    Vector3 newPosition = m_originalPosition + Vector3(0.0f, offsetY, 0.0f);
-    transform()->SetPosition(newPosition);
+    m_owner->GetUITransform()->SetOffset(m_originalOffset + Vector2(0.0f, offsetY));
 
     if (Input::GetKeyTrigger(Input::KK_ENTER))
         Manager::ChangeScene<GameScene>();
