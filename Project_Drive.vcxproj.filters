@@ -34,6 +34,12 @@
     <Filter Include="ヘッダー ファイル\System\Rendering">
       <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb105}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\System\UI">
+      <UniqueIdentifier>{a2b7be7c-684c-4b36-a7d3-2724187aed21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\System\UI">
+      <UniqueIdentifier>{d3cc6a8e-5f67-49b6-a11a-78f1c0906e51}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ヘッダー ファイル\Component">
       <UniqueIdentifier>{16059aa8-a540-4342-bada-5139411be428}</UniqueIdentifier>
     </Filter>
@@ -186,6 +192,9 @@
     <ClCompile Include="source\System\Serialization\GameObjectYamlSerializer.cpp">
       <Filter>ソース ファイル\System\Serialization</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\UI\FontAsset.cpp">
+      <Filter>ソース ファイル\System\UI</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Core\GameObjectReference.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
@@ -210,6 +219,21 @@
     <ClCompile Include="source\Component\SpriteRenderer.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\UIButton.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\UICanvas.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\UIImage.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\UITransform.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\UIText.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
     <ClCompile Include="source\Scene\TitleScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
@@ -232,6 +256,9 @@
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\Transform.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\TransformBase.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\Script\Ripple.cpp">
@@ -362,6 +389,24 @@
     <ClInclude Include="include\Component\Transform.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
+    <ClInclude Include="include\Component\TransformBase.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\UIButton.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\UICanvas.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\UIImage.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\UITransform.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\UIText.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\Core\component.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
@@ -400,6 +445,12 @@
     </ClInclude>
     <ClInclude Include="include\System\Core\input.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\UI\UIRect.h">
+      <Filter>ヘッダー ファイル\System\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\UI\FontAsset.h">
+      <Filter>ヘッダー ファイル\System\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\main.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>

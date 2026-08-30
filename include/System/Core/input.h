@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "System/Core/main.h"
+#include "math/Vector2.h"
 
 class Input
 {
@@ -208,5 +209,8 @@ public:
 	static bool GetKeyPress( BYTE KeyCode );
 	static bool GetKeyRelease(BYTE KeyCode);
 	static bool GetKeyTrigger( BYTE KeyCode );
+
+    // UI用に、Game Windowのクライアント座標で現在のポインター位置を返す。
+    static Vector2 GetMousePosition();
 
 };

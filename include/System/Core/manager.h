@@ -9,6 +9,7 @@
 #include "math/vector3.h"
 #include "System/Core/GameObject.h"
 #include "Component/PostEffect.h"
+#include "Component/UICanvas.h"
 
 class Camera;
 class Component;
@@ -206,6 +207,39 @@ public:
         m_pendingGameObjects.emplace_back(std::move(newObject));
 
         return newObj;
+    }
+
+    static GameObject* CreateUIObject(std::string name = "UI Object")
+    {
+        std::unique_ptr<GameObject> newObject = std::make_unique<GameObject>(
+            std::move(name),
+            Vector3::Zero(),
+            Vector3::Zero(),
+            Vector3::One(),
+            GameObjectTransformType::UI);
+        GameObject* newObj = newObject.get();
+        newObj->SetId(AllocateGameObjectId());
+
+        if (m_sceneTransitionPhase == SceneTransitionPhase::None)
+        {
+            m_GameObjects.emplace_back(std::move(newObject));
+            newObj->OnLoaded();
+            if (m_gameMode == GameMode::Play)
+            {
+                newObj->OnStart();
+            }
+            return newObj;
+        }
+
+        m_pendingGameObjects.emplace_back(std::move(newObject));
+        return newObj;
+    }
+
+    static GameObject* CreateUICanvas(std::string name = "Canvas")
+    {
+        GameObject* const canvasObject = CreateUIObject(std::move(name));
+        canvasObject->AddComponent<UICanvas>();
+        return canvasObject;
     }
 
     template<typename T>

@@ -12,3 +12,8 @@
 #include "Component/Skydome.h"
 #include "Component/SpriteRenderer.h"
 #include "Component/TrailRenderer.h"
+#include "Component/UIButton.h"
+#include "Component/UICanvas.h"
+#include "Component/UIImage.h"
+#include "Component/UITransform.h"
+#include "Component/UIText.h"

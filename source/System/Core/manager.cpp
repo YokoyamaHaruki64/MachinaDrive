@@ -16,6 +16,7 @@
 #include "System/Rendering/renderer.h"
 #include "System/Rendering/RendererBase.h"
 #include "Graphics/TextureManager.h"
+#include "System/UI/FontAsset.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderManager.h"
@@ -926,6 +927,7 @@ void Manager::Uninit()
     PostProcess::Uninit();
     ModelManager::Uninit();
     MaterialManager::Uninit();
+    FontManager::Clear();
     TextureManager::Uninit();
     ShaderManager::Uninit();
     Renderer::Uninit();
@@ -1007,6 +1009,19 @@ void Manager::Update()
         }
         PerformanceMonitor::EndLateUpdate();
     }
+#if GM_ENABLE_EDITOR
+    else if (EditorSystem::IsUIDisplayEnabled())
+    {
+        // Edit時のUIプレビューでは、Canvasだけを更新して子UITransformのLayoutを導出する。
+        for (GameObject* canvasObject : GetObjectsByComponent<UICanvas>())
+        {
+            if (UICanvas* canvas = canvasObject->GetComponent<UICanvas>())
+            {
+                canvas->LateUpdate();
+            }
+        }
+    }
+#endif
 
     // 破棄されたオブジェクトの削除
     for (size_t i = 0; i < m_GameObjects.size();)

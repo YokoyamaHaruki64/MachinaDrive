@@ -151,6 +151,12 @@
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
     <ClCompile Include="source\Component\Transform.cpp" />
+    <ClCompile Include="source\Component\TransformBase.cpp" />
+    <ClCompile Include="source\Component\UIButton.cpp" />
+    <ClCompile Include="source\Component\UICanvas.cpp" />
+    <ClCompile Include="source\Component\UIImage.cpp" />
+    <ClCompile Include="source\Component\UITransform.cpp" />
+    <ClCompile Include="source\Component\UIText.cpp" />
     <ClCompile Include="source\Graphics\Material.cpp" />
     <ClCompile Include="source\Graphics\MaterialManager.cpp" />
     <ClCompile Include="source\Graphics\ModelLoader.cpp" />
@@ -283,6 +289,7 @@
     <ClCompile Include="source\System\Core\main.cpp" />
     <ClCompile Include="source\System\Core\GameObject.cpp" />
     <ClCompile Include="source\System\Serialization\GameObjectYamlSerializer.cpp" />
+    <ClCompile Include="source\System\UI\FontAsset.cpp" />
     <ClCompile Include="source\System\Core\GameObjectReference.cpp" />
     <ClCompile Include="source\System\Core\manager.cpp" />
     <ClCompile Include="source\System\Rendering\renderer.cpp" />
@@ -383,6 +390,12 @@
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />
+    <ClInclude Include="include\Component\TransformBase.h" />
+    <ClInclude Include="include\Component\UIButton.h" />
+    <ClInclude Include="include\Component\UICanvas.h" />
+    <ClInclude Include="include\Component\UIImage.h" />
+    <ClInclude Include="include\Component\UITransform.h" />
+    <ClInclude Include="include\Component\UIText.h" />
     <ClInclude Include="include\Graphics\GraphicInc.h" />
     <ClInclude Include="include\Graphics\Material.h" />
     <ClInclude Include="include\Graphics\MaterialPropertyOverride.h" />
@@ -465,6 +478,8 @@
     <ClInclude Include="include\System\Rendering\DirectXTex.h" />
     <ClInclude Include="include\System\Core\GameObject.h" />
     <ClInclude Include="include\System\Serialization\GameObjectYamlSerializer.h" />
+    <ClInclude Include="include\System\UI\UIRect.h" />
+    <ClInclude Include="include\System\UI\FontAsset.h" />
     <ClInclude Include="include\System\Core\GameObjectReference.h" />
     <ClInclude Include="include\System\Core\PrefabReference.h" />
     <ClInclude Include="include\System\Core\Script.h" />

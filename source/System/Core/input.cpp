@@ -45,3 +45,14 @@ bool Input::GetKeyTrigger(BYTE KeyCode)
 {
 	return ((m_KeyState[KeyCode] & 0x80) && !(m_OldKeyState[KeyCode] & 0x80));
 }
+
+Vector2 Input::GetMousePosition()
+{
+    POINT position{};
+    if (!GetCursorPos(&position) || !ScreenToClient(GetWindow(), &position))
+    {
+        return Vector2::Zero();
+    }
+
+    return Vector2(static_cast<float>(position.x), static_cast<float>(position.y));
+}
