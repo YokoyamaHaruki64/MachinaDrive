@@ -25,6 +25,7 @@
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
 #include "Component/Transform.h"
+#include "Component/TransformBase.h"
 #include "Component/audio.h"
 
 #if GM_ENABLE_EDITOR
@@ -172,7 +173,7 @@ Manager::EditorDetachedGameObjects Manager::DetachForEditor(const std::vector<Ga
     for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
     {
         bool shouldDetach = selectedGameObjects.contains(gameObject.get());
-        for (Transform* parent = gameObject->GetTransform()->GetParent(); !shouldDetach && parent; parent = parent->GetParent())
+        for (TransformBase* parent = gameObject->GetTransformBase()->GetParent(); !shouldDetach && parent; parent = parent->GetParent())
         {
             shouldDetach = selectedGameObjects.contains(parent->GetOwner());
         }
@@ -188,7 +189,7 @@ Manager::EditorDetachedGameObjects Manager::DetachForEditor(const std::vector<Ga
     {
         if (detachedGameObjectSet.contains(gameObject.get()))
         {
-            Transform* const previousParentTransform = gameObject->GetTransform()->GetParent();
+            TransformBase* const previousParentTransform = gameObject->GetTransformBase()->GetParent();
             GameObject* const previousParent = previousParentTransform ? previousParentTransform->GetOwner() : nullptr;
             if (previousParent && !detachedGameObjectSet.contains(previousParent))
             {
@@ -269,7 +270,7 @@ void Manager::DestroyDetachedForEditor(EditorDetachedGameObjects& detachedGameOb
 
 std::unique_ptr<Component> Manager::DetachComponentForEditor(GameObject& gameObject, Component& component)
 {
-    if (m_gameMode != GameMode::Edit || &component == gameObject.GetTransform())
+    if (m_gameMode != GameMode::Edit || &component == gameObject.GetTransformBase())
     {
         return nullptr;
     }
@@ -568,7 +569,7 @@ bool Manager::SavePrefab(GameObject& root, const std::filesystem::path& path)
         GameObject* gameObject = remaining.back();
         remaining.pop_back();
         gameObjects.push_back(gameObject);
-        for (Transform* child : gameObject->GetTransform()->GetChildren())
+        for (TransformBase* child : gameObject->GetTransformBase()->GetChildren())
         {
             remaining.push_back(child->GetOwner());
         }
@@ -600,7 +601,7 @@ bool Manager::ApplyToPrefab(GameObject& gameObject)
     }
 
     GameObject* root = &gameObject;
-    while (Transform* parent = root->GetTransform()->GetParent())
+    while (TransformBase* parent = root->GetTransformBase()->GetParent())
     {
         GameObject* parentObject = parent->GetOwner();
         if (parentObject->GetPrefabPath() != gameObject.GetPrefabPath())
@@ -641,7 +642,7 @@ GameObject* Manager::InstantiatePrefabInternal(
     GameObject* root{};
     for (const std::unique_ptr<GameObject>& gameObject : loaded.gameObjects)
     {
-        if (!gameObject->GetTransform()->GetParent())
+        if (!gameObject->GetTransformBase()->GetParent())
         {
             if (root)
             {
@@ -660,9 +661,12 @@ GameObject* Manager::InstantiatePrefabInternal(
     root->SetName(path.stem().string() + "(Instance)");
     if (position && rotation && scale)
     {
-        root->GetTransform()->SetPosition(*position);
-        root->GetTransform()->SetEulerAngles(*rotation);
-        root->GetTransform()->SetScale(*scale);
+        if (Transform* transform = root->GetTransform())
+        {
+            transform->SetPosition(*position);
+            transform->SetEulerAngles(*rotation);
+            transform->SetScale(*scale);
+        }
     }
 
     if (m_sceneTransitionPhase == SceneTransitionPhase::None)

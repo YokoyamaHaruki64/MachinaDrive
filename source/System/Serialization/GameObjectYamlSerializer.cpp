@@ -6,6 +6,8 @@
 #include <unordered_set>
 
 #include "Component/Transform.h"
+#include "Component/TransformBase.h"
+#include "Component/UITransform.h"
 #include "System/Core/ComponentRegistry.h"
 #include "System/Core/GameObject.h"
 #include "System/Diagnostics/Logger.h"
@@ -119,9 +121,11 @@ bool GameObjectYamlSerializer::CreateComponentsFromYAMLValue(
         }
 
         // GameObject生成時に必ず存在するTransformは重複追加せず、既存のComponentを使う。
-        if (registration->type == typeid(Transform))
+        if (registration->type == typeid(Transform) || registration->type == typeid(UITransform))
         {
-            component = gameObject.GetTransform();
+            component = registration->type == typeid(UITransform)
+                ? static_cast<Component*>(gameObject.GetUITransform())
+                : static_cast<Component*>(gameObject.GetTransform());
         }
         else
         {
@@ -227,7 +231,7 @@ bool GameObjectYamlSerializer::SaveToFile(
         }
 
         // 親TransformのGameObjectを保存
-        Transform* parent = gameObject->GetTransform()->GetParent();
+        TransformBase* parent = gameObject->GetTransformBase()->GetParent();
         // 親のIDをGameObject*から検索、見つからなければRoot扱いとしてNullを保存する
         const auto parentId = parent ? objectIds.find(parent->GetOwner()) : objectIds.end();
         object.Add("parent", parentId != objectIds.end()
@@ -314,8 +318,28 @@ bool GameObjectYamlSerializer::LoadFromFile(
             return false;
         }
 
-        // GameObjectを生成
-        std::unique_ptr<GameObject> gameObject = std::make_unique<GameObject>(std::move(objectName));
+        const YAMLValue* const components = sourceObject.Find("components");
+        bool usesUITransform = false;
+        if (components && components->type == YAMLValue::Type::Sequence)
+        {
+            for (const YAMLValue& component : components->sequence)
+            {
+                const YAMLValue* const type = component.Find("type");
+                if (type && type->type == YAMLValue::Type::Scalar && type->scalar == "UITransform")
+                {
+                    usesUITransform = true;
+                    break;
+                }
+            }
+        }
+
+        // UITransformを持つObjectは生成時から専用Transformを持たせ、復元時の重複を防ぐ。
+        std::unique_ptr<GameObject> gameObject = std::make_unique<GameObject>(
+            std::move(objectName),
+            Vector3::Zero(),
+            Vector3::Zero(),
+            Vector3::One(),
+            usesUITransform ? GameObjectTransformType::UI : GameObjectTransformType::World);
         GameObject* gameObjectPointer = gameObject.get();
         gameObjectPointer->SetId(id);
         if (const YAMLValue* active = sourceObject.Find("active"))

@@ -1,22 +1,14 @@
 ﻿#pragma once
 
-#include <vector>
-
 #include "System/Core/main.h"
 
-#include "System/Core/component.h"
 #include "System/Core/ComponentRegistry.h"
+#include "Component/TransformBase.h"
 #include "math/Matrix4x4.h"
 #include "math/Quaternion.h"
 #include "math/Vector3.h"
 
-enum class ParentTransformMode
-{
-    KeepWorld,
-    KeepLocal,
-};
-
-class Transform : public Component
+class Transform : public TransformBase
 {
     REGISTER_COMPONENT_OPTIONS(Transform, "Transform", false, false);
 
@@ -24,42 +16,28 @@ class Transform : public Component
     Quaternion m_localRotation{ Quaternion::Identity() };
     Vector3 m_localScale{ Vector3::One() };
 
-    Transform* m_parent = nullptr;
-    std::vector<Transform*> m_children;
-
     mutable bool m_isWorldDirty = true;
     mutable Matrix4x4 m_worldMatrix{ Matrix4x4::Identity() };
     mutable Vector3 m_worldPosition{ Vector3::Zero() };
     mutable Quaternion m_worldRotation{ Quaternion::Identity() };
     mutable Vector3 m_worldScale{ Vector3::One() };
-
     void MarkWorldDirty();
     void UpdateWorldCache() const;
     void SetLocalFromMatrix(const Matrix4x4& localMatrix);
     void SetWorldMatrix(const Matrix4x4& worldMatrix);
-    void AddChild(Transform* child);
-    void RemoveChild(Transform* child);
-    bool WouldCreateCycle(const Transform* newParent) const;
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;
 
 public:
     Transform() = delete;
-    explicit Transform(GameObject* owner) : Component(owner) {}
+    explicit Transform(GameObject* owner) : TransformBase(owner) {}
     Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale);
 
     Transform(const Transform&) = delete;
     Transform& operator=(const Transform&) = delete;
 
-
-    ~Transform() override;
-
-    bool SetParent(Transform* parent, ParentTransformMode mode = ParentTransformMode::KeepWorld);
-    Transform* GetParent() const { return m_parent; }
-    const std::vector<Transform*>& GetChildren() const { return m_children; }
-    void DestroyChildren();
-
+    bool SetParent(TransformBase* parent, ParentTransformMode mode = ParentTransformMode::KeepWorld) override;
     void SetPosition(const Vector3& position);
     void SetRotation(const Quaternion& rotation);
     // 既存コードのEuler入力を段階的に移行するために維持する。

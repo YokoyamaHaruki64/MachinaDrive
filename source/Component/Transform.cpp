@@ -1,7 +1,5 @@
 ﻿#include "pch.h"
 
-#include <algorithm>
-
 #include "Component/Transform.h"
 #include "System/Editor/FieldRegistry.h"
 #include "System/Core/GameObject.h"
@@ -9,22 +7,11 @@
 #include "math/MathCommon.h"
 
 Transform::Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale)
-    : Component(owner),
+    : TransformBase(owner),
     m_localPosition(position),
     m_localRotation(Quaternion::EulerToQuat(rotation)),
     m_localScale(scale)
 {
-}
-
-Transform::~Transform()
-{
-    SetParent(nullptr, ParentTransformMode::KeepLocal);
-
-    for (Transform* child : m_children)
-    {
-        child->m_parent = nullptr;
-        child->MarkWorldDirty();
-    }
 }
 
 void Transform::MarkWorldDirty()
@@ -35,9 +22,12 @@ void Transform::MarkWorldDirty()
     }
 
     m_isWorldDirty = true;
-    for (Transform* child : m_children)
+    for (TransformBase* child : m_children)
     {
-        child->MarkWorldDirty();
+        if (Transform* childTransform = dynamic_cast<Transform*>(child))
+        {
+            childTransform->MarkWorldDirty();
+        }
     }
 }
 
@@ -51,7 +41,8 @@ void Transform::UpdateWorldCache() const
     const Matrix4x4 localMatrix = Matrix4x4::Scaling(m_localScale.x, m_localScale.y, m_localScale.z)
         * m_localRotation.ToMatrix()
         * Matrix4x4::Translation(m_localPosition.x, m_localPosition.y, m_localPosition.z);
-    m_worldMatrix = m_parent ? localMatrix * m_parent->GetWorldMatrix() : localMatrix;
+    const Transform* parent = dynamic_cast<const Transform*>(m_parent);
+    m_worldMatrix = parent ? localMatrix * parent->GetWorldMatrix() : localMatrix;
 
     XMVECTOR scale;
     XMVECTOR rotation;
@@ -102,71 +93,30 @@ void Transform::SetLocalFromMatrix(const Matrix4x4& localMatrix)
 
 void Transform::SetWorldMatrix(const Matrix4x4& worldMatrix)
 {
-    if (!m_parent)
+    const Transform* parent = dynamic_cast<const Transform*>(m_parent);
+    if (!parent)
     {
         SetLocalFromMatrix(worldMatrix);
         return;
     }
 
-    const XMMATRIX parentInverse = XMMatrixInverse(nullptr, m_parent->GetWorldMatrix().ToXMMATRIX());
+    const XMMATRIX parentInverse = XMMatrixInverse(nullptr, parent->GetWorldMatrix().ToXMMATRIX());
     SetLocalFromMatrix(Matrix4x4::FromXMMATRIX(worldMatrix.ToXMMATRIX() * parentInverse));
 }
 
-void Transform::AddChild(Transform* child)
-{
-    // Hierarchyの兄弟表示順を親の付け替え前後で安定させる。
-    const auto insertionPosition = std::lower_bound(
-        m_children.begin(),
-        m_children.end(),
-        child,
-        [](const Transform* left, const Transform* right)
-        {
-            return left->GetOwner()->GetId() < right->GetOwner()->GetId();
-        });
-    m_children.insert(insertionPosition, child);
-}
-
-void Transform::RemoveChild(Transform* child)
-{
-    std::erase(m_children, child);
-}
-
-bool Transform::WouldCreateCycle(const Transform* newParent) const
-{
-    for (const Transform* ancestor = newParent; ancestor; ancestor = ancestor->m_parent)
-    {
-        if (ancestor == this)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Transform::SetParent(Transform* parent, ParentTransformMode mode)
+bool Transform::SetParent(TransformBase* parent, ParentTransformMode mode)
 {
     if (parent == m_parent)
     {
         return true;
     }
 
-    if (parent && WouldCreateCycle(parent))
+    const Matrix4x4 previousWorldMatrix = mode == ParentTransformMode::KeepWorld
+        ? GetWorldMatrix()
+        : Matrix4x4::Identity();
+    if (!TransformBase::SetParent(parent, ParentTransformMode::KeepLocal))
     {
-        Logger::Error("Transformの親子関係で循環参照は作成できません。");
         return false;
-    }
-
-    const Matrix4x4 previousWorldMatrix = GetWorldMatrix();
-
-    if (m_parent)
-    {
-        m_parent->RemoveChild(this);
-    }
-
-    m_parent = parent;
-    if (m_parent)
-    {
-        m_parent->AddChild(this);
     }
 
     if (mode == ParentTransformMode::KeepWorld)
@@ -178,15 +128,6 @@ bool Transform::SetParent(Transform* parent, ParentTransformMode mode)
         MarkWorldDirty();
     }
     return true;
-}
-
-void Transform::DestroyChildren()
-{
-    const std::vector<Transform*> children = m_children;
-    for (Transform* child : children)
-    {
-        child->m_owner->Destroy();
-    }
 }
 
 void Transform::SetPosition(const Vector3& position)

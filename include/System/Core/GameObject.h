@@ -4,12 +4,20 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include "math/Vector3.h"
 #include "component.h"
+#include "Component/TransformBase.h"
 
 class Transform;
+class UITransform;
 class GameObjectReference;
-enum class ParentTransformMode;
+
+enum class GameObjectTransformType
+{
+    World,
+    UI,
+};
 
 class GameObject
 {
@@ -18,7 +26,7 @@ protected:
     std::string m_name{ "Empty" };
     std::string m_prefabPath;
     bool m_isPrefabResolutionError = false;
-    Transform* m_transform = nullptr;
+    TransformBase* m_transformBase = nullptr;
 	std::vector<std::unique_ptr<Component>> m_components;
     std::vector<GameObjectReference*> m_references;
 
@@ -36,7 +44,9 @@ public:
         std::string name,
         const Vector3& position = Vector3::Zero(),
         const Vector3& rotation = Vector3::Zero(),
-        const Vector3& scale = Vector3::One());
+        const Vector3& scale = Vector3::One(),
+        GameObjectTransformType transformType = GameObjectTransformType::World);
+    ~GameObject();
 
     uint64_t GetId() const
     {
@@ -116,6 +126,14 @@ public:
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
+        if constexpr (std::is_base_of_v<TransformBase, T>)
+        {
+            if (m_transformBase)
+            {
+                return nullptr;
+            }
+        }
+
         m_components.emplace_back(std::make_unique<T>(this, std::forward<Args>(args)...));
         T* componentPtr = static_cast<T*>(m_components.back().get());
         if (m_isStarted)
@@ -149,6 +167,9 @@ public:
 	}
 
     Transform* GetTransform() const;
+    UITransform* GetUITransform() const;
+    TransformBase* GetTransformBase() const { return m_transformBase; }
+    GameObject* GetParent() const;
     bool SetParent(GameObject* parent, ParentTransformMode mode);
     bool SetParent(GameObject* parent);
 
@@ -289,9 +310,11 @@ private:
     void RegisterReference(GameObjectReference* reference);
     void UnregisterReference(GameObjectReference* reference);
     void ClearReferences();
+    void RegisterTransformBase(TransformBase* transformBase) { m_transformBase = transformBase; }
 
     friend class GameObjectReference;
     friend class Manager;
+    friend class TransformBase;
 };
 
 // テンプレート関数インクルード（循環参照回避）
