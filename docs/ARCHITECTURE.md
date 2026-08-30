@@ -83,7 +83,7 @@ WinMain
 
 ## GameObject と Component
 
-`GameObject` は `Transform` を必ず持ち、追加された `Component` を `std::unique_ptr` で所有する。コンポーネントは `m_owner` で所有 GameObject にアクセスする。`Manager` も稼働中および保留中の GameObject を `std::unique_ptr` で所有し、外部には非所有の `GameObject*` を返す。
+`GameObject` は通常の `Transform` または UI専用の `UITransform` を1つ持ち、追加された `Component` を `std::unique_ptr` で所有する。Transform系Componentの共通基底である `TransformBase` が親子関係を一元管理し、Transform種別ごとの座標計算は各派生Componentが担当する。コンポーネントは `m_owner` で所有 GameObject にアクセスする。`Manager` も稼働中および保留中の GameObject を `std::unique_ptr` で所有し、外部には非所有の `GameObject*` を返す。
 
 | フック | 呼び出しタイミング |
 | --- | --- |
@@ -102,25 +102,27 @@ GameObject の有効状態は `m_isActive`、Component の有効状態は `m_isE
 
 ## Transform Hierarchy
 
-GameObjectは必ず1つ持つTransformを通じて親子関係を構成する。親子関係の正はTransformが持ち、Managerは親子に関わらずすべてのGameObjectを`std::unique_ptr`で一元所有する。GameObject側はTransformへの委譲APIと、破棄時の子孫処理を担当する。
+親子関係の正は`TransformBase`が持つ。通常のWorld Objectは`Transform`、UI Objectは`UITransform`を座標計算Componentとして持ち、共通基底の親子リストへ接続される。これによりUITransformが通常TransformのLocal TRSやWorldキャッシュを継承する必要はなく、UIの比率LayoutとWorld行列をUI側へ集約できる。
 
 ```text
 Manager
   └─ GameObject（全Objectを一元所有）
-       └─ Transform
-            ├─ parent: Transform*（非所有）
-            └─ children: Transform*[]（非所有）
+       └─ TransformBase Component
+            ├─ parent: TransformBase*（非所有）
+            ├─ children: TransformBase*[]（非所有）
+            ├─ Transform（World Object）
+            └─ UITransform（UI Object）
 ```
 
-TransformはLocal Position、Local Quaternion Rotation、Local Scaleを保持する。Rotationの内部表現はQuaternionだけとし、Euler角を別の状態として保持しない。World行列はLocal行列と親TransformのWorld行列から求める。
+TransformはLocal Position、Local Quaternion Rotation、Local Scaleを保持する。Rotationの内部表現はQuaternionだけとし、Euler角を別の状態として保持しない。World行列はLocal行列と親GameObjectのTransformのWorld行列から求める。UITransformは親GameObjectのUIRectとCanvas ScaleからLayoutを導出し、独自のUI World行列を提供する。
 
 TransformはQuaternionを扱う`GetLocalRotation()`と`SetLocalRotation()`、Euler角を扱う`GetLocalEulerAngles()`と`SetLocalEulerAngles()`を明示して提供する。既存のEuler角APIは互換性のため後者へ転送する。InspectorはEuler角を編集値として表示し、変更時にQuaternionへ変換する。YAMLにはQuaternionを`[x, y, z, w]`として保存する。Quaternion自体のAPIと演算規約は[MATH.md](MATH.md)を参照する。
 
 Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱う。Local値を扱うAPIには必ず`Local`を含め、`GetLocalPosition()`、`SetLocalPosition()`、`GetLocalRotation()`、`SetLocalRotation()`、`GetLocalScale()`、`SetLocalScale()`とする。親を持たないTransformではWorld値とLocal値は一致する。
 
-`SetParent()`は自己親子と循環参照を拒否し、失敗時はErrorLogを記録して状態を変更しない。`nullptr`を指定するとRootへ戻す。親変更時は、見た目のWorld変換を維持する`KeepWorld`を既定とし、Local変換を維持する`KeepLocal`も指定できる。親子リストの更新はTransformが担当する。
+`GameObject::SetParent()`はTransformBaseへの委譲APIであり、実際の親子リスト更新はTransformBaseが担当する。自己親子、循環参照、異なるTransform種別の親子付けを拒否し、失敗時はErrorLogを記録して状態を変更しない。`nullptr`を指定するとRootへ戻す。通常Transformの親変更時は、見た目のWorld変換を維持する`KeepWorld`を既定とし、Local変換を維持する`KeepLocal`も指定できる。UITransformのLayoutはCanvasが再計算するため、UIの配置値はUITransform側の比率Layoutを正とする。
 
-親GameObjectを`Destroy()`すると、その場で子孫にも再帰的に破棄予約を伝播する。予約されたGameObjectは同じフレームの残りの`Update()`と`LateUpdate()`を実行せず、Managerの破棄フェーズで実際に削除する。
+親GameObjectを`Destroy()`すると、TransformBaseの子Transformを経由して子孫にも再帰的に破棄予約を伝播する。予約されたGameObjectは同じフレームの残りの`Update()`と`LateUpdate()`を実行せず、Managerの破棄フェーズで実際に削除する。
 
 親に非一様Scale、子に回転がある組み合わせではshearが生じる。初期実装ではTRSへの近似分解として扱い、完全なshearの保存・復元は対象外とする。
 
@@ -164,6 +166,8 @@ Scene、Prefab、MaterialのYAML保存形式と、Transform親子関係を含む
 各クラスの責務、ログの集約規則、スレッド境界、Performance指標の計測範囲は[DIAGNOSTICS.md](DIAGNOSTICS.md)を参照する。
 
 実行中のGameObject、Component、Materialを調整するInspector、フィールド登録、Docking、分離Viewport、Game View、テーマ設定を含むEditor全体の構成は[EDITOR.md](EDITOR.md)を参照する。
+
+16:9基準のCanvas、UITransform、UIImage、UIText、FontAssetの設計は[UI.md](UI.md)を参照する。
 
 Edit状態とPlay状態の分離、ライフサイクルの設計、将来のScript DLLホットリロードに向けた境界は[PLAY_MODE.md](PLAY_MODE.md)を参照する。
 
