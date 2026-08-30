@@ -46,6 +46,7 @@ class EditorSystem final
 public:
     static bool ApplyGameWindowRenderTargetSize();
     static bool IsGameWindowReady();
+    static bool IsUIDisplayEnabled();
     static bool RequestApplicationClose();
     static bool CanUndo();
     static bool CanRedo();

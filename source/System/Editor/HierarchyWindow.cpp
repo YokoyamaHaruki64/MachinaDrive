@@ -4,6 +4,11 @@
 
 #include "imgui.h"
 
+#include "Component/UIButton.h"
+#include "Component/UICanvas.h"
+#include "Component/UIImage.h"
+#include "Component/TransformBase.h"
+#include "Component/UIText.h"
 #include "Component/Transform.h"
 #include "System/Editor/FileSystem.h"
 #include "System/Editor/EditorSystem.h"
@@ -36,8 +41,8 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject)
         return;
     }
 
-    Transform* transform = gameObject.GetTransform();
-    const std::vector<Transform*>& children = transform->GetChildren();
+    const TransformBase* const transform = gameObject.GetTransformBase();
+    const std::vector<TransformBase*>& children = transform->GetChildren();
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
     if (children.empty())
@@ -132,7 +137,7 @@ void HierarchyWindow::DrawGameObjectNode(GameObject& gameObject)
 
     if (isOpen)
     {
-        for (Transform* child : children)
+        for (TransformBase* child : children)
         {
             if (child && child->GetOwner() && !child->GetOwner()->IsDestroyed())
             {
@@ -188,7 +193,7 @@ void HierarchyWindow::DrawImGui()
     m_visibleGameObjects.clear();
     for (const std::unique_ptr<GameObject>& gameObject : Manager::GetActiveGameObjects())
     {
-        if (!gameObject->GetTransform()->GetParent())
+        if (!gameObject->GetParent())
         {
             DrawGameObjectNode(*gameObject);
         }
@@ -213,6 +218,30 @@ void HierarchyWindow::DrawImGui()
             *m_selectionAnchor = createdGameObject;
             EditorSystem::RecordExecutedCommand(
                 Manager::CreateEditorCreationCommand({ createdGameObject }));
+        }
+        if (ImGui::BeginMenu("UI"))
+        {
+            if (ImGui::MenuItem("Create Canvas"))
+            {
+                GameObject* const createdCanvas = Manager::CreateUICanvas();
+                m_selectedGameObjects->assign(1, createdCanvas);
+                *m_selectionAnchor = createdCanvas;
+                EditorSystem::RecordExecutedCommand(
+                    Manager::CreateEditorCreationCommand({ createdCanvas }));
+            }
+            if (ImGui::MenuItem("Create Text"))
+            {
+                CreateUIObject("Text", true, false, false);
+            }
+            if (ImGui::MenuItem("Create Image"))
+            {
+                CreateUIObject("Image", false, true, false);
+            }
+            if (ImGui::MenuItem("Create Button"))
+            {
+                CreateUIObject("Button", false, true, true);
+            }
+            ImGui::EndMenu();
         }
         if (ImGui::MenuItem("Instantiate Prefab"))
         {
@@ -315,6 +344,42 @@ void HierarchyWindow::DeleteSelectedGameObjects()
     EditorSystem::RecordExecutedCommand(std::move(command));
 }
 
+void HierarchyWindow::CreateUIObject(std::string_view name, bool addText, bool addImage, bool addButton)
+{
+    GameObject* canvas = Manager::GetFirstObjectByComponent<UICanvas>();
+    const bool createdCanvas = canvas == nullptr;
+    if (createdCanvas)
+    {
+        canvas = Manager::CreateUICanvas();
+    }
+
+    GameObject* const gameObject = Manager::CreateUIObject(std::string(name));
+    gameObject->SetParent(canvas, ParentTransformMode::KeepLocal);
+    if (addText)
+    {
+        gameObject->AddComponent<UIText>();
+    }
+    if (addImage)
+    {
+        gameObject->AddComponent<UIImage>();
+    }
+    if (addButton)
+    {
+        gameObject->AddComponent<UIButton>();
+    }
+
+    m_selectedGameObjects->assign(1, gameObject);
+    *m_selectionAnchor = gameObject;
+
+    std::vector<GameObject*> createdObjects;
+    if (createdCanvas)
+    {
+        createdObjects.push_back(canvas);
+    }
+    createdObjects.push_back(gameObject);
+    EditorSystem::RecordExecutedCommand(Manager::CreateEditorCreationCommand(createdObjects));
+}
+
 void HierarchyWindow::ApplyParentToDraggedGameObjects(
     const std::vector<GameObject*>& draggedGameObjects,
     GameObject* newParent)
@@ -334,10 +399,7 @@ void HierarchyWindow::ApplyParentToDraggedGameObjects(
             continue;
         }
 
-        Transform* const previousParentTransform = gameObject->GetTransform()->GetParent();
-        GameObject* const previousParent = previousParentTransform
-            ? previousParentTransform->GetOwner()
-            : nullptr;
+        GameObject* const previousParent = gameObject->GetParent();
         if (previousParent == newParent)
         {
             continue;

@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "Component/Transform.h"
+#include "Component/UITransform.h"
 #include "Graphics/Material.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
@@ -368,7 +369,8 @@ void InspectorWindow::DrawImGui()
         bool componentDeleted = false;
         if (ImGui::BeginPopupContextItem("ComponentContext"))
         {
-            const bool isTransform = component == selectedGameObject->GetTransform();
+            const bool isTransform = component == selectedGameObject->GetTransform() ||
+                component == selectedGameObject->GetUITransform();
             ImGui::BeginDisabled(isTransform);
             if (ImGui::MenuItem("Remove Component"))
             {
@@ -416,7 +418,7 @@ void InspectorWindow::DrawImGui()
             bool editStarted = false;
             bool editFinished = false;
             InspectorFieldSpace inspectorSpace = InspectorFieldSpace::All;
-            if (dynamic_cast<Transform*>(component))
+            if (dynamic_cast<Transform*>(component) && !dynamic_cast<UITransform*>(component))
             {
                 ImGui::Checkbox("Local", &m_showLocalTransform);
                 inspectorSpace = m_showLocalTransform ? InspectorFieldSpace::Local : InspectorFieldSpace::World;

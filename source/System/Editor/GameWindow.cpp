@@ -57,8 +57,14 @@ void GameWindow::DrawImGui()
     }
 
     ImGui::SameLine();
-    m_aspectMode = Manager::IsPlayMode() ? AspectMode::Ratio16x9 : AspectMode::Free;
-    ImGui::TextUnformatted(Manager::IsPlayMode() ? "16:9" : "Free");
+    if (!Manager::IsPlayMode() && ImGui::Button(m_displayUI ? "Hide UI" : "Display UI"))
+    {
+        m_displayUI = !m_displayUI;
+    }
+
+    ImGui::SameLine();
+    m_aspectMode = (Manager::IsPlayMode() || m_displayUI) ? AspectMode::Ratio16x9 : AspectMode::Free;
+    ImGui::TextUnformatted(m_aspectMode == AspectMode::Ratio16x9 ? "16:9" : "Free");
     ImGui::SameLine();
     ImGui::Text("Render: %u x %u", Renderer::GetGameWidth(), Renderer::GetGameHeight());
 

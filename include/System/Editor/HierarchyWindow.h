@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <string_view>
 #include <vector>
 
 #include "System/Editor/EditorWindow.h"
@@ -27,6 +28,7 @@ class HierarchyWindow final : public EditorWindow
     void DrawRootDropTarget();
     void ApplySelectionRequest();
     void DeleteSelectedGameObjects();
+    void CreateUIObject(std::string_view name, bool addText, bool addImage, bool addButton);
     void ApplyParentToDraggedGameObjects(
         const std::vector<GameObject*>& draggedGameObjects,
         GameObject* newParent);

@@ -101,6 +101,11 @@ bool EditorSystem::IsGameWindowReady()
     return m_gameWindow.IsRenderTargetReady();
 }
 
+bool EditorSystem::IsUIDisplayEnabled()
+{
+    return m_gameWindow.IsUIDisplayEnabled();
+}
+
 void EditorSystem::ReloadStyle()
 {
     if (!ImGuiStyleConfig::Reload())

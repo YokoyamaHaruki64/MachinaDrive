@@ -110,6 +110,11 @@ std::string FieldRegistry::CreateDisplayName(std::string_view key)
 #if GM_ENABLE_EDITOR
 bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
 {
+    if (field.inspectorType == InspectorFieldType::PositionPreset && field.valueType == ValueType::Vector2)
+    {
+        return DrawPositionPreset(field.displayName.c_str(), *static_cast<Vector2*>(value));
+    }
+
     switch (field.valueType)
     {
     case ValueType::Bool: return ImGui::Checkbox(field.displayName.c_str(), static_cast<bool*>(value));
@@ -119,6 +124,10 @@ bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
         if (field.inspectorType == InspectorFieldType::FilePath)
         {
             return DrawFilePath(field, *static_cast<std::string*>(value));
+        }
+        if (field.inspectorType == InspectorFieldType::Multiline)
+        {
+            return InputTextMultiline(field.displayName.c_str(), *static_cast<std::string*>(value));
         }
         return InputText(field.displayName.c_str(), *static_cast<std::string*>(value));
     case ValueType::Vector2: return ImGui::DragFloat2(field.displayName.c_str(), &static_cast<Vector2*>(value)->x, 0.01f);
@@ -134,6 +143,64 @@ bool FieldRegistry::DrawValue(const FieldDescriptor& field, void* value)
     case ValueType::PrefabReference: return DrawPrefabReference(field.displayName.c_str(), *static_cast<PrefabReference*>(value));
     default: ImGui::Text("%s: 未対応", field.displayName.c_str()); return false;
     }
+}
+
+bool FieldRegistry::InputTextMultiline(const char* label, std::string& value)
+{
+    if (value.capacity() < 256)
+    {
+        value.reserve(256);
+    }
+
+    return ImGui::InputTextMultiline(
+        label,
+        value.data(),
+        value.capacity() + 1,
+        ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 5.0f),
+        ImGuiInputTextFlags_CallbackResize,
+        ResizeStringInputCallback,
+        &value);
+}
+
+bool FieldRegistry::DrawPositionPreset(const char* label, Vector2& value)
+{
+    static constexpr const char* labels[3][3]{
+        { "LT", "CT", "RT" },
+        { "LC", "CC", "RC" },
+        { "LB", "CB", "RB" },
+    };
+
+    ImGui::TextUnformatted(label);
+    bool changed = false;
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int column = 0; column < 3; ++column)
+        {
+            if (column != 0)
+            {
+                ImGui::SameLine();
+            }
+
+            const Vector2 preset(static_cast<float>(column) * 0.5f, static_cast<float>(row) * 0.5f);
+            const bool selected = std::abs(value.x - preset.x) < 0.001f && std::abs(value.y - preset.y) < 0.001f;
+            if (selected)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+            }
+            ImGui::PushID(row * 3 + column);
+            if (ImGui::Button(labels[row][column], ImVec2(34.0f, 0.0f)))
+            {
+                value = preset;
+                changed = true;
+            }
+            ImGui::PopID();
+            if (selected)
+            {
+                ImGui::PopStyleColor();
+            }
+        }
+    }
+    return changed;
 }
 
 bool FieldRegistry::DrawQuaternion(const char* label, Quaternion& value)

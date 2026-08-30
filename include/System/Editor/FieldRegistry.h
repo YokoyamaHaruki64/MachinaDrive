@@ -26,6 +26,8 @@ enum class InspectorFieldType
     List,
     Curve,
     FilePath,
+    PositionPreset,
+    Multiline,
     Hidden,
 };
 
@@ -79,6 +81,8 @@ class FieldRegistry
     static bool DrawGameObjectReference(const char* label, GameObjectReference& value);
     static bool DrawPrefabReference(const char* label, PrefabReference& value);
     static bool DrawFilePath(const FieldDescriptor& field, std::string& value);
+    static bool DrawPositionPreset(const char* label, Vector2& value);
+    static bool InputTextMultiline(const char* label, std::string& value);
     static bool DrawPathDialog(
         const char* label,
         std::string& value,
