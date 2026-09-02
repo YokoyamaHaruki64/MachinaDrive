@@ -1,72 +1,58 @@
 ﻿#pragma once
-#include "System/main.h"
-#include "System/renderer.h"
 
-class PostEffect
+#include "Graphics/ModelAsset.h"
+#include "Graphics/Material.h"
+
+#include <string_view>
+
+class GraphicsShaderPass;
+
+// PostProcessはMaterialの実行順・出力先・画面入力だけを制御する。
+class PostProcess
 {
-    static constexpr VERTEX_3D FULLSCREEN_VERTICES[4] =
-    {
-        {
-            XMFLOAT3(-1.0f,  1.0f, 0.0f),
-            XMFLOAT3(0, 0, -1),
-            XMFLOAT4(1, 1, 1, 1),
-            XMFLOAT2(0, 0)
-        },
-        {
-            XMFLOAT3(1.0f,  1.0f, 0.0f),
-            XMFLOAT3(0, 0, -1),
-            XMFLOAT4(1, 1, 1, 1),
-            XMFLOAT2(1, 0)
-        },
-        {
-            XMFLOAT3(-1.0f, -1.0f, 0.0f),
-            XMFLOAT3(0, 0, -1),
-            XMFLOAT4(1, 1, 1, 1),
-            XMFLOAT2(0, 1)
-        },
-        {
-            XMFLOAT3(1.0f, -1.0f, 0.0f),
-            XMFLOAT3(0, 0, -1),
-            XMFLOAT4(1, 1, 1, 1),
-            XMFLOAT2(1, 1)
-        }
-    };
-    // ポストエフェクト用のVSと頂点バッファは共有
-    static ComPtr<ID3D11VertexShader> vertexShader;
-    static ComPtr<ID3D11InputLayout> inputLayout;
-    static ComPtr<ID3D11Buffer> vertexBuffer;
-    static D3D11_PRIMITIVE_TOPOLOGY originalTopology;
-    static BlendMode originalBlendMode;
+    static Microsoft::WRL::ComPtr<ID3D11Buffer> m_positionBuffer;
+    static Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
 
-    ComPtr<ID3D11PixelShader> m_PixelShader;
+    Material* m_material{};
+
+    bool BindFullscreenVertices(const GraphicsShaderPass& shaderPass) const;
+    void ClearBoundTextures(const GraphicsShaderPass& shaderPass) const;
+    void BindSourceTexture() const;
+    void DrawFullscreen() const;
+
+protected:
+    explicit PostProcess(const char* shaderFilePath);
+
+    // 画面バッファへ描画し、成功時にRendererのPing-Pongを進める。
+    bool ExecutePass(size_t passIndex);
+    bool ExecutePass(std::string_view passTag);
+
+    // 中間RenderTextureへ描画する。中間出力は現在の画面入力を変更しない。
+    bool ExecutePass(size_t passIndex, TextureHandle renderTarget);
+    bool ExecutePass(std::string_view passTag, TextureHandle renderTarget);
+
+    Material* GetMaterial() { return m_material; }
+    const Material* GetMaterial() const { return m_material; }
 
 public:
-
     static void Init();
-    static void PostEffectPass_Begin();
-    static void PostEffectPass_End();
+    static void Uninit();
 
-    PostEffect() = delete;
-    PostEffect(const char* shaderFileName);
-    virtual ~PostEffect() = default;
-    virtual void Prepare() {};
-    virtual void SetUp() {};
-    virtual void Cleanup() {};
-    void Apply();
+    virtual ~PostProcess() = default;
+    virtual void Resize(UINT width, UINT height) { (void)width; (void)height; }
+    virtual void Apply() = 0;
 };
 
-class Bloom : public PostEffect
+class Bloom : public PostProcess
 {
-    static constexpr const char* BLOOM_SHADER_FILE = "BuildedShader/Bloom_PS.cso";
-    static constexpr const char* BLOOM_BLUR_SHADER_FILE = "BuildedShader/BloomBlur_PS.cso";
-    ComPtr<ID3D11RenderTargetView> m_bloomRTV;
-    ComPtr<ID3D11ShaderResourceView> m_bloomSRV;
-    ComPtr<ID3D11PixelShader> m_blurPixelShader;
-    
+    static constexpr const char* SHADER_FILE_PATH = "Assets/Shaders/PostProcessBloom.shader";
+    TextureHandle m_bloomTexture{};
+
+    size_t m_bloomExtractPassIndex{};
+    size_t m_compositePassIndex{};
+
 public:
     Bloom();
-    virtual void Prepare() override;
-    virtual void SetUp() override;
-    virtual void Cleanup() override;
-
+    void Resize(UINT width, UINT height) override;
+    void Apply() override;
 };

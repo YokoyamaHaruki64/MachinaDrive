@@ -1,19 +1,23 @@
 ﻿#pragma once
 
 #include "math/Vector3.h"
-#include "System/Component.h"
-#include "System/GameObject.h"
+#include "System/Core/component.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Core/GameObject.h"
 
 #include <unordered_map>
 
 class Camera : public Component
 {
+    REGISTER_COMPONENT(Camera, "Camera");
+
 public:
 
     enum CameraTag
     {
         MainCamera,
-        SubCamera
+        SubCamera,
+        EditorCamera,
     };
 
     void SetTarget(const Vector3& target) { m_target = target; }
@@ -30,16 +34,20 @@ public:
     {
         if (tag == CameraTag::MainCamera)
         {
-            s_mainCamera = this;
+            s_sceneMainCamera = this;
         }
         s_camerasByTag[tag] = this;
     }
     ~Camera()
     {
-        // カメラが破棄されるときに、メインカメラやタグ付きカメラの登録を解除する
-        if (s_mainCamera == this)
+        // Sceneカメラと現在の描画カメラの登録を、破棄対象だけ解除する。
+        if (s_sceneMainCamera == this)
         {
-            s_mainCamera = nullptr;
+            s_sceneMainCamera = nullptr;
+        }
+        if (s_activeMainCamera == this)
+        {
+            s_activeMainCamera = nullptr;
         }
         for (auto it = s_camerasByTag.begin(); it != s_camerasByTag.end(); ++it)
         {
@@ -51,13 +59,23 @@ public:
         }
     }
     static Camera* GetMainCamera();
+    static Camera* GetSceneMainCamera();
     static Camera* GetCameraByTag(CameraTag tag);
+    static void SetActiveMainCamera(Camera* camera);
 
 private:
     Vector3 m_target{ 0.0f, 0.5f, 0.0f };
     Vector3 m_up{ 0.0f, 1.0f, 0.0f };
 
-    static Camera* s_mainCamera;
+    static Camera* s_sceneMainCamera;
+    static Camera* s_activeMainCamera;
     static std::unordered_map<CameraTag, Camera*> s_camerasByTag;
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override
+    {
+        GM_FIELD(m_target);
+        GM_FIELD(m_up);
+    }
 
 };

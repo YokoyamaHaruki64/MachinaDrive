@@ -1,0 +1,46 @@
+﻿#pragma once
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+
+#define NOMINMAX
+#include <windows.h>
+#include <assert.h>
+#include <functional>
+
+#include <d3d11.h>
+#pragma comment (lib, "d3d11.lib")
+
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+
+
+#include <DirectXMath.h>
+using namespace DirectX;
+
+#include "System/Rendering/DirectXTex.h"
+#if _DEBUG
+#pragma comment (lib, "External/Library/DirectXTex_Debug.lib")
+#else
+#pragma comment (lib, "External/Library/DirectXTex_Release.lib")
+#endif
+
+
+
+
+
+#pragma comment (lib, "winmm.lib")
+
+
+#define SCREEN_WIDTH	(1600)
+#define SCREEN_HEIGHT	(900)
+
+#ifndef GM_ENABLE_EDITOR
+#define GM_ENABLE_EDITOR 1
+#endif
+
+
+HWND GetWindow();
+
+void Invoke(std::function<void()> Function, int Time);
+

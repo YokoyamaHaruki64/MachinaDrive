@@ -1,0 +1,150 @@
+version: 1
+name: Title
+gameObjects:
+  - id: 1
+    name: Title Canvas
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 2
+    name: Title Background
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1.77683318
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/TitleBG.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 3
+    name: Title Logo
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.753000021,0.892444551]
+          m_pos: [0,-0.107000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1.5
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/TitleLogo.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 4
+    name: Title UI
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.537,0.238666698]
+          m_pos: [0,0.25]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/TitleUI.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: TitleUI
+        fields:
+          enabled: true
+  - id: 5
+    name: FieldRegistry Test
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: FieldRegistryTest
+        fields:
+          enabled: true
+          m_reflectSettings:
+            m_integer: 7
+            m_offset: [1,2,3]
+            m_nested:
+              m_id: 2
+              m_offset: [4,5,6]
+            m_items:
+              - m_id: 3
+                m_offset: [7,8,9]
+              - m_id: 4
+                m_offset: [10,11,12]
+          m_boolValue: true
+          m_intValue: 42
+          m_floatValue: 0.5
+          m_stringValue: Inspector test
+          m_matrix3x3Value: [1,0,0,0,1,0,0,0,1]
+          m_matrix4x4Value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+          m_quaternionValue: [0,0,0,1]
+          m_gameObjectReference: 5
+          m_missingGameObjectReference: 
+          m_prefabReference: Assets/Prefabs/Test.prefab
+          m_missingPrefabReference: Assets/Prefabs/Missing.prefab
+          m_intValues:
+            - 1
+            - 2
+            - 3
+          m_vectorValues:
+            - [0,0,0]
+            - [1,1,1]
+          m_quaternionValues:
+            - [0,0,0,1]

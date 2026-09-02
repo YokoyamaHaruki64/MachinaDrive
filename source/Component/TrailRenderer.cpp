@@ -1,239 +1,220 @@
 ﻿#include "pch.h"
 
-#include "System/GM_Time.h"
-#include "Component/TrailRenderer.h"
-#include "Component/Transform.h"
-#include "Component/Camera.h"
+#include "Component/ComponentInc.h"
 
+
+#include "Component/TrailRenderer.h"
+
+#include "Graphics/MaterialManager.h"
+#include "Graphics/Shader/ShaderProgram.h"
+#include "System/Rendering/renderer.h"
+
+namespace
+{
+    constexpr size_t TRAIL_VERTEX_COUNT = 1000 * 2;
+
+    template <typename VertexType>
+    Microsoft::WRL::ComPtr<ID3D11Buffer> CreateTrailVertexBuffer()
+    {
+        D3D11_BUFFER_DESC description{};
+        description.Usage = D3D11_USAGE_DYNAMIC;
+        description.ByteWidth = sizeof(VertexType) * TRAIL_VERTEX_COUNT;
+        description.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
+        if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, nullptr, buffer.GetAddressOf())))
+            MessageBoxA(nullptr, "トレイル頂点バッファの作成に失敗しました。", "Trail Renderer Error", MB_OK | MB_ICONERROR);
+
+        return buffer;
+    }
+}
 
 void TrailRenderer::UpdateSegments()
 {
-    if(m_segments.size() > 0)
-    {
-        // 各セグメントの経過時間を更新
-        for (auto& segment : m_segments)
-        {
-            segment.elapsedTime += Time::GetDeltaTime();
-        }
-        // 寿命を超えたセグメントを削除
-        while (!m_segments.empty() && m_segments.front().elapsedTime > m_trailLifetime)
-        {
-            m_segments.pop_front();
-        }
-    }
+    // 寿命を超えた頂点を先頭から除去し、現在位置との距離が十分ある場合だけ新規頂点を追加する。
+    for (TrailSegment& segment : m_segments)
+        segment.elapsedTime += Time::GetDeltaTime();
 
-    Vector3 currentPosition = transform()->GetPosition() + m_offset;
-    // 新しいセグメントを追加する条件
+    while (!m_segments.empty() && m_segments.front().elapsedTime > m_trailLifetime)
+        m_segments.pop_front();
+
+    const Vector3 currentPosition = transform()->GetPosition() + m_offset;
     if (m_segments.empty() ||
         (currentPosition - m_segments.back().position).LengthSqr() >= m_minSegmentDistance * m_minSegmentDistance)
     {
-        if( m_segments.size() >= MAX_SEGMENTS)
-            m_segments.pop_front(); // 最大セグメント数を超えた場合、古いセグメントを削除
+        if (m_segments.size() >= MAX_SEGMENTS)
+            m_segments.pop_front();
 
         m_segments.emplace_back(currentPosition);
     }
 }
 
-TrailRenderer::TrailRenderer(
-    GameObject* owner,
-    const wchar_t* textureFile,
-    const char* vertexShaderFile,
-    const char* pixelShaderFile)
+void TrailRenderer::CreateVertexStreams()
+{
+    // Trailは毎フレーム形状が変化するため、Mesh Assetではなく専用の動的Streamを所有する。
+    m_positionBuffer = CreateTrailVertexBuffer<PositionVertex>();
+    m_texCoordBuffer = CreateTrailVertexBuffer<PrimaryTexCoordVertex>();
+    m_colorBuffer = CreateTrailVertexBuffer<ColorVertex>();
+}
+
+TrailRenderer::TrailRenderer(GameObject* owner)
     : RendererBase(owner)
 {
-    Renderer::CreateVertexShader(
-        m_vertexShader.GetAddressOf(),
-        m_inputLayout.GetAddressOf(),
-        vertexShaderFile);
+    m_renderPhase = RenderPhase::Transparent;
+}
 
-    Renderer::CreatePixelShader(
-        m_pixelShader.GetAddressOf(),
-        pixelShaderFile);
-
-    if (textureFile == nullptr)
+void TrailRenderer::OnLoaded()
+{
+    if (!m_material && !m_materialPath.empty())
     {
-        // 白いフォールバックテクスチャの初期化
-        D3D11_TEXTURE2D_DESC desc = {};
-        desc.Width = 1;
-        desc.Height = 1;
-        desc.MipLevels = 1;
-        desc.ArraySize = 1;
-        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.SampleDesc.Count = 1;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-
-        uint32_t whitePixel = 0xFFFFFFFF; // RGBAで白色
-        D3D11_SUBRESOURCE_DATA initData = {};
-        initData.pSysMem = &whitePixel;
-        ComPtr<ID3D11Texture2D> texture;
-        HRESULT hr = Renderer::GetDevice()->CreateTexture2D(&desc, &initData, texture.GetAddressOf());
-        if (FAILED(hr))
-        {
-            MessageBoxA(nullptr, "フォールバックテクスチャの作成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-        }
-        // シェーダーリソースビューの作成
-        hr = Renderer::GetDevice()->CreateShaderResourceView(
-            texture.Get(),
-            nullptr,
-            m_texture.GetAddressOf());
-        if (FAILED(hr))
-        {
-            MessageBoxA(nullptr, "フォールバックテクスチャのシェーダーリソースビューの作成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-        }
-
+        m_material = MaterialManager::Load(m_materialPath);
     }
-    else
-    {
+    CreateVertexStreams();
 
-        // テクスチャの読み込み
-        TexMetadata metadata{};
-        ScratchImage image{};
-        HRESULT hr = LoadFromWICFile(textureFile, WIC_FLAGS_NONE, &metadata, image);
-        if (FAILED(hr))
-        {
-            MessageBoxW(nullptr,
-                (L"テクスチャの読み込みに失敗しました: " + std::wstring(textureFile)).c_str(),
-                L"エラー",
-                MB_OK | MB_ICONERROR);
-            return;
-        }
-        CreateShaderResourceView(
-            Renderer::GetDevice(),
-            image.GetImages(),
-            image.GetImageCount(),
-            metadata,
-            m_texture.GetAddressOf());
+}
+
+void TrailRenderer::OnEditorUpdate()
+{
+    OnLoaded();
+}
+
+void TrailRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_material && !m_material->GetFilePath().empty())
+    {
+        m_materialPath = m_material->GetFilePath();
     }
 
-    // 頂点バッファの設定
-    D3D11_BUFFER_DESC bd = {};
-    bd.Usage = D3D11_USAGE_DYNAMIC;
-    bd.ByteWidth = sizeof(VERTEX_3D) * MAX_SEGMENTS * 2; // 各セグメントは2つの頂点を持つ
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    RendererBase::RegisterFields(fields);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
+    GM_FIELD(m_offset);
+    GM_FIELD(m_fixedDirection);
+    GM_FIELD(m_trailLifetime);
+    GM_FIELD(m_minSegmentDistance);
+    GM_FIELD(m_width);
+    fields.AddAccessor<int>("faceMode",
+        [this] { return static_cast<int>(m_faceMode); },
+        [this](int value) { m_faceMode = static_cast<TrailFaceMode>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+}
 
-    HRESULT hr = Renderer::GetDevice()->CreateBuffer(&bd, nullptr, m_vertexBuffer.GetAddressOf());
+Material* TrailRenderer::GetMaterial(uint32_t slot)
+{
+    // Trailは単一Materialのみを持つ。
+    return slot == 0 ? m_material : nullptr;
+}
 
-    if (FAILED(hr))
+void TrailRenderer::SetMaterial(uint32_t slot, Material* material)
+{
+    if (slot == 0)
     {
-        MessageBoxA(nullptr, "頂点バッファの作成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+        m_material = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
+        ClearMaterialPropertyOverride();
     }
-
-    m_renderPass = RenderPass::Transparent; // トレイルは透明パスで描画
-    m_blendMode = BlendMode::AlphaBlend;      // アルファブレンドを使用
-    m_cullMode = CullMode::None;          // カリングなし
 }
 
 void TrailRenderer::Draw()
 {
     UpdateSegments();
+    if (!m_material || m_segments.size() < 2)
+        return;
 
-    if (m_segments.size() < 2)
-        return; // セグメントが2つ未満の場合は描画しない
+    const size_t vertexCount = m_segments.size() * 2;
+    std::vector<PositionVertex> positions(vertexCount);
+    std::vector<PrimaryTexCoordVertex> texCoords(vertexCount);
+    std::vector<ColorVertex> colors(vertexCount);
 
-    const int segmentCount = static_cast<int>(m_segments.size());
-    const int vertexCount = segmentCount * 2; // 各セグメントは2つの頂点を持つ
-    ID3D11DeviceContext* context = Renderer::GetDeviceContext();
-    // 頂点データの作成
-    std::vector<VERTEX_3D> vertices(vertexCount);
-
-    // カメラ方向
-    Vector3 cameraPosition = Camera::GetMainCamera()->transform()->GetPosition();
-
-    for (int i = 0; i < segmentCount; ++i)
+    const Vector3 cameraPosition = Camera::GetMainCamera()->transform()->GetPosition();
+    for (size_t index = 0; index < m_segments.size(); ++index)
     {
-        // セグメントの位置と方向を計算
-        const Vector3& pos = m_segments[i].position;
-        Vector3 dir;
-        if (i == 0)
-        {
-            dir = m_segments[i + 1].position - m_segments[i].position;
-        }
-        else if (i == segmentCount - 1)
-        {
-            dir = m_segments[i].position - m_segments[i - 1].position;
-        }
-        else
-        {
-            dir = m_segments[i + 1].position - m_segments[i - 1].position;
-        }
-        dir.Normalize();
+        const Vector3& position = m_segments[index].position;
+        const Vector3 direction = index == 0
+            ? m_segments[1].position - position
+            : index == m_segments.size() - 1
+                ? position - m_segments[index - 1].position
+                : m_segments[index + 1].position - m_segments[index - 1].position;
 
-        Vector3 toCamera = cameraPosition - pos;
-        toCamera.Normalize();
+        Vector3 normalizedDirection = direction;
+        normalizedDirection.Normalize();
 
-        // トレイルの左右方向を求める
-        Vector3 normal;
+        Vector3 normal = m_faceMode == TrailFaceMode::CameraFacing
+            ? cameraPosition - position
+            : m_fixedDirection;
+        normal.Normalize();
 
-        switch (m_faceMode)
-        {
-        case TrailRenderer::CameraFacing:
-            normal = toCamera;
-            break;
-
-        case TrailRenderer::FixedDirection:
-            normal = m_fixedDirection;
-            normal.Normalize();
-            break;
-        }
-
-        Vector3 side = Vector3::Cross(normal, dir);
+        Vector3 side = Vector3::Cross(normal, normalizedDirection);
         side.Normalize();
-        // セグメントの経過時間に基づいて幅と色を計算
-        float ageRate = m_segments[i].elapsedTime / m_trailLifetime;
 
-        // Curve 
-        float curvedWidth = m_widthCurve.Evaluate(ageRate);
-        Color color = m_colorCurve.Evaluate(ageRate);
+        const float ageRate = m_segments[index].elapsedTime / m_trailLifetime;
+        const float halfWidth = m_widthCurve.Evaluate(ageRate) * m_width * 0.5f;
+        const Color color = m_colorCurve.Evaluate(ageRate);
+        const float v = static_cast<float>(index) / static_cast<float>(m_segments.size() - 1);
 
-        Vector3 leftPos = pos + side * curvedWidth * m_width * 0.5f;
-        Vector3 rightPos = pos - side * curvedWidth * m_width * 0.5f;
-        // テクスチャ座標の計算
-        float v = static_cast<float>(i) / static_cast<float>(segmentCount - 1);
-
-        vertices[i * 2 + 0].Position = XMFLOAT3(leftPos.x, leftPos.y, leftPos.z);
-        vertices[i * 2 + 0].Normal = XMFLOAT3(normal.x, normal.y, normal.z);
-        vertices[i * 2 + 0].Diffuse = XMFLOAT4(color.r, color.g, color.b, color.a);
-        vertices[i * 2 + 0].TexCoord = XMFLOAT2(0.0f, v);
-
-        vertices[i * 2 + 1].Position = XMFLOAT3(rightPos.x, rightPos.y, rightPos.z);
-        vertices[i * 2 + 1].Normal = XMFLOAT3(normal.x, normal.y, normal.z);
-        vertices[i * 2 + 1].Diffuse = XMFLOAT4(color.r, color.g, color.b, color.a);
-        vertices[i * 2 + 1].TexCoord = XMFLOAT2(1.0f, v);
+        positions[index * 2] = { position + side * halfWidth };
+        positions[index * 2 + 1] = { position - side * halfWidth };
+        texCoords[index * 2] = { Vector4(0.0f, v, 0.0f, 0.0f) };
+        texCoords[index * 2 + 1] = { Vector4(1.0f, v, 0.0f, 0.0f) };
+        colors[index * 2] = { color };
+        colors[index * 2 + 1] = { color };
     }
 
-    D3D11_MAPPED_SUBRESOURCE msr{};
-    context->Map(m_vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-    memcpy(msr.pData, vertices.data(), sizeof(VERTEX_3D) * vertexCount);
-    context->Unmap(m_vertexBuffer.Get(), 0);
+    ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    const auto updateStream = [context]<typename VertexType>(ID3D11Buffer* buffer, const std::vector<VertexType>& vertices)
+    {
+        D3D11_MAPPED_SUBRESOURCE mappedResource{};
+        if (FAILED(context->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+            return false;
 
-    UINT stride = sizeof(VERTEX_3D);
-    UINT offset = 0;
+        std::memcpy(mappedResource.pData, vertices.data(), sizeof(VertexType) * vertices.size());
+        context->Unmap(buffer, 0);
+        return true;
+    };
+
+    if (!updateStream(m_positionBuffer.Get(), positions) ||
+        !updateStream(m_texCoordBuffer.Get(), texCoords) ||
+        !updateStream(m_colorBuffer.Get(), colors))
+    {
+        return;
+    }
 
     Renderer::SetWorldMatrix(XMMatrixIdentity());
+    m_material->Bind(0, FindMaterialPropertyOverride());
 
-    Renderer::SetMaterial(
-        {   XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), // Ambient
-            XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), // Diffuse
-            XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), // Specular
-            XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), // Emission
-            32.0f,                           // Shininess
-            TRUE                             // TextureEnable
-        });
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
+    {
+        ID3D11Buffer* vertexBuffer = nullptr;
+        switch (binding.streamType)
+        {
+        case VertexStreamType::Position:
+            vertexBuffer = m_positionBuffer.Get();
+            break;
 
-    context->IASetInputLayout(m_inputLayout.Get());
-    context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+        case VertexStreamType::PrimaryTexCoord:
+            vertexBuffer = m_texCoordBuffer.Get();
+            break;
+
+        case VertexStreamType::Color:
+            vertexBuffer = m_colorBuffer.Get();
+            break;
+        }
+
+        // Trailが持たないStreamは共通フォールバックで補い、Shaderごとの差異を吸収する。
+        if (!vertexBuffer)
+            vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+
+        const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+        const UINT offset = 0;
+        if (!vertexBuffer || stride == 0)
+            return;
+
+        context->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+    }
+
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
-    context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-    context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
-    ID3D11ShaderResourceView* texture = m_texture.Get();
-    context->PSSetShaderResources(0, 1, &texture);
-
-    context->Draw(vertexCount, 0);
-
+    context->Draw(static_cast<UINT>(vertexCount), 0);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 }

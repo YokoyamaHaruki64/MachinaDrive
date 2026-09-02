@@ -1,12 +1,14 @@
 ﻿#include "pch.h"
 
-#include "System/GameObject.h"
-#include "System/Renderer.h"
-#include "System/GM_Time.h"
+#include "Component/ComponentInc.h"
+
+
+#include "System/Rendering/renderer.h"
 #include "Common/Random.h"
 #include "Component/ParticleSystem.h"
-#include "Component/Transform.h"
-
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderProgram.h"
 #include "Common/Random.h"
 
 void ParticleEmitter::Update()
@@ -175,48 +177,148 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
         p.color = m_settings.colorOverLifetime.Evaluate(normalizedAge);
     }
 }
+void ParticleEmitter::RegisterFields(FieldRegistry& fields)
+{
+    GM_FIELD_KEY("offset", m_settings.offset);
+    GM_FIELD_KEY("maxParticles", m_settings.maxParticles);
+    GM_FIELD_KEY("burst", m_settings.burst);
+    GM_FIELD_KEY("burstCount", m_settings.burstCount);
+    GM_FIELD_KEY("burstTime", m_settings.burstTime);
+    GM_FIELD_KEY("finishedDestroy", m_settings.finishedDestroy);
+    GM_FIELD_KEY("emitRate", m_settings.emitRate);
+    GM_FIELD_KEY("lifetimeMin", m_settings.lifetimeMin);
+    GM_FIELD_KEY("lifetimeMax", m_settings.lifetimeMax);
+    GM_FIELD_KEY("gravity", m_settings.gravity);
+    GM_FIELD_KEY("drag", m_settings.drag);
+    GM_FIELD_KEY("size", m_settings.size);
+    GM_FIELD_KEY_TYPE("scaleOverLifetime", m_settings.scaleOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY_TYPE("colorOverLifetime", m_settings.colorOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
+    GM_FIELD_KEY("speed", m_settings.speed);
+    GM_FIELD_KEY("speedMin", m_settings.speedMin);
+    GM_FIELD_KEY("speedMax", m_settings.speedMax);
+    GM_FIELD_KEY("direction", m_settings.direction);
+    GM_FIELD_KEY("coneAngle", m_settings.coneAngle);
+    GM_FIELD_KEY("spawnRadius", m_settings.spawnRadius);
+    GM_FIELD_KEY("spawnNormal", m_settings.spawnNormal);
+    fields.AddAccessor<int>("velocityType",
+        [this] { return static_cast<int>(m_settings.velocityType); },
+        [this](int value) { m_settings.velocityType = static_cast<VelocityType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+    fields.AddAccessor<int>("spawnType",
+        [this] { return static_cast<int>(m_settings.spawnType); },
+        [this](int value) { m_settings.spawnType = static_cast<SpawnType>(value); },
+        InspectorFieldSpace::All,
+        InspectorFieldType::Auto,
+        true);
+}
 
+ParticleRenderer::ParticleRenderer(GameObject* owner)
+    : RendererBase(owner)
+{
+    m_billboardType = BillboardType::CameraFacing;
+    m_renderPhase = RenderPhase::Transparent;
+}
+
+void ParticleRenderer::OnLoaded()
+{
+    if (!m_emitter)
+    {
+        m_emitter = GetComponent<ParticleEmitter>();
+    }
+
+    ModelAsset* quadModel = ModelManager::GetPrimitive(ModelManager::PrimitiveType::Quad);
+    if (quadModel && !quadModel->meshes.empty())
+        m_mesh = &quadModel->meshes.front();
+
+    if (!m_material && !m_materialPath.empty())
+    {
+        m_material = MaterialManager::Load(m_materialPath);
+    }
+}
+
+void ParticleRenderer::OnEditorUpdate()
+{
+    OnLoaded();
+}
+
+void ParticleRenderer::RegisterFields(FieldRegistry& fields)
+{
+    if (m_material && !m_material->GetFilePath().empty())
+    {
+        m_materialPath = m_material->GetFilePath();
+    }
+
+    RendererBase::RegisterFields(fields);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
+}
+
+Material* ParticleRenderer::GetMaterial(uint32_t slot)
+{
+    // Particleは単一Materialのみを持つ。
+    return slot == 0 ? m_material : nullptr;
+}
+
+void ParticleRenderer::SetMaterial(uint32_t slot, Material* material)
+{
+    if (slot == 0)
+    {
+        m_material = material;
+        m_materialPath = material ? material->GetFilePath() : std::string{};
+        ClearMaterialPropertyOverride();
+    }
+}
+
+void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color)
+{
+    if (!m_mesh || !m_material)
+        return;
+
+    Renderer::SetWorldMatrix(worldMatrix);
+    MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
+    propertyOverride.SetColor("_BaseColor", color);
+    m_material->Bind(0, &propertyOverride);
+
+    ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
+    {
+        ID3D11Buffer* vertexBuffer = m_mesh->GetVertexBuffer(binding.streamType);
+        if (!vertexBuffer)
+            vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+
+        const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+        const UINT offset = 0;
+        if (!vertexBuffer || stride == 0)
+            return;
+
+        context->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+    }
+
+    context->IASetIndexBuffer(m_mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+}
 
 void ParticleRenderer::Draw()
 {
+    if (!m_emitter || !m_mesh || !m_material)
+        return;
+
     const ParticleEmitter::EmitterSettings& settings = m_emitter->GetSettingsRef();
     for (auto& p : m_emitter->GetParticles())
     {
         if (!p.active) continue;
 
-        // 入力レイアウトとシェーダーの設定
-        Renderer::GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-        Renderer::GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-        Renderer::GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
-        // ワールド行列の設定
-
-        Renderer::SetWorldMatrix(CalcWorldMatrix(
+        // Particleごとの座標と色をMaterialへ設定し、共有するQuad形状を描画する。
+        BindMesh(CalcWorldMatrix(
             p.position,
             p.rotation,
             Vector3::Multiply(settings.size, transform()->GetScale()) * p.scale,
-            m_billboardType));
+            m_billboardType),
+            p.color);
 
-        // マテリアルの設定
-        MATERIAL material{};
-        material.Diffuse = XMFLOAT4(p.color.r, p.color.g, p.color.b, p.color.a);
-        material.TextureEnable = true;
-        Renderer::SetMaterial(material);
-
-        // UVの設定
-        Renderer::SetUV(XMFLOAT4(m_uvWidth, m_uvHeight, m_uvOffsetX, m_uvOffsetY));
-
-        // 頂点バッファの設定
-        UINT stride = sizeof(VERTEX_3D);
-        UINT offset = 0;
-        Renderer::GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
-        // インデックスバッファの設定
-        Renderer::GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-        // シェーダーリソースビューの設定
-        Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
-        // 描画
-        Renderer::GetDeviceContext()->DrawIndexed(m_indexCount, 0, 0);
+        Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
 
     }
 }

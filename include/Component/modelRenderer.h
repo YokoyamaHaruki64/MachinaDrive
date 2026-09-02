@@ -1,58 +1,15 @@
 ﻿#pragma once
 
-#include "System/renderer.h"
-#include "System/RendererBase.h"
+#include "Graphics/ModelAsset.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Rendering/RendererBase.h"
+
 #include <string>
-#include <unordered_map>
-#include <d3d11.h>
-#include <wrl/client.h>
-using Microsoft::WRL::ComPtr;
 
-// マテリアル構造体
-struct MODEL_MATERIAL
-{
-	char						Name[256];
-	MATERIAL					Material;
-	char						TextureName[256];
-	ID3D11ShaderResourceView*	Texture;
-
-};
-
-
-// 描画サブセット構造体
-struct SUBSET
-{
-	unsigned int	StartIndex;
-	unsigned int	IndexNum;
-	MODEL_MATERIAL	Material;
-};
-
-
-// モデル構造体
-struct MODEL_OBJ
-{
-	VERTEX_3D		*VertexArray;
-	unsigned int	VertexNum;
-
-	unsigned int	*IndexArray;
-	unsigned int	IndexNum;
-
-	SUBSET			*SubsetArray;
-	unsigned int	SubsetNum;
-};
-
-struct MODEL
-{
-	ID3D11Buffer*	VertexBuffer;
-	ID3D11Buffer*	IndexBuffer;
-
-	SUBSET*			SubsetArray;
-	unsigned int	SubsetNum;
-};
-
-class Transform;
 class ModelRenderer : public RendererBase
 {
+    REGISTER_COMPONENT(ModelRenderer, "Model Renderer");
+
 public:
     enum InverseAxis
     {
@@ -60,40 +17,42 @@ public:
         Y = 1 << 1,
         Z = 1 << 2
     };
+
 private:
+    ModelAsset* m_model{};
+    std::string m_modelPath;
+    std::string m_loadedModelPath;
+    std::vector<Material*> m_materialOverrides{};
+    std::vector<std::string> m_materialPaths{};
+    int m_inverseAxisFlags{};
 
-	static std::unordered_map<std::string, MODEL*> m_ModelPool;
+    void InitializeMaterialOverrides();
+    Material* ResolveMaterial(uint32_t materialSlot) const;
 
-	static void LoadModel(const char *FileName, MODEL *Model);
-	static void LoadObj( const char *FileName, MODEL_OBJ *ModelObj );
-	static void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned int *MaterialNum );
-
-	MODEL* m_Model{};
-    ComPtr<ID3D11VertexShader> m_VertexShader{};
-    ComPtr<ID3D11PixelShader> m_PixelShader{};
-    ComPtr<ID3D11InputLayout> m_InputLayout{};
-
-    uint8_t m_InverseAxisFlags = 0; // 反転させる軸をビットフラグで管理
 public:
-
-	static void Preload( const char *FileName );
-	static void UnloadAll();
-
     ModelRenderer() = delete;
-    ModelRenderer(GameObject* Object,
+    explicit ModelRenderer(GameObject* object);
+    ModelRenderer(
+        GameObject* object,
         const char* modelFileName,
-        const char* vertexShaderFileName,
-        const char* pixelShaderFileName,
-        uint8_t inverseAxisFlags = 0) : RendererBase(Object), m_InverseAxisFlags(inverseAxisFlags)
-    {
-        Load(modelFileName, vertexShaderFileName, pixelShaderFileName);
-    }
+        uint8_t inverseAxisFlags = 0);
+    ModelRenderer(
+        GameObject* object,
+        ModelAsset* modelAsset,
+        uint8_t inverseAxisFlags = 0);
 
-	void Load(
-        const char* modelFileName,
-        const char* vertexShaderFileName,
-        const char* pixelShaderFileName);
+    ModelAsset* GetModel() const { return m_model; }
+    void SetModel(ModelAsset* modelAsset);
 
-	void Draw() override;
+    void SetMaterial(uint32_t materialSlot, Material* material) override;
+    Material* GetMaterial(uint32_t materialSlot = 0) override;
+    uint32_t GetMaterialSlotCount() const override { return static_cast<uint32_t>(m_materialOverrides.size()); }
+    uint32_t GetMeshID() const override;
 
+    void Draw() override;
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

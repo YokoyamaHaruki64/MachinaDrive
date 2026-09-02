@@ -361,6 +361,22 @@ struct Vector3
 		return *this;
 	}
 
+    /// @brief このベクトルと他のベクトルのクロス積を計算する関数
+    /// @param other 他のベクトル
+    /// @return クロス積の結果のベクトル
+    inline Vector3 Cross(const Vector3& other) const
+    {
+        return Vector3::Cross(*this, other);
+    }
+
+    /// @brief このベクトルと他のベクトルのドット積を計算する関数
+    /// @param other 他のベクトル
+    /// @return ドット積の結果のスカラー値
+    inline float Dot(const Vector3& other) const
+    {
+        return Vector3::Dot(*this, other);
+    }
+
 };
 
 #endif // _VECTOR3_H_

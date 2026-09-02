@@ -1,0 +1,8 @@
+version: 1
+name: PlayerBody
+shader: Assets/Shaders/DefaultLit.shader
+properties:
+  _BaseColor: [0.00736699998,0.326375008,0.0123020001,1]
+  _Emission: [0,0,0,1]
+  _Shininess: 250
+  _MainTex:

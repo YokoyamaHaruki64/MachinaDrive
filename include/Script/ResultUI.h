@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include "System/component.h"
+#include "System/Core/Script.h"
 
-class ResultUI : public Component
+class ResultUI : public Script
 {
+    REGISTER_COMPONENT(ResultUI, "ResultUI");
 private:
     Vector3 m_originalPosition = Vector3::Zero();
     float m_amplitude = 15.0f; // 振幅
@@ -12,7 +13,7 @@ private:
 public:
     ResultUI() = delete;
     explicit ResultUI(GameObject* owner)
-        : Component(owner)
+        : Script(owner)
     {
     }
     void OnStart() override;

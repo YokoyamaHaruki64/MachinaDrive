@@ -3,13 +3,18 @@
 // Precompiled header file
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
+#define IMGUI_DEFINE_MATH_OPERATORS
+
+#ifndef GM_ENABLE_EDITOR
+#define GM_ENABLE_EDITOR 1
+#endif
 
 // Windows APIとDirectX関連のヘッダーファイル
 #include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>
-#include "System/DirectXTex.h"
+#include "System/Rendering/DirectXTex.h"
 
 // C++標準ライブラリ
 #include <vector>
@@ -34,5 +39,5 @@
 
 // 独自のヘッダーファイル
 #include "math/MathCommon.h"
-#include "System/GameObject.h"
-#include "System/Component.h"
+#include "System/Core/GameObject.h"
+#include "System/Core/component.h"

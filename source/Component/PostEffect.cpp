@@ -1,195 +1,234 @@
-﻿#include "Component/PostEffect.h"
-#include "System/renderer.h"
+﻿#include "pch.h"
 
-ComPtr<ID3D11VertexShader> PostEffect::vertexShader;
-ComPtr<ID3D11InputLayout> PostEffect::inputLayout;
-ComPtr<ID3D11Buffer> PostEffect::vertexBuffer;
+#include "Component/ComponentInc.h"
 
-D3D11_PRIMITIVE_TOPOLOGY PostEffect::originalTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-BlendMode PostEffect::originalBlendMode = BlendMode::AlphaBlend;
-void PostEffect::Init()
+
+#include "Component/PostEffect.h"
+
+#include "Graphics/MaterialManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/Shader/ShaderProgram.h"
+#include "Graphics/TextureManager.h"
+#include "System/Rendering/renderer.h"
+
+Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_positionBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_texCoordBuffer;
+
+namespace
 {
-    Renderer::CreateVertexShader(
-        vertexShader.GetAddressOf(),
-        inputLayout.GetAddressOf(),
-        "BuildedShader/FullScreen_VS.cso");
-
-    // 頂点バッファの作成
-    D3D11_BUFFER_DESC desc{};
-    desc.ByteWidth = sizeof(FULLSCREEN_VERTICES);
-    desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA initData{};
-    initData.pSysMem = FULLSCREEN_VERTICES;
-
-    HRESULT hr = Renderer::GetDevice()->CreateBuffer(&desc, &initData, vertexBuffer.GetAddressOf());
-    if (FAILED(hr))
+    template <typename VertexType>
+    Microsoft::WRL::ComPtr<ID3D11Buffer> CreateFullscreenVertexBuffer(const std::vector<VertexType>& vertices)
     {
-        MessageBoxA(nullptr, "Failed to create vertex buffer for PostEffect.", "Error", MB_OK | MB_ICONERROR);
+        D3D11_BUFFER_DESC description{};
+        description.ByteWidth = static_cast<UINT>(sizeof(VertexType) * vertices.size());
+        description.Usage = D3D11_USAGE_IMMUTABLE;
+        description.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+        D3D11_SUBRESOURCE_DATA initialData{};
+        initialData.pSysMem = vertices.data();
+
+        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
+        if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, buffer.GetAddressOf())))
+            MessageBoxA(nullptr, "ポストプロセス用頂点バッファの作成に失敗しました。", "Post Process Error", MB_OK | MB_ICONERROR);
+
+        return buffer;
     }
 }
 
-void PostEffect::PostEffectPass_Begin()
+void PostProcess::Init()
+{
+    const std::vector<PositionVertex> positions
+    {
+        { Vector3(-1.0f, 1.0f, 0.0f) }, { Vector3(1.0f, 1.0f, 0.0f) },
+        { Vector3(-1.0f, -1.0f, 0.0f) }, { Vector3(1.0f, -1.0f, 0.0f) },
+    };
+    const std::vector<PrimaryTexCoordVertex> texCoords
+    {
+        { Vector4(0.0f, 0.0f, 0.0f, 0.0f) }, { Vector4(1.0f, 0.0f, 0.0f, 0.0f) },
+        { Vector4(0.0f, 1.0f, 0.0f, 0.0f) }, { Vector4(1.0f, 1.0f, 0.0f, 0.0f) },
+    };
+
+    m_positionBuffer = CreateFullscreenVertexBuffer(positions);
+    m_texCoordBuffer = CreateFullscreenVertexBuffer(texCoords);
+}
+
+void PostProcess::Uninit()
+{
+    m_positionBuffer.Reset();
+    m_texCoordBuffer.Reset();
+}
+
+PostProcess::PostProcess(const char* shaderFilePath)
+{
+    // PostProcessごとの値は独立したMaterialへ持たせ、Property APIを通常描画と共用する。
+    static uint32_t materialInstanceIndex = 0;
+    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderFilePath))
+        m_material = MaterialManager::Create("PostProcess." + std::to_string(materialInstanceIndex++), *shader);
+}
+
+bool PostProcess::BindFullscreenVertices(const GraphicsShaderPass& shaderPass) const
 {
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    for (const InputSlotBinding& binding : shaderPass.GetInputSlotBindings())
+    {
+        ID3D11Buffer* vertexBuffer{};
+        switch (binding.streamType)
+        {
+        case VertexStreamType::Position:
+            vertexBuffer = m_positionBuffer.Get();
+            break;
+        case VertexStreamType::PrimaryTexCoord:
+            vertexBuffer = m_texCoordBuffer.Get();
+            break;
+        default:
+            vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+            break;
+        }
 
-    // ブレンドモードを保存してアルファブレンドに設定
-    originalBlendMode = Renderer::GetCurrentBlendMode();
-    Renderer::SetBlendMode(BlendMode::None);
-    Renderer::SetDepthEnable(false);
+        const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+        const UINT offset = 0;
+        if (!vertexBuffer || stride == 0)
+            return false;
 
-    // シェーダーの設定
-    context->VSSetShader(vertexShader.Get(), nullptr, 0);
-    context->IASetInputLayout(inputLayout.Get());
-    // 頂点バッファの設定
-    UINT stride = sizeof(VERTEX_3D);
-    UINT offset = 0;
-    context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-    // プリミティブトポロジーの設定
-    context->IAGetPrimitiveTopology(&originalTopology);
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+        context->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+    }
+
+    return true;
 }
 
-void PostEffect::PostEffectPass_End()
+void PostProcess::BindSourceTexture() const
 {
-    Renderer::GetDeviceContext()->IASetPrimitiveTopology(originalTopology);
-    Renderer::SetBlendMode(originalBlendMode);
+    // 画面入力はPropertyではなく、すべてのPostProcessで共通のt0へ設定する。
+    ID3D11ShaderResourceView* source = Renderer::GetSrcSRV();
+    Renderer::GetDeviceContext()->PSSetShaderResources(0, 1, &source);
 }
 
-PostEffect::PostEffect(const char* shaderFileName)
-{
-    Renderer::CreatePixelShader(m_PixelShader.GetAddressOf(), shaderFileName);
-}
-
-
-void PostEffect::Apply()
+void PostProcess::ClearBoundTextures(const GraphicsShaderPass& shaderPass) const
 {
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    ID3D11ShaderResourceView* nullResource = nullptr;
 
-    // 前回のRTVを解除
-    // srcをPrepare内でSRVとして使用可能にする
-    context->OMSetRenderTargets(0, nullptr, nullptr);
+    // 次のRTとの読み書き競合を避けるため、このPassが設定したSRVを解除する。
+    context->PSSetShaderResources(0, 1, &nullResource);
+    for (const ShaderTextureInfo& binding : shaderPass.GetTextureInfo())
+    {
+        if (binding.vsSlot >= 0)
+            context->VSSetShaderResources(binding.vsSlot, 1, &nullResource);
+        if (binding.psSlot >= 0)
+            context->PSSetShaderResources(binding.psSlot, 1, &nullResource);
+    }
+}
 
-    // エフェクト固有の中間処理
-    Prepare();
+bool PostProcess::ExecutePass(size_t passIndex)
+{
+    if (!m_material || passIndex >= m_material->GetShader().GetShaderPasses().size())
+        return false;
 
-    // 共通の最終出力先
+    const GraphicsShaderPass& shaderPass = m_material->GetShaderPass(passIndex);
+
+    // 画面出力では、現在のSourceと異なるDstへ描画して完了後にSwapする。
     Renderer::SetDstRTV();
+    m_material->Bind(passIndex);
+    BindSourceTexture();
+    const bool canDraw = BindFullscreenVertices(shaderPass);
+    if (canDraw)
+        DrawFullscreen();
 
-    // エフェクト固有のSRV設定など
-    SetUp();
-
-    // メインのピクセルシェーダーを設定
-    context->PSSetShader(m_PixelShader.Get(), nullptr, 0);
-
-    // 描画済みのテクスチャをSRVとして設定
-    ID3D11ShaderResourceView* srcSRV = Renderer::GetSrcSRV();
-    context->PSSetShaderResources(0, 1, &srcSRV);
-
-    context->Draw(4, 0);
-
-    // 基底クラスが使ったt0を解除
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->PSSetShaderResources(0, 1, &nullSRV);
-
-    // 派生クラスが使った追加SRVなどを解除
-    Cleanup();
+    ClearBoundTextures(shaderPass);
+    if (!canDraw)
+        return false;
 
     Renderer::SwapBuffers();
+    return true;
 }
 
-Bloom::Bloom() : PostEffect(BLOOM_SHADER_FILE)
+bool PostProcess::ExecutePass(std::string_view passTag)
 {
-    ID3D11Device* device = Renderer::GetDevice();
-    // 輝度抽出用のテクスチャを作成
-    ID3D11Texture2D* bloomTexture = nullptr;
-    D3D11_TEXTURE2D_DESC desc{};
-    desc.Width = SCREEN_WIDTH * 0.5f; // 半分の解像度で作成
-    desc.Height = SCREEN_HEIGHT * 0.5f;
-    desc.MipLevels = 1;
-    desc.ArraySize = 1;
-    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    desc.SampleDesc.Count = 1;
-    desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    if (!m_material)
+        return false;
 
-    HRESULT hr = device->CreateTexture2D(&desc, nullptr, &bloomTexture);
-    if (FAILED(hr))
-    {
-        MessageBoxA(nullptr, "Failed to create bloom texture.", "Error", MB_OK | MB_ICONERROR);
-    }
-
-    // 輝度抽出用のRTVを作成
-    hr = device->CreateRenderTargetView(bloomTexture, nullptr, m_bloomRTV.GetAddressOf());
-    if (FAILED(hr))
-    {
-        MessageBoxA(nullptr, "Failed to create bloom RTV.", "Error", MB_OK | MB_ICONERROR);
-    }
-
-    // 輝度のSRVを作成
-    hr = device->CreateShaderResourceView(bloomTexture, nullptr, m_bloomSRV.GetAddressOf());
-    if (FAILED(hr))
-    {
-        MessageBoxA(nullptr, "Failed to create bloom SRV.", "Error", MB_OK | MB_ICONERROR);
-    }
-
-    // 作成したテクスチャは不要なので解放
-    if (bloomTexture)
-    {
-        bloomTexture->Release();
-    }
-
-    // 輝度抽出&横ブラー用のピクセルシェーダーを作成
-    Renderer::CreatePixelShader(m_blurPixelShader.GetAddressOf(), BLOOM_BLUR_SHADER_FILE);
+    const std::optional<size_t> passIndex = m_material->GetShader().GetShaderPassIndex(passTag);
+    return passIndex && ExecutePass(*passIndex);
 }
 
-void Bloom::Prepare()
+bool PostProcess::ExecutePass(size_t passIndex, TextureHandle renderTarget)
+{
+    if (!m_material || passIndex >= m_material->GetShader().GetShaderPasses().size())
+        return false;
+
+    const GraphicsShaderPass& shaderPass = m_material->GetShaderPass(passIndex);
+    if (!Renderer::SetRenderTarget(renderTarget))
+        return false;
+
+    // 中間RTへの出力ではSwapせず、次のPassも同じ画面入力を参照できるようにする。
+    m_material->Bind(passIndex);
+    BindSourceTexture();
+    const bool canDraw = BindFullscreenVertices(shaderPass);
+    if (canDraw)
+        DrawFullscreen();
+
+    ClearBoundTextures(shaderPass);
+    return canDraw;
+}
+
+bool PostProcess::ExecutePass(std::string_view passTag, TextureHandle renderTarget)
+{
+    if (!m_material)
+        return false;
+
+    const std::optional<size_t> passIndex = m_material->GetShader().GetShaderPassIndex(passTag);
+    return passIndex && ExecutePass(*passIndex, renderTarget);
+}
+
+void PostProcess::DrawFullscreen() const
 {
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
-
-    // レンダーターゲットを輝度抽出用のRTVに切り替え
-    context->OMSetRenderTargets(1, m_bloomRTV.GetAddressOf(), nullptr);
-
-    // ビューポートを半分の解像度に設定
-    D3D11_VIEWPORT originalViewport{};
-    D3D11_VIEWPORT bloomViewport{};
-    bloomViewport.Width = SCREEN_WIDTH * 0.5f;
-    bloomViewport.Height = SCREEN_HEIGHT * 0.5f;
-    bloomViewport.MinDepth = 0.0f;
-    bloomViewport.MaxDepth = 1.0f;
-
-    // 元のビューポートを保存してから、半分の解像度のビューポートに切り替え
-    UINT viewportNum = 1;
-    context->RSGetViewports(&viewportNum, &originalViewport);
-    context->RSSetViewports(1, &bloomViewport);
-
-    // 描画済みのテクスチャをSRVとして設定
-    ID3D11ShaderResourceView* srcSRV = Renderer::GetSrcSRV();
-    context->PSSetShaderResources(0, 1, &srcSRV);
-
-    // 輝度抽出用&横ブラー用のピクセルシェーダーを設定
-    context->PSSetShader(m_blurPixelShader.Get(), nullptr, 0);
-
-    // 輝度抽出&横ブラーの描画
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     context->Draw(4, 0);
-
-    // 元のビューポートに戻す
-    context->RSSetViewports(1, &originalViewport);
-
-    // Apply で 縦ブラーを適用して加算
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Bloom::SetUp()
+Bloom::Bloom()
+    : PostProcess(SHADER_FILE_PATH)
 {
-    // 輝度抽出済のテクスチャをSRVとして設定
-    Renderer::GetDeviceContext()->PSSetShaderResources(1, 1, m_bloomSRV.GetAddressOf());
+    // 中間RTはTextureManagerが所有し、Material Propertyへ共通Handleで渡す。
+    const UINT bloomWidth = std::max<UINT>(Renderer::GetGameWidth() / 2, 1);
+    const UINT bloomHeight = std::max<UINT>(Renderer::GetGameHeight() / 2, 1);
+    m_bloomTexture = TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
+    if (!m_bloomTexture.IsValid())
+        return;
+
+    if (Material* material = GetMaterial())
+    {
+        material->SetTexture("_Bloom", m_bloomTexture);
+        m_bloomExtractPassIndex = material->GetShader().GetShaderPassIndex("BloomExtract").value_or(-1);
+        m_compositePassIndex = material->GetShader().GetShaderPassIndex("Composite").value_or(-1);
+    }
+
 }
 
-void Bloom::Cleanup()
+void Bloom::Resize(UINT width, UINT height)
 {
-    // SRVを解除
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    Renderer::GetDeviceContext()->PSSetShaderResources(1, 1, &nullSRV);
+    const UINT bloomWidth = std::max<UINT>(width / 2, 1);
+    const UINT bloomHeight = std::max<UINT>(height / 2, 1);
+    const TextureHandle resizedTexture =
+        TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
+    if (!resizedTexture.IsValid())
+        return;
+
+    m_bloomTexture = resizedTexture;
+    if (Material* material = GetMaterial())
+        material->SetTexture("_Bloom", m_bloomTexture);
+}
+
+void Bloom::Apply()
+{
+    if (!m_bloomTexture.IsValid() || !GetMaterial())
+        return;
+
+    // 中間RTへ抽出してから、Materialの_Bloom Propertyを使って画面へ合成する。
+    if (!ExecutePass(m_bloomExtractPassIndex, m_bloomTexture))
+        return;
+
+    ExecutePass(m_compositePassIndex);
 }

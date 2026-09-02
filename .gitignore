@@ -1,9 +1,9 @@
 .vs/
-Assets/
+.codex-work/
+Assets/Local/
 BuildedShader/
 Project_Drive/
+Logs/
+x64/
+# ImGuiのDock配置は開発者ごとに異なるため追跡しない。
 config/imgui.ini
-config/BoundBallConfig.ini
-config/FireWorkConfig.ini
-config/ImpactBurstConfig.ini
-config/PatternTrailConfig.ini

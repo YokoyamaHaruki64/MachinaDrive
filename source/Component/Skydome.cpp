@@ -1,30 +1,27 @@
 ﻿#include "Component/Skydome.h"
 
-#include "Component/Transform.h"
-#include "Component/modelRenderer.h"
-#include "Component/Camera.h"
-#include "System/manager.h"
+#include "Component/ComponentInc.h"
+
+
+#include "Graphics/MaterialManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 void Skydome::OnStart()
 {
     m_mainCamera = Camera::GetMainCamera();
     if (!m_mainCamera)
     {
-        MessageBoxA(nullptr, "Skydome: Main Camera not found!", "Error", MB_OK | MB_ICONERROR);
+        Logger::Error("Skydome: メインカメラが見つかりません。");
+        return;
     }
-
-    GameObject* domeObject = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(1000.0f, 1000.0f, 1000.0f));
-    domeObject->AddComponent<ModelRenderer>(
-        "Assets\\Models\\sky.obj",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
 }
 
 void Skydome::Update()
 {
-    if (m_mainCamera && m_domeObject)
+    if (m_mainCamera)
     {
         Vector3 cameraPos = m_mainCamera->transform()->GetPosition();
-        m_domeObject->GetTransform()->SetPosition(cameraPos);
+        transform()->SetPosition(cameraPos);
     }
 }

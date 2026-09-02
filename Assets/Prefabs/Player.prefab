@@ -1,0 +1,39 @@
+version: 1
+name: Player
+gameObjects:
+  - id: 1
+    name: Player
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,2.61216004e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1.00034523,1,1.00034523]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - Assets/Materials/Player/PlayerBody.material
+            - Assets/Materials/Player/PlayerFlont.material
+            - Assets/Materials/Player/PlayerHead.material
+          m_inverseAxisFlags: 0
+      - type: Player
+        fields:
+          enabled: true
+          m_velocity: [0,0,0]
+          m_isGrounded: true
+      - type: Audio
+        fields:
+          enabled: true
+          m_filePath: Assets/Local/Sounds/wan.wav
+          m_playOnStart: false
+          m_loop: false

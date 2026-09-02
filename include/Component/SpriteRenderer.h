@@ -1,62 +1,54 @@
 ﻿#pragma once
-#include "System/RendererBase.h"
 
-#include <d3d11.h>
-#include <wrl/client.h>
-using Microsoft::WRL::ComPtr;
+#include "Graphics/Material.h"
+#include "Graphics/ModelAsset.h"
+#include "System/Rendering/RendererBase.h"
 
 class SpriteRenderer : public RendererBase
 {
+    REGISTER_COMPONENT(SpriteRenderer, "Sprite Renderer");
+
 protected:
-    ComPtr<ID3D11Buffer> m_vertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_positionBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_texCoordBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_colorBuffer;
 
-    ComPtr<ID3D11VertexShader> m_vertexShader;
-    ComPtr<ID3D11PixelShader> m_pixelShader;
-    ComPtr<ID3D11InputLayout> m_inputLayout;
+    Material* m_material{};
+    std::string m_materialPath{ "Assets/Materials/Sprite.material" };
 
-    ComPtr<ID3D11ShaderResourceView> m_texture;
-    int m_textureWidth = 0;
-    int m_textureHeight = 0;
-
-    float m_uvOffsetX = 0.0f;
-    float m_uvOffsetY = 0.0f;
-    float m_uvWidth = 1.0f;
-    float m_uvHeight = 1.0f;
-
-    static const char* DEFAULT_VERTEX_SHADER_FILE;
-    static const char* DEFAULT_PIXEL_SHADER_FILE;
 public:
     SpriteRenderer() = delete;
-    SpriteRenderer(
-        GameObject* owner,
-        const wchar_t* textureFile,
-        const char* vertexShaderFile = DEFAULT_VERTEX_SHADER_FILE,
-        const char* pixelShaderFile = DEFAULT_PIXEL_SHADER_FILE
-    );
+    explicit SpriteRenderer(GameObject* owner);
 
     virtual ~SpriteRenderer() {}
+    void OnLoaded() override;
+    void OnEditorUpdate() override;
     void Draw() override;
+    Material* GetMaterial(uint32_t slot = 0) override;
+    void SetMaterial(uint32_t slot, Material* material) override;
 
     void SetUVRect(float offsetX, float offsetY, float width, float height)
     {
-        m_uvOffsetX = offsetX;
-        m_uvOffsetY = offsetY;
-        m_uvWidth = width;
-        m_uvHeight = height;
+        MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVOffset", Vector2(offsetX, offsetY));
+        propertyOverride.SetVector2("_UVScale", Vector2(width, height));
     }
 
     void SetUVOffset(float offsetX, float offsetY)
     {
-        m_uvOffsetX = offsetX;
-        m_uvOffsetY = offsetY;
+        GetMaterialPropertyOverride().SetVector2("_UVOffset", Vector2(offsetX, offsetY));
     }
 
     void SetUVSize(float width, float height)
     {
-        m_uvWidth = width;
-        m_uvHeight = height;
+        GetMaterialPropertyOverride().SetVector2("_UVScale", Vector2(width, height));
     }
 
-    int GetTextureWidth() const { return m_textureWidth; }
-    int GetTextureHeight() const { return m_textureHeight; }
+    void SetColor(const Color& color)
+    {
+        GetMaterialPropertyOverride().SetColor("_BaseColor", color);
+    }
+
+protected:
+    void RegisterFields(FieldRegistry& fields) override;
 };

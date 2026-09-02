@@ -1,0 +1,55 @@
+
+
+
+cbuffer PerFrame : register(b0)
+{
+	matrix View;
+	matrix Projection;
+	float3 CameraPosition;
+	float Time;
+}
+
+cbuffer PerObject : register(b1)
+{
+	matrix World;
+}
+
+SamplerState LinearSampler : register(s0);
+SamplerComparisonState ShadowSampler : register(s1);
+SamplerState ClampSampler : register(s2);
+
+
+
+
+struct LIGHT
+{
+	bool Enable;
+	bool3 Dummy;
+	float4 Direction;
+	float4 Diffuse;
+	float4 Ambient;
+};
+
+cbuffer Lighting : register(b2)
+{
+	LIGHT Light;
+}
+
+struct VS_IN
+{
+	float4 Position		: POSITION0;
+	float4 Normal		: NORMAL0;
+	float4 Diffuse		: COLOR0;
+	float2 TexCoord		: TEXCOORD0;
+};
+
+
+struct PS_IN
+{
+	float4 Position		: SV_POSITION;
+    float4 Normal		: NORMAL0;
+	float4 Diffuse		: COLOR0;
+	float2 TexCoord		: TEXCOORD0;
+    float4 WorldPos		: POSITION0;
+    float4 ObjectNormal	: NORMAL1;
+};

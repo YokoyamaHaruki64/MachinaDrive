@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -72,9 +72,10 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;GM_ENABLE_EDITOR=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -84,11 +85,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GM_ENABLE_EDITOR=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -98,11 +100,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;GM_ENABLE_EDITOR=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;$(ProjectDir)External\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -117,13 +120,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;GM_ENABLE_EDITOR=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)source;$(ProjectDir)include\Script;$(ProjectDir)include\Common;$(ProjectDir)include\ImGui;$(ProjectDir)External\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -142,49 +146,77 @@
     <ClCompile Include="source\Component\modelRenderer.cpp" />
     <ClCompile Include="source\Component\ParticleSystem.cpp" />
     <ClCompile Include="source\Component\PostEffect.cpp" />
-    <ClCompile Include="source\Component\Primitive.cpp" />
     <ClCompile Include="source\Component\Conponent.cpp" />
     <ClCompile Include="source\Component\Skydome.cpp" />
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\Component\Transform.cpp" />
+    <ClCompile Include="source\Component\TransformBase.cpp" />
+    <ClCompile Include="source\Component\UIButton.cpp" />
+    <ClCompile Include="source\Component\UICanvas.cpp" />
+    <ClCompile Include="source\Component\UIImage.cpp" />
+    <ClCompile Include="source\Component\UITransform.cpp" />
+    <ClCompile Include="source\Component\UIText.cpp" />
+    <ClCompile Include="source\Graphics\Material.cpp" />
+    <ClCompile Include="source\Graphics\MaterialManager.cpp" />
+    <ClCompile Include="source\Graphics\ModelLoader.cpp" />
+    <ClCompile Include="source\Graphics\ModelManager.cpp" />
+    <ClCompile Include="source\Graphics\TextureManager.cpp" />
+    <ClCompile Include="source\Graphics\Shader\InputLayoutBuilder.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderCompiler.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderFactory.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderLoader.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderManager.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderParser.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderProgram.cpp" />
+    <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp" />
     <ClCompile Include="source\ImGui\imgui.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="source\ImGui\imgui_curve_custom.cpp" />
+    <ClCompile Include="source\ImGui\imgui_curve_custom.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\ImGui\imgui_demo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_draw.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_impl_dx11.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_impl_win32.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_tables.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_widgets.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)include\pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -197,44 +229,182 @@
     <ClCompile Include="source\Scene\GameScene.cpp" />
     <ClCompile Include="source\Scene\ResultScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
-    <ClCompile Include="source\Script\BallManager.cpp" />
     <ClCompile Include="source\Script\Bullet.cpp" />
-    <ClCompile Include="source\Script\BoundBall.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
-    <ClCompile Include="source\Script\EffectConfig.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
-    <ClCompile Include="source\Script\FireworksEffect.cpp" />
-    <ClCompile Include="source\Script\ImpactBurst.cpp" />
-    <ClCompile Include="source\Script\PatternTrail.cpp" />
-    <ClCompile Include="source\Script\PatternTrailHeader.cpp" />
-    <ClCompile Include="source\Script\PatternTrailManager.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
-    <ClCompile Include="source\Script\Ripple.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
+    <ClCompile Include="source\Script\SampleMoveScript.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
-    <ClCompile Include="source\System\GM_Time.cpp" />
-    <ClCompile Include="source\System\input.cpp" />
-    <ClCompile Include="source\System\main.cpp" />
-    <ClCompile Include="source\System\GameObject.cpp" />
-    <ClCompile Include="source\System\manager.cpp" />
-    <ClCompile Include="source\System\renderer.cpp" />
-    <ClCompile Include="source\System\RendererBase.cpp" />
+    <ClCompile Include="source\System\Core\GM_Time.cpp" />
+    <ClCompile Include="source\System\Core\input.cpp" />
+    <ClCompile Include="source\System\Editor\EditorWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\EditorSystem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\GameWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Core\ComponentRegistry.cpp" />
+    <ClCompile Include="source\System\Editor\HierarchyWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\InspectorWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\ImGuiStyleConfig.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\LogWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\PerformanceWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\FieldRegistry.cpp">
+    </ClCompile>
+    <ClCompile Include="source\System\Editor\FileSystem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\System\Serialization\YAMLDocumentIO.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\System\Diagnostics\LogFileWorker.cpp" />
+    <ClCompile Include="source\System\Diagnostics\Logger.cpp" />
+    <ClCompile Include="source\System\Diagnostics\LogSystem.cpp" />
+    <ClCompile Include="source\System\Diagnostics\PerformanceMonitor.cpp" />
+    <ClCompile Include="source\System\Core\main.cpp" />
+    <ClCompile Include="source\System\Core\GameObject.cpp" />
+    <ClCompile Include="source\System\Serialization\GameObjectYamlSerializer.cpp" />
+    <ClCompile Include="source\System\UI\FontAsset.cpp" />
+    <ClCompile Include="source\System\Core\GameObjectReference.cpp" />
+    <ClCompile Include="source\System\Core\manager.cpp" />
+    <ClCompile Include="source\System\Rendering\renderer.cpp" />
+    <ClCompile Include="source\System\Rendering\RendererBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\Include\rapidyaml\rapidyaml.hpp" />
+    <ClInclude Include="External\Include\Assimp\aabb.h" />
+    <ClInclude Include="External\Include\Assimp\ai_assert.h" />
+    <ClInclude Include="External\Include\Assimp\anim.h" />
+    <ClInclude Include="External\Include\Assimp\AssertHandler.h" />
+    <ClInclude Include="External\Include\Assimp\Base64.hpp" />
+    <ClInclude Include="External\Include\Assimp\BaseImporter.h" />
+    <ClInclude Include="External\Include\Assimp\Bitmap.h" />
+    <ClInclude Include="External\Include\Assimp\BlobIOSystem.h" />
+    <ClInclude Include="External\Include\Assimp\ByteSwapper.h" />
+    <ClInclude Include="External\Include\Assimp\camera.h" />
+    <ClInclude Include="External\Include\Assimp\cexport.h" />
+    <ClInclude Include="External\Include\Assimp\cfileio.h" />
+    <ClInclude Include="External\Include\Assimp\cimport.h" />
+    <ClInclude Include="External\Include\Assimp\ColladaMetaData.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\poppack1.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="External\Include\Assimp\Compiler\pstdint.h" />
+    <ClInclude Include="External\Include\Assimp\color4.h" />
+    <ClInclude Include="External\Include\Assimp\commonMetaData.h" />
+    <ClInclude Include="External\Include\Assimp\config.h" />
+    <ClInclude Include="External\Include\Assimp\CreateAnimMesh.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultIOStream.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultIOSystem.h" />
+    <ClInclude Include="External\Include\Assimp\DefaultLogger.hpp" />
+    <ClInclude Include="External\Include\Assimp\defs.h" />
+    <ClInclude Include="External\Include\Assimp\Exceptional.h" />
+    <ClInclude Include="External\Include\Assimp\Exporter.hpp" />
+    <ClInclude Include="External\Include\Assimp\fast_atof.h" />
+    <ClInclude Include="External\Include\Assimp\GenericProperty.h" />
+    <ClInclude Include="External\Include\Assimp\GltfMaterial.h" />
+    <ClInclude Include="External\Include\Assimp\Hash.h" />
+    <ClInclude Include="External\Include\Assimp\Importer.hpp" />
+    <ClInclude Include="External\Include\Assimp\importerdesc.h" />
+    <ClInclude Include="External\Include\Assimp\IOStream.hpp" />
+    <ClInclude Include="External\Include\Assimp\IOStreamBuffer.h" />
+    <ClInclude Include="External\Include\Assimp\IOSystem.hpp" />
+    <ClInclude Include="External\Include\Assimp\light.h" />
+    <ClInclude Include="External\Include\Assimp\LineSplitter.h" />
+    <ClInclude Include="External\Include\Assimp\LogAux.h" />
+    <ClInclude Include="External\Include\Assimp\Logger.hpp" />
+    <ClInclude Include="External\Include\Assimp\LogStream.hpp" />
+    <ClInclude Include="External\Include\Assimp\material.h" />
+    <ClInclude Include="External\Include\Assimp\MathFunctions.h" />
+    <ClInclude Include="External\Include\Assimp\matrix3x3.h" />
+    <ClInclude Include="External\Include\Assimp\matrix4x4.h" />
+    <ClInclude Include="External\Include\Assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="External\Include\Assimp\mesh.h" />
+    <ClInclude Include="External\Include\Assimp\metadata.h" />
+    <ClInclude Include="External\Include\Assimp\NullLogger.hpp" />
+    <ClInclude Include="External\Include\Assimp\ObjMaterial.h" />
+    <ClInclude Include="External\Include\Assimp\ParsingUtils.h" />
+    <ClInclude Include="External\Include\Assimp\pbrmaterial.h" />
+    <ClInclude Include="External\Include\Assimp\postprocess.h" />
+    <ClInclude Include="External\Include\Assimp\Profiler.h" />
+    <ClInclude Include="External\Include\Assimp\ProgressHandler.hpp" />
+    <ClInclude Include="External\Include\Assimp\qnan.h" />
+    <ClInclude Include="External\Include\Assimp\quaternion.h" />
+    <ClInclude Include="External\Include\Assimp\RemoveComments.h" />
+    <ClInclude Include="External\Include\Assimp\scene.h" />
+    <ClInclude Include="External\Include\Assimp\SceneCombiner.h" />
+    <ClInclude Include="External\Include\Assimp\SGSpatialSort.h" />
+    <ClInclude Include="External\Include\Assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="External\Include\Assimp\SmallVector.h" />
+    <ClInclude Include="External\Include\Assimp\SmoothingGroups.h" />
+    <ClInclude Include="External\Include\Assimp\SpatialSort.h" />
+    <ClInclude Include="External\Include\Assimp\StandardShapes.h" />
+    <ClInclude Include="External\Include\Assimp\StreamReader.h" />
+    <ClInclude Include="External\Include\Assimp\StreamWriter.h" />
+    <ClInclude Include="External\Include\Assimp\StringComparison.h" />
+    <ClInclude Include="External\Include\Assimp\StringUtils.h" />
+    <ClInclude Include="External\Include\Assimp\Subdivision.h" />
+    <ClInclude Include="External\Include\Assimp\texture.h" />
+    <ClInclude Include="External\Include\Assimp\TinyFormatter.h" />
+    <ClInclude Include="External\Include\Assimp\types.h" />
+    <ClInclude Include="External\Include\Assimp\vector2.h" />
+    <ClInclude Include="External\Include\Assimp\vector3.h" />
+    <ClInclude Include="External\Include\Assimp\version.h" />
+    <ClInclude Include="External\Include\Assimp\Vertex.h" />
+    <ClInclude Include="External\Include\Assimp\XmlParser.h" />
+    <ClInclude Include="External\Include\Assimp\XMLTools.h" />
+    <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="include\Common\Color.h" />
+    <ClInclude Include="include\Common\ValueType.h" />
     <ClInclude Include="include\Common\Random.h" />
     <ClInclude Include="include\Component\audio.h" />
     <ClInclude Include="include\Component\Camera.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\ParticleSystem.h" />
     <ClInclude Include="include\Component\PostEffect.h" />
-    <ClInclude Include="include\Component\Primitive.h" />
     <ClInclude Include="include\Component\Skydome.h" />
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
     <ClInclude Include="include\Component\Transform.h" />
+    <ClInclude Include="include\Component\TransformBase.h" />
+    <ClInclude Include="include\Component\UIButton.h" />
+    <ClInclude Include="include\Component\UICanvas.h" />
+    <ClInclude Include="include\Component\UIImage.h" />
+    <ClInclude Include="include\Component\UITransform.h" />
+    <ClInclude Include="include\Component\UIText.h" />
+    <ClInclude Include="include\Graphics\GraphicInc.h" />
+    <ClInclude Include="include\Graphics\Material.h" />
+    <ClInclude Include="include\Graphics\MaterialPropertyOverride.h" />
+    <ClInclude Include="include\Graphics\MaterialManager.h" />
+    <ClInclude Include="include\Graphics\ModelAsset.h" />
+    <ClInclude Include="include\Graphics\ModelLoader.h" />
+    <ClInclude Include="include\Graphics\ModelManager.h" />
+    <ClInclude Include="include\Graphics\TextureManager.h" />
+    <ClInclude Include="include\Graphics\Shader\InputLayoutBuilder.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderCompiler.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderFactory.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderInc.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderLoader.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderManager.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderParser.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderProgram.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderReflector.h" />
+    <ClInclude Include="include\Graphics\Shader\ShaderToken.h" />
     <ClInclude Include="include\ImGui\imconfig.h" />
     <ClInclude Include="include\ImGui\imgui.h" />
     <ClInclude Include="include\ImGui\imgui_curve_custom.h" />
@@ -246,44 +416,72 @@
     <ClInclude Include="include\ImGui\imstb_truetype.h" />
     <ClInclude Include="include\math\Curve.h" />
     <ClInclude Include="include\math\MathCommon.h" />
+    <ClInclude Include="include\math\Matrix3x3.h" />
+    <ClInclude Include="include\math\Matrix4x4.h" />
+    <ClInclude Include="include\math\Quaternion.h" />
+    <ClInclude Include="include\math\Vector2.h" />
     <ClInclude Include="include\math\Vector3.h" />
+    <ClInclude Include="include\math\Vector4.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\Scene\GameScene.h" />
     <ClInclude Include="include\Scene\ResultScene.h" />
     <ClInclude Include="include\Scene\Scene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
-    <ClInclude Include="include\Script\BallManager.h" />
     <ClInclude Include="include\Script\Bullet.h" />
-    <ClInclude Include="include\Script\BoundBall.h" />
     <ClInclude Include="include\Script\CameraController.h" />
-    <ClInclude Include="include\Script\EffectConfig.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
-    <ClInclude Include="include\Script\FireworksEffect.h" />
-    <ClInclude Include="include\Script\ImpactBurst.h" />
-    <ClInclude Include="include\Script\PatternTrail.h" />
-    <ClInclude Include="include\Script\PatternTrailManager.h" />
     <ClInclude Include="include\Script\Player.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
-    <ClInclude Include="include\Script\Ripple.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
+    <ClInclude Include="include\Script\SampleMoveScript.h" />
+    <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
-    <ClInclude Include="include\Script\PatternTrailHeader.h" />
-    <ClInclude Include="include\Script\Wall.h" />
-    <ClInclude Include="include\System\component.h" />
-    <ClInclude Include="include\System\DirectXTex.h" />
-    <ClInclude Include="include\System\GameObject.h" />
-    <ClInclude Include="include\System\GM_Time.h" />
-    <ClInclude Include="include\System\input.h" />
-    <ClInclude Include="include\System\main.h" />
-    <ClInclude Include="include\System\manager.h" />
-    <ClInclude Include="include\System\PrefabFactory.h" />
-    <ClInclude Include="include\System\renderer.h" />
-    <ClInclude Include="include\System\RendererBase.h" />
+    <ClInclude Include="include\System\Core\component.h" />
+    <ClInclude Include="include\System\Core\component.inl" />
+    <ClInclude Include="include\System\Core\ComponentRegistry.h" />
+    <ClInclude Include="include\System\Editor\EditorWindow.h" />
+    <ClInclude Include="include\System\Editor\EditorSystem.h" />
+    <ClInclude Include="include\System\Editor\GameWindow.h" />
+    <ClInclude Include="include\System\Editor\HierarchyWindow.h" />
+    <ClInclude Include="include\System\Editor\InspectorWindow.h" />
+    <ClInclude Include="include\System\Editor\ImGuiStyleConfig.h" />
+    <ClInclude Include="include\System\Editor\LogWindow.h" />
+    <ClInclude Include="include\System\Editor\PerformanceWindow.h" />
+    <ClInclude Include="include\System\Editor\FieldRegistry.h" />
+    <ClInclude Include="include\System\Editor\FieldRegistry.inl" />
+    <ClInclude Include="include\System\Editor\FileSystem.h" />
+    <ClInclude Include="include\System\Serialization\YAMLValueConverter.h" />
+    <ClInclude Include="include\System\Serialization\YAMLReflection.h" />
+    <ClInclude Include="include\System\Serialization\YAMLDocumentIO.h" />
+    <ClInclude Include="include\System\Serialization\YAMLTypes.h" />
+    <ClInclude Include="include\System\Rendering\DirectXTex.h" />
+    <ClInclude Include="include\System\Core\GameObject.h" />
+    <ClInclude Include="include\System\Serialization\GameObjectYamlSerializer.h" />
+    <ClInclude Include="include\System\UI\UIRect.h" />
+    <ClInclude Include="include\System\UI\FontAsset.h" />
+    <ClInclude Include="include\System\Core\GameObjectReference.h" />
+    <ClInclude Include="include\System\Core\PrefabReference.h" />
+    <ClInclude Include="include\System\Core\Script.h" />
+    <ClInclude Include="include\System\GameplayMacros.h" />
+    <ClInclude Include="include\System\SystemInc.h" />
+    <ClInclude Include="include\Component\ComponentInc.h" />
+    <ClInclude Include="include\System\Core\GM_Time.h" />
+    <ClInclude Include="include\System\Core\input.h" />
+    <ClInclude Include="include\System\Diagnostics\LogFileWorker.h" />
+    <ClInclude Include="include\System\Diagnostics\Logger.h" />
+    <ClInclude Include="include\System\Diagnostics\LogSystem.h" />
+    <ClInclude Include="include\System\Diagnostics\PerformanceMonitor.h" />
+    <ClInclude Include="include\System\Core\main.h" />
+    <ClInclude Include="include\System\Core\manager.h" />
+    <ClInclude Include="include\System\Rendering\renderer.h" />
+    <ClInclude Include="include\System\Rendering\RendererBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shader\BloomBlur_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\BloomBlur_PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -291,7 +489,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Bloom_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\Bloom_PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -299,11 +499,17 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\common.hlsl">
+    <FxCompile Include="Assets\Shaders\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitPS.hlsl">
+    <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shaders\DefaultLitPS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
@@ -311,7 +517,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\DefaultLitVS.hlsl">
+    <FxCompile Include="Assets\Shaders\DefaultLitVS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
@@ -319,7 +527,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Dice_PS.hlsl">
+    <FxCompile Include="Assets\Shaders\Dice_PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -327,7 +537,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\Dice_VS.hlsl">
+    <FxCompile Include="Assets\Shaders\Dice_VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -335,7 +547,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\FullScreen_VS.hlsl">
+    <FxCompile Include="Assets\Shaders\FullScreen_VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -345,7 +559,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\unlitTexturePS.hlsl">
+    <FxCompile Include="Assets\Shaders\unlitTexturePS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -353,7 +569,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="shader\unlitTextureVS.hlsl">
+    <FxCompile Include="Assets\Shaders\unlitTextureVS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -364,7 +582,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="include\System\DirectXTex.inl" />
+    <None Include="Assets\Shaders\DefaultLit.shader" />
+    <None Include="Assets\Shaders\PostProcessBloom.shader" />
+    <None Include="Assets\Shaders\UnlitAdditive.shader" />
+    <None Include="Assets\Shaders\UnlitTexture.shader" />
+    <None Include="Assets\Shaders\UnlitTransparent.shader" />
+    <None Include="External\Include\Assimp\color4.inl" />
+    <None Include="External\Include\Assimp\material.inl" />
+    <None Include="External\Include\Assimp\matrix3x3.inl" />
+    <None Include="External\Include\Assimp\matrix4x4.inl" />
+    <None Include="External\Include\Assimp\quaternion.inl" />
+    <None Include="External\Include\Assimp\SmoothingGroups.inl" />
+    <None Include="External\Include\Assimp\vector2.inl" />
+    <None Include="External\Include\Assimp\vector3.inl" />
+    <None Include="include\System\Rendering\DirectXTex.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

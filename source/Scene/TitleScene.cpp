@@ -2,33 +2,46 @@
 
 #include "Scene/TitleScene.h"
 
-#include "System/main.h"
-#include "System/manager.h"
-#include "Component/Transform.h"
-#include "Component/SpriteRenderer.h"
+#include "System/Core/main.h"
+#include "System/Core/manager.h"
+#include "Component/UIImage.h"
+#include "Component/UICanvas.h"
+#include "Component/UITransform.h"
+#include "System/Rendering/renderer.h"
 
 #include "Script/TItleUI.h"
+#include "Script/FieldRegistryTest.h"
 
 
 void TitleScene::Init()
 {
+    if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
+    {
+        return;
+    }
+
     // シーン初期化
-    GameObject* titleBG = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f));
-    titleBG->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/TitleBG.png");
-    titleBG->GetTransform()->SetScale(Vector3(SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f));
+    GameObject* const canvas = Manager::CreateUICanvas("Title Canvas");
 
-    const float LOGO_SCALE = 300.0f;
-    GameObject* titleLogo = Manager::CreateEmpty(Vector3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f, 0.0f));
-    titleLogo->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/TitleLogo.png");
-    titleLogo->GetTransform()->SetScale(Vector3(LOGO_SCALE * 3.0f, LOGO_SCALE * 2.0f, 1.0f)); // 3:2画像
+    GameObject* const titleBG = Manager::CreateUIObject("Title Background");
+    titleBG->SetParent(canvas, ParentTransformMode::KeepLocal);
+    UITransform* const backgroundTransform = titleBG->GetUITransform();
+    titleBG->AddComponent<UIImage>()->SetTexturePath("Assets/Local/Textures/TitleBG.png");
+    backgroundTransform->SetStretch(Vector2::One());
 
-    GameObject* titleUI =
-        Manager::CreateEmpty(
-            Vector3(SCREEN_WIDTH / 2.0f,
-                    SCREEN_HEIGHT - SCREEN_HEIGHT / 4.0f,
-                    0.0f));
+    GameObject* const titleLogo = Manager::CreateUIObject("Title Logo");
+    titleLogo->SetParent(canvas, ParentTransformMode::KeepLocal);
+    titleLogo->GetUITransform()->SetPos(Vector2(0.0f, -180.0f / 1080.0f));
+    titleLogo->GetUITransform()->SetStretch(Vector2(900.0f / 1920.0f, 600.0f / 1080.0f));
+    titleLogo->AddComponent<UIImage>()->SetTexturePath("Assets/Local/Textures/TitleLogo.png");
 
-    titleUI->AddComponentForCreate<SpriteRenderer>(L"Assets/Textures/TitleUI.png");
-    titleUI->AddComponentForCreate<TitleUI>();
-    titleUI->GetTransform()->SetScale(Vector3(800.0f, 200.0f, 1.0f));
+    GameObject* const titleUI = Manager::CreateUIObject("Title UI");
+    titleUI->SetParent(canvas, ParentTransformMode::KeepLocal);
+    titleUI->GetUITransform()->SetPos(Vector2(0.0f, 270.0f / 1080.0f));
+    titleUI->GetUITransform()->SetStretch(Vector2(800.0f / 1920.0f, 200.0f / 1080.0f));
+    titleUI->AddComponent<UIImage>()->SetTexturePath("Assets/Local/Textures/TitleUI.png");
+    titleUI->AddComponent<TitleUI>();
+
+    GameObject* fieldRegistryTest = Manager::CreateEmpty("FieldRegistry Test");
+    fieldRegistryTest->AddComponent<FieldRegistryTest>();
 }

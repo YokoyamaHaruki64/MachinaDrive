@@ -2,44 +2,72 @@
 
 #include "Scene/GameScene.h"
 
-#include "System/main.h"
-#include "System/manager.h"
+#include "System/Core/main.h"
+#include "System/Core/manager.h"
 #include "Component/Transform.h"
 #include "Component/SpriteRenderer.h"
 #include "Component/Camera.h"
-#include "Component/Primitive.h"
+#include "Component/modelRenderer.h"
 #include "Component/Skydome.h"
 #include "Component/PostEffect.h"
 #include "Component/audio.h"
+#include "Graphics/Material.h"
+#include "Graphics/MaterialManager.h"
+#include "Graphics/ModelManager.h"
+#include "Graphics/Shader/ShaderManager.h"
+#include "Graphics/TextureManager.h"
 
 #include "Script/TItleUI.h"
 #include "Script/CameraController.h"
 #include "Script/RotateCube.h"
 #include "Script/Score.h"
 
-
 void GameScene::Init()
 {
+    if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
+    {
+        Manager::AddPostEffect(std::make_unique<Bloom>());
+        return;
+    }
+
     // シーン初期化
     GameObject* camera = Manager::CreateEmpty(Vector3(0.0f, 2.0f, -5.0f));
-    camera->AddComponentForCreate<Camera>(Camera::MainCamera);
-    camera->AddComponentForCreate<CameraController>();
+    camera->AddComponent<Camera>(Camera::MainCamera);
+    camera->AddComponent<CameraController>();
 
     GameObject* field = Manager::CreateEmpty(Vector3::Zero(), Vector3::Zero(), Vector3(10.0f, 1.0f, 10.0f));
-    field->AddComponentForCreate<Plane>(
-        L"Assets\\Textures\\glass2.png",
-        "BuildedShader\\unlitTextureVS.cso",
-        "BuildedShader\\unlitTexturePS.cso");
+    ModelRenderer* fieldRenderer = field->AddComponent<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Plane));
+    Material* fieldMaterial = MaterialManager::Get("GameScene.Field.Material");
+    if (!fieldMaterial)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
+        {
+            fieldMaterial = MaterialManager::Create("GameScene.Field.Material", *shader);
+            if (fieldMaterial)
+                fieldMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\glass2.png"));
+        }
+    }
+    fieldRenderer->SetMaterial(0, fieldMaterial);
 
     GameObject* obj = Manager::CreateEmpty(Vector3(0.0f, 1.0f, -5.0f));
-    obj->AddComponentForCreate<Cube>(
-        L"Assets\\Textures\\DarkMatReal.png",
-        "BuildedShader\\Dice_VS.cso",
-        "BuildedShader\\Dice_PS.cso");
-    obj->AddComponentForCreate<RotateCube>();
+    ModelRenderer* cubeRenderer = obj->AddComponent<ModelRenderer>(
+        ModelManager::GetPrimitive(ModelManager::PrimitiveType::Cube));
+    Material* cubeMaterial = MaterialManager::Get("GameScene.Cube.Material");
+    if (!cubeMaterial)
+    {
+        if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile("Assets/Shaders/UnlitTexture.shader"))
+        {
+            cubeMaterial = MaterialManager::Create("GameScene.Cube.Material", *shader);
+            if (cubeMaterial)
+                cubeMaterial->SetTexture("_MainTex", TextureManager::LoadTexture(L"Assets\\Local\\Textures\\DarkMatReal.png"));
+        }
+    }
+    cubeRenderer->SetMaterial(0, cubeMaterial);
+    obj->AddComponent<RotateCube>();
 
-    Manager::InstantiateForBeginScene(
-        "Player",
+    Manager::Instantiate(
+        "Assets/Prefabs/Player.prefab",
         Vector3(0.0f, 0.0f, 1.0f),
         Vector3(0.0f, 0.0f, 0.0f),
         Vector3::One());
@@ -52,8 +80,8 @@ void GameScene::Init()
 
     for (const auto& pos : enemyPos)
     {
-        Manager::InstantiateForBeginScene(
-            "Enemy",
+        Manager::Instantiate(
+            "Assets/Prefabs/Enemy.prefab",
             pos,
             Vector3(0.0f, Math::PI, 0.0f), // 敵はプレイヤーと向かい合うように180度回転
             Vector3::One());
@@ -69,22 +97,20 @@ void GameScene::Init()
 
     for (const auto& pos : treePos)
     {
-        GameObject* tree = Manager::InstantiateForBeginScene(
-            "Tree",
+        Manager::Instantiate(
+            "Assets/Prefabs/Tree.prefab",
             pos,
             Vector3::Zero(),
             Vector3::One() * 5.0f);
-
-        tree->GetComponent<Quad>()->SetRenderPass(RenderPass::Transparent);
     }
 
     GameObject* skydome = Manager::CreateEmpty();
-    skydome->AddComponentForCreate<Skydome>();
+    skydome->AddComponent<Skydome>();
 
     GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
-    scoreObj->AddComponentForCreate<Score>();
+    scoreObj->AddComponent<Score>();
 
     Manager::AddPostEffect(std::make_unique<Bloom>());
 
-    Manager::CreateEmpty()->AddComponentForCreate<Audio>("Assets\\Sounds\\bgm.wav")->Play(true);
+    Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Local\\Sounds\\bgm.wav")->Play(true);
 }

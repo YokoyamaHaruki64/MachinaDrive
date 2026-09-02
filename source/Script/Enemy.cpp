@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
-#include "System/Manager.h"
+
+#include "Component/ComponentInc.h"
 
 #include "Script/Enemy.h"
 #include "Script/Score.h"

@@ -1,0 +1,337 @@
+version: 1
+name: Game
+gameObjects:
+  - id: 1
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2,-10]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999995232,1,0.999995232]
+      - type: Camera
+        fields:
+          enabled: true
+          m_target: [0,0,2.61216004e-15]
+          m_up: [0,1,0]
+      - type: CameraController
+        fields:
+          enabled: true
+  - id: 2
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [10,1,10]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: __primitive_plane
+          m_materialPaths:
+            - Assets/Materials/Field.material
+          m_inverseAxisFlags: 0
+  - id: 3
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,1,-5]
+          m_localRotation: [-0.0682410151,-0.0643375218,-0.0641507059,0.9935233]
+          m_localScale: [1.00055456,1.00062096,1.00062978]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: __primitive_cube
+          m_materialPaths:
+            - Assets/Materials/Mateo.material
+          m_inverseAxisFlags: 0
+      - type: RotateCube
+        fields:
+          enabled: true
+  - id: 4
+    name: Player
+    active: true
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,2.61216004e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1.00034523,1,1.00034523]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - Assets/Materials/Player/PlayerBody.material
+            - Assets/Materials/Player/PlayerFlont.material
+            - Assets/Materials/Player/PlayerHead.material
+          m_inverseAxisFlags: 0
+      - type: Player
+        fields:
+          enabled: true
+          m_velocity: [0,0,0]
+          m_isGrounded: true
+      - type: Audio
+        fields:
+          enabled: true
+          m_filePath: Assets/Local/Sounds/wan.wav
+          m_playOnStart: false
+          m_loop: false
+  - id: 5
+    name: Enemy(Instance)
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [4,0,4]
+          m_localRotation: [0,1,0,-1.19209304e-07]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - ''
+            - ''
+            - ''
+          m_inverseAxisFlags: 0
+      - type: Enemy
+        fields:
+          enabled: true
+  - id: 6
+    name: Enemy(Instance)
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-4,0,4]
+          m_localRotation: [0,1,0,-1.19209304e-07]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - ''
+            - ''
+            - ''
+          m_inverseAxisFlags: 0
+      - type: Enemy
+        fields:
+          enabled: true
+  - id: 7
+    name: Enemy(Instance)
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,6]
+          m_localRotation: [0,1,0,-1.19209304e-07]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - ''
+            - ''
+            - ''
+          m_inverseAxisFlags: 0
+      - type: Enemy
+        fields:
+          enabled: true
+  - id: 8
+    name: Tree(Instance)
+    active: true
+    prefab: Assets/Prefabs/Tree.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [5,3.5,12]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [5,5,5]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 2
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/Tree.material
+          m_inverseAxisFlags: 0
+  - id: 9
+    name: Tree(Instance)
+    active: true
+    prefab: Assets/Prefabs/Tree.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-5,3.5,12]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [5,5,5]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 2
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/Tree.material
+          m_inverseAxisFlags: 0
+  - id: 10
+    name: Tree(Instance)
+    active: true
+    prefab: Assets/Prefabs/Tree.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [7,3.5,8]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [5,5,5]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 2
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/Tree.material
+          m_inverseAxisFlags: 0
+  - id: 11
+    name: Tree(Instance)
+    active: true
+    prefab: Assets/Prefabs/Tree.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-7,3.5,8]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [5,5,5]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 2
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/Tree.material
+          m_inverseAxisFlags: 0
+  - id: 12
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1000,1000,1000]
+      - type: Skydome
+        fields:
+          enabled: true
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/sky.obj
+          m_materialPaths:
+            - ''
+            - Assets/Materials/Skydome.material
+          m_inverseAxisFlags: 0
+  - id: 13
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [100,100,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Score
+        fields:
+          enabled: true
+  - id: 14
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Audio
+        fields:
+          enabled: true
+          m_filePath: Assets\Local\Sounds\bgm.wav
+          m_playOnStart: true
+          m_loop: true

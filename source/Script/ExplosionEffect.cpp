@@ -1,21 +1,22 @@
 ﻿#include "pch.h"
 
+#include "Component/ComponentInc.h"
+
 #include "Script/ExplosionEffect.h"
-
-#include "System/GM_Time.h"
-#include "Component/Primitive.h"
-
 
 void ExplosionEffect::OnStart()
 {
     // 初期のUV座標を設定w
-    Quad* renderer = GetComponent<Quad>();
+    ModelRenderer* renderer = GetComponent<ModelRenderer>();
     // 透明描画パスに設定
     if (renderer != nullptr)
     {
-        renderer->SetRenderPass(RenderPass::Transparent);
+        renderer->SetRenderPhase(RenderPhase::Transparent);
+
         // 最初のフレームのUV座標
-        renderer->SetUVRect(0.0f, 0.0f, 1.0f / 4.0f, 1.0f / 4.0f); 
+        MaterialPropertyOverride& propertyOverride = renderer->GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVScale", Vector2(1.0f / 4.0f, 1.0f / 4.0f));
+        propertyOverride.SetVector2("_UVOffset", Vector2(0.0f, 0.0f));
     }
 }
 
@@ -35,9 +36,11 @@ void ExplosionEffect::Update()
     float offsetX = (currentFrame % 4) * width;
     float offsetY = (currentFrame / 4) * height;
     // UV座標を更新
-    Quad* renderer = GetComponent<Quad>();
+    ModelRenderer* renderer = GetComponent<ModelRenderer>();
     if (renderer != nullptr)
     {
-        renderer->SetUVRect(offsetX, offsetY, width, height);
+        MaterialPropertyOverride& propertyOverride = renderer->GetMaterialPropertyOverride();
+        propertyOverride.SetVector2("_UVScale", Vector2(width, height));
+        propertyOverride.SetVector2("_UVOffset", Vector2(offsetX, offsetY));
     }
 }

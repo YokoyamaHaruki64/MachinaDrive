@@ -1,0 +1,8 @@
+version: 1
+name: PlayerFlont
+shader: Assets/Shaders/DefaultLit.shader
+properties:
+  _BaseColor: [0.462110013,0.467202008,0.0208250005,1]
+  _Emission: [0,0,0,1]
+  _Shininess: 250
+  _MainTex:
