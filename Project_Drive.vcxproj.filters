@@ -261,30 +261,6 @@
     <ClCompile Include="source\Component\TransformBase.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
-    <ClCompile Include="source\Script\Ripple.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\BoundBall.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\BallManager.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\PatternTrail.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\PatternTrailHeader.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\PatternTrailManager.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\FireworksEffect.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\ImpactBurst.cpp">
-      <Filter>ソース ファイル\Script</Filter>
-    </ClCompile>
     <ClCompile Include="source\ImGui\imgui_widgets.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
@@ -311,9 +287,6 @@
     </ClCompile>
     <ClCompile Include="source\ImGui\imgui_curve_custom.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script\EffectConfig.cpp">
-      <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\PostEffect.cpp">
       <Filter>ソース ファイル\Component</Filter>
@@ -581,33 +554,6 @@
     <ClInclude Include="include\Component\TrailRenderer.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
-    <ClInclude Include="include\Script\Ripple.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\Wall.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\BoundBall.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\BallManager.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\PatternTrailHeader.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\PatternTrail.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\PatternTrailManager.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\FireworksEffect.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\ImpactBurst.h">
-      <Filter>ヘッダー ファイル\System</Filter>
-    </ClInclude>
     <ClInclude Include="include\ImGui\imgui.h">
       <Filter>ヘッダー ファイル\ImGui</Filter>
     </ClInclude>
@@ -634,9 +580,6 @@
     </ClInclude>
     <ClInclude Include="include\ImGui\imgui_curve_custom.h">
       <Filter>ヘッダー ファイル\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Script\EffectConfig.h">
-      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\PostEffect.h">
       <Filter>ヘッダー ファイル\Component</Filter>

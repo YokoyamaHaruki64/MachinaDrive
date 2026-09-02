@@ -4,8 +4,8 @@ gameObjects:
   - id: 1
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -24,8 +24,8 @@ gameObjects:
   - id: 2
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -46,8 +46,8 @@ gameObjects:
   - id: 3
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -72,7 +72,7 @@ gameObjects:
     name: Player
     active: true
     prefab: Assets/Prefabs/Player.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -108,7 +108,7 @@ gameObjects:
     name: Enemy(Instance)
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -136,7 +136,7 @@ gameObjects:
     name: Enemy(Instance)
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -164,7 +164,7 @@ gameObjects:
     name: Enemy(Instance)
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -192,7 +192,7 @@ gameObjects:
     name: Tree(Instance)
     active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -214,7 +214,7 @@ gameObjects:
     name: Tree(Instance)
     active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -236,7 +236,7 @@ gameObjects:
     name: Tree(Instance)
     active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -258,7 +258,7 @@ gameObjects:
     name: Tree(Instance)
     active: true
     prefab: Assets/Prefabs/Tree.prefab
-    parent:
+    parent: 
     components:
       - type: Transform
         fields:
@@ -279,23 +279,34 @@ gameObjects:
   - id: 12
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
           enabled: true
           m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [1,1,1]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1000,1000,1000]
       - type: Skydome
         fields:
           enabled: true
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/sky.obj
+          m_materialPaths:
+            - ''
+            - Assets/Materials/Skydome.material
+          m_inverseAxisFlags: 0
   - id: 13
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -309,8 +320,8 @@ gameObjects:
   - id: 14
     name: Empty
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -324,72 +335,3 @@ gameObjects:
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
-  - id: 15
-    name: Empty
-    active: true
-    prefab:
-    parent:
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [-7.79153204,2,-7.78195763]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1000,1000,1000]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets\Local\Models\sky.obj
-          m_materialPaths:
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-  - id: 16
-    name: Empty
-    active: true
-    prefab:
-    parent:
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,2,-10]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1000,1000,1000]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets\Local\Models\sky.obj
-          m_materialPaths:
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-  - id: 17
-    name: Empty
-    active: true
-    prefab:
-    parent:
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,2,-10]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1000,1000,1000]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets\Local\Models\sky.obj
-          m_materialPaths:
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
