@@ -709,6 +709,16 @@ void Manager::InitScene()
     PendingGameObjectsProcess();
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
+    if (m_gameMode == GameMode::Edit)
+    {
+        EditorSystem::ResetEditorCameraToScene();
+    }
+    else
+#endif
+    {
+        Camera::SetActiveMainCamera(Camera::GetSceneMainCamera());
+    }
+#if GM_ENABLE_EDITOR
     EditorSystem::ClearCommandHistory();
 #endif
 }
@@ -731,6 +741,16 @@ void Manager::ReloadCurrentScene()
     PendingGameObjectsProcess();
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
+    if (m_gameMode == GameMode::Edit)
+    {
+        EditorSystem::ActivateEditorCamera();
+    }
+    else
+#endif
+    {
+        Camera::SetActiveMainCamera(Camera::GetSceneMainCamera());
+    }
+#if GM_ENABLE_EDITOR
     EditorSystem::ClearCommandHistory();
 #endif
 }
@@ -748,6 +768,7 @@ bool Manager::EnterPlayMode()
     }
 
     m_gameMode = GameMode::Play;
+    Camera::SetActiveMainCamera(Camera::GetSceneMainCamera());
     for (size_t index = 0; index < m_GameObjects.size(); ++index)
     {
         if (!m_GameObjects[index]->IsDestroyed())
@@ -889,6 +910,7 @@ bool Manager::Init()
     io.IniFilename = ImGuiStyleConfig::GetIniPathString().c_str(); // 設定ファイルの保存先を指定
 
     ImGuiStyleConfig::Apply();
+    EditorSystem::Initialize();
 #endif
 
     m_nextScene = std::make_unique<TitleScene>();
@@ -917,6 +939,7 @@ void Manager::Uninit()
     m_sceneTransitionPhase = SceneTransitionPhase::None;
 
 #if GM_ENABLE_EDITOR
+    EditorSystem::Uninitialize();
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -948,6 +971,9 @@ void Manager::Update()
         // Play中に予約されたScene遷移は、編集対象Sceneへ戻るため破棄する。
         m_nextScene.reset();
         m_gameMode = GameMode::Edit;
+#if GM_ENABLE_EDITOR
+        EditorSystem::ActivateEditorCamera();
+#endif
         ReloadCurrentScene();
     }
 
@@ -962,13 +988,14 @@ void Manager::Update()
         ImGui::GetMainViewport(),
         ImGuiDockNodeFlags_PassthruCentralNode);
 
-	if (EditorSystem::ApplyGameWindowRenderTargetSize())
+    if (EditorSystem::ApplyGameWindowRenderTargetSize())
 	{
 		for (const std::unique_ptr<PostProcess>& postEffect : m_postEffects)
 		{
-			postEffect->Resize(Renderer::GetGameWidth(), Renderer::GetGameHeight());
-		}
-	}
+            postEffect->Resize(Renderer::GetGameWidth(), Renderer::GetGameHeight());
+        }
+    }
+    EditorSystem::Update();
 #endif
 
     if (m_nextScene)
@@ -1054,6 +1081,13 @@ void Manager::Draw()
 	PerformanceMonitor::BeginRender();
 	Renderer::Begin();
 
+#if GM_ENABLE_EDITOR
+    if (m_gameMode == GameMode::Edit)
+    {
+        EditorSystem::ApplyEditorCameraView();
+    }
+    else
+#endif
     if (Camera* camera = Camera::GetMainCamera())
     {
         camera->SetViewProjection();

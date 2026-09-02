@@ -7,17 +7,28 @@
 #include "System/Rendering/renderer.h"
 
 std::unordered_map<Camera::CameraTag, Camera*> Camera::s_camerasByTag;
-Camera* Camera::s_mainCamera = nullptr;
+Camera* Camera::s_sceneMainCamera = nullptr;
+Camera* Camera::s_activeMainCamera = nullptr;
 
 Camera* Camera::GetMainCamera()
 {
-    return s_mainCamera ? s_mainCamera : GetCameraByTag(CameraTag::MainCamera);
+    return s_activeMainCamera ? s_activeMainCamera : s_sceneMainCamera;
+}
+
+Camera* Camera::GetSceneMainCamera()
+{
+    return s_sceneMainCamera;
 }
 
 Camera* Camera::GetCameraByTag(CameraTag tag)
 {
     auto it = s_camerasByTag.find(tag);
     return it != s_camerasByTag.end() ? it->second : nullptr;
+}
+
+void Camera::SetActiveMainCamera(Camera* camera)
+{
+    s_activeMainCamera = camera;
 }
 
 void Camera::SetViewProjection()

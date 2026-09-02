@@ -12,6 +12,7 @@
 
 class GameObject;
 class Component;
+class Camera;
 struct YAMLValue;
 
 class EditorCommand
@@ -37,13 +38,27 @@ class EditorSystem final
     static bool m_applicationCloseConfirmationRequested;
     static std::vector<std::unique_ptr<EditorCommand>> m_undoCommands;
     static std::vector<std::unique_ptr<EditorCommand>> m_redoCommands;
+    static std::unique_ptr<GameObject> m_editorCameraObject;
+    static Camera* m_editorCamera;
+    static float m_editorCameraYaw;
+    static float m_editorCameraPitch;
+    static bool m_editorCameraRightDragActive;
+    static bool m_editorCameraMiddleDragActive;
 
     static bool IsActiveGameObject(GameObject* gameObject);
     static void ReloadStyle();
     static void OpenScene(const std::filesystem::path& path);
     static void DrawConfirmationDialogs();
+    static void UpdateEditorCameraInput();
+    static void UpdateEditorCameraPose();
 
 public:
+    static void Initialize();
+    static void Uninitialize();
+    static void Update();
+    static void ApplyEditorCameraView();
+    static void ActivateEditorCamera();
+    static void ResetEditorCameraToScene();
     static bool ApplyGameWindowRenderTargetSize();
     static bool IsGameWindowReady();
     static bool IsUIDisplayEnabled();

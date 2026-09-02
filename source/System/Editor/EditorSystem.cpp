@@ -6,8 +6,13 @@
 #include "System/Editor/ImGuiStyleConfig.h"
 #include "System/Core/main.h"
 #include "System/Core/component.h"
+#include "System/Core/GM_Time.h"
+#include "System/Core/input.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Serialization/YAMLTypes.h"
+#include "Component/Camera.h"
+#include "Component/Transform.h"
+#include "math/MathCommon.h"
 
 #include "imgui.h"
 
@@ -15,6 +20,23 @@
 
 namespace
 {
+    constexpr Vector3 EDITOR_CAMERA_DEFAULT_POSITION{ 0.0f, 2.0f, -5.0f };
+    constexpr float EDITOR_CAMERA_LOOK_DISTANCE = 10.0f;
+    constexpr float EDITOR_CAMERA_MOVE_SPEED = 10.0f;
+    constexpr float EDITOR_CAMERA_FAST_MULTIPLIER = 3.0f;
+    constexpr float EDITOR_CAMERA_LOOK_SENSITIVITY = 0.005f;
+    constexpr float EDITOR_CAMERA_PAN_SPEED = 0.01f;
+    constexpr float EDITOR_CAMERA_MAX_PITCH = Math::PI_DIV2 - 0.01f;
+
+    Vector3 CalculateEditorCameraForward(float yaw, float pitch)
+    {
+        const float cosPitch = cosf(pitch);
+        return Vector3(
+            sinf(yaw) * cosPitch,
+            sinf(pitch),
+            cosf(yaw) * cosPitch).Normalized();
+    }
+
     class LambdaEditorCommand final : public EditorCommand
     {
         std::function<void()> m_execute;
@@ -80,6 +102,210 @@ bool EditorSystem::m_openSceneConfirmationRequested = false;
 bool EditorSystem::m_applicationCloseConfirmationRequested = false;
 std::vector<std::unique_ptr<EditorCommand>> EditorSystem::m_undoCommands{};
 std::vector<std::unique_ptr<EditorCommand>> EditorSystem::m_redoCommands{};
+std::unique_ptr<GameObject> EditorSystem::m_editorCameraObject{};
+Camera* EditorSystem::m_editorCamera{};
+float EditorSystem::m_editorCameraYaw = 0.0f;
+float EditorSystem::m_editorCameraPitch = 0.0f;
+bool EditorSystem::m_editorCameraRightDragActive = false;
+bool EditorSystem::m_editorCameraMiddleDragActive = false;
+
+void EditorSystem::Initialize()
+{
+    if (m_editorCamera)
+    {
+        return;
+    }
+
+    m_editorCameraObject = std::make_unique<GameObject>(
+        "EditorCamera",
+        EDITOR_CAMERA_DEFAULT_POSITION,
+        Vector3::Zero(),
+        Vector3::One());
+    m_editorCamera = m_editorCameraObject->AddComponent<Camera>(Camera::EditorCamera);
+    if (!m_editorCamera)
+    {
+        m_editorCameraObject.reset();
+        return;
+    }
+
+    m_editorCamera->SetUp(Vector3::Up());
+    UpdateEditorCameraPose();
+    ActivateEditorCamera();
+}
+
+void EditorSystem::Uninitialize()
+{
+    Camera::SetActiveMainCamera(nullptr);
+    m_editorCamera = nullptr;
+    m_editorCameraObject.reset();
+    m_editorCameraRightDragActive = false;
+    m_editorCameraMiddleDragActive = false;
+}
+
+void EditorSystem::ActivateEditorCamera()
+{
+    if (m_editorCamera)
+    {
+        Camera::SetActiveMainCamera(m_editorCamera);
+    }
+}
+
+void EditorSystem::ResetEditorCameraToScene()
+{
+    if (!m_editorCamera)
+    {
+        return;
+    }
+
+    Camera* sceneCamera = Camera::GetSceneMainCamera();
+    if (!sceneCamera || !sceneCamera->transform())
+    {
+        m_editorCamera->transform()->SetPosition(EDITOR_CAMERA_DEFAULT_POSITION);
+        m_editorCameraYaw = 0.0f;
+        m_editorCameraPitch = 0.0f;
+    }
+    else
+    {
+        const Vector3 position = sceneCamera->transform()->GetPosition();
+        const Vector3 forward = (sceneCamera->GetTarget() - position).Normalized();
+        if (forward.LengthSqr() > 0.0f)
+        {
+            m_editorCameraYaw = atan2f(forward.x, forward.z);
+            m_editorCameraPitch = asinf(Math::Clamp(forward.y, -1.0f, 1.0f));
+        }
+        else
+        {
+            m_editorCameraYaw = 0.0f;
+            m_editorCameraPitch = 0.0f;
+        }
+
+        m_editorCamera->transform()->SetPosition(position);
+    }
+
+    UpdateEditorCameraPose();
+    ActivateEditorCamera();
+}
+
+void EditorSystem::UpdateEditorCameraPose()
+{
+    if (!m_editorCamera || !m_editorCamera->transform())
+    {
+        return;
+    }
+
+    const Vector3 forward = CalculateEditorCameraForward(m_editorCameraYaw, m_editorCameraPitch);
+    Transform* transform = m_editorCamera->transform();
+    transform->SetEulerAngles(Vector3(m_editorCameraPitch, m_editorCameraYaw, 0.0f));
+    m_editorCamera->SetTarget(transform->GetPosition() + forward * EDITOR_CAMERA_LOOK_DISTANCE);
+    m_editorCamera->SetUp(Vector3::Up());
+}
+
+void EditorSystem::UpdateEditorCameraInput()
+{
+    if (!m_editorCamera || Manager::IsPlayMode())
+    {
+        return;
+    }
+
+    const bool viewportHovered = m_gameWindow.IsViewportHovered();
+    const bool rightButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+    const bool middleButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Middle);
+
+    if (!rightButtonDown)
+    {
+        m_editorCameraRightDragActive = false;
+    }
+    else if (viewportHovered)
+    {
+        m_editorCameraRightDragActive = true;
+    }
+
+    if (!middleButtonDown)
+    {
+        m_editorCameraMiddleDragActive = false;
+    }
+    else if (viewportHovered && !rightButtonDown)
+    {
+        m_editorCameraMiddleDragActive = true;
+    }
+
+    const ImGuiIO& io = ImGui::GetIO();
+    bool cameraChanged = false;
+
+    if (m_editorCameraRightDragActive)
+    {
+        m_editorCameraYaw += io.MouseDelta.x * EDITOR_CAMERA_LOOK_SENSITIVITY;
+        m_editorCameraPitch = Math::Clamp(
+            m_editorCameraPitch - io.MouseDelta.y * EDITOR_CAMERA_LOOK_SENSITIVITY,
+            -EDITOR_CAMERA_MAX_PITCH,
+            EDITOR_CAMERA_MAX_PITCH);
+
+        Vector3 movement = Vector3::Zero();
+        const Vector3 forward = CalculateEditorCameraForward(m_editorCameraYaw, m_editorCameraPitch);
+        const Vector3 right = Vector3::Cross(Vector3::Up(), forward).Normalized();
+        if (Input::GetKeyPress(Input::KK_W))
+        {
+            movement += forward;
+        }
+        if (Input::GetKeyPress(Input::KK_S))
+        {
+            movement -= forward;
+        }
+        if (Input::GetKeyPress(Input::KK_A))
+        {
+            movement -= right;
+        }
+        if (Input::GetKeyPress(Input::KK_D))
+        {
+            movement += right;
+        }
+
+        if (movement.LengthSqr() > 0.0f)
+        {
+            const float speed = Input::GetKeyPress(Input::KK_SHIFT)
+                ? EDITOR_CAMERA_MOVE_SPEED * EDITOR_CAMERA_FAST_MULTIPLIER
+                : EDITOR_CAMERA_MOVE_SPEED;
+            m_editorCamera->transform()->Translate(
+                movement.Normalized() * speed * Time::GetUnscaledDeltaTime());
+            cameraChanged = true;
+        }
+
+        if (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f)
+        {
+            cameraChanged = true;
+        }
+    }
+
+    if (m_editorCameraMiddleDragActive &&
+        (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f))
+    {
+        const Vector3 forward = CalculateEditorCameraForward(m_editorCameraYaw, m_editorCameraPitch);
+        const Vector3 right = Vector3::Cross(Vector3::Up(), forward).Normalized();
+        const Vector3 up = Vector3::Cross(forward, right).Normalized();
+        m_editorCamera->transform()->Translate(
+            right * (-io.MouseDelta.x * EDITOR_CAMERA_PAN_SPEED) +
+            up * (io.MouseDelta.y * EDITOR_CAMERA_PAN_SPEED));
+        cameraChanged = true;
+    }
+
+    if (cameraChanged)
+    {
+        UpdateEditorCameraPose();
+    }
+}
+
+void EditorSystem::Update()
+{
+    UpdateEditorCameraInput();
+}
+
+void EditorSystem::ApplyEditorCameraView()
+{
+    if (m_editorCamera)
+    {
+        m_editorCamera->SetViewProjection();
+    }
+}
 
 bool EditorSystem::IsActiveGameObject(GameObject* gameObject)
 {

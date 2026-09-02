@@ -38,6 +38,7 @@ bool GameWindow::IsRenderTargetReady() const
 
 void GameWindow::DrawImGui()
 {
+    m_viewportHovered = false;
     if (!BeginWindow("Game", Vector2(800.0f, 500.0f)))
     {
         EndWindow();
@@ -94,6 +95,7 @@ void GameWindow::DrawImGui()
         ImVec2(displayWidth, displayHeight),
         ImVec2(0.0f, 0.0f),
         ImVec2(1.0f, 1.0f));
+    m_viewportHovered = ImGui::IsItemHovered();
 
     EndWindow();
 }
