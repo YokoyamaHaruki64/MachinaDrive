@@ -22,6 +22,9 @@
     <Filter Include="ヘッダー ファイル\System\Core">
       <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb101}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\System\Debug">
+      <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb106}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ヘッダー ファイル\System\Editor">
       <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb102}</UniqueIdentifier>
     </Filter>
@@ -51,6 +54,9 @@
     </Filter>
     <Filter Include="ソース ファイル\System\Core">
       <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\System\Debug">
+      <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb206}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\System\Editor">
       <UniqueIdentifier>{f1c5d1a5-0a14-4f2e-9a20-6b6c3dfcb202}</UniqueIdentifier>
@@ -182,6 +188,9 @@
     </ClCompile>
     <ClCompile Include="source\System\Core\Physics.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\Debug\DebugDrawer.cpp">
+      <Filter>ソース ファイル\System\Debug</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Rendering\renderer.cpp">
       <Filter>ソース ファイル\System\Rendering</Filter>
@@ -523,6 +532,9 @@
     </ClInclude>
     <ClInclude Include="include\System\Core\Physics.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Debug\DebugDrawer.h">
+      <Filter>ヘッダー ファイル\System\Debug</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Rendering\renderer.h">
       <Filter>ヘッダー ファイル\System\Rendering</Filter>

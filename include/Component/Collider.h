@@ -13,13 +13,11 @@ class Collider : public Component
 {
 protected:
     // 形状の中心はObjectの原点からのLocalオフセットとして保存する。
-    // 実際のWorld座標への変換はCollider.cppでTransformに一度だけ委譲する。
+    // Colliderのcenterは形状の位置を指定する値なので、ObjectのScaleでは伸縮させず、
+    // 回転と平行移動だけを適用してWorld座標へ変換する。
     Vector3 m_center{ Vector3::Zero() };
 
-    explicit Collider(GameObject* owner)
-        : Component(owner)
-    {
-    }
+    explicit Collider(GameObject* owner);
 
     void RegisterFields(FieldRegistry& fields) override;
 
@@ -32,7 +30,7 @@ public:
     };
 
     Collider() = delete;
-    ~Collider() override = default;
+    ~Collider() override;
 
     virtual ShapeType GetShapeType() const = 0;
 

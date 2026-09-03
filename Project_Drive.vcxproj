@@ -289,6 +289,7 @@
     <ClCompile Include="source\System\Core\GameObjectReference.cpp" />
     <ClCompile Include="source\System\Core\manager.cpp" />
     <ClCompile Include="source\System\Core\Physics.cpp" />
+    <ClCompile Include="source\System\Debug\DebugDrawer.cpp" />
     <ClCompile Include="source\System\Rendering\renderer.cpp" />
     <ClCompile Include="source\System\Rendering\RendererBase.cpp" />
   </ItemGroup>
@@ -487,6 +488,7 @@
     <ClInclude Include="include\System\Core\main.h" />
     <ClInclude Include="include\System\Core\manager.h" />
     <ClInclude Include="include\System\Core\Physics.h" />
+    <ClInclude Include="include\System\Debug\DebugDrawer.h" />
     <ClInclude Include="include\System\Rendering\renderer.h" />
     <ClInclude Include="include\System\Rendering\RendererBase.h" />
   </ItemGroup>

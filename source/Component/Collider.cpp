@@ -4,6 +4,24 @@
 
 #include "Component/Rigidbody.h"
 #include "Component/Transform.h"
+#include "System/Debug/DebugDrawer.h"
+
+Collider::Collider(GameObject* owner)
+    : Component(owner)
+{
+#if GM_ENABLE_EDITOR
+    // 生成時に登録し、DebugDrawer側で毎フレーム現在のTransformから頂点を作り直す。
+    DebugDrawer::RegisterCollider(this);
+#endif
+}
+
+Collider::~Collider()
+{
+#if GM_ENABLE_EDITOR
+    // Colliderより先にGameObjectが破棄されても、登録リストに無効なポインタを残さない。
+    DebugDrawer::UnregisterCollider(this);
+#endif
+}
 
 void Collider::RegisterFields(FieldRegistry& fields)
 {
@@ -19,11 +37,11 @@ Vector3 Collider::GetWorldCenter() const
         return m_center;
     }
 
-    // OffsetにもObjectのScaleを適用してからRotationで回す。
-    // これにより、Collider中心をObject原点からずらした場合もTransformと同じ座標系になる。
-    const Vector3 scaledCenter = Vector3::Multiply(m_center, ownerTransform->GetScale());
+    // centerはCollider自身の位置オフセットであり、形状の大きさとは別に扱う。
+    // そのためScaleはBoxのsizeやCapsuleのradius/heightだけへ適用し、
+    // centerにはRotationとPositionだけを適用する。
     return ownerTransform->GetPosition()
-        + ownerTransform->GetRotation().RotateVector(scaledCenter);
+        + ownerTransform->GetRotation().RotateVector(m_center);
 }
 
 Rigidbody* Collider::GetRigidbody() const

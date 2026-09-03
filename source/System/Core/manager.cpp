@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "System/Core/manager.h"
+#include "System/Debug/DebugDrawer.h"
 
 #include <algorithm>
 #include <unordered_set>
@@ -857,6 +858,9 @@ bool Manager::Init()
         return false;
     }
     ModelManager::Init();
+#if GM_ENABLE_EDITOR
+    DebugDrawer::Initialize();
+#endif
 	Input::Init();
     PostProcess::Init();
     Audio::InitMaster();
@@ -940,6 +944,7 @@ void Manager::Uninit()
 
 #if GM_ENABLE_EDITOR
     EditorSystem::Uninitialize();
+    DebugDrawer::Uninitialize();
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -1120,6 +1125,12 @@ void Manager::Draw()
 	//}
 
 	Renderer::Draw();
+
+#if GM_ENABLE_EDITOR
+    // 通常のMesh描画後、PostProcess前にCollider線を重ねる。
+    // 深度テストは専用Shaderで維持するため、遮蔽物の裏側は自然に隠れる。
+    DebugDrawer::Draw();
+#endif
 
     for (int i = 0; i < m_postEffects.size(); ++i)
     {
