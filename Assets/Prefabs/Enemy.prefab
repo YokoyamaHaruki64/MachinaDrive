@@ -19,5 +19,11 @@ gameObjects:
           m_modelPath: Assets/Local/Models/Player.obj
           m_materialPaths: []
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_radius: 0.5
+          m_height: 2
       - type: Enemy
         fields: {}

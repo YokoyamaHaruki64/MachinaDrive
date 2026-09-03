@@ -26,6 +26,12 @@ gameObjects:
             - Assets/Materials/Player/PlayerFlont.material
             - Assets/Materials/Player/PlayerHead.material
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_radius: 0.5
+          m_height: 2
       - type: Player
         fields:
           enabled: true

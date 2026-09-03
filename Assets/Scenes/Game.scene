@@ -93,6 +93,10 @@ gameObjects:
             - Assets/Materials/Player/PlayerFlont.material
             - Assets/Materials/Player/PlayerHead.material
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
       - type: Player
         fields:
           enabled: true
@@ -104,6 +108,10 @@ gameObjects:
           m_filePath: Assets/Local/Sounds/wan.wav
           m_playOnStart: false
           m_loop: false
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_velocity: [0,0,0]
   - id: 5
     name: Enemy(Instance)
     active: true
@@ -129,6 +137,10 @@ gameObjects:
             - ''
             - ''
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
       - type: Enemy
         fields:
           enabled: true
@@ -157,6 +169,10 @@ gameObjects:
             - ''
             - ''
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
       - type: Enemy
         fields:
           enabled: true
@@ -185,6 +201,10 @@ gameObjects:
             - ''
             - ''
           m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
       - type: Enemy
         fields:
           enabled: true

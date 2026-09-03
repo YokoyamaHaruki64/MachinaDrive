@@ -1,9 +1,11 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include "Component/ComponentInc.h"
 
 #include "Script/Player.h"
 #include "System/Editor/FieldRegistry.h"
+#include "System/Core/Physics.h"
+#include "System/Diagnostics/Logger.h"
 
 void Player::RegisterFields(FieldRegistry& fields)
 {
@@ -94,7 +96,48 @@ void Player::Update()
 		m_isGrounded = true;
 	}
 
+    // PhysicsWorldは使わず、Playerが必要な相手だけ取得して判定する。
+    // 今回はPlayer/EnemyのCapsule同士を試すため、最初に中心線分間の最近接距離を求め、
+    // 2つの半径の和以下ならHitInfo::hitがtrueになる。
     auto enemies = Manager::GetObjectsByComponent<Enemy>();
+    bool isTouchingEnemy = false;
+    GameObject* touchingEnemy = nullptr;
+    CapsuleCollider* playerCollider = m_owner->GetComponent<CapsuleCollider>();
+    if (playerCollider)
+    {
+        for (GameObject* enemyObject : enemies)
+        {
+            CapsuleCollider* enemyCollider = enemyObject->GetComponent<CapsuleCollider>();
+            if (!enemyCollider)
+            {
+                // Capsule未設定のEnemyは今回の検証対象外としてスキップする。
+                continue;
+            }
+
+            const HitInfo hitInfo = Physics::CheckCollision(*playerCollider, *enemyCollider);
+            if (hitInfo.hit)
+            {
+                isTouchingEnemy = true;
+                touchingEnemy = enemyObject;
+
+				Physics::ResolveCollision(hitInfo); // 物理的に分離する
+            }
+        }
+    }
+
+    if (isTouchingEnemy != m_isTouchingEnemy)
+    {
+        if (isTouchingEnemy && touchingEnemy)
+        {
+            Logger::Log("Player: EnemyとのCapsule接触を検出しました: " + touchingEnemy->GetName());
+        }
+        else
+        {
+            Logger::Log("Player: EnemyとのCapsule接触が終了しました。");
+        }
+    }
+    m_isTouchingEnemy = isTouchingEnemy;
+
     if(enemies.empty())
     {
         Manager::ChangeScene<ResultScene>();

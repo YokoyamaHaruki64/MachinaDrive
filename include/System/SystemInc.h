@@ -11,6 +11,7 @@
 #include "System/Diagnostics/Logger.h"
 #include "System/Core/main.h"
 #include "System/Core/manager.h"
+#include "System/Core/Physics.h"
 #include "System/Serialization/YAMLDocumentIO.h"
 #include "System/Serialization/YAMLReflection.h"
 

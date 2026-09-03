@@ -180,10 +180,28 @@
     <ClCompile Include="source\System\Core\manager.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Core\Physics.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Rendering\renderer.cpp">
       <Filter>ソース ファイル\System\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\Conponent.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\BoxCollider.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\Collider.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\CapsuleCollider.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\Rigidbody.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\SphereCollider.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Core\GameObject.cpp">
@@ -359,6 +377,21 @@
     <ClInclude Include="include\Component\Camera.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
+    <ClInclude Include="include\Component\Collider.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\CapsuleCollider.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\BoxCollider.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\Rigidbody.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\SphereCollider.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
     <ClInclude Include="include\Component\Transform.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
@@ -486,6 +519,9 @@
       <Filter>ヘッダー ファイル\System\Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\manager.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Core\Physics.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Rendering\renderer.h">
