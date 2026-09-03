@@ -191,11 +191,11 @@ void HierarchyWindow::DrawImGui()
     ImGui::Separator();
 
     m_visibleGameObjects.clear();
-    for (const std::unique_ptr<GameObject>& gameObject : Manager::GetActiveGameObjects())
+	for (size_t i = 0; i < Manager::GetActiveGameObjects().size(); ++i)
     {
-        if (!gameObject->GetParent())
+        if (!Manager::GetActiveGameObjects()[i]->GetParent())
         {
-            DrawGameObjectNode(*gameObject);
+            DrawGameObjectNode(*Manager::GetActiveGameObjects()[i]);
         }
     }
 
