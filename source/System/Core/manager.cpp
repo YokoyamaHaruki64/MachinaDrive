@@ -7,6 +7,7 @@
 #include <unordered_set>
 
 #if GM_ENABLE_EDITOR
+#include "Component/Collider.h"
 #include "System/Editor/EditorSystem.h"
 #include "System/Editor/ImGuiStyleConfig.h"
 #endif
@@ -204,8 +205,13 @@ Manager::EditorDetachedGameObjects Manager::DetachForEditor(const std::vector<Ga
                 gameObject->SetParent(nullptr, ParentTransformMode::KeepLocal);
             }
 
+            // Undo用のunique_ptrは生存したままなので、デストラクタに頼らず描画登録を解除する。
             for (Component* component : gameObject->GetComponents())
             {
+                if (Collider* collider = dynamic_cast<Collider*>(component))
+                {
+                    DebugDrawer::UnregisterCollider(collider);
+                }
                 if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
                 {
                     UnregisterRenderer(renderer);
@@ -253,8 +259,13 @@ void Manager::RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects)
             gameObject->SetParent(previousParent, ParentTransformMode::KeepLocal);
         }
 
+        // Undoで復元したObjectを次のDrawから表示対象へ戻す。
         for (Component* component : gameObject->GetComponents())
         {
+            if (Collider* collider = dynamic_cast<Collider*>(component))
+            {
+                DebugDrawer::RegisterCollider(collider);
+            }
             if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
             {
                 RegisterRenderer(renderer);
@@ -299,6 +310,10 @@ std::unique_ptr<Component> Manager::DetachComponentForEditor(GameObject& gameObj
     {
         UnregisterRenderer(renderer);
     }
+    if (Collider* collider = dynamic_cast<Collider*>(&component))
+    {
+        DebugDrawer::UnregisterCollider(collider);
+    }
 
     std::unique_ptr<Component> detachedComponent = std::move(*iterator);
     gameObject.m_components.erase(iterator);
@@ -317,6 +332,10 @@ void Manager::RestoreComponentForEditor(GameObject& gameObject, std::unique_ptr<
     if (RendererBase* renderer = dynamic_cast<RendererBase*>(restoredComponent))
     {
         RegisterRenderer(renderer);
+    }
+    if (Collider* collider = dynamic_cast<Collider*>(restoredComponent))
+    {
+        DebugDrawer::RegisterCollider(collider);
     }
 }
 
