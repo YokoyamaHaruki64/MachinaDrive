@@ -4,17 +4,31 @@
 #include "System/Core/component.h"
 #include "math/Vector3.h"
 
-// Rigidbodyは速度と衝突解決に必要な物理値だけを保持する。
-// 速度の積分や重力は呼び出し側のScriptで必要に応じて行う。
-// Massが0のRigidbody、またはRigidbodyを持たないObjectは静的物体として扱う。
-// 判定解決では質量の逆数を使うため、静的物体の逆質量を0にすると、動的側だけを動かせる。
+// Rigidbodyは物理Bodyの設定値と速度を保持する。
+// 速度の積分、重力、衝突解決、SleepはPhysics(Jolt)が担当し、Scriptは速度を操作する。
+// RigidbodyがないColliderはStatic Body、ColliderがないRigidbodyはEmptyShape Bodyとして扱う。
 class Rigidbody : public Component
 {
     REGISTER_COMPONENT(Rigidbody, "Rigidbody");
 
+public:
+    enum class MotionType
+    {
+        Static,
+        Kinematic,
+        Dynamic,
+    };
+
+private:
+    int m_motionType{ static_cast<int>(MotionType::Dynamic) };
+
     float m_mass{ 1.0f };
     Vector3 m_velocity{ Vector3::Zero() };
     float m_bounciness{ 0.0f };
+    float m_friction{ 0.2f };
+    bool m_useGravity{ true };
+    bool m_allowSleep{ true };
+    bool m_freezeRotation{ true };
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;
@@ -25,6 +39,27 @@ public:
         : Component(owner)
     {
     }
+
+    ~Rigidbody() override;
+
+    void OnLoaded() override;
+    void OnDestroy() override;
+
+    MotionType GetMotionType() const
+    {
+        // YAMLやInspectorから不正値が入っても、Joltへ未知のMotionTypeを渡さない。
+        if (m_motionType <= static_cast<int>(MotionType::Static))
+        {
+            return MotionType::Static;
+        }
+        if (m_motionType == static_cast<int>(MotionType::Kinematic))
+        {
+            return MotionType::Kinematic;
+        }
+        return MotionType::Dynamic;
+    }
+
+    void SetMotionType(MotionType motionType);
 
     float GetMass() const { return m_mass; }
     void SetMass(float mass);
@@ -37,4 +72,16 @@ public:
 
     float GetBounciness() const { return m_bounciness; }
     void SetBounciness(float bounciness);
+
+    float GetFriction() const { return m_friction; }
+    void SetFriction(float friction);
+
+    bool IsUseGravity() const { return m_useGravity; }
+    void SetUseGravity(bool useGravity);
+
+    bool IsAllowSleep() const { return m_allowSleep; }
+    void SetAllowSleep(bool allowSleep);
+
+    bool IsFreezeRotation() const { return m_freezeRotation; }
+    void SetFreezeRotation(bool freezeRotation);
 };

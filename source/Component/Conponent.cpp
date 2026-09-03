@@ -2,6 +2,7 @@
 
 #include "Component/ComponentInc.h"
 #include "System/Editor/FieldRegistry.h"
+#include "System/Core/Physics.h"
 
 
 
@@ -18,6 +19,8 @@ void Component::SetEnabled(bool enabled)
     }
 
     m_isEnabled = enabled;
+    Physics::MarkDirty();
+
     if (m_isEnabled && m_owner && m_owner->IsStarted() && m_owner->IsActive() && !m_owner->IsDestroyed())
     {
         OnEnable();

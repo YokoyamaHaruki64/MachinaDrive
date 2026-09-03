@@ -3,6 +3,7 @@
 #include "Component/SphereCollider.h"
 
 #include "System/Editor/FieldRegistry.h"
+#include "System/Core/Physics.h"
 
 void SphereCollider::RegisterFields(FieldRegistry& fields)
 {
@@ -13,4 +14,5 @@ void SphereCollider::RegisterFields(FieldRegistry& fields)
 void SphereCollider::SetRadius(float radius)
 {
     m_radius = std::max(radius, 0.0f);
+    Physics::MarkDirty();
 }

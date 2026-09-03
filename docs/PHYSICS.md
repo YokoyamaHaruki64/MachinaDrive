@@ -33,6 +33,12 @@ StaticとKinematic BodyはComponentの`Update()`後にTransformのWorld姿勢を
 
 非一様Scaleは各Collider形状へ焼き込む。Boxは各軸、Sphereは最大軸、CapsuleはXZの最大軸を半径、Y軸を高さへ適用する。負のScaleは絶対値を使用する。Colliderのcenterは既存仕様どおりScaleせず、Collider Transformの回転と移動を適用する。
 
+## Physicsへの登録と更新コスト
+
+ColliderとRigidbodyは`OnLoaded()`でPhysicsへ登録し、`OnDestroy()`で登録を解除する。Physicsはこの登録集合を使ってBodyの所属を構築するため、通常のStepでManagerから全GameObjectと全Componentを走査しない。
+
+GameObject／Componentの有効状態、物理Componentの追加・破棄、親子関係の変更があったFrameだけ、登録集合からBody構成を再構築する。通常Frameは既存BodyのTransform、速度、接触状態だけを処理する。形状署名はBodyの同一性を表すキーではなく、Colliderの形状設定やBody基準の相対形状が変わったときにShapeを差し替えるためのキャッシュ判定である。Dynamic BodyのWorld位置・回転・速度はキーに含めない。
+
 ## Rigidbody
 
 RigidbodyはJolt Bodyを操作するエンジン側Componentであり、Joltの`BodyID`を公開しない。MotionType、mass、velocity、bounciness、friction、useGravity、allowSleep、freezeRotationを保存対象とする。MotionTypeはStatic、Kinematic、Dynamicを持ち、実行中の切り替えを許可する。
@@ -57,7 +63,7 @@ Colliderは所属する`CollisionLayer`と`IsTrigger`を持つ。Layer番号と�
 
 GameObjectはイベント時点で有効な全Componentへ通知する。通知中にDestroyが要求された場合は、そのGameObjectの残りのComponentを呼ばない。JoltがSleep時に出す接触削除は分離として扱わず、休眠接触をキャッシュする。起床後に実際の分離を確認した場合だけ`OnHitEnd()`を通知する。
 
-Scene破棄、Play終了、Physics終了では接触キャッシュを通知なしで破棄する。個別Colliderの無効化または破棄では、生存している相手側にだけ`OnHitEnd()`を通知する。
+Scene破棄、Play終了、Physics終了では、GameObjectを破棄する前に接触キャッシュを通知なしで破棄する。個別Colliderの無効化または破棄では、生存している相手側にだけ`OnHitEnd()`を通知する。
 
 ## 外部ライブラリ
 

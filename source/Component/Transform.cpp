@@ -4,6 +4,7 @@
 #include "System/Editor/FieldRegistry.h"
 #include "System/Core/GameObject.h"
 #include "System/Diagnostics/Logger.h"
+#include "System/Core/Physics.h"
 #include "math/MathCommon.h"
 
 Transform::Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale)
@@ -127,6 +128,9 @@ bool Transform::SetParent(TransformBase* parent, ParentTransformMode mode)
     {
         MarkWorldDirty();
     }
+
+    // 親子関係の変更は、Colliderの所属BodyやBody基準の相対姿勢を変える可能性がある。
+    Physics::MarkDirty();
     return true;
 }
 

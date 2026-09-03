@@ -7,6 +7,7 @@
 #include "Component/Transform.h"
 #include "Component/TransformBase.h"
 #include "Component/UITransform.h"
+#include "System/Core/Physics.h"
 
 GameObject::GameObject()
     : GameObject("Empty", Vector3::Zero(), Vector3::Zero(), Vector3::One())
@@ -40,6 +41,24 @@ GameObject::~GameObject()
 {
 }
 
+void GameObject::SetActive(bool active)
+{
+    if (m_isActive == active)
+    {
+        return;
+    }
+
+    m_isActive = active;
+    Physics::MarkDirty();
+
+    if (!m_isActive || !m_isStarted || m_isDestroyRequested || m_isDestroyed)
+    {
+        return;
+    }
+
+    NotifyActiveState();
+}
+
 Transform* GameObject::GetTransform() const
 {
     return dynamic_cast<Transform*>(m_transformBase);
@@ -69,6 +88,7 @@ void GameObject::Destroy()
         m_transformBase->DestroyChildren();
     }
     m_isDestroyRequested = true;
+    Physics::MarkDirty();
 }
 
 void GameObject::RegisterReference(GameObjectReference* reference)

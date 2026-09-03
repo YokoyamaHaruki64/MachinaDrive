@@ -12,6 +12,8 @@
 #endif
 #include "System/Serialization/GameObjectYamlSerializer.h"
 #include "System/Core/input.h"
+#include "System/Core/GM_Time.h"
+#include "System/Core/Physics.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Diagnostics/PerformanceMonitor.h"
 #include "System/Rendering/renderer.h"
@@ -133,6 +135,10 @@ void Manager::EnsureGameObjectIds(
 
 void Manager::DestroyGameObjects()
 {
+    // PhysicsのBodyRecordはGameObject／Colliderへの参照を持つため、
+    // OnDestroyでGameObjectを解放する前に物理側のキャッシュを空にする。
+    Physics::Clear();
+
     // まだ開始していない旧シーンの生成物は、そのまま所有権を破棄する。
     m_pendingGameObjects.clear();
 
@@ -858,6 +864,19 @@ bool Manager::Init()
         return false;
     }
     ModelManager::Init();
+
+    // PhysicsはPlay開始時ではなくManagerの寿命に合わせて初期化する。
+    // Edit中はUpdateしないが、Playへの切り替え時にBody生成を待たず利用できる。
+    if (!Physics::Initialize())
+    {
+        Logger::Fatal("Physicsの初期化に失敗しました。");
+        ModelManager::Uninit();
+        MaterialManager::Uninit();
+        TextureManager::Uninit();
+        ShaderManager::Uninit();
+        Renderer::Uninit();
+        return false;
+    }
 #if GM_ENABLE_EDITOR
     DebugDrawer::Initialize();
 #endif
@@ -938,6 +957,9 @@ void Manager::Uninit()
         m_currentScene->Uninit();
     }
     DestroyGameObjects();
+
+    // SceneのGameObject破棄後に、PhysicsのBodyと接触キャッシュを破棄する。
+    Physics::Uninitialize();
     m_currentScene.reset();
     m_nextScene.reset();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
@@ -1029,6 +1051,9 @@ void Manager::Update()
                 m_GameObjects[i]->Update();
             }
         }
+
+        // Componentの入力処理後に物理を固定刻みで進め、結果をLateUpdate前に反映する。
+        Physics::Update(Time::GetDeltaTime());
 
         // Manager::Update全体からLateUpdateだけを分離して計測する。
         PerformanceMonitor::BeginLateUpdate();

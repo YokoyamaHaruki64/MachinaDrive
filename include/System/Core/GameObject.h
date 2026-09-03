@@ -107,21 +107,7 @@ public:
         return m_isActive;
     }
 
-    void SetActive(bool active)
-    {
-        if (m_isActive == active)
-        {
-            return;
-        }
-
-        m_isActive = active;
-        if (!m_isActive || !m_isStarted || m_isDestroyRequested || m_isDestroyed)
-        {
-            return;
-        }
-
-        NotifyActiveState();
-    }
+    void SetActive(bool active);
 
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)
@@ -293,6 +279,43 @@ public:
 	//}
 
 private:
+    // Physicsが作ったHitInfoを、受信対象ObjectのComponent列へ転送する。
+    void NotifyHitBegin(const HitInfo& hitInfo)
+    {
+        NotifyHit([&hitInfo](Component& component) { component.OnHitBegin(hitInfo); });
+    }
+
+    void NotifyHit(const HitInfo& hitInfo)
+    {
+        NotifyHit([&hitInfo](Component& component) { component.OnHit(hitInfo); });
+    }
+
+    void NotifyHitEnd(const HitInfo& hitInfo)
+    {
+        NotifyHit([&hitInfo](Component& component) { component.OnHitEnd(hitInfo); });
+    }
+
+    template <typename Callback>
+    void NotifyHit(Callback&& callback)
+    {
+        if (!m_isActive || m_isDestroyed)
+        {
+            return;
+        }
+
+        // 通知中に追加されたComponentは、今回のイベント対象に含めない。
+        // Destroy要求後は残りのComponentを呼ばず、既存のLifecycle通知と同じ規則にする。
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount && !m_isDestroyRequested; ++i)
+        {
+            Component* component = m_components[i].get();
+            if (component->IsEnabled())
+            {
+                callback(*component);
+            }
+        }
+    }
+
     void NotifyActiveState()
     {
         const size_t componentCount = m_components.size();
@@ -315,6 +338,7 @@ private:
     friend class GameObjectReference;
     friend class Manager;
     friend class TransformBase;
+    friend class Physics;
 };
 
 // テンプレート関数インクルード（循環参照回避）

@@ -5,6 +5,7 @@
 
 class Transform;
 class GameObject;
+struct HitInfo;
 
 class Component
 {
@@ -29,6 +30,11 @@ public:
     // Componentが有効になった遷移で呼び出される。
     virtual void OnEnable() {};
     virtual void OnDestroy() {};
+
+    // 物理接触の通知。GameObjectが物理ステップ後に有効な全Componentへ転送する。
+    virtual void OnHitBegin(const HitInfo&) {};
+    virtual void OnHit(const HitInfo&) {};
+    virtual void OnHitEnd(const HitInfo&) {};
 
 	virtual void Update() {};
     virtual void LateUpdate() {};

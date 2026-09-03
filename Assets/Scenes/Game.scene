@@ -77,12 +77,12 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,2.61216004e-15]
+          m_localPosition: [0,2.24000001,2.61216004e-15]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1.00034523,1,1.00034523]
       - type: ModelRenderer
         fields:
-          enabled: true
+          enabled: false
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
@@ -355,3 +355,55 @@ gameObjects:
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
+  - id: 15
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_size: [1,1,1]
+      - type: Enemy
+        fields:
+          enabled: true
+  - id: 28
+    name: Enemy(Instance)
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [2.27999997,0.0299999993,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - ''
+            - ''
+            - ''
+          m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+      - type: Enemy
+        fields:
+          enabled: true
