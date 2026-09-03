@@ -279,6 +279,19 @@ public:
 	//}
 
 private:
+    void NotifyTransformChanged(const TransformChangedEvent& event)
+    {
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount && !m_isDestroyRequested; ++i)
+        {
+            Component* component = m_components[i].get();
+            if (component->IsEnabled())
+            {
+                component->OnTransformChanged(event);
+            }
+        }
+    }
+
     // Physicsが作ったHitInfoを、受信対象ObjectのComponent列へ転送する。
     void NotifyHitBegin(const HitInfo& hitInfo)
     {
@@ -330,6 +343,20 @@ private:
         }
     }
 
+    void NotifyInactiveState()
+    {
+        const size_t componentCount = m_components.size();
+        for (size_t i = 0; i < componentCount && !m_isDestroyRequested; ++i)
+        {
+            Component* component = m_components[i].get();
+            if (component->IsEnabled())
+            {
+                component->OnDisable();
+            }
+            component->OnInactive();
+        }
+    }
+
     void RegisterReference(GameObjectReference* reference);
     void UnregisterReference(GameObjectReference* reference);
     void ClearReferences();
@@ -338,6 +365,7 @@ private:
     friend class GameObjectReference;
     friend class Manager;
     friend class TransformBase;
+    friend class Transform;
     friend class Physics;
 };
 

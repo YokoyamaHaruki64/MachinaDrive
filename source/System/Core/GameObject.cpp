@@ -48,15 +48,23 @@ void GameObject::SetActive(bool active)
         return;
     }
 
+    const bool notifyLifecycle = m_isStarted && !m_isDestroyRequested && !m_isDestroyed;
     m_isActive = active;
-    Physics::MarkDirty();
+    Physics::NotifyGameObjectStateChanged(this);
 
-    if (!m_isActive || !m_isStarted || m_isDestroyRequested || m_isDestroyed)
+    if (!notifyLifecycle)
     {
         return;
     }
 
-    NotifyActiveState();
+    if (m_isActive)
+    {
+        NotifyActiveState();
+    }
+    else
+    {
+        NotifyInactiveState();
+    }
 }
 
 Transform* GameObject::GetTransform() const
@@ -88,7 +96,7 @@ void GameObject::Destroy()
         m_transformBase->DestroyChildren();
     }
     m_isDestroyRequested = true;
-    Physics::MarkDirty();
+    Physics::NotifyGameObjectStateChanged(this);
 }
 
 void GameObject::RegisterReference(GameObjectReference* reference)

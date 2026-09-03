@@ -8,11 +8,11 @@
 void SphereCollider::RegisterFields(FieldRegistry& fields)
 {
     Collider::RegisterFields(fields);
-    GM_FIELD(m_radius);
+    GM_FIELD_ACCESSOR(float, "m_radius", GetRadius(), SetRadius(value), All);
 }
 
 void SphereCollider::SetRadius(float radius)
 {
     m_radius = std::max(radius, 0.0f);
-    Physics::MarkDirty();
+    Physics::MarkBodyShapeDirty(this);
 }

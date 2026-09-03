@@ -2,16 +2,8 @@
 
 #include "System/Core/Physics.h"
 
-#define JPH_USE_AVX2
-#define JPH_USE_AVX
-#define JPH_USE_SSE4_1
-#define JPH_USE_SSE4_2
-#define JPH_USE_LZCNT
-#define JPH_USE_TZCNT
-#define JPH_USE_F16C
-#define JPH_USE_FMADD
+#include "System/Core/PhysicsJoltUtils.h"
 
-#include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -19,27 +11,15 @@
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 #include <Jolt/Physics/Collision/CollideShape.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
-#include <Jolt/Physics/Collision/Shape/CompoundShape.h>
-#include <Jolt/Physics/Collision/Shape/EmptyShape.h>
-#include <Jolt/Physics/Collision/Shape/Shape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
 
-#include "Component/BoxCollider.h"
-#include "Component/CapsuleCollider.h"
 #include "Component/Rigidbody.h"
-#include "Component/SphereCollider.h"
 #include "Component/Transform.h"
 #include "System/Core/GameObject.h"
 #include "System/Diagnostics/Logger.h"
 
 #include <algorithm>
-#include <bit>
-#include <cmath>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -72,99 +52,14 @@ namespace JoltPhysicsDetail
 
 struct Physics::Backend
 {
-    // -------------------------------------------------------------------------
-    // 接触とBodyをゲーム側へ戻すためのデータ構造
-    // -------------------------------------------------------------------------
+    using RawContactKey = PhysicsDetail::RawContactKey;
+    using RawContactKeyHash = PhysicsDetail::RawContactKeyHash;
+    using BodyRecord = PhysicsDetail::BodyRecord;
+    using ContactState = PhysicsDetail::ContactState;
+    using EventType = PhysicsDetail::EventType;
+    using DispatchEvent = PhysicsDetail::DispatchEvent;
 
-    // 接触したBodyだけでなくCompound ShapeのSubShapeもキーに含める。
-    // これにより、親Bodyに複数Colliderがある場合もCollider単位でBegin/Endを管理できる。
-    struct RawContactKey
-    {
-        uint32_t body1{};
-        uint32_t subShape1{};
-        uint32_t body2{};
-        uint32_t subShape2{};
-
-        bool operator==(const RawContactKey& other) const
-        {
-            return body1 == other.body1
-                && subShape1 == other.subShape1
-                && body2 == other.body2
-                && subShape2 == other.subShape2;
-        }
-    };
-
-    struct RawContactKeyHash
-    {
-        size_t operator()(const RawContactKey& key) const
-        {
-            size_t result = key.body1;
-            result = result * 31 + key.subShape1;
-            result = result * 31 + key.body2;
-            result = result * 31 + key.subShape2;
-            return result;
-        }
-    };
-
-    struct BodyRecord;
-
-    struct ContactState
-    {
-        // Joltのワーカースレッドから受け取った接触情報を、メインスレッドのイベントへ変換する中間状態。
-        BodyRecord* body1{};
-        BodyRecord* body2{};
-        Collider* collider1{};
-        Collider* collider2{};
-        Vector3 point{ Vector3::Zero() };
-        Vector3 normal{ Vector3::Up() };
-        float penetration{};
-        bool isTrigger{};
-        uint64_t lastSeenStep{};
-        bool began{};
-    };
-
-    enum class EventType
-    {
-        Begin,
-        Hit,
-        End,
-    };
-
-    struct DispatchEvent
-    {
-        EventType type{};
-        HitInfo hitInfo{};
-    };
-
-    struct BodyRecord
-    {
-        // keyはRigidbodyまたはColliderのアドレス。Rigidbodyがある場合は子Colliderも同じBodyへまとめる。
-        void* key{};
-        GameObject* bodyOwner{};
-        Rigidbody* rigidbody{};
-        std::vector<Collider*> colliders;
-        JPH::BodyID bodyID;
-        JPH::ShapeRefC shape;
-        // どちらもBodyの同一性ではなく、Jolt Bodyを差し替える必要があるかの判定値。
-        // 同一性はkeyのRigidbody／Colliderポインタだけで決まり、物理挙動の値は含めない。
-        size_t shapeSignature{};
-        size_t settingsSignature{};
-        bool hasPhysicsTransform{ false };
-        Vector3 lastPhysicsPosition{ Vector3::Zero() };
-        Quaternion lastPhysicsRotation{ Quaternion::Identity() };
-        Vector3 lastPhysicsVelocity{ Vector3::Zero() };
-        bool hasPhysicsVelocity{ false };
-    };
-
-    struct DesiredBody
-    {
-        // 構成変更が検出されたFrameに、登録集合から組み立てる「あるべきBody」の一時データ。
-        // 既存Bodyとの差分だけをRefreshBodiesで反映する。
-        void* key{};
-        GameObject* bodyOwner{};
-        Rigidbody* rigidbody{};
-        std::vector<Collider*> colliders;
-    };
+    // 内部型は専用ヘッダーに置き、Backend内では短い別名で扱う。
 
     // -------------------------------------------------------------------------
     // Joltの広域フィルターと接触callback
@@ -332,12 +227,19 @@ struct Physics::Backend
     // Position、Rotation、Velocityなどをキーに含めないため、動いても同じBodyを使い続けられる。
     std::unordered_map<void*, std::unique_ptr<BodyRecord>> m_bodyRecords;
 
-    // ManagerのGameObject配列を毎Step走査する代わりに、物理対象の寿命だけを登録で追跡する。
+    // Colliderから所属Bodyへ直接到達し、形状変更のたびに全Bodyを探索しない。
+    std::unordered_map<Collider*, BodyRecord*> m_colliderToBody;
+
+    // Componentの寿命だけを登録で追跡する。Bodyの追加・削除はこの集合へのイベントで行う。
     std::unordered_set<Collider*> m_registeredColliders;
     std::unordered_set<Rigidbody*> m_registeredRigidbodies;
 
-    // 構成変更があったFrameだけ、登録集合からBody集合を再構築する。
-    bool m_structureDirty{ true };
+    // Colliderが先にロードされた場合だけ、解決済みRigidbody単位で登録待ちにする。
+    std::unordered_map<Rigidbody*, std::unordered_set<Collider*>> m_waitingColliders;
+    std::unordered_map<Collider*, Rigidbody*> m_waitingRigidbodyByCollider;
+
+    // 登録解除時に接触終了を次のPhysics::Updateへ渡すための一時イベント。
+    std::vector<DispatchEvent> m_pendingEvents;
 
     // Jolt callbackで受け取ったBodyIDをゲーム側のBodyRecordへ戻すための索引。
     std::unordered_map<uint32_t, BodyRecord*> m_bodyRecordsByID;
@@ -348,48 +250,368 @@ struct Physics::Backend
 
     uint64_t m_currentStep{};
     float m_accumulatedTime{};
+    bool m_isApplyingPhysicsTransforms{ false };
+
+    static bool IsObjectActive(const GameObject* object)
+    {
+        for (const GameObject* current = object; current; current = current->GetParent())
+        {
+            if (current->IsDestroyed() || !current->IsActive())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static bool IsInHierarchy(const GameObject* object, const GameObject* ancestor)
+    {
+        for (const GameObject* current = object; current; current = current->GetParent())
+        {
+            if (current == ancestor)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Rigidbody* FindRegisteredRigidbody(Collider* collider) const
+    {
+        // Collider自身のGetRigidbodyが返す「最も近いRigidbody」を正とする。
+        // 親Rigidbodyが無効でも、さらに上のRigidbodyへ勝手に所属させない。
+        Rigidbody* rigidbody = collider->GetRigidbody();
+        return rigidbody
+            && m_registeredRigidbodies.contains(rigidbody)
+            && IsObjectActive(rigidbody->GetOwner())
+            ? rigidbody
+            : nullptr;
+    }
+
+    BodyRecord* FindBodyRecord(void* key) const
+    {
+        const auto iterator = m_bodyRecords.find(key);
+        return iterator != m_bodyRecords.end() ? iterator->second.get() : nullptr;
+    }
+
+    BodyRecord* FindBodyRecord(Collider* collider) const
+    {
+        const auto iterator = m_colliderToBody.find(collider);
+        return iterator != m_colliderToBody.end() ? iterator->second : nullptr;
+    }
+
+    BodyRecord* CreateRecord(void* key, GameObject* bodyOwner, Rigidbody* rigidbody)
+    {
+        auto record = std::make_unique<BodyRecord>();
+        record->bodyOwner = bodyOwner;
+        record->rigidbody = rigidbody;
+        BodyRecord* result = record.get();
+        m_bodyRecords.emplace(key, std::move(record));
+        return result;
+    }
+
+    void ClearWaitingCollider(Collider* collider)
+    {
+        const auto ownerIterator = m_waitingRigidbodyByCollider.find(collider);
+        if (ownerIterator == m_waitingRigidbodyByCollider.end())
+        {
+            return;
+        }
+
+        Rigidbody* rigidbody = ownerIterator->second;
+        const auto waitingIterator = m_waitingColliders.find(rigidbody);
+        waitingIterator->second.erase(collider);
+        if (waitingIterator->second.empty())
+        {
+            m_waitingColliders.erase(waitingIterator);
+        }
+        m_waitingRigidbodyByCollider.erase(ownerIterator);
+    }
+
+    void WaitForRigidbody(Collider* collider, Rigidbody* rigidbody)
+    {
+        ClearWaitingCollider(collider);
+        m_waitingColliders[rigidbody].insert(collider);
+        m_waitingRigidbodyByCollider[collider] = rigidbody;
+    }
+
+    BodyRecord* EnsureRigidbodyRecord(Rigidbody* rigidbody)
+    {
+        BodyRecord* record = FindBodyRecord(rigidbody);
+        if (!record)
+        {
+            record = CreateRecord(rigidbody, rigidbody->GetOwner(), rigidbody);
+        }
+
+        return record;
+    }
+
+    void RemoveRecord(void* key, std::vector<DispatchEvent>& events)
+    {
+        const auto iterator = m_bodyRecords.find(key);
+        if (iterator == m_bodyRecords.end())
+        {
+            return;
+        }
+
+        BodyRecord& record = *iterator->second;
+        for (Collider* collider : record.colliders)
+        {
+            m_colliderToBody.erase(collider);
+        }
+        RemoveContactsForBody(record, events);
+        DestroyBody(record);
+        m_bodyRecords.erase(iterator);
+    }
+
+    void DetachCollider(Collider* collider, std::vector<DispatchEvent>& events)
+    {
+        BodyRecord* record = FindBodyRecord(collider);
+        if (!record)
+        {
+            return;
+        }
+
+        if (!record->rigidbody)
+        {
+            RemoveRecord(collider, events);
+            return;
+        }
+
+        m_colliderToBody.erase(collider);
+        std::erase(record->colliders, collider);
+        record->shapeDirty = true;
+    }
+
+    void AttachCollider(Collider* collider, std::vector<DispatchEvent>& events)
+    {
+        if (!m_registeredColliders.contains(collider))
+        {
+            return;
+        }
+
+        ClearWaitingCollider(collider);
+        if (!IsObjectActive(collider->GetOwner()))
+        {
+            DetachCollider(collider, events);
+            return;
+        }
+
+        Rigidbody* resolvedRigidbody = collider->GetRigidbody();
+        Rigidbody* rigidbody = FindRegisteredRigidbody(collider);
+        if (!rigidbody && resolvedRigidbody)
+        {
+            // 所属Rigidbodyが無効な間は、ColliderをStaticへ移さず待機させる。
+            DetachCollider(collider, events);
+            WaitForRigidbody(collider, resolvedRigidbody);
+            return;
+        }
+
+        BodyRecord* currentRecord = FindBodyRecord(collider);
+        BodyRecord* targetRecord = rigidbody
+            ? EnsureRigidbodyRecord(rigidbody)
+            : FindBodyRecord(collider);
+
+        if (!rigidbody && !targetRecord)
+        {
+            targetRecord = CreateRecord(collider, collider->GetOwner(), nullptr);
+        }
+
+        if (currentRecord && currentRecord != targetRecord)
+        {
+            DetachCollider(collider, events);
+        }
+
+        if (std::find(targetRecord->colliders.begin(), targetRecord->colliders.end(), collider)
+            == targetRecord->colliders.end())
+        {
+            targetRecord->colliders.push_back(collider);
+            targetRecord->shapeDirty = true;
+        }
+        m_colliderToBody[collider] = targetRecord;
+
+    }
+
+    void RebindCollider(Collider* collider, std::vector<DispatchEvent>& events)
+    {
+        AttachCollider(collider, events);
+        if (BodyRecord* record = FindBodyRecord(collider))
+        {
+            record->shapeDirty = true;
+        }
+    }
+
+    void RebindCollider(Collider* collider)
+    {
+        RebindCollider(collider, m_pendingEvents);
+    }
 
     void RegisterCollider(Collider* collider)
     {
-        if (collider && m_registeredColliders.insert(collider).second)
+        if (!collider || !collider->GetOwner() || !collider->GetOwner()->GetTransform())
         {
-            m_structureDirty = true;
+            return;
         }
+
+        m_registeredColliders.insert(collider);
+        AttachCollider(collider, m_pendingEvents);
     }
 
     void UnregisterCollider(Collider* collider)
     {
-        if (collider && m_registeredColliders.erase(collider) > 0)
-        {
-            m_structureDirty = true;
-        }
+        m_registeredColliders.erase(collider);
+        ClearWaitingCollider(collider);
+        DetachCollider(collider, m_pendingEvents);
     }
 
     void RegisterRigidbody(Rigidbody* rigidbody)
     {
-        if (rigidbody && m_registeredRigidbodies.insert(rigidbody).second)
+        if (!rigidbody || !rigidbody->GetOwner() || !rigidbody->GetOwner()->GetTransform())
         {
-            m_structureDirty = true;
+            return;
+        }
+
+        m_registeredRigidbodies.insert(rigidbody);
+        if (IsObjectActive(rigidbody->GetOwner()))
+        {
+            EnsureRigidbodyRecord(rigidbody);
+        }
+
+        // Collider先行ロード時の待機集合だけを処理し、全Colliderは走査しない。
+        const auto waitingIterator = m_waitingColliders.find(rigidbody);
+        if (waitingIterator == m_waitingColliders.end())
+        {
+            return;
+        }
+
+        const std::vector<Collider*> waitingColliders(
+            waitingIterator->second.begin(),
+            waitingIterator->second.end());
+        for (Collider* collider : waitingColliders)
+        {
+            AttachCollider(collider, m_pendingEvents);
         }
     }
 
     void UnregisterRigidbody(Rigidbody* rigidbody)
     {
-        if (rigidbody && m_registeredRigidbodies.erase(rigidbody) > 0)
+        m_registeredRigidbodies.erase(rigidbody);
+
+        BodyRecord* record = FindBodyRecord(rigidbody);
+        std::vector<Collider*> colliders;
+        if (record)
         {
-            m_structureDirty = true;
+            colliders = record->colliders;
+            RemoveRecord(rigidbody, m_pendingEvents);
+        }
+
+        // 子Colliderは別の親Rigidbody、または独立Static Bodyへ明示的に移す。
+        for (Collider* collider : colliders)
+        {
+            AttachCollider(collider, m_pendingEvents);
         }
     }
 
-    void MarkDirty()
+    void MarkBodyShapeDirty(Collider* collider)
     {
-        m_structureDirty = true;
+        if (BodyRecord* record = FindBodyRecord(collider))
+        {
+            record->shapeDirty = true;
+        }
+    }
+
+    void MarkBodyShapeDirty(Rigidbody* rigidbody)
+    {
+        if (BodyRecord* record = FindBodyRecord(rigidbody))
+        {
+            record->shapeDirty = true;
+        }
+    }
+
+    void MarkBodySettingsDirty(Rigidbody* rigidbody, bool requiresBodyRecreate)
+    {
+        if (BodyRecord* record = FindBodyRecord(rigidbody))
+        {
+            record->settingsDirty = true;
+            record->settingsRequiresRecreate = record->settingsRequiresRecreate || requiresBodyRecreate;
+        }
+    }
+
+    void MarkBodyVelocityDirty(Rigidbody* rigidbody)
+    {
+        if (BodyRecord* record = FindBodyRecord(rigidbody))
+        {
+            record->velocityDirty = true;
+        }
+    }
+
+    void MarkBodyTransformDirty(Collider* collider)
+    {
+        if (m_isApplyingPhysicsTransforms)
+        {
+            return;
+        }
+
+        if (BodyRecord* record = FindBodyRecord(collider))
+        {
+            record->transformDirty = true;
+        }
+    }
+
+    void MarkBodyTransformDirty(Rigidbody* rigidbody)
+    {
+        if (m_isApplyingPhysicsTransforms)
+        {
+            return;
+        }
+
+        if (BodyRecord* record = FindBodyRecord(rigidbody))
+        {
+            record->transformDirty = true;
+        }
+    }
+
+    void RefreshRigidbodyState(Rigidbody* rigidbody)
+    {
+        if (!m_registeredRigidbodies.contains(rigidbody))
+        {
+            return;
+        }
+
+        if (IsObjectActive(rigidbody->GetOwner()))
+        {
+            EnsureRigidbodyRecord(rigidbody);
+        }
+        else
+        {
+            RemoveRecord(rigidbody, m_pendingEvents);
+        }
+    }
+
+    void NotifyGameObjectStateChanged(GameObject* object)
+    {
+        // Active変更は低頻度なので、変更された階層に属する登録Componentだけを更新する。
+        for (Collider* collider : m_registeredColliders)
+        {
+            if (IsInHierarchy(collider->GetOwner(), object))
+            {
+                RebindCollider(collider, m_pendingEvents);
+            }
+        }
+
+        for (Rigidbody* rigidbody : m_registeredRigidbodies)
+        {
+            if (IsInHierarchy(rigidbody->GetOwner(), object))
+            {
+                RefreshRigidbodyState(rigidbody);
+            }
+        }
     }
 
     Backend()
         : m_contactListener(*this)
     {
-        // Joltのフィルターと接触リスナーを登録する。BodyはRefreshBodiesで遅延生成する。
+        // Joltのフィルターと接触リスナーを登録する。BodyはComponent登録イベントで生成する。
         m_physicsSystem.Init(
             JoltPhysicsDetail::MAX_BODIES,
             0,
@@ -408,290 +630,18 @@ struct Physics::Backend
     }
 
     // -------------------------------------------------------------------------
-    // Joltとゲーム側の値変換、Shape生成
-    // -------------------------------------------------------------------------
-
-    static JPH::RVec3 ToJoltPosition(const Vector3& value)
-    {
-        // 現在のプロジェクト設定では軸変換を行わず、位置成分をそのまま境界越しに渡す。
-        return JPH::RVec3(value.x, value.y, value.z);
-    }
-
-    static JPH::Quat ToJoltRotation(const Quaternion& value)
-    {
-        // 不正な長さのQuaternionがBodyへ入らないよう、境界で正規化する。
-        const Quaternion normalized = value.Normalized();
-        return JPH::Quat(normalized.x, normalized.y, normalized.z, normalized.w);
-    }
-
-    static Vector3 FromJoltVector(JPH::Vec3 value)
-    {
-        return Vector3(value.GetX(), value.GetY(), value.GetZ());
-    }
-
-    static Quaternion FromJoltRotation(JPH::Quat value)
-    {
-        return Quaternion(value.GetX(), value.GetY(), value.GetZ(), value.GetW());
-    }
-
-    static Vector3 FromJoltPosition(JPH::RVec3 value)
-    {
-        return Vector3(
-            static_cast<float>(value.GetX()),
-            static_cast<float>(value.GetY()),
-            static_cast<float>(value.GetZ()));
-    }
-
-    static bool NearlyEqual(const Vector3& a, const Vector3& b)
-    {
-        return Vector3::DistanceSqr(a, b) <= 1.0e-8f;
-    }
-
-    static bool NearlyEqual(const Quaternion& a, const Quaternion& b)
-    {
-        return std::abs(a.x - b.x) <= 1.0e-4f
-            && std::abs(a.y - b.y) <= 1.0e-4f
-            && std::abs(a.z - b.z) <= 1.0e-4f
-            && std::abs(a.w - b.w) <= 1.0e-4f;
-    }
-
-    static void HashCombine(size_t& hash, size_t value)
-    {
-        hash ^= value + static_cast<size_t>(0x9e3779b9) + (hash << 6) + (hash >> 2);
-    }
-
-    static void HashFloat(size_t& hash, float value)
-    {
-        HashCombine(hash, std::bit_cast<uint32_t>(value));
-    }
-
-    static void HashVector(size_t& hash, const Vector3& value)
-    {
-        HashFloat(hash, value.x);
-        HashFloat(hash, value.y);
-        HashFloat(hash, value.z);
-    }
-
-    static void HashQuaternion(size_t& hash, const Quaternion& value)
-    {
-        HashFloat(hash, value.x);
-        HashFloat(hash, value.y);
-        HashFloat(hash, value.z);
-        HashFloat(hash, value.w);
-    }
-
-    static Vector3 GetWorldScale(const Transform* transform)
-    {
-        return transform ? transform->GetScale() : Vector3::One();
-    }
-
-    static JPH::ShapeRefC CreateLeafShape(Collider& collider)
-    {
-        // JoltのShapeはBodyから見た単位形状として作り、位置・回転はCompound側で与える。
-        // 非一様ScaleをJoltのShapeへ直接渡すのではなく、形状寸法へ焼き込む。
-        JPH::ShapeRefC shape;
-        const Transform* transform = collider.transform();
-        const Vector3 scale = GetWorldScale(transform);
-
-        if (const BoxCollider* box = dynamic_cast<const BoxCollider*>(&collider))
-        {
-            // Boxは各軸のScaleを半サイズへ適用する。
-            const Vector3 size = box->GetSize();
-
-            const Vector3 halfExtent(
-                std::max(std::abs(size.x * scale.x) * 0.5f, 0.001f),
-                std::max(std::abs(size.y * scale.y) * 0.5f, 0.001f),
-                std::max(std::abs(size.z * scale.z) * 0.5f, 0.001f));
-            shape = new JPH::BoxShape(JPH::Vec3(halfExtent.x, halfExtent.y, halfExtent.z));
-        }
-        else if (const SphereCollider* sphere = dynamic_cast<const SphereCollider*>(&collider))
-        {
-            // Sphereは球形を保つため、最も大きい軸のScaleを半径へ使う。
-            const float radius = std::max(
-                std::abs(sphere->GetRadius())
-                    * std::max({ std::abs(scale.x), std::abs(scale.y), std::abs(scale.z) }),
-                0.001f);
-            shape = new JPH::SphereShape(radius);
-        }
-        else if (const CapsuleCollider* capsule = dynamic_cast<const CapsuleCollider*>(&collider))
-        {
-            // Capsuleの中心線はY軸。半径はXZ、全高はYのScaleで決める。
-            const float radius = std::max(
-                std::abs(capsule->GetRadius())
-                    * std::max(std::abs(scale.x), std::abs(scale.z)),
-                0.001f);
-            const float halfHeight = std::abs(capsule->GetHeight() * scale.y) * 0.5f;
-
-            const float halfHeightOfCylinder = std::max(halfHeight - radius, 0.001f);
-            shape = new JPH::CapsuleShape(halfHeightOfCylinder, radius);
-        }
-
-        return shape;
-    }
-
-    static size_t CalculateShapeSignature(
-        const std::vector<Collider*>& colliders,
-        const Transform* bodyTransform)
-    {
-        // Body自身のWorld移動・回転はShapeを変えないため、Body基準の相対値だけを署名に含める。
-        // World値をそのまま含めると、Dynamic Bodyが1フレーム動くたびにShapeを再生成してしまう。
-        size_t hash = 0;
-        const Vector3 bodyPosition = bodyTransform ? bodyTransform->GetPosition() : Vector3::Zero();
-        const Quaternion inverseBodyRotation = bodyTransform
-            ? bodyTransform->GetRotation().Inversed()
-            : Quaternion::Identity();
-
-        for (Collider* collider : colliders)
-        {
-            HashCombine(hash, reinterpret_cast<size_t>(collider));
-            HashCombine(hash, static_cast<size_t>(collider->GetShapeType()));
-            const Transform* colliderTransform = collider->transform();
-
-            const Vector3 relativePosition = inverseBodyRotation.RotateVector(
-                collider->GetWorldCenter() - bodyPosition);
-            const Quaternion relativeRotation = inverseBodyRotation
-                * colliderTransform->GetRotation();
-
-            HashVector(hash, relativePosition);
-            HashQuaternion(hash, relativeRotation);
-            HashVector(hash, GetWorldScale(colliderTransform));
-            HashCombine(hash, static_cast<size_t>(collider->GetLayer()));
-            HashCombine(hash, collider->IsTrigger() ? 1 : 0);
-
-            if (const BoxCollider* box = dynamic_cast<const BoxCollider*>(collider))
-            {
-                HashVector(hash, box->GetSize());
-            }
-            else if (const SphereCollider* sphere = dynamic_cast<const SphereCollider*>(collider))
-            {
-                HashFloat(hash, sphere->GetRadius());
-            }
-            else if (const CapsuleCollider* capsule = dynamic_cast<const CapsuleCollider*>(collider))
-            {
-                HashFloat(hash, capsule->GetRadius());
-                HashFloat(hash, capsule->GetHeight());
-            }
-        }
-        return hash;
-    }
-
-    static size_t CalculateSettingsSignature(Rigidbody* rigidbody)
-    {
-        if (!rigidbody)
-        {
-            return 0;
-        }
-
-        size_t hash = 0;
-        HashCombine(hash, static_cast<size_t>(rigidbody->GetMotionType()));
-        HashFloat(hash, rigidbody->GetMass());
-        HashFloat(hash, rigidbody->GetBounciness());
-        HashFloat(hash, rigidbody->GetFriction());
-        HashCombine(hash, rigidbody->IsUseGravity() ? 1 : 0);
-        HashCombine(hash, rigidbody->IsAllowSleep() ? 1 : 0);
-        HashCombine(hash, rigidbody->IsFreezeRotation() ? 1 : 0);
-        return hash;
-    }
-
-    JPH::ShapeRefC CreateShape(BodyRecord& record)
-    {
-        // ColliderなしRigidbodyも、速度・重力・Sleepを持つBodyとして登録する。
-        // EmptyShapeは他のShapeと接触しないため、衝突対象だけを持たせたい場合の安全な空形状になる。
-        if (record.colliders.empty())
-        {
-            return JPH::ShapeRefC(new JPH::EmptyShape());
-        }
-
-        const Transform* bodyTransform = record.bodyOwner ? record.bodyOwner->GetTransform() : nullptr;
-        if (!bodyTransform)
-        {
-            return JPH::ShapeRefC(new JPH::EmptyShape());
-        }
-
-        const Vector3 bodyPosition = bodyTransform->GetPosition();
-        const Quaternion inverseBodyRotation = bodyTransform->GetRotation().Inversed();
-        JPH::StaticCompoundShapeSettings settings;
-
-        for (size_t index = 0; index < record.colliders.size(); ++index)
-        {
-            Collider* collider = record.colliders[index];
-            JPH::ShapeRefC leafShape = CreateLeafShape(*collider);
-            if (!leafShape)
-            {
-                continue;
-            }
-
-            const Transform* colliderTransform = collider->transform();
-
-            // ColliderのWorld姿勢をBodyのWorld姿勢で戻し、Compound Shape内の相対姿勢へ変換する。
-            // 子GameObjectのColliderでも、この計算により親RigidbodyのBodyへ正しく配置される。
-            const Vector3 relativePosition = inverseBodyRotation.RotateVector(
-                collider->GetWorldCenter() - bodyPosition);
-            const Quaternion relativeRotation = inverseBodyRotation
-                * colliderTransform->GetRotation();
-            settings.AddShape(
-                JPH::Vec3(relativePosition.x, relativePosition.y, relativePosition.z),
-                ToJoltRotation(relativeRotation),
-                leafShape.GetPtr(),
-                static_cast<uint32_t>(index + 1));
-        }
-
-        // Colliderが複数ある場合は、各Shapeの相対姿勢を保持したStaticCompoundShapeにまとめる。
-        // AddShapeのuserDataにCollider配列の1始まりの番号を保存し、接触時の逆引きに使う。
-        JPH::Shape::ShapeResult result = settings.Create();
-        if (!result.IsValid())
-        {
-            Logger::Error("JoltのCompound Shape生成に失敗しました: " + result.GetError());
-            return JPH::ShapeRefC(new JPH::EmptyShape());
-        }
-        return result.Get();
-    }
-
-    static JPH::EMotionType GetJoltMotionType(Rigidbody* rigidbody)
-    {
-        // RigidbodyがないColliderは静的Bodyとして生成する。
-        if (!rigidbody)
-        {
-            return JPH::EMotionType::Static;
-        }
-
-        switch (rigidbody->GetMotionType())
-        {
-        case Rigidbody::MotionType::Static:
-            return JPH::EMotionType::Static;
-        case Rigidbody::MotionType::Kinematic:
-            return JPH::EMotionType::Kinematic;
-        case Rigidbody::MotionType::Dynamic:
-        default:
-            return JPH::EMotionType::Dynamic;
-        }
-    }
-
-    static JPH::EAllowedDOFs GetAllowedDOFs(Rigidbody* rigidbody)
-    {
-        // 初期値では回転を固定し、Playerのような簡単な地上移動で転倒しないようにする。
-        if (!rigidbody || !rigidbody->IsFreezeRotation())
-        {
-            return JPH::EAllowedDOFs::All;
-        }
-        return JPH::EAllowedDOFs::TranslationX
-            | JPH::EAllowedDOFs::TranslationY
-            | JPH::EAllowedDOFs::TranslationZ;
-    }
-
-    // -------------------------------------------------------------------------
     // Body生成と接触情報のキャッシュ
     // -------------------------------------------------------------------------
 
-    JPH::BodyID CreateBody(BodyRecord& record)
+    void CreateBody(BodyRecord& record)
     {
         // Bodyの生成時点でShapeと初期Transformを確定する。
-        record.shape = CreateShape(record);
+        record.shape = PhysicsDetail::CreateShape(record);
 
-        const Transform* transform = record.bodyOwner ? record.bodyOwner->GetTransform() : nullptr;
-        const Vector3 position = transform ? transform->GetPosition() : Vector3::Zero();
-        const Quaternion rotation = transform ? transform->GetRotation() : Quaternion::Identity();
-        const JPH::EMotionType motionType = GetJoltMotionType(record.rigidbody);
+        const Transform* transform = record.bodyOwner->GetTransform();
+        const Vector3 position = transform->GetPosition();
+        const Quaternion rotation = transform->GetRotation();
+        const JPH::EMotionType motionType = PhysicsDetail::GetJoltMotionType(record.rigidbody);
 
         // JoltのBody Layerは広域判定用の2値へ変換する。細かなLayer判定はListenerで行う。
         const JPH::ObjectLayer objectLayer = motionType == JPH::EMotionType::Static
@@ -700,27 +650,28 @@ struct Physics::Backend
 
         JPH::BodyCreationSettings settings(
             record.shape.GetPtr(),
-            ToJoltPosition(position),
-            ToJoltRotation(rotation),
+            PhysicsDetail::ToJoltPosition(position),
+            PhysicsDetail::ToJoltRotation(rotation),
             motionType,
             objectLayer);
 
-        // UserDataにはBodyRecordのアドレスを保存するが、現在の接触処理ではID索引を正としている。
-        // JoltのBodyからゲームオブジェクトへ直接戻る経路を公開しないための保険として設定する。
-        settings.mUserData = reinterpret_cast<uint64_t>(&record);
         settings.mAllowDynamicOrKinematic = true;
         settings.mCollideKinematicVsNonDynamic = true;
-        settings.mAllowedDOFs = GetAllowedDOFs(record.rigidbody);
+        settings.mAllowedDOFs = PhysicsDetail::GetAllowedDOFs(record.rigidbody);
 
         if (record.rigidbody)
         {
-            // Rigidbodyの値はBody生成時にJoltへ渡し、変更時はRefreshBodiesでBodyを再生成する。
+            // Rigidbodyの初期値はBody生成時にJoltへ渡す。以後の変更はComponentのSetterから通知する。
             settings.mAllowSleeping = record.rigidbody->IsAllowSleep();
             settings.mFriction = record.rigidbody->GetFriction();
             settings.mRestitution = record.rigidbody->GetBounciness();
             settings.mGravityFactor = record.rigidbody->IsUseGravity() ? 1.0f : 0.0f;
             if (motionType == JPH::EMotionType::Dynamic)
             {
+                settings.mLinearVelocity = JPH::Vec3(
+                    record.rigidbody->GetVelocity().x,
+                    record.rigidbody->GetVelocity().y,
+                    record.rigidbody->GetVelocity().z);
                 if (record.colliders.empty())
                 {
                     // EmptyShapeは質量特性を自動計算できないため、単純な慣性を与える。
@@ -744,25 +695,17 @@ struct Physics::Backend
         if (bodyID.IsInvalid())
         {
             Logger::Error("Jolt Bodyの生成に失敗しました。Body上限に達している可能性があります。");
-            return JPH::BodyID();
+            return;
         }
 
         record.bodyID = bodyID;
-        record.shapeSignature = CalculateShapeSignature(
-            record.colliders,
-            record.bodyOwner ? record.bodyOwner->GetTransform() : nullptr);
-        record.settingsSignature = CalculateSettingsSignature(record.rigidbody);
-        record.hasPhysicsTransform = true;
-        record.lastPhysicsPosition = position;
-        record.lastPhysicsRotation = rotation;
+        record.shapeDirty = false;
+        record.settingsDirty = false;
+        record.settingsRequiresRecreate = false;
+        record.velocityDirty = false;
+        record.transformDirty = false;
 
-        if (record.rigidbody)
-        {
-            record.lastPhysicsVelocity = record.rigidbody->GetVelocity();
-            record.hasPhysicsVelocity = true;
-        }
         m_bodyRecordsByID[bodyID.GetIndexAndSequenceNumber()] = &record;
-        return bodyID;
     }
 
     BodyRecord* FindBodyRecord(const JPH::BodyID& bodyID) const
@@ -774,20 +717,20 @@ struct Physics::Backend
 
     Collider* FindCollider(const BodyRecord& record, const JPH::SubShapeID& subShapeID) const
     {
-        // Compound ShapeのuserDataはCreateShapeで設定したCollider配列の番号。
-        // Colliderが1個だけの場合は、Joltが最適化してSubShapeIDを省略しても逆引きできる。
         if (record.colliders.empty())
         {
             return nullptr;
         }
 
-        const uint64_t userData = record.shape
-            ? record.shape->GetSubShapeUserData(subShapeID)
-            : 0;
+        // Collider番号はリーフShapeのUserDataへ保存しているため、Compound／Decoratorの
+        // 実体へキャストせず、Joltの仮想APIでSubShapeを辿って逆引きする。
+        const uint64_t userData = record.shape->GetSubShapeUserData(subShapeID);
         if (userData > 0 && userData <= record.colliders.size())
         {
             return record.colliders[static_cast<size_t>(userData - 1)];
         }
+
+        // Colliderが1個だけの場合は、JoltがSubShapeIDを省略しても逆引きできる。
         return record.colliders.size() == 1 ? record.colliders.front() : nullptr;
     }
 
@@ -829,10 +772,10 @@ struct Physics::Backend
         state.body2 = record2;
         state.collider1 = collider1;
         state.collider2 = collider2;
-        state.point = FromJoltPosition(point);
+        state.point = PhysicsDetail::FromJoltPosition(point);
         // JoltのnormalはBody2をBody1から押し出す向きなので、
         // objectA側へ通知するnormalは反転する。
-        state.normal = FromJoltVector(-manifold.mWorldSpaceNormal);
+        state.normal = PhysicsDetail::FromJoltVector(-manifold.mWorldSpaceNormal);
         state.penetration = std::max(manifold.mPenetrationDepth, 0.0f);
         state.isTrigger = settings.mIsSensor;
         state.lastSeenStep = m_currentStep;
@@ -867,10 +810,10 @@ struct Physics::Backend
             result.colliderB = state.collider1;
         }
 
-        result.objectA = result.colliderA ? result.colliderA->GetOwner() : nullptr;
-        result.objectB = result.colliderB ? result.colliderB->GetOwner() : nullptr;
-        result.rigidbodyA = result.colliderA ? result.colliderA->GetRigidbody() : nullptr;
-        result.rigidbodyB = result.colliderB ? result.colliderB->GetRigidbody() : nullptr;
+        result.objectA = result.colliderA->GetOwner();
+        result.objectB = result.colliderB->GetOwner();
+        result.rigidbodyA = result.colliderA->GetRigidbody();
+        result.rigidbodyB = result.colliderB->GetRigidbody();
         return result;
     }
 
@@ -894,7 +837,7 @@ struct Physics::Backend
         // キャッシュが古くても相手がSleep中なら分離とは見なさない。
         auto isSleepingBody = [this](BodyRecord* record)
         {
-            if (!record || record->bodyID.IsInvalid() || !record->rigidbody)
+            if (!record->rigidbody)
             {
                 return false;
             }
@@ -918,7 +861,7 @@ struct Physics::Backend
             {
                 ContactState state = iterator->second;
                 BodyRecord* other = state.body1 == &record ? state.body2 : state.body1;
-                if (state.began && other && other->bodyOwner
+                if (state.began
                     && other->bodyOwner->IsActive() && !other->bodyOwner->IsDestroyed())
                 {
                     const bool recordIsFirst = state.body1 == &record;
@@ -951,248 +894,99 @@ struct Physics::Backend
 
     void RecreateBody(BodyRecord& record, std::vector<DispatchEvent>& events)
     {
-        // Collider形状やRigidbody設定が変わった場合の簡易更新。
-        // 既存Bodyを差し替えるため、速度とTransformを退避して新Bodyへ戻す。
+        // CreateBodyが現在のTransform・速度・設定をまとめて反映する。
         RemoveContactsForBody(record, events);
-
-        Vector3 position = record.bodyOwner && record.bodyOwner->GetTransform()
-            ? record.bodyOwner->GetTransform()->GetPosition()
-            : Vector3::Zero();
-        Quaternion rotation = record.bodyOwner && record.bodyOwner->GetTransform()
-            ? record.bodyOwner->GetTransform()->GetRotation()
-            : Quaternion::Identity();
-        Vector3 velocity = record.rigidbody ? record.rigidbody->GetVelocity() : Vector3::Zero();
-
         DestroyBody(record);
         CreateBody(record);
-        if (!record.bodyID.IsInvalid())
-        {
-            auto& bodyInterface = m_physicsSystem.GetBodyInterface();
-            bodyInterface.SetPositionAndRotation(
-                record.bodyID,
-                ToJoltPosition(position),
-                ToJoltRotation(rotation),
-                JPH::EActivation::Activate);
-            if (record.rigidbody && GetJoltMotionType(record.rigidbody) == JPH::EMotionType::Dynamic)
-            {
-                bodyInterface.SetLinearVelocity(record.bodyID, JPH::Vec3(velocity.x, velocity.y, velocity.z));
-            }
-            record.lastPhysicsPosition = position;
-            record.lastPhysicsRotation = rotation;
-            record.lastPhysicsVelocity = velocity;
-        }
-    }
-
-    void CollectDesiredBodies(std::unordered_map<void*, DesiredBody>& desiredBodies)
-    {
-        // RigidbodyはColliderがなくてもEmptyShape Bodyとして登録する。
-        // 登録済み集合には物理に関係するComponentしか入らないため、全Object走査は不要になる。
-        for (Rigidbody* rigidbody : m_registeredRigidbodies)
-        {
-            if (!rigidbody || !rigidbody->IsEnabled() || !rigidbody->GetOwner())
-            {
-                continue;
-            }
-
-            GameObject* object = rigidbody->GetOwner();
-            if (object->IsDestroyed() || !object->IsActive())
-            {
-                continue;
-            }
-
-            // Colliderがなくても候補を先に作る。CreateShapeがEmptyShapeを生成する。
-            DesiredBody& body = desiredBodies[rigidbody];
-            body.key = rigidbody;
-            body.bodyOwner = object;
-            body.rigidbody = rigidbody;
-        }
-
-        for (Collider* collider : m_registeredColliders)
-        {
-            if (!collider || !collider->IsEnabled() || !collider->GetOwner())
-            {
-                continue;
-            }
-
-            GameObject* object = collider->GetOwner();
-            if (object->IsDestroyed() || !object->IsActive())
-            {
-                continue;
-            }
-
-            Rigidbody* ownerRigidbody = collider->GetRigidbody();
-            if (ownerRigidbody && m_registeredRigidbodies.contains(ownerRigidbody)
-                && ownerRigidbody->IsEnabled()
-                && ownerRigidbody->GetOwner()->IsActive()
-                && !ownerRigidbody->GetOwner()->IsDestroyed())
-            {
-                // 子Colliderは最も近い親RigidbodyのBodyへ追加する。
-                DesiredBody& body = desiredBodies[ownerRigidbody];
-                body.key = ownerRigidbody;
-                body.bodyOwner = ownerRigidbody->GetOwner();
-                body.rigidbody = ownerRigidbody;
-                body.colliders.push_back(collider);
-            }
-            else if (!ownerRigidbody)
-            {
-                // RigidbodyのないColliderは、Colliderごとに独立したStatic Bodyとする。
-                DesiredBody& body = desiredBodies[collider];
-                body.key = collider;
-                body.bodyOwner = object;
-                body.colliders.push_back(collider);
-            }
-        }
-    }
-
-    std::unordered_map<void*, DesiredBody> BuildDesiredBodies()
-    {
-        // RefreshBodies中にm_bodyRecordsを直接変更しないよう、一時Mapへ候補を構築する。
-        std::unordered_map<void*, DesiredBody> desiredBodies;
-        CollectDesiredBodies(desiredBodies);
-        return desiredBodies;
     }
 
     // -------------------------------------------------------------------------
     // 物理ステップ前後のTransform／速度同期
     // -------------------------------------------------------------------------
 
-    void SyncBody(BodyRecord& record, float deltaTime, std::vector<DispatchEvent>& events)
+    void SyncBody(BodyRecord& record, float deltaTime)
     {
-        if (record.bodyID.IsInvalid())
-        {
-            return;
-        }
-
-        // BodyのWorld移動・回転は識別子に使わない。相対形状だけを署名にしているため、
-        // Dynamic Bodyが動いてもShapeを再生成せず、形状設定の変更だけを検出できる。
-        const size_t shapeSignature = CalculateShapeSignature(
-            record.colliders,
-            record.bodyOwner ? record.bodyOwner->GetTransform() : nullptr);
-        const size_t settingsSignature = CalculateSettingsSignature(record.rigidbody);
-        if (shapeSignature != record.shapeSignature
-            || settingsSignature != record.settingsSignature)
-        {
-            // Shape変更とBody設定変更は、現段階ではBody差し替えで扱う。
-            RecreateBody(record, events);
-            if (record.bodyID.IsInvalid())
-            {
-                return;
-            }
-        }
-
-        const Transform* transform = record.bodyOwner ? record.bodyOwner->GetTransform() : nullptr;
-        if (!transform)
-        {
-            return;
-        }
-
-        const Vector3 position = transform->GetPosition();
-        const Quaternion rotation = transform->GetRotation();
         auto& bodyInterface = m_physicsSystem.GetBodyInterface();
-        const JPH::EMotionType motionType = GetJoltMotionType(record.rigidbody);
+        const JPH::EMotionType motionType = PhysicsDetail::GetJoltMotionType(record.rigidbody);
 
-        if (motionType == JPH::EMotionType::Kinematic)
+        if (record.transformDirty)
         {
-            // KinematicはScriptがTransformを正とする。移動速度はJolt側で接触判定に使用される。
-            bodyInterface.MoveKinematic(
-                record.bodyID,
-                ToJoltPosition(position),
-                ToJoltRotation(rotation),
-                deltaTime);
-        }
-        else if (motionType == JPH::EMotionType::Static)
-        {
-            // Staticは必要な場合だけTransformを更新し、無用な起床を避ける。
-            bodyInterface.SetPositionAndRotationWhenChanged(
-                record.bodyID,
-                ToJoltPosition(position),
-                ToJoltRotation(rotation),
-                JPH::EActivation::DontActivate);
-        }
-        else if (!record.hasPhysicsTransform
-            || !NearlyEqual(position, record.lastPhysicsPosition)
-            || !NearlyEqual(rotation, record.lastPhysicsRotation))
-        {
-            // Script側が前回の物理結果からTransformを変更した場合だけテレポートする。
-            bodyInterface.SetPositionAndRotation(
-                record.bodyID,
-                ToJoltPosition(position),
-                ToJoltRotation(rotation),
-                JPH::EActivation::Activate);
-        }
-
-        if (record.rigidbody && motionType == JPH::EMotionType::Dynamic)
-        {
-            // ScriptがRigidbodyの速度を変更した場合だけJoltへ書き戻す。
-            // 毎フレーム無条件にSetLinearVelocityすると、Joltの解決結果を上書きしてしまう。
-            const Vector3 requestedVelocity = record.rigidbody->GetVelocity();
-            if (!record.hasPhysicsVelocity
-                || !NearlyEqual(requestedVelocity, record.lastPhysicsVelocity))
+            const Transform* transform = record.bodyOwner->GetTransform();
+            const Vector3 position = transform->GetPosition();
+            const Quaternion rotation = transform->GetRotation();
+            if (motionType == JPH::EMotionType::Kinematic)
             {
-                bodyInterface.SetLinearVelocity(
+                bodyInterface.MoveKinematic(
                     record.bodyID,
-                    JPH::Vec3(requestedVelocity.x, requestedVelocity.y, requestedVelocity.z));
+            PhysicsDetail::ToJoltPosition(position),
+            PhysicsDetail::ToJoltRotation(rotation),
+                    deltaTime);
             }
+            else
+            {
+                const JPH::EActivation activation = motionType == JPH::EMotionType::Dynamic
+                    ? JPH::EActivation::Activate
+                    : JPH::EActivation::DontActivate;
+                bodyInterface.SetPositionAndRotation(
+                    record.bodyID,
+            PhysicsDetail::ToJoltPosition(position),
+            PhysicsDetail::ToJoltRotation(rotation),
+                    activation);
+            }
+            record.transformDirty = false;
+        }
+
+        if (record.rigidbody && motionType == JPH::EMotionType::Dynamic && record.velocityDirty)
+        {
+            // 速度変更はRigidbodyのSetterから通知されるため、毎Frameの値比較は行わない。
+            const Vector3 requestedVelocity = record.rigidbody->GetVelocity();
+            bodyInterface.SetLinearVelocity(
+                record.bodyID,
+                JPH::Vec3(requestedVelocity.x, requestedVelocity.y, requestedVelocity.z));
+            record.velocityDirty = false;
         }
     }
 
-    void RefreshBodies(float deltaTime, std::vector<DispatchEvent>& events)
+    void SyncBodies(float deltaTime, std::vector<DispatchEvent>& events)
     {
-        // GameObjectの追加・削除、Componentの有効状態、親子関係の変更があったときだけ
-        // 登録集合からBody候補を再構築する。通常Frameは既存Bodyから候補を再利用する。
-        std::unordered_map<void*, DesiredBody> desiredBodies;
-        if (m_structureDirty)
-        {
-            desiredBodies = BuildDesiredBodies();
-
-            for (auto iterator = m_bodyRecords.begin(); iterator != m_bodyRecords.end();)
-            {
-                if (desiredBodies.find(iterator->first) == desiredBodies.end())
-                {
-                    // 既に存在しない候補は、接触終了を整理してからJoltからも削除する。
-                    RemoveContactsForBody(*iterator->second, events);
-                    DestroyBody(*iterator->second);
-                    iterator = m_bodyRecords.erase(iterator);
-                }
-                else
-                {
-                    ++iterator;
-                }
-            }
-
-            for (auto& [key, desired] : desiredBodies)
-            {
-                const auto existing = m_bodyRecords.find(key);
-                if (existing == m_bodyRecords.end())
-                {
-                    // 新しいRigidbody／ColliderはこのFrameで初めてJoltへ登録する。
-                    auto newRecord = std::make_unique<BodyRecord>();
-                    newRecord->key = key;
-                    newRecord->bodyOwner = desired.bodyOwner;
-                    newRecord->rigidbody = desired.rigidbody;
-                    newRecord->colliders = std::move(desired.colliders);
-                    BodyRecord* record = newRecord.get();
-                    m_bodyRecords.emplace(key, std::move(newRecord));
-                    CreateBody(*record);
-                }
-                else
-                {
-                    // アドレスは同じでも、親子関係や形状、Rigidbody設定が変わる可能性がある。
-                    BodyRecord* record = existing->second.get();
-                    record->bodyOwner = desired.bodyOwner;
-                    record->rigidbody = desired.rigidbody;
-                    record->colliders = std::move(desired.colliders);
-                }
-            }
-
-            m_structureDirty = false;
-        }
-
-        // 構成変更がないFrameでは、既存Bodyだけを直接同期する。
+        // Shape／Settingsの変更はComponentから通知されたBodyだけがdirtyになる。
+        // ここではdirty flagを処理するが、ColliderやRigidbodyの現在値を比較しない。
         for (auto& [key, recordPointer] : m_bodyRecords)
         {
             (void)key;
-            SyncBody(*recordPointer, deltaTime, events);
+            BodyRecord& record = *recordPointer;
+            if (record.bodyID.IsInvalid())
+            {
+                CreateBody(record);
+            }
+
+            if (record.bodyID.IsInvalid())
+            {
+                continue;
+            }
+
+            if (record.shapeDirty || (record.settingsDirty && record.settingsRequiresRecreate))
+            {
+                // 現段階では低頻度の形状変更をBody再生成で反映する。
+                // 高頻度更新が必要になった時点でMutableCompoundShapeを検討する。
+                RecreateBody(record, events);
+            }
+            else if (record.settingsDirty && record.rigidbody)
+            {
+                auto& bodyInterface = m_physicsSystem.GetBodyInterface();
+                bodyInterface.SetFriction(record.bodyID, record.rigidbody->GetFriction());
+                bodyInterface.SetRestitution(record.bodyID, record.rigidbody->GetBounciness());
+        if (PhysicsDetail::GetJoltMotionType(record.rigidbody) != JPH::EMotionType::Static)
+                {
+                    bodyInterface.SetGravityFactor(
+                        record.bodyID,
+                        record.rigidbody->IsUseGravity() ? 1.0f : 0.0f);
+                }
+                record.settingsDirty = false;
+                record.settingsRequiresRecreate = false;
+            }
+
+            SyncBody(record, deltaTime);
         }
     }
 
@@ -1200,12 +994,13 @@ struct Physics::Backend
     {
         // JoltのDynamic結果をゲーム側へ戻す。Transformの更新はこの1箇所に限定する。
         const auto& bodyInterface = m_physicsSystem.GetBodyInterfaceNoLock();
+        m_isApplyingPhysicsTransforms = true;
         for (auto& [key, recordPointer] : m_bodyRecords)
         {
             (void)key;
             BodyRecord& record = *recordPointer;
-            if (!record.rigidbody || GetJoltMotionType(record.rigidbody) != JPH::EMotionType::Dynamic
-                || record.bodyID.IsInvalid() || !record.bodyOwner || !record.bodyOwner->GetTransform())
+            if (!record.rigidbody || PhysicsDetail::GetJoltMotionType(record.rigidbody) != JPH::EMotionType::Dynamic
+                || record.bodyID.IsInvalid())
             {
                 continue;
             }
@@ -1214,21 +1009,16 @@ struct Physics::Backend
             JPH::RVec3 position;
             JPH::Quat rotation;
             bodyInterface.GetPositionAndRotation(record.bodyID, position, rotation);
-            const Vector3 worldPosition = FromJoltPosition(position);
-            const Quaternion worldRotation = FromJoltRotation(rotation);
+            const Vector3 worldPosition = PhysicsDetail::FromJoltPosition(position);
+            const Quaternion worldRotation = PhysicsDetail::FromJoltRotation(rotation);
             Transform* transform = record.bodyOwner->GetTransform();
             transform->SetPosition(worldPosition);
             transform->SetRotation(worldRotation);
-            record.lastPhysicsPosition = worldPosition;
-            record.lastPhysicsRotation = worldRotation;
-            record.hasPhysicsTransform = true;
 
-            // 次フレームにScriptが速度を変更したか比較できるよう、解決後の速度を保存する。
-            const Vector3 velocity = FromJoltVector(bodyInterface.GetLinearVelocity(record.bodyID));
-            record.rigidbody->SetVelocity(velocity);
-            record.lastPhysicsVelocity = velocity;
-            record.hasPhysicsVelocity = true;
+            const Vector3 velocity = PhysicsDetail::FromJoltVector(bodyInterface.GetLinearVelocity(record.bodyID));
+            record.rigidbody->SetVelocityFromPhysics(velocity);
         }
+        m_isApplyingPhysicsTransforms = false;
     }
 
     std::vector<DispatchEvent> FinishContacts()
@@ -1266,9 +1056,10 @@ struct Physics::Backend
 
     std::vector<DispatchEvent> Step(float deltaTime)
     {
-        // 1フレーム分の入力を受け取り、Body同期→固定刻み→結果同期の順で処理する。
-        std::vector<DispatchEvent> events;
-        RefreshBodies(deltaTime, events);
+        // 1フレーム分の入力を受け取り、明示通知の反映→Body同期→固定刻み→結果同期の順で処理する。
+        std::vector<DispatchEvent> events = std::move(m_pendingEvents);
+        m_pendingEvents.clear();
+        SyncBodies(deltaTime, events);
 
         m_accumulatedTime = std::min(
             m_accumulatedTime + std::max(deltaTime, 0.0f),
@@ -1312,9 +1103,12 @@ struct Physics::Backend
             DestroyBody(*record);
         }
         m_bodyRecords.clear();
+        m_colliderToBody.clear();
         m_registeredColliders.clear();
         m_registeredRigidbodies.clear();
-        m_structureDirty = true;
+        m_waitingColliders.clear();
+        m_waitingRigidbodyByCollider.clear();
+        m_pendingEvents.clear();
         m_accumulatedTime = 0.0f;
     }
 };
@@ -1367,14 +1161,14 @@ void Physics::Update(float deltaTime)
     // unordered_map由来のイベント順に依存しないよう、通知順をObject IDで固定する。
     std::sort(events.begin(), events.end(), [](const Backend::DispatchEvent& a, const Backend::DispatchEvent& b)
     {
-        const uint64_t aObject = a.hitInfo.objectA ? a.hitInfo.objectA->GetId() : 0;
-        const uint64_t bObject = b.hitInfo.objectA ? b.hitInfo.objectA->GetId() : 0;
+        const uint64_t aObject = a.hitInfo.objectA->GetId();
+        const uint64_t bObject = b.hitInfo.objectA->GetId();
         if (aObject != bObject)
         {
             return aObject < bObject;
         }
-        const uint64_t aOther = a.hitInfo.objectB ? a.hitInfo.objectB->GetId() : 0;
-        const uint64_t bOther = b.hitInfo.objectB ? b.hitInfo.objectB->GetId() : 0;
+        const uint64_t aOther = a.hitInfo.objectB->GetId();
+        const uint64_t bOther = b.hitInfo.objectB->GetId();
         return aOther < bOther;
     });
 
@@ -1382,7 +1176,7 @@ void Physics::Update(float deltaTime)
     {
         // Destroy済みObjectへのcallbackは送らない。相手側のイベントは別のDispatchEventで処理される。
         GameObject* object = event.hitInfo.objectA;
-        if (!object || object->IsDestroyed() || !object->IsActive())
+        if (object->IsDestroyed() || !object->IsActive())
         {
             continue;
         }
@@ -1434,11 +1228,75 @@ void Physics::UnregisterRigidbody(Rigidbody* rigidbody)
     }
 }
 
-void Physics::MarkDirty()
+void Physics::MarkBodyShapeDirty(Collider* collider)
 {
     if (s_backend)
     {
-        s_backend->MarkDirty();
+        s_backend->MarkBodyShapeDirty(collider);
+    }
+}
+
+void Physics::MarkBodyShapeDirty(Rigidbody* rigidbody)
+{
+    if (s_backend)
+    {
+        s_backend->MarkBodyShapeDirty(rigidbody);
+    }
+}
+
+void Physics::MarkBodySettingsDirty(Rigidbody* rigidbody, bool requiresBodyRecreate)
+{
+    if (s_backend)
+    {
+        s_backend->MarkBodySettingsDirty(rigidbody, requiresBodyRecreate);
+    }
+}
+
+void Physics::MarkBodyVelocityDirty(Rigidbody* rigidbody)
+{
+    if (s_backend)
+    {
+        s_backend->MarkBodyVelocityDirty(rigidbody);
+    }
+}
+
+void Physics::MarkBodyTransformDirty(Collider* collider)
+{
+    if (s_backend)
+    {
+        s_backend->MarkBodyTransformDirty(collider);
+    }
+}
+
+void Physics::MarkBodyTransformDirty(Rigidbody* rigidbody)
+{
+    if (s_backend)
+    {
+        s_backend->MarkBodyTransformDirty(rigidbody);
+    }
+}
+
+void Physics::RebindCollider(Collider* collider)
+{
+    if (s_backend)
+    {
+        s_backend->RebindCollider(collider);
+    }
+}
+
+void Physics::RefreshRigidbodyState(Rigidbody* rigidbody)
+{
+    if (s_backend)
+    {
+        s_backend->RefreshRigidbodyState(rigidbody);
+    }
+}
+
+void Physics::NotifyGameObjectStateChanged(GameObject* object)
+{
+    if (s_backend)
+    {
+        s_backend->NotifyGameObjectStateChanged(object);
     }
 }
 

@@ -30,6 +30,8 @@ private:
     bool m_allowSleep{ true };
     bool m_freezeRotation{ true };
 
+    void OnTransformChanged(const TransformChangedEvent& event) override;
+
 protected:
     void RegisterFields(FieldRegistry& fields) override;
 
@@ -42,7 +44,8 @@ public:
 
     ~Rigidbody() override;
 
-    void OnLoaded() override;
+    void OnEnable() override;
+    void OnDisable() override;
     void OnDestroy() override;
 
     MotionType GetMotionType() const
@@ -61,14 +64,20 @@ public:
 
     void SetMotionType(MotionType motionType);
 
+    int GetMotionTypeValue() const { return m_motionType; }
+    void SetMotionTypeValue(int motionType);
+
     float GetMass() const { return m_mass; }
     void SetMass(float mass);
 
     float GetInverseMass() const { return m_mass > 0.0f ? 1.0f / m_mass : 0.0f; }
 
     const Vector3& GetVelocity() const { return m_velocity; }
-    void SetVelocity(const Vector3& velocity) { m_velocity = velocity; }
-    void AddVelocity(const Vector3& velocity) { m_velocity += velocity; }
+    void SetVelocity(const Vector3& velocity);
+    void AddVelocity(const Vector3& velocity);
+
+    // Joltの解決結果を書き戻す経路。Script向けSetterのdirty通知を発生させない。
+    void SetVelocityFromPhysics(const Vector3& velocity) { m_velocity = velocity; }
 
     float GetBounciness() const { return m_bounciness; }
     void SetBounciness(float bounciness);

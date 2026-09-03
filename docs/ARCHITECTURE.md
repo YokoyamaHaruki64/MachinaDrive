@@ -103,7 +103,7 @@ WinMain
 
 GameObject の有効状態は `m_isActive`、Component の有効状態は `m_isEnabled` で管理し、どちらも既定値は `true` とする。`SetActive(false)` は対象 GameObject の `Update()`、`LateUpdate()`、所有 Renderer の描画を停止する。開始済み GameObject を `SetActive(true)` にすると、全 Component の `OnActive()` を呼び出し、そのうち有効な Component の `OnEnable()` を呼び出す。`SetEnabled(false)` は対象 Component の更新と描画を停止し、開始済みかつ所有 GameObject が有効な状態で `SetEnabled(true)` にすると `OnEnable()` を呼び出す。開始時の有効状態も同じ規則でコールバック対象となり、GameObject が無効な間に Component を有効化した場合の `OnEnable()` は GameObject の再有効化まで保留する。
 
-物理シミュレーションはPlay中だけ実行する。`Manager`は全Componentの`Update()`後に固定時間刻みでPhysicsを更新し、Dynamic Bodyの結果をTransformへ同期してから接触イベントをGameObject経由で各Componentへ配信する。その後に`LateUpdate()`を実行する。Joltのワーカースレッドからゲーム側Componentを直接呼ばない。ColliderとRigidbodyはPhysicsへ自分の生存期間を登録し、Physicsは通常Stepで全GameObject／全Componentを走査しない。BodyとCollider階層、Trigger、Layer、イベントの詳細は[PHYSICS.md](PHYSICS.md)を参照する。
+物理シミュレーションはPlay中だけ実行する。`Manager`は全Componentの`Update()`後に固定時間刻みでPhysicsを更新し、Dynamic Bodyの結果をTransformへ同期してから接触イベントをGameObject経由で各Componentへ配信する。その後に`LateUpdate()`を実行する。Joltのワーカースレッドからゲーム側Componentを直接呼ばない。ColliderとRigidbodyはPhysicsへ生存期間と設定変更を明示的に通知し、Physicsは通常Stepで全GameObject／全Componentを走査・比較しない。BodyとCollider階層、Trigger、Layer、イベント、ShapeDirtyの詳細は[PHYSICS.md](PHYSICS.md)を参照する。
 
 Scene切替やManager終了では、`Manager::DestroyGameObjects()`が`Physics::Clear()`を先に呼び出し、GameObject／Colliderへの参照を持つJoltのBodyと接触キャッシュを破棄してからGameObjectを解放する。
 

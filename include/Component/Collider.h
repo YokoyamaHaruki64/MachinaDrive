@@ -23,6 +23,9 @@ protected:
 
     void RegisterFields(FieldRegistry& fields) override;
 
+private:
+    void OnTransformChanged(const TransformChangedEvent& event) override;
+
 public:
     enum class ShapeType
     {
@@ -34,7 +37,8 @@ public:
     Collider() = delete;
     ~Collider() override;
 
-    void OnLoaded() override;
+    void OnEnable() override;
+    void OnDisable() override;
     void OnDestroy() override;
 
     virtual ShapeType GetShapeType() const = 0;

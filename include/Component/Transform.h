@@ -22,6 +22,7 @@ class Transform : public TransformBase
     mutable Quaternion m_worldRotation{ Quaternion::Identity() };
     mutable Vector3 m_worldScale{ Vector3::One() };
     void MarkWorldDirty();
+    void NotifyTransformChanged(Transform* source, TransformChange changes);
     void UpdateWorldCache() const;
     void SetLocalFromMatrix(const Matrix4x4& localMatrix);
     void SetWorldMatrix(const Matrix4x4& worldMatrix);

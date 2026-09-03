@@ -8,11 +8,11 @@
 void BoxCollider::RegisterFields(FieldRegistry& fields)
 {
     Collider::RegisterFields(fields);
-    GM_FIELD(m_size);
+    GM_FIELD_ACCESSOR(Vector3, "m_size", GetSize(), SetSize(value), All);
 }
 
 void BoxCollider::SetSize(const Vector3& size)
 {
     m_size = size;
-    Physics::MarkDirty();
+    Physics::MarkBodyShapeDirty(this);
 }

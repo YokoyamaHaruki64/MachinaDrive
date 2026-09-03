@@ -4,7 +4,6 @@
 #include "System/Editor/FieldRegistry.h"
 #include "System/Core/GameObject.h"
 #include "System/Diagnostics/Logger.h"
-#include "System/Core/Physics.h"
 #include "math/MathCommon.h"
 
 Transform::Transform(GameObject* owner, const Vector3& position, const Vector3& rotation, const Vector3& scale)
@@ -28,6 +27,22 @@ void Transform::MarkWorldDirty()
         if (Transform* childTransform = dynamic_cast<Transform*>(child))
         {
             childTransform->MarkWorldDirty();
+        }
+    }
+}
+
+void Transform::NotifyTransformChanged(Transform* source, TransformChange changes)
+{
+    if (m_owner)
+    {
+        m_owner->NotifyTransformChanged({ source, changes });
+    }
+
+    for (TransformBase* child : m_children)
+    {
+        if (Transform* childTransform = dynamic_cast<Transform*>(child))
+        {
+            childTransform->NotifyTransformChanged(source, changes);
         }
     }
 }
@@ -129,8 +144,7 @@ bool Transform::SetParent(TransformBase* parent, ParentTransformMode mode)
         MarkWorldDirty();
     }
 
-    // 親子関係の変更は、Colliderの所属BodyやBody基準の相対姿勢を変える可能性がある。
-    Physics::MarkDirty();
+    NotifyTransformChanged(this, TransformChange::Hierarchy);
     return true;
 }
 
@@ -140,6 +154,7 @@ void Transform::SetPosition(const Vector3& position)
     SetWorldMatrix(Matrix4x4::Scaling(m_worldScale.x, m_worldScale.y, m_worldScale.z)
         * m_worldRotation.ToMatrix()
         * Matrix4x4::Translation(position.x, position.y, position.z));
+    NotifyTransformChanged(this, TransformChange::Position);
 }
 
 void Transform::SetRotation(const Quaternion& rotation)
@@ -148,6 +163,7 @@ void Transform::SetRotation(const Quaternion& rotation)
     SetWorldMatrix(Matrix4x4::Scaling(m_worldScale.x, m_worldScale.y, m_worldScale.z)
         * rotation.Normalized().ToMatrix()
         * Matrix4x4::Translation(m_worldPosition.x, m_worldPosition.y, m_worldPosition.z));
+    NotifyTransformChanged(this, TransformChange::Rotation);
 }
 
 void Transform::SetScale(const Vector3& scale)
@@ -156,18 +172,21 @@ void Transform::SetScale(const Vector3& scale)
     SetWorldMatrix(Matrix4x4::Scaling(scale.x, scale.y, scale.z)
         * m_worldRotation.ToMatrix()
         * Matrix4x4::Translation(m_worldPosition.x, m_worldPosition.y, m_worldPosition.z));
+    NotifyTransformChanged(this, TransformChange::Scale);
 }
 
 void Transform::SetLocalPosition(const Vector3& position)
 {
     m_localPosition = position;
     MarkWorldDirty();
+    NotifyTransformChanged(this, TransformChange::Position);
 }
 
 void Transform::SetLocalRotation(const Quaternion& rotation)
 {
     m_localRotation = rotation.Normalized();
     MarkWorldDirty();
+    NotifyTransformChanged(this, TransformChange::Rotation);
 }
 
 void Transform::SetEulerAngles(const Vector3& eulerRadians)
@@ -184,6 +203,7 @@ void Transform::SetLocalScale(const Vector3& scale)
 {
     m_localScale = scale;
     MarkWorldDirty();
+    NotifyTransformChanged(this, TransformChange::Scale);
 }
 
 const Matrix4x4& Transform::GetWorldMatrix() const

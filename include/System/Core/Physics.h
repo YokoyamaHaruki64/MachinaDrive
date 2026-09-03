@@ -70,9 +70,19 @@ public:
     static void RegisterRigidbody(Rigidbody* rigidbody);
     static void UnregisterRigidbody(Rigidbody* rigidbody);
 
-    // Collider/Rigidbodyの構成や親子関係が変化したときに呼び出す。
-    // Bodyの再構築は次のPhysics::Updateで一度だけ行う。
-    static void MarkDirty();
+    // Component側から変更内容を明示的に通知する。
+    // Physicsはこれらの通知を受けたBodyだけを次のUpdateで更新し、通常Frameに値を比較しない。
+    static void MarkBodyShapeDirty(Collider* collider);
+    static void MarkBodyShapeDirty(Rigidbody* rigidbody);
+    static void MarkBodySettingsDirty(Rigidbody* rigidbody, bool requiresBodyRecreate);
+    static void MarkBodyVelocityDirty(Rigidbody* rigidbody);
+    static void MarkBodyTransformDirty(Collider* collider);
+    static void MarkBodyTransformDirty(Rigidbody* rigidbody);
+    static void RebindCollider(Collider* collider);
+    static void RefreshRigidbodyState(Rigidbody* rigidbody);
+
+    // Active変更は既存のGameObject lifecycleから通知する。
+    static void NotifyGameObjectStateChanged(GameObject* object);
 
     // SceneのGameObjectを破棄する前に、Bodyと接触キャッシュを通知なしで破棄する。
     static void Clear();
