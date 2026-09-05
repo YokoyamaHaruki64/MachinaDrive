@@ -88,9 +88,9 @@ void Collider::OnTransformChanged(const TransformChangedEvent& event)
 
 void Collider::RegisterFields(FieldRegistry& fields)
 {
-    GM_FIELD_ACCESSOR(Vector3, "m_center", GetCenter(), SetCenter(value), All);
-    GM_FIELD_ACCESSOR(bool, "m_isTrigger", IsTrigger(), SetIsTrigger(value), All);
-    GM_FIELD_ACCESSOR(int, "m_layer", GetLayer(), SetLayer(value), All);
+    GM_FIELD_ACCESSOR_TYPE(Vector3, "m_center", GetCenter(), SetCenter(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(bool, "m_isTrigger", IsTrigger(), SetIsTrigger(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(int, "m_layer", GetLayer(), SetLayer(value), All, InspectorFieldType::Auto, true);
 }
 
 void Collider::SetCenter(const Vector3& center)

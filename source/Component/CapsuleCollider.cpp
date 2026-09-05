@@ -8,8 +8,8 @@
 void CapsuleCollider::RegisterFields(FieldRegistry& fields)
 {
     Collider::RegisterFields(fields);
-    GM_FIELD_ACCESSOR(float, "m_radius", GetRadius(), SetRadius(value), All);
-    GM_FIELD_ACCESSOR(float, "m_height", GetHeight(), SetHeight(value), All);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_radius", GetRadius(), SetRadius(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_height", GetHeight(), SetHeight(value), All, InspectorFieldType::Auto, true);
 }
 
 void CapsuleCollider::SetRadius(float radius)

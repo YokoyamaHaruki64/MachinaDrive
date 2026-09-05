@@ -8,7 +8,7 @@
 void BoxCollider::RegisterFields(FieldRegistry& fields)
 {
     Collider::RegisterFields(fields);
-    GM_FIELD_ACCESSOR(Vector3, "m_size", GetSize(), SetSize(value), All);
+    GM_FIELD_ACCESSOR_TYPE(Vector3, "m_size", GetSize(), SetSize(value), All, InspectorFieldType::Auto, true);
 }
 
 void BoxCollider::SetSize(const Vector3& size)

@@ -8,7 +8,7 @@
 void SphereCollider::RegisterFields(FieldRegistry& fields)
 {
     Collider::RegisterFields(fields);
-    GM_FIELD_ACCESSOR(float, "m_radius", GetRadius(), SetRadius(value), All);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_radius", GetRadius(), SetRadius(value), All, InspectorFieldType::Auto, true);
 }
 
 void SphereCollider::SetRadius(float radius)

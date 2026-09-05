@@ -48,14 +48,13 @@ void Rigidbody::OnTransformChanged(const TransformChangedEvent& event)
 
 void Rigidbody::RegisterFields(FieldRegistry& fields)
 {
-    GM_FIELD_ACCESSOR(int, "m_motionType", GetMotionTypeValue(), SetMotionTypeValue(value), All);
-    GM_FIELD_ACCESSOR(float, "m_mass", GetMass(), SetMass(value), All);
-    GM_FIELD_ACCESSOR(Vector3, "m_velocity", GetVelocity(), SetVelocity(value), All);
-    GM_FIELD_ACCESSOR(float, "m_bounciness", GetBounciness(), SetBounciness(value), All);
-    GM_FIELD_ACCESSOR(float, "m_friction", GetFriction(), SetFriction(value), All);
-    GM_FIELD_ACCESSOR(bool, "m_useGravity", IsUseGravity(), SetUseGravity(value), All);
-    GM_FIELD_ACCESSOR(bool, "m_allowSleep", IsAllowSleep(), SetAllowSleep(value), All);
-    GM_FIELD_ACCESSOR(bool, "m_freezeRotation", IsFreezeRotation(), SetFreezeRotation(value), All);
+    GM_FIELD_ACCESSOR_TYPE(int, "m_motionType", GetMotionTypeValue(), SetMotionTypeValue(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_mass", GetMass(), SetMass(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_bounciness", GetBounciness(), SetBounciness(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(float, "m_friction", GetFriction(), SetFriction(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(bool, "m_useGravity", IsUseGravity(), SetUseGravity(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(bool, "m_allowSleep", IsAllowSleep(), SetAllowSleep(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(bool, "m_freezeRotation", IsFreezeRotation(), SetFreezeRotation(value), All, InspectorFieldType::Auto, true);
 }
 
 void Rigidbody::SetMotionType(MotionType motionType)

@@ -45,7 +45,7 @@ Rigidbodyのmass、MotionType、allowSleep、freezeRotationなどBody再生成�
 
 ## Rigidbody
 
-RigidbodyはJolt Bodyを操作するエンジン側Componentであり、Joltの`BodyID`を公開しない。MotionType、mass、velocity、bounciness、friction、useGravity、allowSleep、freezeRotationを保存対象とする。MotionTypeはStatic、Kinematic、Dynamicを持ち、実行中の切り替えを許可する。
+RigidbodyはJolt Bodyを操作するエンジン側Componentであり、Joltの`BodyID`を公開しない。MotionType、mass、bounciness、friction、useGravity、allowSleep、freezeRotationを保存対象とする。Velocityは実行時に変化する動的状態のため、Scene／Prefabへ保存しない。MotionTypeはStatic、Kinematic、Dynamicを持ち、実行中の切り替えを許可する。
 
 速度設定や加算はSetterの通知によって次の物理ステップへ反映する。Dynamic Bodyの位置をScriptから直接変更した場合はテレポートとしてJoltへ同期し、Bodyを起床させる。子Colliderの位置・回転・Scale変更はShapeDirtyとして扱い、毎Frame更新のための専用経路は持たない。
 
