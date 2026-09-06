@@ -16,10 +16,15 @@ protected:
     // Colliderのcenterは形状の位置を指定する値なので、ObjectのScaleでは伸縮させず、
     // 回転と平行移動だけを適用してWorld座標へ変換する。
     Vector3 m_center{ Vector3::Zero() };
+    bool m_isTrigger{ false };
+    int m_layer{ 0 };
 
     explicit Collider(GameObject* owner);
 
     void RegisterFields(FieldRegistry& fields) override;
+
+private:
+    void OnTransformChanged(const TransformChangedEvent& event) override;
 
 public:
     enum class ShapeType
@@ -32,10 +37,20 @@ public:
     Collider() = delete;
     ~Collider() override;
 
+    void OnEnable() override;
+    void OnDisable() override;
+    void OnDestroy() override;
+
     virtual ShapeType GetShapeType() const = 0;
 
     const Vector3& GetCenter() const { return m_center; }
-    void SetCenter(const Vector3& center) { m_center = center; }
+    void SetCenter(const Vector3& center);
+
+    bool IsTrigger() const { return m_isTrigger; }
+    void SetIsTrigger(bool isTrigger);
+
+    int GetLayer() const { return m_layer; }
+    void SetLayer(int layer);
 
     // 判定は常にObjectのTransformを正とする。Collider側で別の姿勢を持たないため、
     // 呼び出し側がTransformを更新した直後でも同じ情報からWorld座標を計算できる。

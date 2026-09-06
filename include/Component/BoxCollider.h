@@ -24,5 +24,5 @@ public:
     ShapeType GetShapeType() const override { return ShapeType::Box; }
 
     const Vector3& GetSize() const { return m_size; }
-    void SetSize(const Vector3& size) { m_size = size; }
+    void SetSize(const Vector3& size);
 };

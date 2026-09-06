@@ -77,7 +77,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,2.61216004e-15]
+          m_localPosition: [0,3.75999999,2.61216004e-15]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1.00034523,1,1.00034523]
       - type: ModelRenderer
@@ -96,7 +96,11 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0,0]
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_radius: 0.5
+          m_height: 2
       - type: Player
         fields:
           enabled: true
@@ -111,7 +115,13 @@ gameObjects:
       - type: Rigidbody
         fields:
           enabled: true
-          m_velocity: [0,0,0]
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0.200000003
+          m_useGravity: true
+          m_allowSleep: true
+          m_freezeRotation: true
   - id: 5
     name: Enemy(Instance)
     active: true
@@ -140,7 +150,11 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0,0]
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_radius: 0.5
+          m_height: 2
       - type: Enemy
         fields:
           enabled: true
@@ -172,7 +186,11 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0,0]
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_radius: 0.5
+          m_height: 2
       - type: Enemy
         fields:
           enabled: true
@@ -204,7 +222,11 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0,0]
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_radius: 0.5
+          m_height: 2
       - type: Enemy
         fields:
           enabled: true
@@ -355,3 +377,61 @@ gameObjects:
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
+  - id: 15
+    name: Empty
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-0.5,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [100,1,100]
+      - type: Enemy
+        fields:
+          enabled: false
+  - id: 28
+    name: Enemy(Instance)
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [2.27999997,0.0299999993,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths:
+            - ''
+            - ''
+            - ''
+            - ''
+          m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_radius: 0.5
+          m_height: 2
+      - type: Enemy
+        fields:
+          enabled: true

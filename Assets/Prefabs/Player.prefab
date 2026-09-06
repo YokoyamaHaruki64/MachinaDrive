@@ -1,11 +1,11 @@
 version: 1
 name: Player
 gameObjects:
-  - id: 1
+  - id: 4
     name: Player
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -29,9 +29,6 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,1,0]
-          m_radius: 0.5
-          m_height: 2
       - type: Player
         fields:
           enabled: true
@@ -43,3 +40,6 @@ gameObjects:
           m_filePath: Assets/Local/Sounds/wan.wav
           m_playOnStart: false
           m_loop: false
+      - type: Rigidbody
+        fields:
+          enabled: true

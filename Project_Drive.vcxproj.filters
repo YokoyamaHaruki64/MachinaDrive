@@ -189,6 +189,9 @@
     <ClCompile Include="source\System\Core\Physics.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Core\PhysicsJoltUtils.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Debug\DebugDrawer.cpp">
       <Filter>ソース ファイル\System\Debug</Filter>
     </ClCompile>
@@ -532,6 +535,12 @@
     </ClInclude>
     <ClInclude Include="include\System\Core\Physics.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="source\System\Core\PhysicsTypes.h">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="source\System\Core\PhysicsJoltUtils.h">
+      <Filter>ソース ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Debug\DebugDrawer.h">
       <Filter>ヘッダー ファイル\System\Debug</Filter>

@@ -5,6 +5,9 @@
 // ゲーム固有の振る舞いを記述するComponentの基底クラス。
 class Script : public Component
 {
+private:
+    void OnTransformChanged(const TransformChangedEvent&) final override {}
+
 public:
     Script() = delete;
     explicit Script(GameObject* owner)
