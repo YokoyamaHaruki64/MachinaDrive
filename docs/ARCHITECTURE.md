@@ -11,6 +11,7 @@ WinMain
   │    │    └─ GameObject
   │    │         └─ Component
   │    ├─ Renderer / RendererBase
+  │    ├─ Physics / Jolt Physics
   │    ├─ PostEffect
   │    └─ Prefab archive / legacy factory
   ├─ EditorSystem（Debug構成のみ）
@@ -61,6 +62,7 @@ WinMain
   ├─ 保留中シーンがなければ、保留中オブジェクトを有効化
   ├─ Scene::Update
   ├─ GameObject::Update
+  ├─ Physicsの固定ステップ、Transform同期、接触イベント配信
   ├─ GameObject::LateUpdate
   └─ Destroy 指定済みオブジェクトを OnDestroy 後に削除
 
@@ -92,11 +94,18 @@ WinMain
 | `OnEnable()` | Component が開始時に有効、または無効から有効へ遷移した時（所有 GameObject も有効な場合） |
 | `Update()` | 毎フレームの主処理 |
 | `LateUpdate()` | 全 `Update()` 後の後段処理 |
+| `OnHitBegin()` | Collider同士が接触を開始した固定物理ステップ後 |
+| `OnHit()` | 接触開始の次以降、接触が継続している固定物理ステップ後 |
+| `OnHitEnd()` | Collider同士の接触が終了した固定物理ステップ後 |
 | `OnDestroy()` | オブジェクトまたはシーンの破棄時 |
 
 `AddComponent()` は所有 GameObject が開始済みの場合だけ、追加したコンポーネントの `OnStart()` を即時実行する。開始前の GameObject ではコンポーネントを保持するだけで、GameObject の `OnStart()` が各コンポーネントを追加順に開始する。prefab は必要なコンポーネントをすべて追加してから `Manager::Instantiate()` が GameObject を開始するため、コンポーネント間の依存関係を構築時に解決できる。
 
 GameObject の有効状態は `m_isActive`、Component の有効状態は `m_isEnabled` で管理し、どちらも既定値は `true` とする。`SetActive(false)` は対象 GameObject の `Update()`、`LateUpdate()`、所有 Renderer の描画を停止する。開始済み GameObject を `SetActive(true)` にすると、全 Component の `OnActive()` を呼び出し、そのうち有効な Component の `OnEnable()` を呼び出す。`SetEnabled(false)` は対象 Component の更新と描画を停止し、開始済みかつ所有 GameObject が有効な状態で `SetEnabled(true)` にすると `OnEnable()` を呼び出す。開始時の有効状態も同じ規則でコールバック対象となり、GameObject が無効な間に Component を有効化した場合の `OnEnable()` は GameObject の再有効化まで保留する。
+
+物理シミュレーションはPlay中だけ実行する。`Manager`は全Componentの`Update()`後に固定時間刻みでPhysicsを更新し、Dynamic Bodyの結果をTransformへ同期してから接触イベントをGameObject経由で各Componentへ配信する。その後に`LateUpdate()`を実行する。Joltのワーカースレッドからゲーム側Componentを直接呼ばない。ColliderとRigidbodyはPhysicsへ生存期間と設定変更を明示的に通知し、Physicsは通常Stepで全GameObject／全Componentを走査・比較しない。BodyとCollider階層、Trigger、Layer、イベント、ShapeDirtyの詳細は[PHYSICS.md](PHYSICS.md)を参照する。
+
+Scene切替やManager終了では、`Manager::DestroyGameObjects()`が`Physics::Clear()`を先に呼び出し、GameObject／Colliderへの参照を持つJoltのBodyと接触キャッシュを破棄してからGameObjectを解放する。
 
 `Manager::Update()` は `m_GameObjects.size()` を毎回評価する添字ループで GameObject を更新する。このため、`Update()` 中に生成されたオブジェクトは同じフレームの `Update()` と `LateUpdate()` の対象になり、`LateUpdate()` 中に生成されたオブジェクトも同じフレームの `LateUpdate()` の対象になる。
 

@@ -116,6 +116,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>External\Library\Jolt_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,6 +139,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>External\Library\Jolt_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -289,6 +291,7 @@
     <ClCompile Include="source\System\Core\GameObjectReference.cpp" />
     <ClCompile Include="source\System\Core\manager.cpp" />
     <ClCompile Include="source\System\Core\Physics.cpp" />
+    <ClCompile Include="source\System\Core\PhysicsJoltUtils.cpp" />
     <ClCompile Include="source\System\Debug\DebugDrawer.cpp" />
     <ClCompile Include="source\System\Rendering\renderer.cpp" />
     <ClCompile Include="source\System\Rendering\RendererBase.cpp" />
@@ -488,6 +491,8 @@
     <ClInclude Include="include\System\Core\main.h" />
     <ClInclude Include="include\System\Core\manager.h" />
     <ClInclude Include="include\System\Core\Physics.h" />
+    <ClInclude Include="source\System\Core\PhysicsTypes.h" />
+    <ClInclude Include="source\System\Core\PhysicsJoltUtils.h" />
     <ClInclude Include="include\System\Debug\DebugDrawer.h" />
     <ClInclude Include="include\System\Rendering\renderer.h" />
     <ClInclude Include="include\System\Rendering\RendererBase.h" />

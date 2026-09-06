@@ -7,11 +7,14 @@
 #include <unordered_set>
 
 #if GM_ENABLE_EDITOR
+#include "Component/Collider.h"
 #include "System/Editor/EditorSystem.h"
 #include "System/Editor/ImGuiStyleConfig.h"
 #endif
 #include "System/Serialization/GameObjectYamlSerializer.h"
 #include "System/Core/input.h"
+#include "System/Core/GM_Time.h"
+#include "System/Core/Physics.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Diagnostics/PerformanceMonitor.h"
 #include "System/Rendering/renderer.h"
@@ -133,6 +136,10 @@ void Manager::EnsureGameObjectIds(
 
 void Manager::DestroyGameObjects()
 {
+    // PhysicsのBodyRecordはGameObject／Colliderへの参照を持つため、
+    // OnDestroyでGameObjectを解放する前に物理側のキャッシュを空にする。
+    Physics::Clear();
+
     // まだ開始していない旧シーンの生成物は、そのまま所有権を破棄する。
     m_pendingGameObjects.clear();
 
@@ -198,8 +205,13 @@ Manager::EditorDetachedGameObjects Manager::DetachForEditor(const std::vector<Ga
                 gameObject->SetParent(nullptr, ParentTransformMode::KeepLocal);
             }
 
+            // Undo用のunique_ptrは生存したままなので、デストラクタに頼らず描画登録を解除する。
             for (Component* component : gameObject->GetComponents())
             {
+                if (Collider* collider = dynamic_cast<Collider*>(component))
+                {
+                    DebugDrawer::UnregisterCollider(collider);
+                }
                 if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
                 {
                     UnregisterRenderer(renderer);
@@ -247,8 +259,13 @@ void Manager::RestoreForEditor(EditorDetachedGameObjects& detachedGameObjects)
             gameObject->SetParent(previousParent, ParentTransformMode::KeepLocal);
         }
 
+        // Undoで復元したObjectを次のDrawから表示対象へ戻す。
         for (Component* component : gameObject->GetComponents())
         {
+            if (Collider* collider = dynamic_cast<Collider*>(component))
+            {
+                DebugDrawer::RegisterCollider(collider);
+            }
             if (RendererBase* renderer = dynamic_cast<RendererBase*>(component))
             {
                 RegisterRenderer(renderer);
@@ -293,6 +310,10 @@ std::unique_ptr<Component> Manager::DetachComponentForEditor(GameObject& gameObj
     {
         UnregisterRenderer(renderer);
     }
+    if (Collider* collider = dynamic_cast<Collider*>(&component))
+    {
+        DebugDrawer::UnregisterCollider(collider);
+    }
 
     std::unique_ptr<Component> detachedComponent = std::move(*iterator);
     gameObject.m_components.erase(iterator);
@@ -311,6 +332,10 @@ void Manager::RestoreComponentForEditor(GameObject& gameObject, std::unique_ptr<
     if (RendererBase* renderer = dynamic_cast<RendererBase*>(restoredComponent))
     {
         RegisterRenderer(renderer);
+    }
+    if (Collider* collider = dynamic_cast<Collider*>(restoredComponent))
+    {
+        DebugDrawer::RegisterCollider(collider);
     }
 }
 
@@ -858,6 +883,19 @@ bool Manager::Init()
         return false;
     }
     ModelManager::Init();
+
+    // PhysicsはPlay開始時ではなくManagerの寿命に合わせて初期化する。
+    // Edit中はUpdateしないが、Playへの切り替え時にBody生成を待たず利用できる。
+    if (!Physics::Initialize())
+    {
+        Logger::Fatal("Physicsの初期化に失敗しました。");
+        ModelManager::Uninit();
+        MaterialManager::Uninit();
+        TextureManager::Uninit();
+        ShaderManager::Uninit();
+        Renderer::Uninit();
+        return false;
+    }
 #if GM_ENABLE_EDITOR
     DebugDrawer::Initialize();
 #endif
@@ -938,6 +976,9 @@ void Manager::Uninit()
         m_currentScene->Uninit();
     }
     DestroyGameObjects();
+
+    // SceneのGameObject破棄後に、PhysicsのBodyと接触キャッシュを破棄する。
+    Physics::Uninitialize();
     m_currentScene.reset();
     m_nextScene.reset();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
@@ -1029,6 +1070,9 @@ void Manager::Update()
                 m_GameObjects[i]->Update();
             }
         }
+
+        // Componentの入力処理後に物理を固定刻みで進め、結果をLateUpdate前に反映する。
+        Physics::Update(Time::GetDeltaTime());
 
         // Manager::Update全体からLateUpdateだけを分離して計測する。
         PerformanceMonitor::BeginLateUpdate();
