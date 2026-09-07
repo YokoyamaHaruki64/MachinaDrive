@@ -134,6 +134,32 @@ void Manager::EnsureGameObjectIds(
     }
 }
 
+std::vector<GameObject*> Manager::GetObjectsByTag(const std::string& tag)
+{
+    std::vector<GameObject*> result;
+    result.reserve(m_GameObjects.size());
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            result.push_back(gameObject.get());
+        }
+    }
+    return result;
+}
+
+GameObject* Manager::GetObjectFirstByTag(const std::string& tag)
+{
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            return gameObject.get();
+        }
+    }
+    return nullptr;
+}
+
 void Manager::DestroyGameObjects()
 {
     // PhysicsのBodyRecordはGameObject／Colliderへの参照を持つため、

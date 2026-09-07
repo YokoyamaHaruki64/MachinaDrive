@@ -214,10 +214,15 @@ bool GameObjectYamlSerializer::SaveToFile(
     objects.sequence.reserve(gameObjects.size());
     for (GameObject* gameObject : gameObjects)
     {
-        // GameObjectのID、名前、Prefab参照、親ID、Component配列を保存する
+        // GameObjectのID、名前、タグ、Prefab参照、親ID、Component配列を保存する。
         YAMLValue object = YAMLValue::Map();
         object.Add("id", ToYAMLValue(objectIds.at(gameObject)));
         object.Add("name", YAMLValue::Scalar(gameObject->GetName(), true));
+        object.Add(
+            "tag",
+            gameObject->GetTag().empty()
+                ? YAMLValue::Null()
+                : YAMLValue::Scalar(gameObject->GetTag(), true));
         object.Add("active", ToYAMLValue(gameObject->IsActive()));
 
         if (prefabReferenceMode == PrefabReferenceSaveMode::Include && !gameObject->GetPrefabPath().empty())
@@ -342,6 +347,22 @@ bool GameObjectYamlSerializer::LoadFromFile(
             usesUITransform ? GameObjectTransformType::UI : GameObjectTransformType::World);
         GameObject* gameObjectPointer = gameObject.get();
         gameObjectPointer->SetId(id);
+        if (const YAMLValue* tag = sourceObject.Find("tag"))
+        {
+            if (tag->type == YAMLValue::Type::Null)
+            {
+                gameObjectPointer->SetTag({});
+            }
+            else if (tag->type == YAMLValue::Type::Scalar)
+            {
+                gameObjectPointer->SetTag(tag->scalar);
+            }
+            else
+            {
+                Logger::Error("GameObjectのtagが不正です: " + gameObjectPointer->GetName());
+                return false;
+            }
+        }
         if (const YAMLValue* active = sourceObject.Find("active"))
         {
             bool decodedActive{};

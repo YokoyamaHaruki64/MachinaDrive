@@ -22,6 +22,8 @@ class InspectorWindow final : public EditorWindow
     bool m_showLocalTransform = false;
     GameObject* m_gameObjectNameTarget = nullptr;
     std::array<char, 256> m_gameObjectNameBuffer{};
+    GameObject* m_gameObjectTagTarget = nullptr;
+    std::array<char, 256> m_gameObjectTagBuffer{};
     std::unordered_map<const Material*, std::array<char, 256>> m_materialNameBuffers;
     std::unordered_map<Component*, YAMLValue> m_componentEditSnapshots;
 
