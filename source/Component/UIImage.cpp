@@ -110,7 +110,7 @@ void UIImage::Update()
         return;
     }
 
-    if (Input::GetKeyTrigger(Input::KK_LBUTTON) && ContainsPointer())
+    if (Input::GetMouseTrigger(Input::MouseButton::Left) && ContainsPointer())
     {
         m_pointerPressed = true;
         m_pointerHeld = true;
@@ -118,7 +118,7 @@ void UIImage::Update()
         m_pressPosition = Input::GetMousePosition();
     }
 
-    if (m_pointerCaptured && Input::GetKeyPress(Input::KK_LBUTTON))
+    if (m_pointerCaptured && Input::GetMousePress(Input::MouseButton::Left))
     {
         m_pointerHeld = true;
         if (m_dragEnabled && !m_dragging && Vector2::DistanceSqr(m_pressPosition, Input::GetMousePosition()) > 4.0f)
@@ -128,7 +128,7 @@ void UIImage::Update()
         }
     }
 
-    if (m_pointerCaptured && Input::GetKeyRelease(Input::KK_LBUTTON))
+    if (m_pointerCaptured && Input::GetMouseRelease(Input::MouseButton::Left))
     {
         m_pointerReleased = true;
         m_dragEnded = m_dragging;

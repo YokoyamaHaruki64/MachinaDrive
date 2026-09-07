@@ -10,6 +10,8 @@ public:
     bool IsRenderTargetReady() const;
     bool IsUIDisplayEnabled() const { return m_displayUI; }
     bool IsViewportHovered() const { return m_viewportHovered; }
+    const Vector2& GetDisplayPosition() const { return m_displayPosition; }
+    const Vector2& GetDisplaySize() const { return m_displaySize; }
     void DrawImGui() override;
 
 private:

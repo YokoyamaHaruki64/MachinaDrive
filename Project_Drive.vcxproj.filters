@@ -135,6 +135,9 @@
     <ClCompile Include="source\System\Core\input.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Core\Mouse.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Core\main.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
@@ -462,6 +465,9 @@
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\input.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Core\Mouse.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\UI\UIRect.h">

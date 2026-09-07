@@ -22,7 +22,7 @@ void ResultUI::Update()
     Vector3 newPosition = m_originalPosition + Vector3(0.0f, offsetY, 0.0f);
     transform()->SetPosition(newPosition);
 
-    if (Input::GetKeyTrigger(Input::KK_ENTER))
+    if (Input::GetKeyTrigger(Input::KeyCode::ENTER))
         Manager::ChangeScene<TitleScene>();
 
 }

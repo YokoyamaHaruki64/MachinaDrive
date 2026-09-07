@@ -48,24 +48,24 @@ void Player::Update()
     const float friction = 10.0f;
 
     Vector3 inputDirection = Vector3::Zero();
-    if (Input::GetKeyPress(Input::KK_W))
+    if (Input::GetKeyPress(Input::KeyCode::W))
     {
         inputDirection += cameraForward;
     }
-    if (Input::GetKeyPress(Input::KK_S))
+    if (Input::GetKeyPress(Input::KeyCode::S))
     {
         inputDirection -= cameraForward;
     }
-    if (Input::GetKeyPress(Input::KK_A))
+    if (Input::GetKeyPress(Input::KeyCode::A))
     {
         inputDirection -= cameraRight;
     }
-    if (Input::GetKeyPress(Input::KK_D))
+    if (Input::GetKeyPress(Input::KeyCode::D))
     {
         inputDirection += cameraRight;
     }
 
-    if (Input::GetKeyPress(Input::KK_SHIFT))
+    if (Input::GetKeyPress(Input::KeyCode::SHIFT))
     {
         inputDirection *= 2.0f;
     }
@@ -79,7 +79,7 @@ void Player::Update()
     velocity.x -= velocity.x * friction * Time::GetDeltaTime();
     velocity.z -= velocity.z * friction * Time::GetDeltaTime();
 
-    if (Input::GetKeyTrigger(Input::KK_SPACE) && m_isGrounded)
+    if (Input::GetKeyTrigger(Input::KeyCode::SPACE) && m_isGrounded)
     {
         velocity.y += jumpForce;
         m_isGrounded = false;
@@ -104,7 +104,7 @@ void Player::Update()
             currentRotation.z));
     }
 
-    if (Input::GetKeyTrigger(Input::KK_F))
+    if (Input::GetKeyTrigger(Input::KeyCode::F))
     {
         GameObject* bullet = Manager::Instantiate(
             "Assets/Prefabs/Bullet.prefab",
