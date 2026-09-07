@@ -2,7 +2,7 @@ version: 1
 name: Game
 gameObjects:
   - id: 1
-    name: Empty
+    name: Camera
     active: true
     prefab: 
     parent: 
@@ -21,8 +21,10 @@ gameObjects:
       - type: CameraController
         fields:
           enabled: true
+          m_distance: 10
+          m_sensitivity: 1
   - id: 2
-    name: Empty
+    name: Field
     active: true
     prefab: 
     parent: 
@@ -43,8 +45,15 @@ gameObjects:
           m_materialPaths:
             - Assets/Materials/Field.material
           m_inverseAxisFlags: 0
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-0.5,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [10,1,10]
   - id: 3
-    name: Empty
+    name: MateoCube
     active: true
     prefab: 
     parent: 
@@ -104,8 +113,7 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
-          m_velocity: [0,0,0]
-          m_isGrounded: true
+          m_speed: 30
       - type: Audio
         fields:
           enabled: true
@@ -118,7 +126,7 @@ gameObjects:
           m_motionType: 2
           m_mass: 1
           m_bounciness: 0
-          m_friction: 0.200000003
+          m_friction: 1
           m_useGravity: true
           m_allowSleep: true
           m_freezeRotation: true
@@ -319,7 +327,7 @@ gameObjects:
             - Assets/Materials/Tree.material
           m_inverseAxisFlags: 0
   - id: 12
-    name: Empty
+    name: Skydome
     active: true
     prefab: 
     parent: 
@@ -345,7 +353,7 @@ gameObjects:
             - Assets/Materials/Skydome.material
           m_inverseAxisFlags: 0
   - id: 13
-    name: Empty
+    name: Score
     active: true
     prefab: 
     parent: 
@@ -360,7 +368,7 @@ gameObjects:
         fields:
           enabled: true
   - id: 14
-    name: Empty
+    name: BGM
     active: true
     prefab: 
     parent: 
@@ -377,8 +385,8 @@ gameObjects:
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
-  - id: 15
-    name: Empty
+  - id: 33
+    name: Wall_Left
     active: true
     prefab: 
     parent: 
@@ -386,52 +394,70 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
+          m_localPosition: [-50,0,0]
+          m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
         fields:
           enabled: true
-          m_center: [0,-0.5,0]
+          m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [100,1,100]
-      - type: Enemy
-        fields:
-          enabled: false
-  - id: 28
-    name: Enemy(Instance)
+          m_size: [1,10,100]
+  - id: 34
+    name: Wall_Right
     active: true
-    prefab: Assets/Prefabs/Enemy.prefab
+    prefab: 
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [2.27999997,0.0299999993,0]
+          m_localPosition: [50,0,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
-      - type: ModelRenderer
+      - type: BoxCollider
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
-        fields:
-          enabled: true
-          m_center: [0,1,0]
+          m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
+          m_size: [1,10,100]
+  - id: 35
+    name: Wall_Fore
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
         fields:
           enabled: true
+          m_localPosition: [0,0,50]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [100,10,1]
+  - id: 36
+    name: Wall_Back
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-50]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [100,10,1]

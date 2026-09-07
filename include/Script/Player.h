@@ -8,20 +8,19 @@
 class Audio;
 class Collider;
 struct HitInfo;
+class CameraController;
 
 class Player : public Script
 {
     REGISTER_COMPONENT(Player, "Player");
 private:
-    // 旧シーンに残るフィールドとの互換用。実際の速度はRigidbodyを正とする。
-    Vector3 m_velocity{ Vector3::Zero() };
-
-    bool m_isGrounded = false;
-
-    // 段差や複数Colliderに同時接触しても、1つが離れただけで空中判定にならないようにする。
-    std::unordered_set<Collider*> m_groundColliders;
-
+    Rigidbody* m_rigidbody = nullptr;
+    CameraController* m_cameraController = nullptr;
     Audio* m_jumpSE = nullptr;
+
+    Vector2 m_beginMousePos{ Vector2::Zero() };
+
+    float m_speed = 10.0f;
 
 public:
     void OnStart() override;

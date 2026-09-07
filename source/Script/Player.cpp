@@ -9,115 +9,73 @@
 #include "math/MathCommon.h"
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
+#include "Script/CameraController.h"
 
 void Player::RegisterFields(FieldRegistry& fields)
 {
-    // 旧シーンを読み込めるように残すが、実行時の物理値はRigidbodyへ集約する。
-    GM_FIELD_TYPE(m_velocity, InspectorFieldType::Hidden);
-    GM_FIELD_TYPE(m_isGrounded, InspectorFieldType::Hidden);
+    GM_FIELD(m_speed);
 }
 
 void Player::OnStart()
 {
-    m_jumpSE = m_owner->GetComponent<Audio>();
+    m_jumpSE = GetComponent<Audio>();
+    m_rigidbody = GetComponent<Rigidbody>();
+    m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
-    // 旧Player実装で保存された初速だけは、Rigidbodyへ一度だけ移行する。
-    if (Rigidbody* rigidbody = m_owner->GetComponent<Rigidbody>();
-        rigidbody && rigidbody->GetVelocity().LengthSqr() == 0.0f && m_velocity.LengthSqr() > 0.0f)
+    if( !m_rigidbody )
     {
-        rigidbody->SetVelocity(m_velocity);
+        Logger::Error("Player: Rigidbody component not found.");
+    }
+
+    if( !m_cameraController )
+    {
+        Logger::Error("Player: CameraController component not found.");
     }
 }
 
 void Player::Update()
 {
-    Rigidbody* rigidbody = m_owner->GetComponent<Rigidbody>();
-    if (!rigidbody)
+    if (!m_rigidbody)
     {
         return;
     }
 
-    Camera* camera = Camera::GetMainCamera();
-    Vector3 cameraDir = camera->GetTarget() - camera->transform()->GetPosition();
-    cameraDir.y = 0.0f;
-    Vector3 cameraForward = cameraDir.Normalized();
-    Vector3 cameraRight = Vector3(cameraForward.z, 0.0f, -cameraForward.x);
+    Vector3 cameraForward = Camera::GetMainCamera()->transform()->GetForward();
+    cameraForward.y = 0.0f;
+    cameraForward.Normalize();
+    Vector3 cameraRight = Camera::GetMainCamera()->transform()->GetRight();
+    cameraRight.y = 0.0f;
+    cameraRight.Normalize();
 
-    const float moveSpeed = 50.0f;
-    const float jumpForce = 5.0f;
-    const float friction = 10.0f;
+    Vector3 move = Vector3::Zero();
 
-    Vector3 inputDirection = Vector3::Zero();
-    if (Input::GetKeyPress(Input::KeyCode::W))
+    if(Input::GetMouseTrigger(Input::MouseButton::Left))
     {
-        inputDirection += cameraForward;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::S))
-    {
-        inputDirection -= cameraForward;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::A))
-    {
-        inputDirection -= cameraRight;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::D))
-    {
-        inputDirection += cameraRight;
+        m_beginMousePos = Input::GetMousePositionNormalized();
+        m_cameraController->BeginLock();
     }
 
-    if (Input::GetKeyPress(Input::KeyCode::SHIFT))
+    if(Input::GetMousePress(Input::MouseButton::Left))
     {
-        inputDirection *= 2.0f;
+        Vector2 currentMousePos = Input::GetMousePositionNormalized();
+        Vector2 dragVector = currentMousePos - m_beginMousePos;
+
+        move = cameraForward * dragVector.y + cameraRight * -dragVector.x;
     }
 
-    Vector3 velocity = rigidbody->GetVelocity();
-    if (inputDirection.LengthSqr() > 0.0f)
+    if(Input::GetMouseRelease(Input::MouseButton::Left))
     {
-        velocity += inputDirection.Normalized() * moveSpeed * Time::GetDeltaTime();
-    }
+        Vector2 currentMousePos = Input::GetMousePositionNormalized();
+        Vector2 dragVector = currentMousePos - m_beginMousePos;
 
-    velocity.x -= velocity.x * friction * Time::GetDeltaTime();
-    velocity.z -= velocity.z * friction * Time::GetDeltaTime();
+        move = cameraForward * dragVector.y + cameraRight * -dragVector.x;
 
-    if (Input::GetKeyTrigger(Input::KeyCode::SPACE) && m_isGrounded)
-    {
-        velocity.y += jumpForce;
-        m_isGrounded = false;
-        m_groundColliders.clear();
-
-        if (m_jumpSE)
+        if(move.LengthSqr() > 0.0f)
         {
-            m_jumpSE->Play();
+            move.Normalize();
+            m_rigidbody->SetVelocity(move * m_speed);
         }
-    }
-
-    rigidbody->SetVelocity(velocity);
-    m_velocity = velocity;
-
-    if (velocity.LengthSqr() > 0.01f)
-    {
-        const float targetRotationY = atan2f(velocity.x, velocity.z);
-        const Vector3 currentRotation = transform()->GetRotation().QuatToEuler();
-        transform()->SetRotation(Vector3(
-            currentRotation.x,
-            Math::LerpAngle(currentRotation.y, targetRotationY, 10.0f * Time::GetDeltaTime()),
-            currentRotation.z));
-    }
-
-    if (Input::GetKeyTrigger(Input::KeyCode::F))
-    {
-        GameObject* bullet = Manager::Instantiate(
-            "Assets/Prefabs/Bullet.prefab",
-            transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f),
-            Vector3::Zero(),
-            Vector3::One());
-        bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f);
-    }
-
-    auto enemies = Manager::GetObjectsByComponent<Enemy>();
-    if (enemies.empty())
-    {
-        Manager::ChangeScene<ResultScene>();
+        m_cameraController->EndLock();
     }
 }
 
@@ -131,8 +89,6 @@ void Player::OnHitBegin(const HitInfo& hitInfo)
     // PhysicsはA側から見た押し戻し方向をnormalに入れるため、上向きなら足元の接触である。
     if (hitInfo.normal.y > 0.5f)
     {
-        m_groundColliders.insert(hitInfo.colliderB);
-        m_isGrounded = true;
     }
 }
 
@@ -145,8 +101,6 @@ void Player::OnHit(const HitInfo& hitInfo)
 
     if (hitInfo.normal.y > 0.5f)
     {
-        m_groundColliders.insert(hitInfo.colliderB);
-        m_isGrounded = true;
     }
 }
 
@@ -157,6 +111,4 @@ void Player::OnHitEnd(const HitInfo& hitInfo)
         return;
     }
 
-    m_groundColliders.erase(hitInfo.colliderB);
-    m_isGrounded = !m_groundColliders.empty();
 }

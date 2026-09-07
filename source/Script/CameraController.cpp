@@ -7,6 +7,11 @@
 
 #include "Script/Player.h"
 
+FIELDS_BEGIN(CameraController)
+    GM_FIELD(m_distance);
+    GM_FIELD(m_sensitivity);
+FIELDS_END()
+
 void CameraController::OnStart()
 {
     // シーン内のPlayerコンポーネントを持つ最初のゲームオブジェクトを取得し、そのTransformをターゲットに設定
@@ -20,33 +25,43 @@ void CameraController::OnStart()
         Logger::Error("Playerコンポーネントを持つGameObjectが見つかりません。");
     }
     m_camera = Camera::GetMainCamera();
+
+    Input::ShowCursor(false); // カーソルを非表示にする
+
 }
 
 void CameraController::LateUpdate()
 {
-    // 回転処理
-    if (Input::GetKeyPress(Input::KeyCode::Q))
-    {
-        transform()->Rotate(Vector3(0.0f, -0.02f, 0.0f)); // 左回転
-    }
-    if (Input::GetKeyPress(Input::KeyCode::E))
-    {
-        transform()->Rotate(Vector3(0.0f, 0.02f, 0.0f)); // 右回転
-    }
+    Vector2 mouseDelta = Input::GetMouseDeltaNormalized();
+    Vector3 targetPos = m_target ? m_target->GetTransform()->GetPosition() : Vector3::Zero();
 
-    // カメラのターゲットを設定
+    // カメラのターゲットを更新
     if (!m_target)
         m_camera->SetTarget(Vector3::Zero()); // ターゲットがない場合は原点を向く
     else
-        m_camera->SetTarget(m_target->GetTransform()->GetPosition());
+        m_camera->SetTarget(targetPos);
+    
+    if (isLocked)
+        return;
 
-    // カメラの位置をターゲットから一定の距離と高さに設定
-    const float cameraYaw = transform()->GetEulerAngles().y;
-    Vector3 cameraPos = m_camera->GetTarget() + Vector3(
-        -sinf(cameraYaw) * CAMERA_DISTANCE,
-        CAMERA_HEIGHT,
-        -cosf(cameraYaw) * CAMERA_DISTANCE
-    );
+    m_yaw += mouseDelta.x * m_sensitivity;
+    m_pitch -= mouseDelta.y * m_sensitivity;
+
+    // ピッチの制限
+    const float pitchLimit = 30.0f * Math::DEG2RAD; // 30度をラジアンに変換
+    m_pitch = Math::Clamp(m_pitch, -pitchLimit, pitchLimit);
+
+    // カメラの位置を計算
+    Vector3 cameraPos =
+        targetPos + Vector3(
+            m_distance * std::cos(m_pitch) * std::sin(m_yaw),
+            m_distance * std::sin(m_pitch),
+            m_distance * std::cos(m_pitch) * std::cos(m_yaw));
 
     m_camera->transform()->SetPosition(cameraPos);
+}
+
+void CameraController::OnDestroy()
+{
+    Input::ShowCursor(true); // カーソルを表示する
 }
