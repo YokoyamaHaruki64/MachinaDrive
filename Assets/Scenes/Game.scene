@@ -3,6 +3,7 @@ name: Game
 gameObjects:
   - id: 1
     name: Camera
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -25,6 +26,7 @@ gameObjects:
           m_sensitivity: 0.00100000005
   - id: 2
     name: Field
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -54,6 +56,7 @@ gameObjects:
           m_size: [10,1,10]
   - id: 3
     name: MateoCube
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -79,6 +82,7 @@ gameObjects:
           enabled: true
   - id: 4
     name: Player
+    tag: 
     active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: 
@@ -132,6 +136,7 @@ gameObjects:
           m_freezeRotation: true
   - id: 5
     name: Enemy(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -168,6 +173,7 @@ gameObjects:
           enabled: true
   - id: 6
     name: Enemy(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -204,6 +210,7 @@ gameObjects:
           enabled: true
   - id: 7
     name: Enemy(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -240,6 +247,7 @@ gameObjects:
           enabled: true
   - id: 8
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -262,6 +270,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 9
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -284,6 +293,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 10
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -306,6 +316,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 11
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -328,6 +339,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 12
     name: Skydome
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -354,6 +366,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 13
     name: Score
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -369,6 +382,7 @@ gameObjects:
           enabled: true
   - id: 14
     name: BGM
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -387,6 +401,7 @@ gameObjects:
           m_loop: true
   - id: 33
     name: Wall_Left
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -406,6 +421,7 @@ gameObjects:
           m_size: [1,10,100]
   - id: 34
     name: Wall_Right
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -425,6 +441,7 @@ gameObjects:
           m_size: [1,10,100]
   - id: 35
     name: Wall_Fore
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -444,6 +461,7 @@ gameObjects:
           m_size: [100,10,1]
   - id: 36
     name: Wall_Back
+    tag: 
     active: true
     prefab: 
     parent: 

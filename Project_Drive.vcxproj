@@ -244,6 +244,7 @@
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
+    <ClCompile Include="source\Script\ShotDirector.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
@@ -452,6 +453,7 @@
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
     <ClInclude Include="include\Script\SampleMoveScript.h" />
+    <ClInclude Include="include\Script\ShotDirector.h" />
     <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
     <ClInclude Include="include\System\Core\component.h" />
@@ -605,6 +607,7 @@
     <None Include=".editorconfig" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
     <None Include="Assets\Shaders\PostProcessBloom.shader" />
+    <None Include="Assets\Shaders\ShotDirector.shader" />
     <None Include="Assets\Shaders\UnlitAdditive.shader" />
     <None Include="Assets\Shaders\UnlitTexture.shader" />
     <None Include="Assets\Shaders\UnlitTransparent.shader" />

@@ -55,6 +55,8 @@ void Player::Update()
             Input::SetMousePositionNormalized({ 0.5f, 0.5f });
             m_rigidbody->SetVelocity(Vector3::Zero());
             m_accumulatedMouse = Vector2::Zero();
+
+            m_director = Manager::Instantiate("Assets/Prefabs/ShotDirector.prefab");
         }
         if (Input::GetMousePress(Input::MouseButton::Left))
         {
@@ -72,6 +74,11 @@ void Player::Update()
                 m_rigidbody->SetVelocity(move * m_speed);
             }
             m_cameraController->EndLock();
+            if (m_director.Get())
+            {
+                m_director->Destroy();
+                m_director.Clear();
+            }
         }
     }
 }

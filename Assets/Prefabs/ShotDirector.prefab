@@ -1,0 +1,31 @@
+version: 1
+name: ShotDirector
+gameObjects:
+  - id: 41
+    name: ShotDirector
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0.0500000007,0]
+          m_localRotation: [0.704954267,2.12229359e-10,-2.10942999e-10,0.709252775]
+          m_localScale: [1.63,5,1.00004888]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: __primitive_quad
+          m_materialPaths:
+            - Assets/Materials/ShotDirector.material
+          m_inverseAxisFlags: 0
+      - type: ShotDirector
+        fields:
+          enabled: true
+          m_pivotOffset: 2.5
+          m_positionOffset: [0,0.0500000007,0]

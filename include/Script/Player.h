@@ -18,6 +18,8 @@ class Player : public Script
 private:
     Rigidbody* m_rigidbody = nullptr;
     CameraController* m_cameraController = nullptr;
+    GameObjectReference m_director;
+
     Audio* m_jumpSE = nullptr;
 
     Vector2 m_beginMousePos{ Vector2::Zero() };
@@ -32,4 +34,5 @@ public:
     void OnHit(const HitInfo& hitInfo) override;
     void OnHitEnd(const HitInfo& hitInfo) override;
 
+    const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
 };

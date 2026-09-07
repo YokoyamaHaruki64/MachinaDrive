@@ -3,6 +3,7 @@ name: Title
 gameObjects:
   - id: 1
     name: Title Canvas
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -23,6 +24,7 @@ gameObjects:
           enabled: true
   - id: 2
     name: Title Background
+    tag: 
     active: true
     prefab: 
     parent: 1
@@ -49,6 +51,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 3
     name: Title Logo
+    tag: 
     active: true
     prefab: 
     parent: 1
@@ -75,6 +78,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 4
     name: Title UI
+    tag: 
     active: true
     prefab: 
     parent: 1
@@ -104,6 +108,7 @@ gameObjects:
           enabled: true
   - id: 5
     name: FieldRegistry Test
+    tag: 
     active: true
     prefab: 
     parent: 
