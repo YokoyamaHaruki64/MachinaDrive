@@ -3,6 +3,8 @@
 #include "System/Core/Mouse.h"
 #include "System/Rendering/renderer.h"
 
+#include <hidusage.h>
+
 #if GM_ENABLE_EDITOR
 #include "System/Editor/EditorSystem.h"
 #endif
@@ -21,10 +23,15 @@ void Mouse::Initialize(HWND window)
     m_position = Vector2::Zero();
     m_previousPosition = Vector2::Zero();
     m_delta = Vector2::Zero();
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
-    m_cursorLocked = false;
+    m_cursorVisible = QueryCursorVisible();
+    m_windowActive = ::GetForegroundWindow() == m_window;
+
+    RegisterRawInput();
 
     Vector2 initialPosition;
     if (QueryMousePosition(initialPosition))
@@ -37,22 +44,36 @@ void Mouse::Initialize(HWND window)
 
 void Mouse::Shutdown()
 {
+    SetCursorVisible(true);
+    UnregisterRawInput();
+    ::ClipCursor(nullptr);
+
     m_window = nullptr;
     m_position = Vector2::Zero();
     m_previousPosition = Vector2::Zero();
     m_delta = Vector2::Zero();
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
-    m_cursorLocked = false;
-    ::ClipCursor(nullptr);
+    m_cursorVisible = true;
+    m_windowActive = false;
 }
 
 void Mouse::Update(const BYTE* keyState)
 {
-    if (m_cursorLocked)
+    UpdateCursorClip();
+
+    if (!m_windowActive || m_cursorVisible)
     {
-        ApplyCursorClip();
+        m_rawDelta = Vector2::Zero();
+        m_rawDeltaAccumulated = Vector2::Zero();
+    }
+    else
+    {
+        m_rawDelta = m_rawDeltaAccumulated;
+        m_rawDeltaAccumulated = Vector2::Zero();
     }
 
     memcpy(m_oldButtonState, m_buttonState, sizeof(m_buttonState));
@@ -99,6 +120,44 @@ void Mouse::Update(const BYTE* keyState)
     m_delta = m_position - m_previousPosition;
 }
 
+void Mouse::ProcessRawInput(HRAWINPUT rawInput)
+{
+    if (!rawInput || !m_windowActive || m_cursorVisible)
+    {
+        return;
+    }
+
+    RAWINPUT input{};
+    UINT inputSize = sizeof(input);
+    if (::GetRawInputData(
+        rawInput,
+        RID_INPUT,
+        &input,
+        &inputSize,
+        sizeof(RAWINPUTHEADER)) == static_cast<UINT>(-1))
+    {
+        return;
+    }
+
+    if (input.header.dwType != RIM_TYPEMOUSE
+        || (input.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) != 0)
+    {
+        return;
+    }
+
+    m_rawDeltaAccumulated += Vector2(
+        static_cast<float>(input.data.mouse.lLastX),
+        static_cast<float>(input.data.mouse.lLastY));
+}
+
+void Mouse::SetWindowActive(bool active)
+{
+    m_windowActive = active;
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
+    UpdateCursorClip();
+}
+
 Vector2 Mouse::GetPosition() const
 {
     return m_position;
@@ -120,11 +179,6 @@ Vector2 Mouse::GetNormalizedPosition() const
         ClampUnit(normalizedY));
 }
 
-Vector2 Mouse::GetPreviousPosition() const
-{
-    return m_previousPosition;
-}
-
 Vector2 Mouse::GetDelta() const
 {
     return m_delta;
@@ -142,6 +196,11 @@ Vector2 Mouse::GetNormalizedDelta() const
     return Vector2(
         m_delta.x / renderWidth,
         m_delta.y / renderHeight);
+}
+
+Vector2 Mouse::GetRawDelta() const
+{
+    return m_rawDelta;
 }
 
 bool Mouse::SetPositionNormalized(const Vector2& normalizedPosition)
@@ -219,36 +278,23 @@ bool Mouse::GetButtonRelease(BYTE button) const
         && (m_oldButtonState[button] & 0x80) != 0;
 }
 
-void Mouse::SetCursorLocked(bool locked)
-{
-    m_cursorLocked = locked;
-    if (!locked)
-    {
-        ::ClipCursor(nullptr);
-        return;
-    }
-
-    ApplyCursorClip();
-}
-
-bool Mouse::IsCursorLocked() const
-{
-    return m_cursorLocked;
-}
-
 void Mouse::SetCursorVisible(bool visible)
 {
-    if (QueryCursorVisible() == visible)
+    m_cursorVisible = visible;
+
+    if (QueryCursorVisible() != visible)
     {
-        return;
+        // ShowCursorは表示カウンター方式のため、指定状態になるまで調整する。
+        int displayCount = 0;
+        do
+        {
+            displayCount = ::ShowCursor(visible ? TRUE : FALSE);
+        } while ((visible && displayCount < 0) || (!visible && displayCount >= 0));
     }
 
-    // ShowCursorは表示カウンター方式のため、指定状態になるまで調整する。
-    int displayCount = 0;
-    do
-    {
-        displayCount = ::ShowCursor(visible ? TRUE : FALSE);
-    } while ((visible && displayCount < 0) || (!visible && displayCount >= 0));
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
+    UpdateCursorClip();
 }
 
 bool Mouse::IsCursorVisible() const
@@ -266,6 +312,40 @@ bool Mouse::ApplyCursorClip() const
     }
 
     return ::ClipCursor(&clipRect) != FALSE;
+}
+
+void Mouse::UpdateCursorClip() const
+{
+    if (!m_windowActive || m_cursorVisible)
+    {
+        ::ClipCursor(nullptr);
+        return;
+    }
+
+    ApplyCursorClip();
+}
+
+bool Mouse::RegisterRawInput() const
+{
+    if (!m_window || !::IsWindow(m_window))
+    {
+        return false;
+    }
+
+    RAWINPUTDEVICE device{};
+    device.usUsagePage = HID_USAGE_PAGE_GENERIC;
+    device.usUsage = HID_USAGE_GENERIC_MOUSE;
+    device.hwndTarget = m_window;
+    return ::RegisterRawInputDevices(&device, 1, sizeof(device)) != FALSE;
+}
+
+void Mouse::UnregisterRawInput() const
+{
+    RAWINPUTDEVICE device{};
+    device.usUsagePage = HID_USAGE_PAGE_GENERIC;
+    device.usUsage = HID_USAGE_GENERIC_MOUSE;
+    device.dwFlags = RIDEV_REMOVE;
+    ::RegisterRawInputDevices(&device, 1, sizeof(device));
 }
 
 bool Mouse::QueryCursorClipRect(RECT& rect) const

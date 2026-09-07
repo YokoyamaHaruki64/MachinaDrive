@@ -98,11 +98,10 @@ void GameWindow::DrawImGui()
         ImVec2(1.0f, 1.0f));
     m_viewportHovered = ImGui::IsItemHovered();
     if (Manager::IsPlayMode()
-        && !Input::IsMouseLocked()
+        && Input::IsCursorVisible()
         && ImGui::IsItemClicked(ImGuiMouseButton_Left))
     {
-        Input::SetMouseLocked(true);
-        Input::SetMousePositionNormalized(Vector2(0.5f, 0.5f));
+        Input::ShowCursor(false);
     }
 
     EndWindow();

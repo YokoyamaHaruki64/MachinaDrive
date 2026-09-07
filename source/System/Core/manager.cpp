@@ -794,9 +794,7 @@ bool Manager::EnterPlayMode()
     }
 
     m_gameMode = GameMode::Play;
-#if GM_ENABLE_EDITOR
-    Input::SetMouseLocked(true);
-#endif
+    Input::ShowCursor(false);
     Camera::SetActiveMainCamera(Camera::GetSceneMainCamera());
     for (size_t index = 0; index < m_GameObjects.size(); ++index)
     {
@@ -821,9 +819,7 @@ bool Manager::StopPlayMode()
     }
 
     // 描画途中のRendererを破棄しないよう、次のUpdate冒頭で処理する。
-#if GM_ENABLE_EDITOR
-    Input::SetMouseLocked(false);
-#endif
+    Input::ShowCursor(true);
     m_stopPlayRequested = true;
     return true;
 }

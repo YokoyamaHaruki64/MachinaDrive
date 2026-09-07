@@ -59,11 +59,6 @@ Vector2 Input::GetMousePositionNormalized()
 	return m_mouse.GetNormalizedPosition();
 }
 
-Vector2 Input::GetPreviousMousePosition()
-{
-	return m_mouse.GetPreviousPosition();
-}
-
 Vector2 Input::GetMouseDelta()
 {
 	return m_mouse.GetDelta();
@@ -72,6 +67,11 @@ Vector2 Input::GetMouseDelta()
 Vector2 Input::GetMouseDeltaNormalized()
 {
 	return m_mouse.GetNormalizedDelta();
+}
+
+Vector2 Input::GetMouseRawDelta()
+{
+	return m_mouse.GetRawDelta();
 }
 
 bool Input::SetMousePositionNormalized(const Vector2& normalizedPosition)
@@ -94,16 +94,6 @@ bool Input::GetMouseRelease(MouseButton button)
 	return m_mouse.GetButtonRelease(static_cast<BYTE>(button));
 }
 
-void Input::SetMouseLocked(bool locked)
-{
-	m_mouse.SetCursorLocked(locked);
-}
-
-bool Input::IsMouseLocked()
-{
-	return m_mouse.IsCursorLocked();
-}
-
 void Input::ShowCursor(bool visible)
 {
 	m_mouse.SetCursorVisible(visible);
@@ -112,4 +102,17 @@ void Input::ShowCursor(bool visible)
 bool Input::IsCursorVisible()
 {
 	return m_mouse.IsCursorVisible();
+}
+
+namespace InputInternal
+{
+    void ProcessRawInput(HRAWINPUT rawInput)
+    {
+        Input::m_mouse.ProcessRawInput(rawInput);
+    }
+
+    void SetMouseWindowActive(bool active)
+    {
+        Input::m_mouse.SetWindowActive(active);
+    }
 }
