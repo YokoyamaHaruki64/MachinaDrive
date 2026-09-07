@@ -7,6 +7,14 @@
 #include "System/Editor/EditorSystem.h"
 #endif
 
+namespace
+{
+    float ClampUnit(float value)
+    {
+        return value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+    }
+}
+
 void Mouse::Initialize(HWND window)
 {
     m_window = window;
@@ -16,6 +24,7 @@ void Mouse::Initialize(HWND window)
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
+    m_cursorLocked = false;
 
     Vector2 initialPosition;
     if (QueryMousePosition(initialPosition))
@@ -35,10 +44,17 @@ void Mouse::Shutdown()
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
+    m_cursorLocked = false;
+    ::ClipCursor(nullptr);
 }
 
 void Mouse::Update(const BYTE* keyState)
 {
+    if (m_cursorLocked)
+    {
+        ApplyCursorClip();
+    }
+
     memcpy(m_oldButtonState, m_buttonState, sizeof(m_buttonState));
 
     constexpr BYTE virtualKeyCodes[ButtonCount] =
@@ -100,8 +116,8 @@ Vector2 Mouse::GetNormalizedPosition() const
     const float normalizedX = m_position.x / renderWidth;
     const float normalizedY = m_position.y / renderHeight;
     return Vector2(
-        normalizedX < 0.0f ? 0.0f : (normalizedX > 1.0f ? 1.0f : normalizedX),
-        normalizedY < 0.0f ? 0.0f : (normalizedY > 1.0f ? 1.0f : normalizedY));
+        ClampUnit(normalizedX),
+        ClampUnit(normalizedY));
 }
 
 Vector2 Mouse::GetPreviousPosition() const
@@ -128,6 +144,62 @@ Vector2 Mouse::GetNormalizedDelta() const
         m_delta.y / renderHeight);
 }
 
+bool Mouse::SetPositionNormalized(const Vector2& normalizedPosition)
+{
+    if (!m_window || !::IsWindow(m_window))
+    {
+        return false;
+    }
+
+    const float renderWidth = static_cast<float>(Renderer::GetGameWidth());
+    const float renderHeight = static_cast<float>(Renderer::GetGameHeight());
+    if (renderWidth <= 0.0f || renderHeight <= 0.0f)
+    {
+        return false;
+    }
+
+    const Vector2 clampedPosition(
+        ClampUnit(normalizedPosition.x),
+        ClampUnit(normalizedPosition.y));
+    POINT screenPosition{};
+
+#if GM_ENABLE_EDITOR
+    Vector2 displayPosition;
+    Vector2 displaySize;
+    if (EditorSystem::GetGameWindowDisplayRect(displayPosition, displaySize)
+        && displaySize.x > 0.0f && displaySize.y > 0.0f)
+    {
+        screenPosition.x = static_cast<LONG>(std::lround(
+            displayPosition.x + displaySize.x * clampedPosition.x));
+        screenPosition.y = static_cast<LONG>(std::lround(
+            displayPosition.y + displaySize.y * clampedPosition.y));
+    }
+    else
+#endif
+    {
+        screenPosition.x = static_cast<LONG>(std::lround(renderWidth * clampedPosition.x));
+        screenPosition.y = static_cast<LONG>(std::lround(renderHeight * clampedPosition.y));
+        if (!::ClientToScreen(m_window, &screenPosition))
+        {
+            return false;
+        }
+    }
+
+    if (!::SetCursorPos(screenPosition.x, screenPosition.y))
+    {
+        return false;
+    }
+
+    const Vector2 position(
+        renderWidth * clampedPosition.x,
+        renderHeight * clampedPosition.y);
+    m_position = position;
+    m_previousPosition = position;
+    m_delta = Vector2::Zero();
+    m_hasPosition = true;
+    return true;
+}
+
 bool Mouse::GetButtonPress(BYTE button) const
 {
     return button < ButtonCount && (m_buttonState[button] & 0x80) != 0;
@@ -145,6 +217,23 @@ bool Mouse::GetButtonRelease(BYTE button) const
     return button < ButtonCount
         && (m_buttonState[button] & 0x80) == 0
         && (m_oldButtonState[button] & 0x80) != 0;
+}
+
+void Mouse::SetCursorLocked(bool locked)
+{
+    m_cursorLocked = locked;
+    if (!locked)
+    {
+        ::ClipCursor(nullptr);
+        return;
+    }
+
+    ApplyCursorClip();
+}
+
+bool Mouse::IsCursorLocked() const
+{
+    return m_cursorLocked;
 }
 
 void Mouse::SetCursorVisible(bool visible)
@@ -165,6 +254,60 @@ void Mouse::SetCursorVisible(bool visible)
 bool Mouse::IsCursorVisible() const
 {
     return QueryCursorVisible();
+}
+
+bool Mouse::ApplyCursorClip() const
+{
+    RECT clipRect{};
+    if (!QueryCursorClipRect(clipRect))
+    {
+        ::ClipCursor(nullptr);
+        return false;
+    }
+
+    return ::ClipCursor(&clipRect) != FALSE;
+}
+
+bool Mouse::QueryCursorClipRect(RECT& rect) const
+{
+    if (!m_window || !::IsWindow(m_window))
+    {
+        return false;
+    }
+
+#if GM_ENABLE_EDITOR
+    Vector2 displayPosition;
+    Vector2 displaySize;
+    if (EditorSystem::GetGameWindowDisplayRect(displayPosition, displaySize)
+        && displaySize.x > 0.0f && displaySize.y > 0.0f)
+    {
+        rect.left = static_cast<LONG>(std::lround(displayPosition.x));
+        rect.top = static_cast<LONG>(std::lround(displayPosition.y));
+        rect.right = static_cast<LONG>(std::lround(displayPosition.x + displaySize.x));
+        rect.bottom = static_cast<LONG>(std::lround(displayPosition.y + displaySize.y));
+        return rect.right > rect.left && rect.bottom > rect.top;
+    }
+#endif
+
+    RECT clientRect{};
+    if (!::GetClientRect(m_window, &clientRect))
+    {
+        return false;
+    }
+
+    POINT topLeft{ clientRect.left, clientRect.top };
+    POINT bottomRight{ clientRect.right, clientRect.bottom };
+    if (!::ClientToScreen(m_window, &topLeft)
+        || !::ClientToScreen(m_window, &bottomRight))
+    {
+        return false;
+    }
+
+    rect.left = topLeft.x;
+    rect.top = topLeft.y;
+    rect.right = bottomRight.x;
+    rect.bottom = bottomRight.y;
+    return rect.right > rect.left && rect.bottom > rect.top;
 }
 
 bool Mouse::QueryMousePosition(Vector2& position) const
