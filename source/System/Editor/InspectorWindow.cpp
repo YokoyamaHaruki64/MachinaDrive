@@ -380,6 +380,15 @@ void InspectorWindow::DrawImGui()
         {
             Manager::ApplyToPrefab(*selectedGameObject);
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Revert from Prefab") && Manager::RevertFromPrefab(*selectedGameObject))
+        {
+            m_gameObjectNameTarget = nullptr;
+            m_gameObjectTagTarget = nullptr;
+            m_componentEditSnapshots.clear();
+            EndWindow();
+            return;
+        }
         ImGui::Separator();
     }
 

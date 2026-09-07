@@ -137,6 +137,7 @@ public:
     static bool LoadSceneObjects(const std::filesystem::path& path);
     static bool SavePrefab(GameObject& root, const std::filesystem::path& path);
     static bool ApplyToPrefab(GameObject& gameObject);
+    static bool RevertFromPrefab(GameObject& gameObject);
     static GameObject* Instantiate(const std::filesystem::path& path);
     static GameObject* Instantiate(
         const std::filesystem::path& path,
