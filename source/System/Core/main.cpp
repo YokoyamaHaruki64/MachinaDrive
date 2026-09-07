@@ -139,11 +139,23 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    if (uMsg == WM_INPUT)
+    {
+        InputInternal::ProcessRawInput(reinterpret_cast<HRAWINPUT>(lParam));
+        return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
+
+    if (uMsg == WM_ACTIVATEAPP)
+    {
+        InputInternal::SetMouseWindowActive(wParam != FALSE);
+        return 0;
+    }
+
 #if GM_ENABLE_EDITOR
     if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE && Manager::IsPlayMode())
     {
-        // Play中のEscはアプリケーション終了ではなく、カーソル制限の解除に使う。
-        Input::SetMouseLocked(false);
+        // Play中のEscはカーソルを表示し、カーソル制限も解除する。
+        Input::ShowCursor(true);
         return 0;
     }
 

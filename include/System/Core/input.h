@@ -5,12 +5,20 @@
 
 class Mouse;
 
+namespace InputInternal
+{
+    void ProcessRawInput(HRAWINPUT rawInput);
+    void SetMouseWindowActive(bool active);
+}
+
 class Input
 {
 private:
 	static BYTE m_OldKeyState[256];
 	static BYTE m_KeyState[256];
 	static Mouse m_mouse;
+    friend void InputInternal::ProcessRawInput(HRAWINPUT rawInput);
+    friend void InputInternal::SetMouseWindowActive(bool active);
     static bool GetKeyPress(BYTE KB);
     static bool GetKeyRelease(BYTE KB);
     static bool GetKeyTrigger(BYTE KB);
@@ -229,12 +237,13 @@ public:
     // Game RenderSizeを基準に0.0～1.0へ変換し、範囲外は各軸でクランプする。
     static Vector2 GetMousePositionNormalized();
 
-    // 前フレームのマウス位置と、前フレームからの相対移動量を返す。
-    static Vector2 GetPreviousMousePosition();
     static Vector2 GetMouseDelta();
 
     // マウスの相対移動量をRenderSizeで除算した値を返す。移動方向を保つためクランプしない。
     static Vector2 GetMouseDeltaNormalized();
+
+    // マウスデバイスから受け取った位置に依存しない相対移動量を返す。
+    static Vector2 GetMouseRawDelta();
 
     // 正規化座標を指定してOSカーソルを移動する。位置は各軸で0.0～1.0へクランプする。
     static bool SetMousePositionNormalized(const Vector2& normalizedPosition);
@@ -243,10 +252,6 @@ public:
     static bool GetMousePress(MouseButton button);
     static bool GetMouseTrigger(MouseButton button);
     static bool GetMouseRelease(MouseButton button);
-
-    // EditorのPlayModeでGameWindowへカーソルを制限する。
-    static void SetMouseLocked(bool locked);
-    static bool IsMouseLocked();
 
     // OSカーソルの表示状態を変更・取得する。
     static void ShowCursor(bool visible);
