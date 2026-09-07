@@ -32,7 +32,7 @@ void CameraController::OnStart()
 
 void CameraController::LateUpdate()
 {
-    Vector2 mouseDelta = Input::GetMouseDeltaNormalized();
+    Vector2 mouseDelta = Input::GetMouseRawDelta();
     Vector3 targetPos = m_target ? m_target->GetTransform()->GetPosition() : Vector3::Zero();
 
     // カメラのターゲットを更新
@@ -45,11 +45,12 @@ void CameraController::LateUpdate()
         return;
 
     m_yaw += mouseDelta.x * m_sensitivity;
-    m_pitch -= mouseDelta.y * m_sensitivity;
+    m_pitch += mouseDelta.y * m_sensitivity;
 
     // ピッチの制限
-    const float pitchLimit = 30.0f * Math::DEG2RAD; // 30度をラジアンに変換
-    m_pitch = Math::Clamp(m_pitch, -pitchLimit, pitchLimit);
+    const float pitchLimit_min = 10.0f * Math::DEG2RAD;
+    const float pitchLimit_max = 30.0f * Math::DEG2RAD;
+    m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
 
     // カメラの位置を計算
     Vector3 cameraPos =

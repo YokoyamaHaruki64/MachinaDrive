@@ -22,7 +22,7 @@ gameObjects:
         fields:
           enabled: true
           m_distance: 10
-          m_sensitivity: 1
+          m_sensitivity: 0.00100000005
   - id: 2
     name: Field
     active: true
@@ -86,7 +86,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,3.75999999,2.61216004e-15]
+          m_localPosition: [0,0,2.61216004e-15]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1.00034523,1,1.00034523]
       - type: ModelRenderer
@@ -125,7 +125,7 @@ gameObjects:
           enabled: true
           m_motionType: 2
           m_mass: 1
-          m_bounciness: 0
+          m_bounciness: 1
           m_friction: 1
           m_useGravity: true
           m_allowSleep: true

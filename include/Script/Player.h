@@ -12,14 +12,17 @@ class CameraController;
 
 class Player : public Script
 {
-    REGISTER_COMPONENT(Player, "Player");
+    GM_SCRIPT(Player, "Player");
+    USE_FIELDS
+
 private:
     Rigidbody* m_rigidbody = nullptr;
     CameraController* m_cameraController = nullptr;
     Audio* m_jumpSE = nullptr;
 
     Vector2 m_beginMousePos{ Vector2::Zero() };
-
+    Vector2 m_accumulatedMouse{ Vector2::Zero() };
+    
     float m_speed = 10.0f;
 
 public:
@@ -28,11 +31,5 @@ public:
     void OnHitBegin(const HitInfo& hitInfo) override;
     void OnHit(const HitInfo& hitInfo) override;
     void OnHitEnd(const HitInfo& hitInfo) override;
-    Player() = delete;
-    Player(GameObject* owner) : Script(owner)
-    {
-    }
 
-protected:
-    void RegisterFields(FieldRegistry& fields) override;
 };

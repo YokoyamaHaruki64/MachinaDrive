@@ -14,7 +14,7 @@ class CameraController : public Script
     Camera* m_camera = nullptr;
 
     float m_distance = 10.0f;
-    float m_sensitivity = 0.1f;
+    float m_sensitivity = 0.05f;
 
     float m_yaw = 0.0f;
     float m_pitch = 0.0f;

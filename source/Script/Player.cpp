@@ -40,42 +40,39 @@ void Player::Update()
         return;
     }
 
-    Vector3 cameraForward = Camera::GetMainCamera()->transform()->GetForward();
+    Vector3 cameraForward = transform()->GetPosition() - m_cameraController->transform()->GetPosition();
     cameraForward.y = 0.0f;
     cameraForward.Normalize();
-    Vector3 cameraRight = Camera::GetMainCamera()->transform()->GetRight();
+    Vector3 cameraRight = Vector3::Cross(Vector3::Up(), cameraForward);
     cameraRight.y = 0.0f;
     cameraRight.Normalize();
 
-    Vector3 move = Vector3::Zero();
-
-    if(Input::GetMouseTrigger(Input::MouseButton::Left))
+    if (!Input::IsCursorVisible())
     {
-        m_beginMousePos = Input::GetMousePositionNormalized();
-        m_cameraController->BeginLock();
-    }
-
-    if(Input::GetMousePress(Input::MouseButton::Left))
-    {
-        Vector2 currentMousePos = Input::GetMousePositionNormalized();
-        Vector2 dragVector = currentMousePos - m_beginMousePos;
-
-        move = cameraForward * dragVector.y + cameraRight * -dragVector.x;
-    }
-
-    if(Input::GetMouseRelease(Input::MouseButton::Left))
-    {
-        Vector2 currentMousePos = Input::GetMousePositionNormalized();
-        Vector2 dragVector = currentMousePos - m_beginMousePos;
-
-        move = cameraForward * dragVector.y + cameraRight * -dragVector.x;
-
-        if(move.LengthSqr() > 0.0f)
+        if (Input::GetMouseTrigger(Input::MouseButton::Left))
         {
-            move.Normalize();
-            m_rigidbody->SetVelocity(move * m_speed);
+            m_cameraController->BeginLock();
+            Input::SetMousePositionNormalized({ 0.5f, 0.5f });
+            m_rigidbody->SetVelocity(Vector3::Zero());
+            m_accumulatedMouse = Vector2::Zero();
         }
-        m_cameraController->EndLock();
+        if (Input::GetMousePress(Input::MouseButton::Left))
+        {
+            m_accumulatedMouse += Input::GetMouseRawDelta();
+
+            Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+        }
+        if (Input::GetMouseRelease(Input::MouseButton::Left))
+        {
+            Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+
+            if (move.LengthSqr() > 0.0f)
+            {
+                move.Normalize();
+                m_rigidbody->SetVelocity(move * m_speed);
+            }
+            m_cameraController->EndLock();
+        }
     }
 }
 
