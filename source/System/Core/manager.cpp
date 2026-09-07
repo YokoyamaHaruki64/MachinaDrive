@@ -1358,11 +1358,6 @@ void Manager::Draw()
 
 	Renderer::Draw();
 
-#if GM_ENABLE_EDITOR
-    // 通常のMesh描画後、PostProcess前にCollider線を重ねる。
-    // 深度テストは専用Shaderで維持するため、遮蔽物の裏側は自然に隠れる。
-    DebugDrawer::Draw();
-#endif
 
     for (int i = 0; i < m_postEffects.size(); ++i)
     {
@@ -1370,6 +1365,9 @@ void Manager::Draw()
     }
 
 #if GM_ENABLE_EDITOR
+    // 通常のMesh描画後、Collider線を重ねる。
+    // 深度テストは専用Shaderで維持するため、遮蔽物の裏側は自然に隠れる。
+    DebugDrawer::Draw();
     EditorSystem::DrawImGui();
 
 	Renderer::BeginEditorFrame();

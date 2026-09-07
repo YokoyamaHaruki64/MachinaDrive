@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "System/Core/main.h"
+#include "System/Core/GM_Time.h"
 #include "System/Rendering/renderer.h"
 #include "System/Rendering/RendererBase.h"
 #include "Graphics/Material.h"
@@ -481,6 +482,10 @@ void Renderer::Uninit()
 
 void Renderer::Begin()
 {
+	// PerFrameを毎フレーム更新し、common.hlslのTimeへゲーム経過時間を渡す。
+	m_PerFrame.Time = Time::GetTotalTime();
+	m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
+
 	// ImGuiの外部Viewport描画がD3D11コンテキストのRTVを変更するため、毎フレームの描画先を明示的に復元する。
 	m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
 
