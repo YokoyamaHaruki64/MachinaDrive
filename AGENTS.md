@@ -56,3 +56,15 @@
 - 既存の未コミット変更には触れず、対象外の整形やファイル名変更は行わない。
 - 外部ライブラリや SDK を追加・更新する前に確認を取る。
 - コミット、push、外部サービスへの操作はユーザーの明示的な承認後に行う。
+
+## ゲームリポジトリのGit運用
+
+- このリポジトリは`GM_Framework`の`v0.2.0`を起点にしたゲーム制作リポジトリである。
+- `origin`はゲーム側、`upstream`はフレームワーク側として登録する。リモートURLは`git remote -v`で確認し、資料へ固定記載しない。
+- `main`はゲームの安定版、`dev`はゲーム開発用とする。ゲーム機能は`feature/*`、再利用可能なエンジン変更は`engine/*`で作業する。
+- 通常のpush先は`origin`とし、フレームワーク側へ誤pushしないよう`git push origin <branch>`を明示する。`upstream`は原則としてfetch・差分確認用である。
+- フレームワーク更新は`git fetch upstream --tags`で取得し、内容を確認してから`upstream/dev`または指定タグをゲーム側へ取り込む。
+- ゲーム制作中に先行実装したエンジン改善は、可能なら`upstream/dev`を起点に`engine/*`ブランチを作る。汎用化できた変更はフレームワーク側へPRし、ゲーム固有の変更はゲーム側に残す。
+- エンジン変更とゲーム検証用変更は、`[Engine]`と`[Game]`のコミットに分ける。コミットメッセージは既存の`[Category] 日本語の要約`形式を守る。
+- フレームワークのタグとゲームのリリースタグは分離する。ゲーム側では`game-v0.1.0`のようにゲーム用タグ名を付ける。
+- Codex開始時は、この`AGENTS.md`、`.codex-work/NEXT_SESSION.md`、`docs/GAME_DEVELOPMENT.md`、`docs/ARCHITECTURE.md`、`docs/PHYSICS.md`、`docs/SERIALIZATION.md`を確認する。
