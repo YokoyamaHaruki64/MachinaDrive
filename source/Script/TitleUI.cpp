@@ -22,7 +22,7 @@ void TitleUI::Update()
     // 元の位置にオフセットを加える
     m_owner->GetUITransform()->SetOffset(m_originalOffset + Vector2(0.0f, offsetY));
 
-    if (Input::GetKeyTrigger(Input::KK_ENTER))
+    if (Input::GetKeyTrigger(Input::KeyCode::ENTER))
         Manager::ChangeScene<GameScene>();
 
 }

@@ -25,11 +25,11 @@ void CameraController::OnStart()
 void CameraController::LateUpdate()
 {
     // 回転処理
-    if (Input::GetKeyPress(Input::KK_Q))
+    if (Input::GetKeyPress(Input::KeyCode::Q))
     {
         transform()->Rotate(Vector3(0.0f, -0.02f, 0.0f)); // 左回転
     }
-    if (Input::GetKeyPress(Input::KK_E))
+    if (Input::GetKeyPress(Input::KeyCode::E))
     {
         transform()->Rotate(Vector3(0.0f, 0.02f, 0.0f)); // 右回転
     }
