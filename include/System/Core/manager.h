@@ -137,6 +137,7 @@ public:
     static bool LoadSceneObjects(const std::filesystem::path& path);
     static bool SavePrefab(GameObject& root, const std::filesystem::path& path);
     static bool ApplyToPrefab(GameObject& gameObject);
+    static bool RevertFromPrefab(GameObject& gameObject);
     static GameObject* Instantiate(const std::filesystem::path& path);
     static GameObject* Instantiate(
         const std::filesystem::path& path,
@@ -145,6 +146,8 @@ public:
         const Vector3& scale);
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
+    static std::vector<GameObject*> GetObjectsByTag(const std::string& tag);
+    static GameObject* GetObjectFirstByTag(const std::string& tag);
 
 #if GM_ENABLE_EDITOR
     static std::unique_ptr<EditorCommand> CreateEditorCreationCommand(

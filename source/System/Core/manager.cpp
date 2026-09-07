@@ -32,6 +32,8 @@
 #include "Component/Transform.h"
 #include "Component/TransformBase.h"
 #include "Component/audio.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Core/GameObjectReference.h"
 
 #if GM_ENABLE_EDITOR
 #include "imgui.h"
@@ -39,6 +41,8 @@
 #include "imgui_impl_win32.h"
 #include "imgui_curve_custom.h"
 #endif
+
+
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
@@ -132,6 +136,32 @@ void Manager::EnsureGameObjectIds(
             }
         }
     }
+}
+
+std::vector<GameObject*> Manager::GetObjectsByTag(const std::string& tag)
+{
+    std::vector<GameObject*> result;
+    result.reserve(m_GameObjects.size());
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            result.push_back(gameObject.get());
+        }
+    }
+    return result;
+}
+
+GameObject* Manager::GetObjectFirstByTag(const std::string& tag)
+{
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            return gameObject.get();
+        }
+    }
+    return nullptr;
 }
 
 void Manager::DestroyGameObjects()
@@ -638,6 +668,162 @@ bool Manager::ApplyToPrefab(GameObject& gameObject)
         root = parentObject;
     }
     return SavePrefab(*root, gameObject.GetPrefabPath());
+}
+
+bool Manager::RevertFromPrefab(GameObject& gameObject)
+{
+    if (m_gameMode != GameMode::Edit || gameObject.IsDestroyed() || gameObject.GetPrefabPath().empty())
+    {
+        return false;
+    }
+
+    const std::string prefabPath = gameObject.GetPrefabPath();
+    GameObject* root = &gameObject;
+    while (TransformBase* parent = root->GetTransformBase()->GetParent())
+    {
+        GameObject* const parentObject = parent->GetOwner();
+        if (parentObject->GetPrefabPath() != prefabPath)
+        {
+            break;
+        }
+        root = parentObject;
+    }
+    GameObject& instanceRoot = *root;
+
+    GameObjectLoadResult loaded;
+    if (!GameObjectYamlSerializer::LoadFromFile(
+        prefabPath, loaded, PrefabSourcePathMode::UseSourceFilePath))
+    {
+        return false;
+    }
+
+    GameObject* prefabRoot = nullptr;
+    for (const auto& object : loaded.gameObjects)
+    {
+        if (!object->GetParent())
+        {
+            if (prefabRoot)
+            {
+                Logger::Error("PrefabにはRoot GameObjectを1つだけ定義してください。");
+                return false;
+            }
+            prefabRoot = object.get();
+        }
+    }
+    if (!prefabRoot ||
+        typeid(*prefabRoot->GetTransformBase()) != typeid(*instanceRoot.GetTransformBase()))
+    {
+        Logger::Error("PrefabのRootが存在しないか、Transform種別が一致しません。");
+        return false;
+    }
+
+    // 子同士の参照は読込済み。Rootへの参照だけ既存インスタンスへ向け直す。
+    while (!prefabRoot->m_references.empty())
+    {
+        prefabRoot->m_references.back()->Set(&instanceRoot);
+    }
+
+    YAMLValueConversionContext context;
+    context.getObjectId = [](const GameObject* object)
+        -> std::optional<uint64_t> { return object->GetId(); };
+    context.resolveObject = [&loaded, &instanceRoot](uint64_t id) -> GameObject*
+    {
+        if (id == instanceRoot.GetId())
+        {
+            return &instanceRoot;
+        }
+        for (const auto& object : loaded.gameObjects)
+        {
+            if (object->GetId() == id)
+            {
+                return object.get();
+            }
+        }
+        return nullptr;
+    };
+
+    // Scene内IDと衝突しないIDを先に割り当て、RootのFieldを順に退避する。
+    EnsureGameObjectIds(loaded.gameObjects, true);
+    struct ComponentState
+    {
+        const ComponentRegistration* registration;
+        YAMLValue fields;
+    };
+    std::vector<ComponentState> rootComponents;
+    for (Component* component : prefabRoot->GetComponents())
+    {
+        if (component == prefabRoot->GetTransformBase())
+        {
+            continue;
+        }
+        const auto* registration = ComponentRegistry::Find(typeid(*component));
+        YAMLValue fields;
+        if (!registration || !component->ToYAMLValue(fields, context))
+        {
+            return false;
+        }
+        rootComponents.push_back({ registration, std::move(fields) });
+    }
+
+#if GM_ENABLE_EDITOR
+    // 破棄対象を指すUndo履歴は、構成変更より前に解放する。
+    EditorSystem::ClearCommandHistory();
+#endif
+
+    // Rootの名前・Transform・外部の親は保持し、旧子階層を破棄予約する。
+    instanceRoot.GetTransformBase()->DestroyChildren();
+    const auto oldChildren = instanceRoot.GetTransformBase()->GetChildren();
+    for (TransformBase* child : oldChildren)
+    {
+        child->SetParent(nullptr, ParentTransformMode::KeepLocal);
+    }
+    std::erase_if(instanceRoot.m_components, [&instanceRoot](const auto& component)
+    {
+        if (component.get() == instanceRoot.GetTransformBase())
+        {
+            return false;
+        }
+        component->OnDestroy();
+        return true;
+    });
+
+    instanceRoot.SetTag(prefabRoot->GetTag());
+    instanceRoot.SetActive(prefabRoot->IsActive());
+    instanceRoot.SetPrefabPath(prefabRoot->GetPrefabPath());
+    for (const ComponentState& state : rootComponents)
+    {
+        Component* component = ComponentRegistry::Add(*state.registration, instanceRoot);
+        if (component)
+        {
+            component->FromYAMLValue(state.fields, context);
+        }
+    }
+
+    // 読込済みの子階層をそのまま移管し、全体が揃ってからロード通知する。
+    const auto newChildren = prefabRoot->GetTransformBase()->GetChildren();
+    for (TransformBase* child : newChildren)
+    {
+        child->SetParent(instanceRoot.GetTransformBase(), ParentTransformMode::KeepLocal);
+    }
+    std::erase_if(loaded.gameObjects, [prefabRoot](const auto& object)
+    {
+        if (object.get() != prefabRoot)
+        {
+            return false;
+        }
+        object->OnDestroy();
+        return true;
+    });
+    StartLoadedGameObjects(std::move(loaded.gameObjects));
+    for (Component* component : instanceRoot.GetComponents())
+    {
+        if (component != instanceRoot.GetTransformBase())
+        {
+            component->OnLoaded();
+        }
+    }
+    MarkCurrentSceneDirty();
+    return true;
 }
 
 GameObject* Manager::Instantiate(const std::filesystem::path& path)

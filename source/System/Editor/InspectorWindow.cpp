@@ -288,6 +288,7 @@ void InspectorWindow::DrawImGui()
     if (!m_selectedGameObjects || m_selectedGameObjects->empty())
     {
         m_gameObjectNameTarget = nullptr;
+        m_gameObjectTagTarget = nullptr;
         m_componentEditSnapshots.clear();
         ImGui::TextUnformatted("GameObjectを選択してください。");
         EndWindow();
@@ -297,6 +298,7 @@ void InspectorWindow::DrawImGui()
     if (m_selectedGameObjects->size() > 1)
     {
         m_gameObjectNameTarget = nullptr;
+        m_gameObjectTagTarget = nullptr;
         m_componentEditSnapshots.clear();
         ImGui::Text("%zu 個のGameObjectを選択中です。", m_selectedGameObjects->size());
         EndWindow();
@@ -304,14 +306,19 @@ void InspectorWindow::DrawImGui()
     }
 
     GameObject* selectedGameObject = m_selectedGameObjects->front();
-    if (m_gameObjectNameTarget != selectedGameObject)
+    if (m_gameObjectNameTarget != selectedGameObject || m_gameObjectTagTarget != selectedGameObject)
     {
         m_gameObjectNameTarget = selectedGameObject;
+        m_gameObjectTagTarget = selectedGameObject;
         m_componentEditSnapshots.clear();
         std::fill(m_gameObjectNameBuffer.begin(), m_gameObjectNameBuffer.end(), '\0');
         const std::string& name = selectedGameObject->GetName();
         const size_t length = std::min(name.size(), m_gameObjectNameBuffer.size() - 1);
         std::copy_n(name.data(), length, m_gameObjectNameBuffer.data());
+        std::fill(m_gameObjectTagBuffer.begin(), m_gameObjectTagBuffer.end(), '\0');
+        const std::string& tag = selectedGameObject->GetTag();
+        const size_t tagLength = std::min(tag.size(), m_gameObjectTagBuffer.size() - 1);
+        std::copy_n(tag.data(), tagLength, m_gameObjectTagBuffer.data());
     }
 
     const bool nameSubmitted = ImGui::InputText(
@@ -331,6 +338,25 @@ void InspectorWindow::DrawImGui()
                 [gameObject = selectedGameObject, previousName]() { gameObject->SetName(previousName); });
         }
     }
+
+    const bool tagSubmitted = ImGui::InputText(
+        "Tag",
+        m_gameObjectTagBuffer.data(),
+        m_gameObjectTagBuffer.size(),
+        ImGuiInputTextFlags_EnterReturnsTrue);
+    if (tagSubmitted || ImGui::IsItemDeactivatedAfterEdit())
+    {
+        const std::string tag = m_gameObjectTagBuffer.data();
+        if (tag != selectedGameObject->GetTag())
+        {
+            const std::string previousTag = selectedGameObject->GetTag();
+            selectedGameObject->SetTag(tag);
+            EditorSystem::RecordExecutedCommand(
+                [gameObject = selectedGameObject, tag]() { gameObject->SetTag(tag); },
+                [gameObject = selectedGameObject, previousTag]() { gameObject->SetTag(previousTag); });
+        }
+    }
+
     bool active = selectedGameObject->IsActive();
     if (ImGui::Checkbox("Active", &active))
     {
@@ -353,6 +379,15 @@ void InspectorWindow::DrawImGui()
         if (ImGui::Button("Apply to Prefab"))
         {
             Manager::ApplyToPrefab(*selectedGameObject);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Revert from Prefab") && Manager::RevertFromPrefab(*selectedGameObject))
+        {
+            m_gameObjectNameTarget = nullptr;
+            m_gameObjectTagTarget = nullptr;
+            m_componentEditSnapshots.clear();
+            EndWindow();
+            return;
         }
         ImGui::Separator();
     }
