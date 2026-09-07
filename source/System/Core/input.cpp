@@ -74,6 +74,11 @@ Vector2 Input::GetMouseDeltaNormalized()
 	return m_mouse.GetNormalizedDelta();
 }
 
+bool Input::SetMousePositionNormalized(const Vector2& normalizedPosition)
+{
+	return m_mouse.SetPositionNormalized(normalizedPosition);
+}
+
 bool Input::GetMousePress(MouseButton button)
 {
 	return m_mouse.GetButtonPress(static_cast<BYTE>(button));
@@ -87,6 +92,16 @@ bool Input::GetMouseTrigger(MouseButton button)
 bool Input::GetMouseRelease(MouseButton button)
 {
 	return m_mouse.GetButtonRelease(static_cast<BYTE>(button));
+}
+
+void Input::SetMouseLocked(bool locked)
+{
+	m_mouse.SetCursorLocked(locked);
+}
+
+bool Input::IsMouseLocked()
+{
+	return m_mouse.IsCursorLocked();
 }
 
 void Input::ShowCursor(bool visible)

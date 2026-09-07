@@ -236,10 +236,17 @@ public:
     // マウスの相対移動量をRenderSizeで除算した値を返す。移動方向を保つためクランプしない。
     static Vector2 GetMouseDeltaNormalized();
 
+    // 正規化座標を指定してOSカーソルを移動する。位置は各軸で0.0～1.0へクランプする。
+    static bool SetMousePositionNormalized(const Vector2& normalizedPosition);
+
     // マウスボタンの現在状態、押下、解放を返す。
     static bool GetMousePress(MouseButton button);
     static bool GetMouseTrigger(MouseButton button);
     static bool GetMouseRelease(MouseButton button);
+
+    // EditorのPlayModeでGameWindowへカーソルを制限する。
+    static void SetMouseLocked(bool locked);
+    static bool IsMouseLocked();
 
     // OSカーソルの表示状態を変更・取得する。
     static void ShowCursor(bool visible);

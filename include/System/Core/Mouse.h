@@ -28,10 +28,15 @@ class Mouse final
     bool GetButtonTrigger(BYTE button) const;
     bool GetButtonRelease(BYTE button) const;
 
+    bool SetPositionNormalized(const Vector2& normalizedPosition);
+    void SetCursorLocked(bool locked);
+    bool IsCursorLocked() const;
     void SetCursorVisible(bool visible);
     bool IsCursorVisible() const;
 
     bool QueryMousePosition(Vector2& position) const;
+    bool ApplyCursorClip() const;
+    bool QueryCursorClipRect(RECT& rect) const;
     bool QueryCursorVisible() const;
 
     HWND m_window = nullptr;
@@ -43,4 +48,5 @@ class Mouse final
     static constexpr BYTE ButtonCount = 5;
     BYTE m_oldButtonState[ButtonCount]{};
     BYTE m_buttonState[ButtonCount]{};
+    bool m_cursorLocked = false;
 };

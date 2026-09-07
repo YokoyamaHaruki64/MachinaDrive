@@ -2,6 +2,7 @@
 
 #include "System/Core/main.h"
 #include "System/Core/manager.h"
+#include "System/Core/input.h"
 #include "System/Core/GM_Time.h"
 #include "System/Diagnostics/LogSystem.h"
 #include "System/Diagnostics/PerformanceMonitor.h"
@@ -139,6 +140,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 #if GM_ENABLE_EDITOR
+    if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE && Manager::IsPlayMode())
+    {
+        // Play中のEscはアプリケーション終了ではなく、カーソル制限の解除に使う。
+        Input::SetMouseLocked(false);
+        return 0;
+    }
+
     if (ImGui::GetCurrentContext() && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         return true;
 #endif
@@ -165,12 +173,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_KEYDOWN:
-		switch(wParam)
-		{
-		case VK_ESCAPE:
-			SendMessage(hWnd, WM_CLOSE, 0, 0);
-			break;
-		}
 		break;
 
 	default:

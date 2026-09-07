@@ -5,6 +5,7 @@
 #include "imgui.h"
 
 #include "System/Core/manager.h"
+#include "System/Core/input.h"
 #include "System/Rendering/renderer.h"
 
 namespace
@@ -96,6 +97,13 @@ void GameWindow::DrawImGui()
         ImVec2(0.0f, 0.0f),
         ImVec2(1.0f, 1.0f));
     m_viewportHovered = ImGui::IsItemHovered();
+    if (Manager::IsPlayMode()
+        && !Input::IsMouseLocked()
+        && ImGui::IsItemClicked(ImGuiMouseButton_Left))
+    {
+        Input::SetMouseLocked(true);
+        Input::SetMousePositionNormalized(Vector2(0.5f, 0.5f));
+    }
 
     EndWindow();
 }
