@@ -28,7 +28,6 @@
 #include "Scene/TitleScene.h"
 
 #include "Component/Camera.h"
-#include "Component/PostEffect.h"
 #include "Component/Transform.h"
 #include "Component/TransformBase.h"
 #include "Component/audio.h"
@@ -46,8 +45,6 @@
 
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
-std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポストエフェクトのリスト
-
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
 Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTransitionPhase::None;
@@ -905,7 +902,7 @@ void Manager::InitScene()
         m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
         m_currentScene->Uninit();
         DestroyGameObjects();
-        m_postEffects.clear();
+        Renderer::ClearPostEffects();
         m_currentScene.reset();
     }
 
@@ -945,7 +942,7 @@ void Manager::ReloadCurrentScene()
     m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
     m_currentScene->Uninit();
     DestroyGameObjects();
-    m_postEffects.clear();
+    Renderer::ClearPostEffects();
 
     m_sceneTransitionPhase = SceneTransitionPhase::Initializing;
     m_currentScene->Init();
@@ -1085,10 +1082,9 @@ bool Manager::Init()
         return false;
     }
 #if GM_ENABLE_EDITOR
-    DebugDrawer::Initialize();
+	DebugDrawer::Initialize();
 #endif
 	Input::Init();
-    PostProcess::Init();
     Audio::InitMaster();
 
 #if GM_ENABLE_EDITOR
@@ -1180,8 +1176,7 @@ void Manager::Uninit()
 #endif
 
     // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
-    m_postEffects.clear();
-    PostProcess::Uninit();
+    Renderer::ClearPostEffects();
     ModelManager::Uninit();
     MaterialManager::Uninit();
     FontManager::Clear();
@@ -1224,10 +1219,7 @@ void Manager::Update()
 
     if (EditorSystem::ApplyGameWindowRenderTargetSize())
 	{
-		for (const std::unique_ptr<PostProcess>& postEffect : m_postEffects)
-		{
-            postEffect->Resize(Renderer::GetGameWidth(), Renderer::GetGameHeight());
-        }
+        Renderer::ResizePostEffects();
     }
     EditorSystem::Update();
 #endif
@@ -1357,12 +1349,6 @@ void Manager::Draw()
 	//}
 
 	Renderer::Draw();
-
-
-    for (int i = 0; i < m_postEffects.size(); ++i)
-    {
-        m_postEffects[i]->Apply();
-    }
 
 #if GM_ENABLE_EDITOR
     // 通常のMesh描画後、Collider線を重ねる。

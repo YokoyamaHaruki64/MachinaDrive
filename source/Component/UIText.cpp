@@ -13,6 +13,7 @@
 #include "System/Editor/FieldRegistry.h"
 #include "System/Rendering/renderer.h"
 #include "System/UI/FontAsset.h"
+#include "Graphics/ModelAsset.h"
 
 namespace
 {

@@ -8,7 +8,6 @@
 #include <utility>
 #include "math/vector3.h"
 #include "System/Core/GameObject.h"
-#include "Component/PostEffect.h"
 #include "Component/UICanvas.h"
 
 class Camera;
@@ -36,7 +35,6 @@ private:
 
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
-    static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
 
     static std::unique_ptr<Scene> m_currentScene;
@@ -279,21 +277,4 @@ public:
         return result; // 見つからない場合は空のベクターを返す
     }
 
-    static void AddPostEffect(std::unique_ptr<PostProcess> postEffect)
-    {
-        m_postEffects.push_back(std::move(postEffect));
-    }
-
-    static void RemovePostEffect(PostProcess* postEffect)
-    {
-        for (size_t i = 0; i < m_postEffects.size(); ++i)
-        {
-            if (m_postEffects[i].get() == postEffect)
-            {
-                std::swap(m_postEffects[i], m_postEffects.back());
-                m_postEffects.pop_back();
-                break;
-            }
-        }
-    }
 };

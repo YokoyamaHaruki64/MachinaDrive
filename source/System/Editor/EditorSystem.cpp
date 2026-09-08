@@ -12,7 +12,6 @@
 #include "System/Serialization/YAMLTypes.h"
 #include "Component/Camera.h"
 #include "Component/Transform.h"
-#include "math/MathCommon.h"
 
 #include "imgui.h"
 

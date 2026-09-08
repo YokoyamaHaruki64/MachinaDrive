@@ -4,6 +4,7 @@
 #include "Graphics/GraphicInc.h"
 
 #include <array>
+#include <string_view>
 
 
 
@@ -46,6 +47,7 @@ struct PerObject
 
 class Material;
 class GraphicsShaderPass;
+class PostProcess;
 
 // 1回の描画を表す、フレーム内限定の提出データ。
 struct DrawItem
@@ -102,6 +104,7 @@ private:
     static PerObject m_PerObject;
 
     static std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> m_DrawQueues;
+    static std::vector<PostProcess*> m_postEffects;
     static uint64_t m_SubmitOrder;
 
     static BlendMode m_CurrentBlendMode;
@@ -111,6 +114,7 @@ private:
     static void CreateFallbackVertexBuffers();
     static bool CreateGameRenderTargets(UINT width, UINT height);
     static void ReleaseGameRenderTargets();
+    static void SetSrcRTV();
     static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);
 
 public:
@@ -145,6 +149,12 @@ public:
 
     static void SubmitDrawItem(RenderPhase phase, DrawItem item);
     static void SubmitDrawCommand(RenderPhase phase, DrawItem item);
+    static bool RegisterPostEffect(PostProcess* postEffect);
+    static void UnregisterPostEffect(PostProcess* postEffect);
+    static PostProcess* FindPostEffect(std::string_view name);
+    static bool IsPostProcessMaterialUsed(const Material* material, const PostProcess* excludedPostEffect = nullptr);
+    static void ClearPostEffects();
+    static void ResizePostEffects();
 
     static bool SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil = false);
     static void SetDstRTV();
