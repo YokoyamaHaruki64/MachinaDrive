@@ -177,7 +177,7 @@ void UIImage::Draw()
     }
     Renderer::SetWorldMatrix(uiTransform->GetWorldMatrix());
 
-    MaterialPropertyOverride overrideProperties;
+    MaterialPropertyOverride& overrideProperties = GetMaterialPropertyOverride();
     overrideProperties.SetColor("_BaseColor", m_color);
     m_material->Bind(0, &overrideProperties);
 

@@ -118,6 +118,7 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
+          m_hpBar: 50
           m_speed: 100
           m_attackTime: 5
           m_speedFriction: 0.300000012
@@ -555,5 +556,49 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: 1 Combo!
           m_fontSize: 100
-          m_color: [1,0.423529416,0.501960814,1]
+          m_color: [1,0,0,1]
           m_materialPath: Assets/Materials/UI.material
+  - id: 50
+    name: HPBar
+    tag: 
+    active: true
+    prefab: 
+    parent: 44
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0.5]
+          m_stretch: [0.379999995,0.0299999993]
+          m_pos: [0.0399999991,0.0799999982]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: ''
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 100
+          m_current: 100
+          m_barColor: [1,1,1,1]
+          m_chipColor: [1,0.200000003,0.200000003,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0.5
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false

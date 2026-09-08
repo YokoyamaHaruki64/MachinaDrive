@@ -282,6 +282,9 @@
     <ClCompile Include="source\Script\ResultUI.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\FillBar.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Component\ParticleSystem.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
@@ -609,6 +612,9 @@
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\ResultUI.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\FillBar.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\Color.h">
@@ -1066,6 +1072,9 @@
     <None Include="Assets\Shaders\DefaultLit.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Assets\Shaders\FillBarShader.shader">
+      <Filter>Shader</Filter>
+    </None>
     <None Include="Assets\Shaders\PostProcessBloom.shader">
       <Filter>Shader</Filter>
     </None>
@@ -1079,6 +1088,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\ShotDirector.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\UIImageFill.shader">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
