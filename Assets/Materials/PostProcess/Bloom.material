@@ -1,5 +1,5 @@
 version: 1
-name: Bloom_1
+name: Bloom
 shader: Assets/Shaders/PostProcessBloom.shader
 properties:
   _Threshold: 0.800000012

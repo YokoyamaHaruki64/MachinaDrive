@@ -118,7 +118,6 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
-          m_hpBar: 50
           m_speed: 100
           m_attackTime: 5
           m_speedFriction: 0.300000012
@@ -602,3 +601,21 @@ gameObjects:
           m_horizontalFromLeft: true
           m_horizontalFromCenter: false
           m_horizontalFromRight: false
+  - id: 51
+    name: PostProcess
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Bloom
+        fields:
+          enabled: true
+          m_name: Bloom
+          m_materialPath: Assets/Materials/PostProcess/Bloom.material

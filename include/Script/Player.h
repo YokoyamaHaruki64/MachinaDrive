@@ -56,7 +56,7 @@ private:
         Color(1.0f, 0.0f, 0.0f, 1.0f), // Attacking
         Color(0.5f, 0.5f, 0.5f, 1.0f)  // AttackEnd
     };
-    bool m_debug;
+    bool m_debug = false;
 
     bool GetCameraDirection(Vector3& forward, Vector3& right) const;
 public:
