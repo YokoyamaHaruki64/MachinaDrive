@@ -3,7 +3,7 @@ name: Player
 gameObjects:
   - id: 4
     name: Player
-    tag: 
+    tag: Player
     active: true
     prefab: 
     parent: 
@@ -38,7 +38,9 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
-          m_speed: 30
+          m_speed: 100
+          m_attackTime: 5
+          m_speedFriction: 0.300000012
       - type: Audio
         fields:
           enabled: true
@@ -51,7 +53,7 @@ gameObjects:
           m_motionType: 2
           m_mass: 1
           m_bounciness: 1
-          m_friction: 1
+          m_friction: 0
           m_useGravity: true
           m_allowSleep: true
           m_freezeRotation: true

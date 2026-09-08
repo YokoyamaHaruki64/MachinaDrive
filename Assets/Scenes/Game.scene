@@ -82,7 +82,7 @@ gameObjects:
           enabled: true
   - id: 4
     name: Player
-    tag: 
+    tag: Player
     active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: 
@@ -117,7 +117,10 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
-          m_speed: 30
+          m_speed: 100
+          m_attackTime: 5
+          m_speedFriction: 0.300000012
+          m_debug: true
       - type: Audio
         fields:
           enabled: true
@@ -130,7 +133,7 @@ gameObjects:
           m_motionType: 2
           m_mass: 1
           m_bounciness: 1
-          m_friction: 1
+          m_friction: 0
           m_useGravity: true
           m_allowSleep: true
           m_freezeRotation: true
@@ -409,7 +412,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [-50,0,0]
+          m_localPosition: [-52.5,0,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
@@ -418,7 +421,7 @@ gameObjects:
           m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [1,10,100]
+          m_size: [5,10,100]
   - id: 34
     name: Wall_Right
     tag: 
@@ -429,7 +432,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [50,0,0]
+          m_localPosition: [52.5,0,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
@@ -438,7 +441,7 @@ gameObjects:
           m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [1,10,100]
+          m_size: [5,10,100]
   - id: 35
     name: Wall_Fore
     tag: 
@@ -449,7 +452,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,50]
+          m_localPosition: [0,0,52.5]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
@@ -458,7 +461,7 @@ gameObjects:
           m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [100,10,1]
+          m_size: [100,10,5]
   - id: 36
     name: Wall_Back
     tag: 
@@ -469,7 +472,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,-50]
+          m_localPosition: [0,0,-52.5]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
@@ -478,7 +481,7 @@ gameObjects:
           m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [100,10,1]
+          m_size: [100,10,5]
   - id: 39
     name: PlayerHit
     tag: 

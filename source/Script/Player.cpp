@@ -11,10 +11,12 @@
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
 
-void Player::RegisterFields(FieldRegistry& fields)
-{
+FIELDS_BEGIN(Player)
     GM_FIELD(m_speed);
-}
+    GM_FIELD(m_attackTime);
+    GM_FIELD(m_speedFriction);
+    GM_FIELD(m_debug);
+FIELDS_END()
 
 void Player::OnStart()
 {
@@ -31,6 +33,10 @@ void Player::OnStart()
     {
         Logger::Error("Player: CameraController component not found.");
     }
+
+#ifndef _DEBUG
+    m_debug = false;
+#endif // !_DEBUG
 }
 
 void Player::Update()
@@ -40,47 +46,132 @@ void Player::Update()
         return;
     }
 
-    Vector3 cameraForward = transform()->GetPosition() - m_cameraController->transform()->GetPosition();
-    cameraForward.y = 0.0f;
-    cameraForward.Normalize();
-    Vector3 cameraRight = Vector3::Cross(Vector3::Up(), cameraForward);
-    cameraRight.y = 0.0f;
-    cameraRight.Normalize();
-
-    if (!Input::IsCursorVisible())
+    switch(m_state)
     {
-        if (Input::GetMouseTrigger(Input::MouseButton::Left))
-        {
-            m_cameraController->BeginLock();
-            Input::SetMousePositionNormalized({ 0.5f, 0.5f });
-            m_rigidbody->SetVelocity(Vector3::Zero());
-            m_accumulatedMouse = Vector2::Zero();
+        case Idle:
+            UpdateIdle();
+            break;
 
-            m_director = Manager::Instantiate("Assets/Prefabs/ShotDirector.prefab");
+        case AttackReady:
+            UpdateAttackReady();
+            break;
+
+        case Attacking:
+            UpdateAttacking();
+            break;
+
+        case AttackEnd:
+            UpdateAttackEnd();
+            break;
+    }
+
+    if (m_debug)
+    {
+        MaterialPropertyOverride& debugMaterial = GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(1);
+        debugMaterial.SetColor("_BaseColor", m_debugColor[m_state]);
+    }
+}
+
+void Player::UpdateIdle()
+{
+    Vector3 cameraForward;
+    Vector3 cameraRight;
+
+    if (!GetCameraDirection(cameraForward, cameraRight)) return;
+
+    if (Input::IsCursorVisible()) return;
+
+    if (Input::GetMouseTrigger(Input::MouseButton::Left))
+    {
+        m_state = AttackReady;
+
+        m_cameraController->BeginLock();
+        Input::SetMousePositionNormalized({ 0.5f, 0.5f });
+        m_rigidbody->SetVelocity(Vector3::Zero());
+        m_accumulatedMouse = Vector2::Zero();
+
+        m_director = Manager::Instantiate("Assets/Prefabs/ShotDirector.prefab");
+    }
+
+}
+
+void Player::UpdateAttackReady()
+{
+    Vector3 cameraForward;
+    Vector3 cameraRight;
+
+    if (!GetCameraDirection(cameraForward, cameraRight)) return;
+
+    if (Input::GetMousePress(Input::MouseButton::Left))
+    {
+        m_accumulatedMouse += Input::GetMouseRawDelta();
+
+        Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+    }
+
+    if (Input::GetMouseRelease(Input::MouseButton::Left))
+    {
+        m_state = Attacking;
+        m_attackTimer = m_attackTime;
+
+        Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+
+        if (move.LengthSqr() > 0.0f)
+        {
+            move.Normalize();
+            m_rigidbody->SetVelocity(move * m_speed);
         }
-        if (Input::GetMousePress(Input::MouseButton::Left))
+        m_cameraController->EndLock();
+        if (m_director.Get())
         {
-            m_accumulatedMouse += Input::GetMouseRawDelta();
-
-            Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
-        }
-        if (Input::GetMouseRelease(Input::MouseButton::Left))
-        {
-            Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
-
-            if (move.LengthSqr() > 0.0f)
-            {
-                move.Normalize();
-                m_rigidbody->SetVelocity(move * m_speed);
-            }
-            m_cameraController->EndLock();
-            if (m_director.Get())
-            {
-                m_director->Destroy();
-                m_director.Clear();
-            }
+            m_director->Destroy();
+            m_director.Clear();
         }
     }
+}
+
+void Player::UpdateAttacking()
+{
+    m_attackTimer -= Time::GetDeltaTime();
+    if (m_attackTimer <= 0.0f)
+    {
+        m_state = AttackEnd;
+        return;
+    }
+    float damping = std::exp(-m_speedFriction * Time::GetDeltaTime());
+
+    m_rigidbody->SetVelocity(m_rigidbody->GetVelocity() * damping);
+}
+
+void Player::UpdateAttackEnd()
+{
+    Vector3 velocity = m_rigidbody->GetVelocity();
+
+    if (velocity.LengthSqr() > 1.0f)
+    {
+        m_rigidbody->SetVelocity(Math::Lerp(Vector3::Zero(), velocity, 0.95f));
+    }
+    else
+    {
+        m_rigidbody->SetVelocity(Vector3::Zero());
+        m_state = Idle;
+    }
+
+
+}
+
+bool Player::GetCameraDirection(Vector3& forward, Vector3& right) const
+{
+    if (!m_cameraController) false;
+
+    forward = transform()->GetPosition() - m_cameraController->transform()->GetPosition();
+    forward.y = 0.0f;
+    forward.Normalize();
+    right = Vector3::Cross(Vector3::Up(), forward);
+    right.y = 0.0f;
+    right.Normalize();
+
+    return true;
 }
 
 void Player::OnHitBegin(const HitInfo& hitInfo)

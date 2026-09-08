@@ -26,7 +26,36 @@ private:
     Vector2 m_accumulatedMouse{ Vector2::Zero() };
     
     float m_speed = 10.0f;
+    float m_attackTime = 5.0f;
+    float m_speedFriction = 0.9f;
 
+    float m_attackTimer = 0.0f;
+
+    enum State
+    {
+        Idle,
+        AttackReady,
+        Attacking,
+        AttackEnd,
+
+        Count
+    };
+
+    State m_state = Idle;
+    void UpdateIdle();
+    void UpdateAttackReady();
+    void UpdateAttacking();
+    void UpdateAttackEnd();
+
+    Color m_debugColor[Count] = {
+        Color(0.0f, 1.0f, 0.0f, 1.0f), // Idle
+        Color(1.0f, 1.0f, 0.0f, 1.0f), // AttackReady
+        Color(1.0f, 0.0f, 0.0f, 1.0f), // Attacking
+        Color(0.5f, 0.5f, 0.5f, 1.0f)  // AttackEnd
+    };
+    bool m_debug;
+
+    bool GetCameraDirection(Vector3& forward, Vector3& right) const;
 public:
     void OnStart() override;
     void Update() override;
