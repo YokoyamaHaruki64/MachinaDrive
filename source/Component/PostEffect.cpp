@@ -60,6 +60,7 @@ void PostProcess::Uninit()
 void PostProcess::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD(m_name);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
 }
 
 void PostProcess::SetMaterial(Material* material)
@@ -77,6 +78,12 @@ void PostProcess::SetMaterialPath(const std::string& path)
     Material* material = MaterialManager::Load(path);
     if (material && material->IsValid())
         SetMaterial(material);
+}
+
+void PostProcess::OnLoaded()
+{
+    if (!m_material && !m_materialPath.empty())
+        SetMaterialPath(m_materialPath);
 }
 
 void PostProcess::OnEnable()
