@@ -46,6 +46,17 @@ void Player::Update()
         return;
     }
 
+    if(m_isHitStop)
+    {
+        m_hitStopTimer -= Time::GetDeltaTime();
+        if( m_hitStopTimer <= 0.0f )
+        {
+            m_isHitStop = false;
+            m_rigidbody->SetEnabled(true);
+        }
+        return;
+    }
+
     switch(m_state)
     {
         case Idle:
@@ -203,4 +214,14 @@ void Player::OnHitEnd(const HitInfo& hitInfo)
         return;
     }
 
+}
+
+void Player::HitStop(float duration)
+{
+    if (m_rigidbody)
+    {
+        m_isHitStop = true;
+        m_hitStopTimer = duration;
+        m_rigidbody->SetEnabled(false);
+    }
 }

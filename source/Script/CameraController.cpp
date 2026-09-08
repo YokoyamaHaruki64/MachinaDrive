@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "Component/ComponentInc.h"
+#include "Common/Random.h"
 
 #include "Script/CameraController.h"
 
@@ -10,7 +11,16 @@
 FIELDS_BEGIN(CameraController)
     GM_FIELD(m_distance);
     GM_FIELD(m_sensitivity);
+    GM_FIELD(m_offset);
 FIELDS_END()
+
+void CameraController::Shake(float duration, float magnitude)
+{
+    m_isShaking = true;
+    m_shakeTimer = 0.0f;
+    m_shakeDuration = duration;
+    m_shakeMagnitude = magnitude;
+}
 
 void CameraController::OnStart()
 {
@@ -26,8 +36,6 @@ void CameraController::OnStart()
     }
     m_camera = Camera::GetMainCamera();
 
-    Input::ShowCursor(false); // カーソルを非表示にする
-
 }
 
 void CameraController::LateUpdate()
@@ -39,7 +47,7 @@ void CameraController::LateUpdate()
     if (!m_target)
         m_camera->SetTarget(Vector3::Zero()); // ターゲットがない場合は原点を向く
     else
-        m_camera->SetTarget(targetPos);
+        m_camera->SetTarget(targetPos + m_offset);
     
     if (isLocked)
         return;
@@ -60,9 +68,33 @@ void CameraController::LateUpdate()
             m_distance * std::cos(m_pitch) * std::cos(m_yaw));
 
     m_camera->transform()->SetPosition(cameraPos);
-}
 
-void CameraController::OnDestroy()
-{
-    Input::ShowCursor(true); // カーソルを表示する
+    // カメラの揺れ処理
+    if(m_isShaking)
+    {
+        m_shakeTimer += Time::GetDeltaTime();
+        if (m_shakeTimer < m_shakeDuration)
+        {
+            float t = m_shakeTimer / m_shakeDuration;
+            float shakeFactor = m_shakeMagnitude * (1.0f - t); // 揺れの強さを時間経過で減衰させる
+
+            Vector3 currentShakeOffset = Vector3(
+                Random::Range(-1.0f, 1.0f),
+                Random::Range(-1.0f, 1.0f),
+                0.0f
+            );
+
+            m_shakeOffset = Math::Lerp(m_shakeOffset, currentShakeOffset, 0.2f);
+
+            Vector3 right = Vector3::Cross(Vector3::Up(), (targetPos - cameraPos).Normalized()).Normalized();
+
+            m_camera->transform()->SetPosition(cameraPos +
+                right * m_shakeOffset.x * shakeFactor +
+                Vector3::Up() * m_shakeOffset.y * shakeFactor);
+        }
+        else
+        {
+            m_isShaking = false; // 揺れ終了
+        }
+    }
 }

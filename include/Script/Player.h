@@ -31,7 +31,10 @@ private:
 
     float m_attackTimer = 0.0f;
 
-    enum State
+    bool m_isHitStop = false;
+    float m_hitStopTimer = 0.0f;
+
+    enum AttackState
     {
         Idle,
         AttackReady,
@@ -40,8 +43,8 @@ private:
 
         Count
     };
+    AttackState m_state = Idle;
 
-    State m_state = Idle;
     void UpdateIdle();
     void UpdateAttackReady();
     void UpdateAttacking();
@@ -62,6 +65,8 @@ public:
     void OnHitBegin(const HitInfo& hitInfo) override;
     void OnHit(const HitInfo& hitInfo) override;
     void OnHitEnd(const HitInfo& hitInfo) override;
+
+    void HitStop(float duration);
 
     const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
 };

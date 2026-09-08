@@ -24,6 +24,7 @@ gameObjects:
           enabled: true
           m_distance: 10
           m_sensitivity: 0.00100000005
+          m_offset: [0,1,0]
   - id: 2
     name: Field
     tag: 
@@ -505,3 +506,54 @@ gameObjects:
       - type: PlayerHit
         fields:
           enabled: true
+          m_shakeDuration: 0.800000012
+          m_shakeMagnitude: 3
+          m_hitStopDuration: 0.300000012
+  - id: 44
+    name: Canvas
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.0520833321,0.0925925896]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 45
+    name: Combo
+    tag: 
+    active: true
+    prefab: 
+    parent: 44
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0,0]
+          m_pos: [-0.230000004,0.140000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 1 Combo!
+          m_fontSize: 100
+          m_color: [1,0.423529416,0.501960814,1]
+          m_materialPath: Assets/Materials/UI.material

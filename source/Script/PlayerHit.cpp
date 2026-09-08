@@ -4,11 +4,20 @@
 
 #include "Script/PlayerHit.h"
 #include "Script/Player.h"
+#include "Script/CameraController.h"
+
+FIELDS_BEGIN(PlayerHit)
+    GM_FIELD(m_shakeDuration);
+    GM_FIELD(m_shakeMagnitude);
+    GM_FIELD(m_hitStopDuration);
+FIELDS_END()
 
 void PlayerHit::OnStart()
 {
     m_player = GetComponent<Player>();
-    if (m_player) return;
+    m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
+
+    if (m_player && m_cameraController) return;
 
     TransformBase* parent = transform()->GetParent();
 
@@ -37,5 +46,13 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
     if (otherObject && otherObject->GetTag() == "Enemy")
     {
         otherObject->Destroy();
+        if(m_cameraController)
+        {
+            m_cameraController->Shake(m_shakeDuration, m_shakeMagnitude);
+        }
+        if( m_player )
+        {
+            m_player->HitStop(m_hitStopDuration);
+        }
     }
 }

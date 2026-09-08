@@ -41,6 +41,7 @@ gameObjects:
           m_speed: 100
           m_attackTime: 5
           m_speedFriction: 0.300000012
+          m_debug: true
       - type: Audio
         fields:
           enabled: true
@@ -80,3 +81,5 @@ gameObjects:
       - type: PlayerHit
         fields:
           enabled: true
+          m_shakeDuration: 0.800000012
+          m_shakeMagnitude: 3
