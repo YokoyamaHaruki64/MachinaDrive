@@ -46,6 +46,7 @@ public:
     void LateUpdate() final override {}
     void Draw() final override {}
 
+    void OnLoaded() final override;
     void OnEnable() final override;
     void OnDisable() final override;
     void OnDestroy() final override;
