@@ -4,6 +4,7 @@
 
 #include "Component/Transform.h"
 #include "Component/UITransform.h"
+#include "Component/PostEffect.h"
 #include "Graphics/Material.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
@@ -16,6 +17,7 @@
 #include "System/Diagnostics/Logger.h"
 #include "System/Core/manager.h"
 #include "System/Rendering/RendererBase.h"
+#include "System/Rendering/renderer.h"
 #include <algorithm>
 #include <typeinfo>
 
@@ -281,6 +283,85 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
     ImGui::PopID();
 }
 
+void InspectorWindow::DrawPostProcessMaterialInspector(PostProcess& postProcess)
+{
+    ImGui::PushID("PostProcessMaterial");
+    Material* material = postProcess.GetMaterial();
+    const char* label = material ? "Material" : "Material (None)";
+    ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
+    if (ImGui::TreeNode(label))
+    {
+        if (ImGui::Button("Select Material"))
+        {
+            const std::optional<std::filesystem::path> selectedPath = FileSystem::OpenFileDialog("Assets/Materials", ".material");
+            if (selectedPath)
+            {
+                const std::optional<std::filesystem::path> sourcePath = ToAssetRelativePath(*selectedPath, "Assets", L".material", "Material");
+                Material* source = sourcePath ? MaterialManager::Load(*sourcePath) : nullptr;
+                if (source && source->IsValid())
+                {
+                    if (Renderer::IsPostProcessMaterialUsed(source, &postProcess))
+                    {
+                        Logger::Error("選択したMaterialは別のPostProcessが使用中です。");
+                    }
+                    else
+                    {
+                        postProcess.SetMaterial(source);
+                    }
+                }
+            }
+        }
+
+        material = postProcess.GetMaterial();
+        if (!material || !material->IsValid())
+        {
+            ImGui::TextUnformatted(material ? "Status: Error" : "Status: None");
+            if (ImGui::Button("Create Material"))
+            {
+                const std::optional<std::filesystem::path> selectedPath = FileSystem::OpenFileDialog("Assets/Shaders", ".shader");
+                if (selectedPath)
+                {
+                    const std::optional<std::filesystem::path> shaderPath = ToAssetRelativePath(*selectedPath, "Assets", L".shader", "Shader");
+                    GraphicsShader* shader = shaderPath ? ShaderManager::LoadShaderFromFile(shaderPath->generic_string()) : nullptr;
+                    if (shader)
+                        postProcess.SetMaterial(MaterialManager::Create(shaderPath->stem().string() + " Material", *shader));
+                }
+            }
+        }
+        else
+        {
+            DrawMaterialName(*material);
+            ImGui::Separator();
+            ImGui::Text("Path: %s", material->GetFilePath().c_str());
+            if (!material->GetFilePath().empty() && ImGui::Button("Save"))
+                MaterialManager::Save(*material, material->GetFilePath());
+            if (!material->GetFilePath().empty())
+                ImGui::SameLine();
+            if (ImGui::Button("New Save"))
+            {
+                const std::optional<std::filesystem::path> selectedPath =
+                    FileSystem::SaveFileDialog("Assets/Materials/PostProcess", ".material", material->GetName() + ".material");
+                if (selectedPath)
+                {
+                    const std::optional<std::filesystem::path> path = ToAssetRelativePath(*selectedPath, "Assets", L".material", "Material");
+                    if (path && MaterialManager::Save(*material, *path))
+                        postProcess.SetMaterial(material);
+                }
+            }
+
+            ImGui::Separator();
+            if (ImGui::Button("Select Shader") && SelectShader(*material))
+                postProcess.SetMaterial(material);
+            ImGui::Text("Shader: %s", material->GetShader().GetShaderName().c_str());
+            ImGui::Separator();
+            material->DrawInspectorImGui();
+        }
+
+        ImGui::TreePop();
+    }
+    ImGui::PopID();
+}
+
 void InspectorWindow::DrawImGui()
 {
     BeginWindow("Inspector", Vector2(360.0f, 500.0f));
@@ -487,6 +568,10 @@ void InspectorWindow::DrawImGui()
                 {
                     DrawMaterialInspector(*renderer, slot);
                 }
+            }
+            else if (PostProcess* postProcess = dynamic_cast<PostProcess*>(component))
+            {
+                DrawPostProcessMaterialInspector(*postProcess);
             }
             ImGui::TreePop();
         }

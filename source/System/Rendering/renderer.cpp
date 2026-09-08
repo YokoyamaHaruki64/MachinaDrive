@@ -4,6 +4,7 @@
 #include "System/Core/GM_Time.h"
 #include "System/Rendering/renderer.h"
 #include "System/Rendering/RendererBase.h"
+#include "Component/PostEffect.h"
 #include "Graphics/Material.h"
 #include "Graphics/TextureManager.h"
 #include <io.h>
@@ -54,6 +55,7 @@ PerFrame Renderer::m_PerFrame{};
 PerObject Renderer::m_PerObject{};
 
 std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> Renderer::m_DrawQueues{};
+std::vector<PostProcess*> Renderer::m_postEffects{};
 uint64_t Renderer::m_SubmitOrder{};
 BlendMode Renderer::m_CurrentBlendMode{ BlendMode::AlphaBlend };
 CullMode Renderer::m_CurrentCullMode{ CullMode::Back };
@@ -426,6 +428,8 @@ void Renderer::Init()
 	light.Diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
 	SetLight(light);
 
+	PostProcess::Init();
+
 
 }
 
@@ -433,6 +437,9 @@ void Renderer::Init()
 
 void Renderer::Uninit()
 {
+	ClearPostEffects();
+	PostProcess::Uninit();
+
 
 	m_PerFrameBuffer->Release();
 	m_PerObjectBuffer->Release();
@@ -514,8 +521,20 @@ void Renderer::Draw()
     for (size_t phaseIndex = 0; phaseIndex < m_DrawQueues.size(); ++phaseIndex)
     {
         const RenderPhase phase = static_cast<RenderPhase>(phaseIndex);
+
+        // PostProcessの描画
         if (phase == RenderPhase::PostProcess)
+        {
+            for (PostProcess* postEffect : m_postEffects)
+            {
+                if (postEffect)
+                    postEffect->Apply();
+            }
+
+            // 失敗したPassが中間RTを残しても、Overlayは完成済みの画面バッファへ重ねる。
+            SetSrcRTV();
             continue;
+        }
 
         auto& queue = m_DrawQueues[phaseIndex];
         std::sort(queue.begin(), queue.end(), [](const DrawItem& a, const DrawItem& b)
@@ -532,6 +551,61 @@ void Renderer::Draw()
         }
 
         queue.clear();
+    }
+}
+
+bool Renderer::RegisterPostEffect(PostProcess* postEffect)
+{
+    if (!postEffect || std::find(m_postEffects.begin(), m_postEffects.end(), postEffect) != m_postEffects.end())
+        return false;
+
+    m_postEffects.push_back(postEffect);
+    return true;
+}
+
+void Renderer::UnregisterPostEffect(PostProcess* postEffect)
+{
+    const auto iterator = std::find(m_postEffects.begin(), m_postEffects.end(), postEffect);
+    if (iterator != m_postEffects.end())
+        m_postEffects.erase(iterator);
+}
+
+PostProcess* Renderer::FindPostEffect(std::string_view name)
+{
+    for (PostProcess* postEffect : m_postEffects)
+    {
+        if (postEffect && postEffect->GetName() == name)
+            return postEffect;
+    }
+
+    return nullptr;
+}
+
+bool Renderer::IsPostProcessMaterialUsed(const Material* material, const PostProcess* excludedPostEffect)
+{
+    if (!material)
+        return false;
+
+    for (const PostProcess* postEffect : m_postEffects)
+    {
+        if (postEffect != excludedPostEffect && postEffect && postEffect->GetMaterial() == material)
+            return true;
+    }
+
+    return false;
+}
+
+void Renderer::ClearPostEffects()
+{
+    m_postEffects.clear();
+}
+
+void Renderer::ResizePostEffects()
+{
+    for (PostProcess* postEffect : m_postEffects)
+    {
+        if (postEffect)
+            postEffect->Resize(m_gameWidth, m_gameHeight);
     }
 }
 
@@ -571,6 +645,18 @@ void Renderer::SetDstRTV()
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 	m_DeviceContext->RSSetViewports(1, &viewport);
+}
+
+void Renderer::SetSrcRTV()
+{
+    m_DeviceContext->OMSetRenderTargets(1, &m_bufferRTV[srcBufferIndex], m_DepthStencilView);
+
+    D3D11_VIEWPORT viewport{};
+    viewport.Width = static_cast<float>(m_gameWidth);
+    viewport.Height = static_cast<float>(m_gameHeight);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_DeviceContext->RSSetViewports(1, &viewport);
 }
 
 

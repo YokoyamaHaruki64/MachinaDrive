@@ -5,6 +5,7 @@
 #include "System/SystemInc.h"
 
 #include "Component/audio.h"
+#include "Component/Bloom.h"
 #include "Component/BoxCollider.h"
 #include "Component/Camera.h"
 #include "Component/CapsuleCollider.h"

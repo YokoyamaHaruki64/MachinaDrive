@@ -13,6 +13,7 @@
 class GameObject;
 class Component;
 class Material;
+class PostProcess;
 class RendererBase;
 
 // 選択中GameObjectの詳細とComponentごとの項目を表示する。
@@ -28,6 +29,7 @@ class InspectorWindow final : public EditorWindow
     std::unordered_map<Component*, YAMLValue> m_componentEditSnapshots;
 
     void DrawMaterialInspector(RendererBase& renderer, uint32_t slot);
+    void DrawPostProcessMaterialInspector(PostProcess& postProcess);
     bool DrawMaterialName(Material& material);
     static bool SelectShader(Material& material);
     static void CreateMaterial(RendererBase& renderer, uint32_t slot);
