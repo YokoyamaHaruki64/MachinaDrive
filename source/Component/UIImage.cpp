@@ -12,6 +12,7 @@
 #include "System/Editor/EditorSystem.h"
 #include "System/Editor/FieldRegistry.h"
 #include "System/Rendering/renderer.h"
+#include "Graphics/GraphicInc.h"
 
 namespace
 {

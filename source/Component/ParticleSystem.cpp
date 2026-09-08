@@ -4,12 +4,10 @@
 
 
 #include "System/Rendering/renderer.h"
-#include "Common/Random.h"
 #include "Component/ParticleSystem.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "Common/Random.h"
 
 void ParticleEmitter::Update()
 {

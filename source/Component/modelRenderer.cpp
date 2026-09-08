@@ -11,8 +11,6 @@
 #include "Graphics/Shader/ShaderProgram.h"
 #include "System/Rendering/renderer.h"
 
-#include "math/MathCommon.h"
-
 #include <unordered_set>
 
 ModelRenderer::ModelRenderer(GameObject* object)

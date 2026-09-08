@@ -482,6 +482,7 @@
     <ClInclude Include="include\System\Core\GameObjectReference.h" />
     <ClInclude Include="include\System\Core\PrefabReference.h" />
     <ClInclude Include="include\System\Core\Script.h" />
+    <ClInclude Include="include\System\Core\ScriptTypes.h" />
     <ClInclude Include="include\System\GameplayMacros.h" />
     <ClInclude Include="include\System\SystemInc.h" />
     <ClInclude Include="include\Component\ComponentInc.h" />

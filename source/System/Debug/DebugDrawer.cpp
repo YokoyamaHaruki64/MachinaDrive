@@ -13,7 +13,6 @@
 #include "System/Core/GameObject.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
-#include "math/MathCommon.h"
 
 #include <array>
 #include <cstring>

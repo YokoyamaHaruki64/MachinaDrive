@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "System/Core/component.h"
+#include "System/Core/ScriptTypes.h"
 
 // ゲーム固有の振る舞いを記述するComponentの基底クラス。
 class Script : public Component

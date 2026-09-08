@@ -458,6 +458,9 @@
     <ClInclude Include="include\System\Core\Script.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\Core\ScriptTypes.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\SystemInc.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
