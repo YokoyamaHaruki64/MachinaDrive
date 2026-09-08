@@ -3,6 +3,7 @@ name: Player
 gameObjects:
   - id: 4
     name: Player
+    tag: Player
     active: true
     prefab: 
     parent: 
@@ -29,11 +30,18 @@ gameObjects:
       - type: CapsuleCollider
         fields:
           enabled: true
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 1
+          m_radius: 0.5
+          m_height: 2
       - type: Player
         fields:
           enabled: true
-          m_velocity: [0,0,0]
-          m_isGrounded: true
+          m_speed: 100
+          m_attackTime: 5
+          m_speedFriction: 0.300000012
+          m_debug: true
       - type: Audio
         fields:
           enabled: true
@@ -43,3 +51,35 @@ gameObjects:
       - type: Rigidbody
         fields:
           enabled: true
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 1
+          m_friction: 0
+          m_useGravity: true
+          m_allowSleep: true
+          m_freezeRotation: true
+  - id: 39
+    name: PlayerHit
+    tag: 
+    active: true
+    prefab: 
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-2.61125858e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.20000005
+      - type: PlayerHit
+        fields:
+          enabled: true
+          m_shakeDuration: 0.800000012
+          m_shakeMagnitude: 3

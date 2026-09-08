@@ -9,130 +9,189 @@
 #include "math/MathCommon.h"
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
+#include "Script/CameraController.h"
 
-void Player::RegisterFields(FieldRegistry& fields)
-{
-    // 旧シーンを読み込めるように残すが、実行時の物理値はRigidbodyへ集約する。
-    GM_FIELD_TYPE(m_velocity, InspectorFieldType::Hidden);
-    GM_FIELD_TYPE(m_isGrounded, InspectorFieldType::Hidden);
-}
+FIELDS_BEGIN(Player)
+    GM_FIELD(m_speed);
+    GM_FIELD(m_attackTime);
+    GM_FIELD(m_speedFriction);
+    GM_FIELD(m_debug);
+FIELDS_END()
 
 void Player::OnStart()
 {
-    m_jumpSE = m_owner->GetComponent<Audio>();
+    m_jumpSE = GetComponent<Audio>();
+    m_rigidbody = GetComponent<Rigidbody>();
+    m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
-    // 旧Player実装で保存された初速だけは、Rigidbodyへ一度だけ移行する。
-    if (Rigidbody* rigidbody = m_owner->GetComponent<Rigidbody>();
-        rigidbody && rigidbody->GetVelocity().LengthSqr() == 0.0f && m_velocity.LengthSqr() > 0.0f)
+    if( !m_rigidbody )
     {
-        rigidbody->SetVelocity(m_velocity);
+        Logger::Error("Player: Rigidbody component not found.");
     }
+
+    if( !m_cameraController )
+    {
+        Logger::Error("Player: CameraController component not found.");
+    }
+
+#ifndef _DEBUG
+    m_debug = false;
+#endif // !_DEBUG
 }
 
 void Player::Update()
 {
-    Rigidbody* rigidbody = m_owner->GetComponent<Rigidbody>();
-    if (!rigidbody)
+    if (!m_rigidbody)
     {
         return;
     }
 
-    Camera* camera = Camera::GetMainCamera();
-    Vector3 cameraDir = camera->GetTarget() - camera->transform()->GetPosition();
-    cameraDir.y = 0.0f;
-    Vector3 cameraForward = cameraDir.Normalized();
-    Vector3 cameraRight = Vector3(cameraForward.z, 0.0f, -cameraForward.x);
-
-    const float moveSpeed = 50.0f;
-    const float jumpForce = 5.0f;
-    const float friction = 10.0f;
-
-    Vector3 inputDirection = Vector3::Zero();
-    if (Input::GetKeyPress(Input::KeyCode::W))
+    if(m_isHitStop)
     {
-        inputDirection += cameraForward;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::S))
-    {
-        inputDirection -= cameraForward;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::A))
-    {
-        inputDirection -= cameraRight;
-    }
-    if (Input::GetKeyPress(Input::KeyCode::D))
-    {
-        inputDirection += cameraRight;
-    }
-
-    if (Input::GetKeyPress(Input::KeyCode::SHIFT))
-    {
-        inputDirection *= 2.0f;
-    }
-
-    Vector3 velocity = rigidbody->GetVelocity();
-    if (inputDirection.LengthSqr() > 0.0f)
-    {
-        velocity += inputDirection.Normalized() * moveSpeed * Time::GetDeltaTime();
-    }
-
-    velocity.x -= velocity.x * friction * Time::GetDeltaTime();
-    velocity.z -= velocity.z * friction * Time::GetDeltaTime();
-
-    if (Input::GetKeyTrigger(Input::KeyCode::SPACE) && m_isGrounded)
-    {
-        velocity.y += jumpForce;
-        m_isGrounded = false;
-        m_groundColliders.clear();
-
-        if (m_jumpSE)
+        m_hitStopTimer -= Time::GetDeltaTime();
+        if( m_hitStopTimer <= 0.0f )
         {
-            m_jumpSE->Play();
+            m_isHitStop = false;
+            m_rigidbody->SetEnabled(true);
+        }
+        return;
+    }
+
+    switch(m_state)
+    {
+        case Idle:
+            UpdateIdle();
+            break;
+
+        case AttackReady:
+            UpdateAttackReady();
+            break;
+
+        case Attacking:
+            UpdateAttacking();
+            break;
+
+        case AttackEnd:
+            UpdateAttackEnd();
+            break;
+    }
+
+    if (m_debug)
+    {
+        MaterialPropertyOverride& debugMaterial = GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(1);
+        debugMaterial.SetColor("_BaseColor", m_debugColor[m_state]);
+    }
+}
+
+void Player::UpdateIdle()
+{
+    Vector3 cameraForward;
+    Vector3 cameraRight;
+
+    if (!GetCameraDirection(cameraForward, cameraRight)) return;
+
+    if (Input::IsCursorVisible()) return;
+
+    if (Input::GetMouseTrigger(Input::MouseButton::Left))
+    {
+        m_state = AttackReady;
+
+        m_cameraController->BeginLock();
+        Input::SetMousePositionNormalized({ 0.5f, 0.5f });
+        m_rigidbody->SetVelocity(Vector3::Zero());
+        m_accumulatedMouse = Vector2::Zero();
+
+        m_director = Manager::Instantiate("Assets/Prefabs/ShotDirector.prefab");
+    }
+
+}
+
+void Player::UpdateAttackReady()
+{
+    Vector3 cameraForward;
+    Vector3 cameraRight;
+
+    if (!GetCameraDirection(cameraForward, cameraRight)) return;
+
+    if (Input::GetMousePress(Input::MouseButton::Left))
+    {
+        m_accumulatedMouse += Input::GetMouseRawDelta();
+
+        Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+    }
+
+    if (Input::GetMouseRelease(Input::MouseButton::Left))
+    {
+        m_state = Attacking;
+        m_attackTimer = m_attackTime;
+
+        Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
+
+        if (move.LengthSqr() > 0.0f)
+        {
+            move.Normalize();
+            m_rigidbody->SetVelocity(move * m_speed);
+        }
+        m_cameraController->EndLock();
+        if (m_director.Get())
+        {
+            m_director->Destroy();
+            m_director.Clear();
         }
     }
+}
 
-    rigidbody->SetVelocity(velocity);
-    m_velocity = velocity;
-
-    if (velocity.LengthSqr() > 0.01f)
+void Player::UpdateAttacking()
+{
+    m_attackTimer -= Time::GetDeltaTime();
+    if (m_attackTimer <= 0.0f)
     {
-        const float targetRotationY = atan2f(velocity.x, velocity.z);
-        const Vector3 currentRotation = transform()->GetRotation().QuatToEuler();
-        transform()->SetRotation(Vector3(
-            currentRotation.x,
-            Math::LerpAngle(currentRotation.y, targetRotationY, 10.0f * Time::GetDeltaTime()),
-            currentRotation.z));
+        m_state = AttackEnd;
+        return;
+    }
+    float damping = std::exp(-m_speedFriction * Time::GetDeltaTime());
+
+    m_rigidbody->SetVelocity(m_rigidbody->GetVelocity() * damping);
+}
+
+void Player::UpdateAttackEnd()
+{
+    Vector3 velocity = m_rigidbody->GetVelocity();
+
+    if (velocity.LengthSqr() > 1.0f)
+    {
+        m_rigidbody->SetVelocity(Math::Lerp(Vector3::Zero(), velocity, 0.95f));
+    }
+    else
+    {
+        m_rigidbody->SetVelocity(Vector3::Zero());
+        m_state = Idle;
     }
 
-    if (Input::GetKeyTrigger(Input::KeyCode::F))
-    {
-        GameObject* bullet = Manager::Instantiate(
-            "Assets/Prefabs/Bullet.prefab",
-            transform()->GetPosition() + transform()->GetForward() * 2.0f + Vector3(0.0f, 1.0f, 0.0f),
-            Vector3::Zero(),
-            Vector3::One());
-        bullet->GetComponent<Bullet>()->SetVelocity(transform()->GetForward() * 20.0f);
-    }
 
-    auto enemies = Manager::GetObjectsByComponent<Enemy>();
-    if (enemies.empty())
-    {
-        Manager::ChangeScene<ResultScene>();
-    }
+}
+
+bool Player::GetCameraDirection(Vector3& forward, Vector3& right) const
+{
+    if (!m_cameraController) false;
+
+    forward = transform()->GetPosition() - m_cameraController->transform()->GetPosition();
+    forward.y = 0.0f;
+    forward.Normalize();
+    right = Vector3::Cross(Vector3::Up(), forward);
+    right.y = 0.0f;
+    right.Normalize();
+
+    return true;
 }
 
 void Player::OnHitBegin(const HitInfo& hitInfo)
 {
-    if (!hitInfo.hit || hitInfo.isTrigger || hitInfo.objectA != m_owner || !hitInfo.colliderB)
-    {
-        return;
-    }
+    GameObject* otherObject = hitInfo.objectB;
 
-    // PhysicsはA側から見た押し戻し方向をnormalに入れるため、上向きなら足元の接触である。
-    if (hitInfo.normal.y > 0.5f)
+    if (otherObject && otherObject->GetTag() == "Enemy")
     {
-        m_groundColliders.insert(hitInfo.colliderB);
-        m_isGrounded = true;
+        otherObject->Destroy();
     }
 }
 
@@ -145,8 +204,6 @@ void Player::OnHit(const HitInfo& hitInfo)
 
     if (hitInfo.normal.y > 0.5f)
     {
-        m_groundColliders.insert(hitInfo.colliderB);
-        m_isGrounded = true;
     }
 }
 
@@ -157,6 +214,14 @@ void Player::OnHitEnd(const HitInfo& hitInfo)
         return;
     }
 
-    m_groundColliders.erase(hitInfo.colliderB);
-    m_isGrounded = !m_groundColliders.empty();
+}
+
+void Player::HitStop(float duration)
+{
+    if (m_rigidbody)
+    {
+        m_isHitStop = true;
+        m_hitStopTimer = duration;
+        m_rigidbody->SetEnabled(false);
+    }
 }

@@ -375,6 +375,12 @@
     <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp">
       <Filter>ソース ファイル\Graphics\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ShotDirector.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PlayerHit.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -911,6 +917,9 @@
     <ClInclude Include="include\Script\SampleMoveScript.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\ShotDirector.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="External\Include\Assimp\SGSpatialSort.h">
       <Filter>External\Assimp</Filter>
     </ClInclude>
@@ -976,6 +985,9 @@
     </ClInclude>
     <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h">
       <Filter>External\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PlayerHit.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1055,6 +1067,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\UnlitTransparent.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\ShotDirector.shader">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

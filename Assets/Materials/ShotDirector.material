@@ -1,0 +1,14 @@
+version: 1
+name: ShotDirector
+shader: Assets/Shaders/ShotDirector.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  _StripeColor: [1,0.294117659,0,1]
+  _ArrowColor: [1,0,0,0.831372559]
+  _ScrollSpeed: -3.83999991
+  _ArrowCount: 5
+  _ArrowWidth: 1
+  _ArrowThickness: 0.159999996
+  _StripeWidth: 1
+  _StripeIntensity: 0.5
+  _EdgeSoftness: 0

@@ -2,7 +2,8 @@ version: 1
 name: Game
 gameObjects:
   - id: 1
-    name: Empty
+    name: Camera
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -21,8 +22,12 @@ gameObjects:
       - type: CameraController
         fields:
           enabled: true
+          m_distance: 10
+          m_sensitivity: 0.00100000005
+          m_offset: [0,1,0]
   - id: 2
-    name: Empty
+    name: Field
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -43,8 +48,16 @@ gameObjects:
           m_materialPaths:
             - Assets/Materials/Field.material
           m_inverseAxisFlags: 0
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-0.5,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [10,1,10]
   - id: 3
-    name: Empty
+    name: MateoCube
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -70,6 +83,7 @@ gameObjects:
           enabled: true
   - id: 4
     name: Player
+    tag: Player
     active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: 
@@ -77,7 +91,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,3.75999999,2.61216004e-15]
+          m_localPosition: [0,0,2.61216004e-15]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1.00034523,1,1.00034523]
       - type: ModelRenderer
@@ -98,14 +112,16 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 1
           m_radius: 0.5
           m_height: 2
       - type: Player
         fields:
           enabled: true
-          m_velocity: [0,0,0]
-          m_isGrounded: true
+          m_speed: 100
+          m_attackTime: 5
+          m_speedFriction: 0.300000012
+          m_debug: true
       - type: Audio
         fields:
           enabled: true
@@ -117,13 +133,14 @@ gameObjects:
           enabled: true
           m_motionType: 2
           m_mass: 1
-          m_bounciness: 0
-          m_friction: 0.200000003
+          m_bounciness: 1
+          m_friction: 0
           m_useGravity: true
           m_allowSleep: true
           m_freezeRotation: true
   - id: 5
-    name: Enemy(Instance)
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -152,14 +169,15 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
         fields:
           enabled: true
   - id: 6
-    name: Enemy(Instance)
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -188,14 +206,15 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
         fields:
           enabled: true
   - id: 7
-    name: Enemy(Instance)
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -224,7 +243,7 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
@@ -232,6 +251,7 @@ gameObjects:
           enabled: true
   - id: 8
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -254,6 +274,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 9
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -276,6 +297,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 10
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -298,6 +320,7 @@ gameObjects:
           m_inverseAxisFlags: 0
   - id: 11
     name: Tree(Instance)
+    tag: 
     active: true
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
@@ -319,7 +342,8 @@ gameObjects:
             - Assets/Materials/Tree.material
           m_inverseAxisFlags: 0
   - id: 12
-    name: Empty
+    name: Skydome
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -345,7 +369,8 @@ gameObjects:
             - Assets/Materials/Skydome.material
           m_inverseAxisFlags: 0
   - id: 13
-    name: Empty
+    name: Score
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -360,7 +385,8 @@ gameObjects:
         fields:
           enabled: true
   - id: 14
-    name: Empty
+    name: BGM
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -377,8 +403,9 @@ gameObjects:
           m_filePath: Assets\Local\Sounds\bgm.wav
           m_playOnStart: true
           m_loop: true
-  - id: 15
-    name: Empty
+  - id: 33
+    name: Wall_Left
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -386,52 +413,147 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
+          m_localPosition: [-52.5,0,0]
+          m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
       - type: BoxCollider
         fields:
           enabled: true
-          m_center: [0,-0.5,0]
+          m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_size: [100,1,100]
-      - type: Enemy
-        fields:
-          enabled: false
-  - id: 28
-    name: Enemy(Instance)
+          m_size: [5,10,100]
+  - id: 34
+    name: Wall_Right
+    tag: 
     active: true
-    prefab: Assets/Prefabs/Enemy.prefab
+    prefab: 
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [2.27999997,0.0299999993,0]
+          m_localPosition: [52.5,0,0]
           m_localRotation: [-0,0,-0,1]
           m_localScale: [1,1,1]
-      - type: ModelRenderer
+      - type: BoxCollider
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,10,100]
+  - id: 35
+    name: Wall_Fore
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,52.5]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [100,10,5]
+  - id: 36
+    name: Wall_Back
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-52.5]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [100,10,5]
+  - id: 39
+    name: PlayerHit
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-2.61125858e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
         fields:
           enabled: true
           m_center: [0,1,0]
-          m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.20000005
+      - type: PlayerHit
         fields:
           enabled: true
+          m_shakeDuration: 0.800000012
+          m_shakeMagnitude: 3
+          m_hitStopDuration: 0.300000012
+  - id: 44
+    name: Canvas
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.0520833321,0.0925925896]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 45
+    name: Combo
+    tag: 
+    active: true
+    prefab: 
+    parent: 44
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0,0]
+          m_pos: [-0.230000004,0.140000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 1 Combo!
+          m_fontSize: 100
+          m_color: [1,0.423529416,0.501960814,1]
+          m_materialPath: Assets/Materials/UI.material

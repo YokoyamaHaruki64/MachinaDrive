@@ -7,20 +7,38 @@ class Camera;
 
 class CameraController : public Script
 {
-    REGISTER_COMPONENT(CameraController, "CameraController");
+    GM_SCRIPT(CameraController, "Camera Controller");
+    USE_FIELDS
+
     GameObjectReference m_target;
     Camera* m_camera = nullptr;
 
-    static constexpr float CAMERA_DISTANCE = 10.0f;
-    static constexpr float CAMERA_HEIGHT = 2.0f;
+    float m_distance = 10.0f;
+    float m_sensitivity = 0.05f;
+    Vector3 m_offset = Vector3(0.0f, 1.0f, 0.0f);
+
+    float m_yaw = 0.0f;
+    float m_pitch = 0.0f;
+
+    bool m_isShaking = false;
+    float m_shakeDuration = 0.0f;
+    float m_shakeTimer = 0.0f;
+    float m_shakeMagnitude = 0.0f;
+    Vector3 m_shakeOffset{ 0.0f, 0.0f, 0.0f };
+
+    bool isLocked = false;
+
+
+
 public:
-    CameraController() = default;
-    explicit CameraController(GameObject* owner)
-        : Script(owner)
-    {
-    }
     void SetTarget(GameObject* target) { m_target = target; }
     GameObject* GetTarget() const { return m_target.Get(); }
+
+    void BeginLock() { isLocked = true; }
+    void EndLock() { isLocked = false; }
+    bool IsLocked() const { return isLocked; }
+
+    void Shake(float duration, float magnitude);
 
     void OnStart() override;
     void LateUpdate() override;
