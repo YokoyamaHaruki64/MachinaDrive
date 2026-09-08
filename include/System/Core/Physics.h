@@ -46,14 +46,19 @@ public:
     static constexpr CollisionLayer DefaultLayer = 0;
     static constexpr CollisionLayer PlayerLayer = 1;
     static constexpr CollisionLayer EnemyLayer = 2;
+    static constexpr CollisionLayer WorldLayer = 3;
+    static constexpr CollisionLayer PlayerAttackLayer = 4;
     static constexpr CollisionLayer MaxLayer = 8;
 
     // Layer同士の衝突可否はここへ列挙する。ペアの順番は区別しない。
-    static constexpr std::array<std::pair<CollisionLayer, CollisionLayer>, 4> CollisionPairs{
+    static constexpr std::array<std::pair<CollisionLayer, CollisionLayer>, 7> CollisionPairs{
         std::pair{ DefaultLayer, DefaultLayer },
         std::pair{ DefaultLayer, PlayerLayer },
         std::pair{ DefaultLayer, EnemyLayer },
-        std::pair{ PlayerLayer, EnemyLayer },
+        std::pair{ DefaultLayer, WorldLayer },
+        std::pair{ WorldLayer, EnemyLayer },
+        std::pair{ WorldLayer,PlayerLayer },
+        std::pair{ PlayerAttackLayer, EnemyLayer },
     };
 
     // Managerの初期化／終了から一度ずつ呼び出す。

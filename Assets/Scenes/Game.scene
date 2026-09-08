@@ -111,7 +111,7 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 1
           m_radius: 0.5
           m_height: 2
       - type: Player
@@ -135,8 +135,8 @@ gameObjects:
           m_allowSleep: true
           m_freezeRotation: true
   - id: 5
-    name: Enemy(Instance)
-    tag: 
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -165,15 +165,15 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
         fields:
           enabled: true
   - id: 6
-    name: Enemy(Instance)
-    tag: 
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -202,15 +202,15 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
         fields:
           enabled: true
   - id: 7
-    name: Enemy(Instance)
-    tag: 
+    name: Enemy
+    tag: Enemy
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 
@@ -239,7 +239,7 @@ gameObjects:
           enabled: true
           m_center: [0,1,0]
           m_isTrigger: false
-          m_layer: 0
+          m_layer: 2
           m_radius: 0.5
           m_height: 2
       - type: Enemy
@@ -479,3 +479,26 @@ gameObjects:
           m_isTrigger: false
           m_layer: 0
           m_size: [100,10,1]
+  - id: 39
+    name: PlayerHit
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-2.61125858e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.20000005
+      - type: PlayerHit
+        fields:
+          enabled: true

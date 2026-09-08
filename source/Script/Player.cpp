@@ -85,14 +85,11 @@ void Player::Update()
 
 void Player::OnHitBegin(const HitInfo& hitInfo)
 {
-    if (!hitInfo.hit || hitInfo.isTrigger || hitInfo.objectA != m_owner || !hitInfo.colliderB)
-    {
-        return;
-    }
+    GameObject* otherObject = hitInfo.objectB;
 
-    // PhysicsはA側から見た押し戻し方向をnormalに入れるため、上向きなら足元の接触である。
-    if (hitInfo.normal.y > 0.5f)
+    if (otherObject && otherObject->GetTag() == "Enemy")
     {
+        otherObject->Destroy();
     }
 }
 

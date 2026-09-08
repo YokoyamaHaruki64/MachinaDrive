@@ -378,6 +378,9 @@
     <ClCompile Include="source\Script\ShotDirector.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\PlayerHit.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -982,6 +985,9 @@
     </ClInclude>
     <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h">
       <Filter>External\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PlayerHit.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
