@@ -387,6 +387,9 @@
     <ClCompile Include="source\Script\PlayerHit.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ComboUI.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\math\Vector3.h">
@@ -1002,6 +1005,9 @@
       <Filter>External\Assimp</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\PlayerHit.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ComboUI.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
   </ItemGroup>

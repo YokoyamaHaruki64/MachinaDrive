@@ -39,4 +39,7 @@ public:
     void Draw() override;
     Material* GetMaterial(uint32_t slot = 0) override;
     void SetMaterial(uint32_t slot, Material* material) override;
+
+    void SetText(const std::string& text) { m_text = text; }
+    const std::string& GetText() const { return m_text; }
 };

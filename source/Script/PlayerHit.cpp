@@ -5,8 +5,10 @@
 #include "Script/PlayerHit.h"
 #include "Script/Player.h"
 #include "Script/CameraController.h"
+#include "Script/ComboUI.h"
 
 FIELDS_BEGIN(PlayerHit)
+    GM_FIELD(m_comboUIObject);
     GM_FIELD(m_shakeDuration);
     GM_FIELD(m_shakeMagnitude);
     GM_FIELD(m_hitStopDuration);
@@ -37,6 +39,13 @@ void PlayerHit::OnStart()
 
         parent = parent->GetParent();
     }
+
+    m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
+
+    if(m_comboUI)
+        m_comboUI->ResetCombo();
+    else
+        Logger::Error("PlayerHit: ComboUIコンポーネントを持つGameObjectが見つかりません。");
 }
 
 void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
@@ -53,6 +62,10 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
         if( m_player )
         {
             m_player->HitStop(m_hitStopDuration);
+        }
+        if(m_comboUI)
+        {
+            m_comboUI->AddCombo();
         }
     }
 }

@@ -239,6 +239,7 @@
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\Script\Bullet.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
+    <ClCompile Include="source\Script\ComboUI.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
     <ClCompile Include="source\Script\FillBar.cpp" />
@@ -450,6 +451,7 @@
     <ClInclude Include="include\Scene\TitleScene.h" />
     <ClInclude Include="include\Script\Bullet.h" />
     <ClInclude Include="include\Script\CameraController.h" />
+    <ClInclude Include="include\Script\ComboUI.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
     <ClInclude Include="include\Script\FillBar.h" />

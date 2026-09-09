@@ -88,9 +88,13 @@ void CameraController::LateUpdate()
 
             Vector3 right = Vector3::Cross(Vector3::Up(), (targetPos - cameraPos).Normalized()).Normalized();
 
-            m_camera->transform()->SetPosition(cameraPos +
+            Vector3 shakeOffset =
                 right * m_shakeOffset.x * shakeFactor +
-                Vector3::Up() * m_shakeOffset.y * shakeFactor);
+                Vector3::Up() * m_shakeOffset.y * shakeFactor;
+
+            m_camera->transform()->SetPosition(cameraPos + shakeOffset);
+
+            m_camera->SetTarget(targetPos + m_offset + shakeOffset);
         }
         else
         {

@@ -17,7 +17,7 @@ class CameraController : public Script
     float m_sensitivity = 0.05f;
     Vector3 m_offset = Vector3(0.0f, 1.0f, 0.0f);
 
-    float m_yaw = 0.0f;
+    float m_yaw = Math::PI;
     float m_pitch = 0.0f;
 
     bool m_isShaking = false;

@@ -9,7 +9,7 @@ properties:
   Chip: 0
   BarColor: [1,1,1,1]
   ChipColor: [1,0.200000003,0.200000003,1]
-  VerticalFromTop: false
+  VerticalFromTop: true
   VerticalFromCenter: false
   VerticalFromBottom: false
   HorizontalFromLeft: false

@@ -20,6 +20,12 @@ private:
     CameraController* m_cameraController = nullptr;
     GameObjectReference m_director;
 
+    GameObjectReference m_hpBarObject;
+    GameObjectReference m_comboUIObject;
+
+    class FillBar* m_hpBar = nullptr;
+    class ComboUI* m_comboUI = nullptr;
+
     Audio* m_jumpSE = nullptr;
 
     Vector2 m_beginMousePos{ Vector2::Zero() };

@@ -9,8 +9,12 @@
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
+#include "Script/FillBar.h"
+#include "Script/ComboUI.h"
 
 FIELDS_BEGIN(Player)
+    GM_FIELD(m_hpBarObject);
+    GM_FIELD(m_comboUIObject);
     GM_FIELD(m_speed);
     GM_FIELD(m_attackTime);
     GM_FIELD(m_speedFriction);
@@ -23,15 +27,20 @@ void Player::OnStart()
     m_rigidbody = GetComponent<Rigidbody>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
+    m_hpBar = m_hpBarObject.Get() ? m_hpBarObject->GetComponent<FillBar>() : nullptr;
+    m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
+
     if( !m_rigidbody )
-    {
         Logger::Error("Player: Rigidbody component not found.");
-    }
 
     if( !m_cameraController )
-    {
         Logger::Error("Player: CameraController component not found.");
-    }
+
+    if( !m_hpBar )
+        Logger::Error("Player: FillBar component not found in the specified HP Bar GameObject.");
+
+    if (!m_comboUI)
+        Logger::Error("Player: ComboUI component not found in the specified Combo UI GameObject.");
 
 #ifndef _DEBUG
     m_debug = false;
@@ -56,6 +65,9 @@ void Player::Update()
         return;
     }
 
+    Vector3 velocity = m_rigidbody->GetVelocity();
+    m_rigidbody->SetVelocity({ velocity.x, 0.0f, velocity.z });
+
     switch(m_state)
     {
         case Idle:
@@ -79,6 +91,12 @@ void Player::Update()
     {
         MaterialPropertyOverride& debugMaterial = GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(1);
         debugMaterial.SetColor("_BaseColor", m_debugColor[m_state]);
+
+        if(Input::GetKeyTrigger(Input::KeyCode::G))
+        {
+            m_hpBar->AddCurrent(-10.0f);
+        }
+
     }
 }
 
@@ -146,6 +164,7 @@ void Player::UpdateAttacking()
     if (m_attackTimer <= 0.0f)
     {
         m_state = AttackEnd;
+        m_comboUI->ResetCombo();
         return;
     }
     float damping = std::exp(-m_speedFriction * Time::GetDeltaTime());
@@ -186,12 +205,7 @@ bool Player::GetCameraDirection(Vector3& forward, Vector3& right) const
 
 void Player::OnHitBegin(const HitInfo& hitInfo)
 {
-    GameObject* otherObject = hitInfo.objectB;
 
-    if (otherObject && otherObject->GetTag() == "Enemy")
-    {
-        otherObject->Destroy();
-    }
 }
 
 void Player::OnHit(const HitInfo& hitInfo)
