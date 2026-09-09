@@ -1,0 +1,17 @@
+version: 1
+name: FillBar
+shader: Assets/Shaders/FillBarShader.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  _UVScale: [1,1]
+  _UVOffset: [0,0]
+  Fill: 1
+  Chip: 0
+  BarColor: [1,1,1,1]
+  ChipColor: [1,0.200000003,0.200000003,1]
+  VerticalFromTop: true
+  VerticalFromCenter: false
+  VerticalFromBottom: false
+  HorizontalFromLeft: false
+  HorizontalFromCenter: false
+  HorizontalFromRight: false

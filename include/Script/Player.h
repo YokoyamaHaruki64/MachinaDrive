@@ -20,6 +20,12 @@ private:
     CameraController* m_cameraController = nullptr;
     GameObjectReference m_director;
 
+    GameObjectReference m_hpBarObject;
+    GameObjectReference m_comboUIObject;
+
+    class FillBar* m_hpBar = nullptr;
+    class ComboUI* m_comboUI = nullptr;
+
     Audio* m_jumpSE = nullptr;
 
     Vector2 m_beginMousePos{ Vector2::Zero() };
@@ -56,7 +62,7 @@ private:
         Color(1.0f, 0.0f, 0.0f, 1.0f), // Attacking
         Color(0.5f, 0.5f, 0.5f, 1.0f)  // AttackEnd
     };
-    bool m_debug;
+    bool m_debug = false;
 
     bool GetCameraDirection(Vector3& forward, Vector3& right) const;
 public:

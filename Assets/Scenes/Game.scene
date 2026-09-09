@@ -35,26 +35,29 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [10,1,10]
+          m_localPosition: [0,-4,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.100000001,0.100000001,0.100000001]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-3.17000008,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [1000,140,1000]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: __primitive_plane
+          m_modelPath: Assets/Local/Models/Arena_2.fbx
           m_materialPaths:
-            - Assets/Materials/Field.material
+            - ''
+            - ''
+            - ''
+            - ''
           m_inverseAxisFlags: 0
-      - type: BoxCollider
-        fields:
-          enabled: true
-          m_center: [0,-0.5,0]
-          m_isTrigger: false
-          m_layer: 0
-          m_size: [10,1,10]
   - id: 3
     name: MateoCube
     tag: 
@@ -118,6 +121,8 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
+          m_hpBarObject: 50
+          m_comboUIObject: 45
           m_speed: 100
           m_attackTime: 5
           m_speedFriction: 0.300000012
@@ -252,7 +257,7 @@ gameObjects:
   - id: 8
     name: Tree(Instance)
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
     components:
@@ -275,7 +280,7 @@ gameObjects:
   - id: 9
     name: Tree(Instance)
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
     components:
@@ -298,7 +303,7 @@ gameObjects:
   - id: 10
     name: Tree(Instance)
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
     components:
@@ -321,7 +326,7 @@ gameObjects:
   - id: 11
     name: Tree(Instance)
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/Tree.prefab
     parent: 
     components:
@@ -506,7 +511,8 @@ gameObjects:
       - type: PlayerHit
         fields:
           enabled: true
-          m_shakeDuration: 0.800000012
+          m_comboUIObject: 45
+          m_shakeDuration: 0.5
           m_shakeMagnitude: 3
           m_hitStopDuration: 0.300000012
   - id: 44
@@ -543,7 +549,7 @@ gameObjects:
           m_anchor: [1,0]
           m_pivot: [0.5,0.5]
           m_stretch: [0,0]
-          m_pos: [-0.230000004,0.140000001]
+          m_pos: [-0.280000001,0.200000003]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -553,7 +559,95 @@ gameObjects:
           enabled: true
           m_drawLayer: 0
           font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: 1 Combo!
+          text: ''
           m_fontSize: 100
-          m_color: [1,0.423529416,0.501960814,1]
+          m_color: [1,0,0,1]
           m_materialPath: Assets/Materials/UI.material
+      - type: ComboUI
+        fields:
+          enabled: true
+          m_boundTime: 0.5
+          m_boundScale: 75
+          m_boundCurve:
+            - time: 0
+              value: 0
+              inControl: 0
+              outControl: 0
+            - time: 0.250460416
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 0.500920832
+              value: 0
+              inControl: 0
+              outControl: 0
+            - time: 0.753222823
+              value: 0.49444443
+              inControl: 0.49444443
+              outControl: 0.49444443
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+  - id: 50
+    name: HPBar
+    tag: 
+    active: true
+    prefab: 
+    parent: 44
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0.5]
+          m_stretch: [0.379999995,0.0299999993]
+          m_pos: [0.0399999991,0.0799999982]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: ''
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 100
+          m_current: 100
+          m_barColor: [1,1,1,1]
+          m_chipColor: [1,0.200000003,0.200000003,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0.5
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 51
+    name: PostProcess
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Bloom
+        fields:
+          enabled: true
+          m_name: Bloom
+          m_materialPath: Assets/Materials/PostProcess/Bloom.material
