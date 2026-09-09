@@ -238,3 +238,11 @@ void Player::HitStop(float duration)
         m_rigidbody->SetEnabled(false);
     }
 }
+
+void Player::TakeDamage(float damage)
+{
+    if (m_hpBar && damage > 0.0f)
+    {
+        m_hpBar->AddCurrent(-damage);
+    }
+}

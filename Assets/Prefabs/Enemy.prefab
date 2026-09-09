@@ -1,8 +1,8 @@
 version: 1
-name: Enemy
+name: BasicEnemy
 gameObjects:
   - id: 5
-    name: Enemy
+    name: BasicEnemy
     tag: Enemy
     active: true
     prefab: 
@@ -35,6 +35,30 @@ gameObjects:
           m_layer: 2
           m_radius: 0.5
           m_height: 2
-      - type: Enemy
+      - type: Rigidbody
         fields:
           enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: BasicEnemy
+        fields:
+          enabled: true
+          m_moveSpeed: 4
+          m_chaseRange: 12
+          m_attackRange: 10
+          m_shootCooldown: 1.5
+          m_turnInterval: 1
+          m_randomTurnAngle: 60
+          m_maxHP: 1
+          m_projectileSpeed: 30
+          m_preferredDistance: 3
+          m_chasePlayer: true
+          m_teleportNearPlayer: false
+          m_teleportInterval: 3
+          m_teleportDistance: 8
+          m_bulletPrefab: Assets/Prefabs/Bullet.prefab

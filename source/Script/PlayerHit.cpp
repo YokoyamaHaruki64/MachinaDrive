@@ -3,6 +3,7 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/PlayerHit.h"
+#include "Script/Enemy.h"
 #include "Script/Player.h"
 #include "Script/CameraController.h"
 #include "Script/ComboUI.h"
@@ -26,7 +27,7 @@ void PlayerHit::OnStart()
     // 親方向に辿ってPlayerコンポーネントを探す
     while (!m_player && parent)
     {
-        
+
         if (parent)
         {
             m_player = parent->GetComponent<Player>();
@@ -54,18 +55,17 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
 
     if (otherObject && otherObject->GetTag() == "Enemy")
     {
-        otherObject->Destroy();
-        if(m_cameraController)
-        {
-            m_cameraController->Shake(m_shakeDuration, m_shakeMagnitude);
-        }
-        if( m_player )
-        {
-            m_player->HitStop(m_hitStopDuration);
-        }
-        if(m_comboUI)
-        {
-            m_comboUI->AddCombo();
-        }
+        if(m_player && m_player->GetAttackState() != Player::Attacking)
+            return;
+
+
+        if (Enemy* enemy = otherObject->GetComponent<Enemy>())
+            enemy->TakeDamage(1);
+
+        if(m_cameraController)  m_cameraController->Shake(m_shakeDuration, m_shakeMagnitude);
+
+        if(m_player)            m_player->HitStop(m_hitStopDuration);
+
+        if(m_comboUI)           m_comboUI->AddCombo();
     }
 }

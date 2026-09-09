@@ -5,6 +5,42 @@
 
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
+#include "Script/Player.h"
+#include "System/Editor/FieldRegistry.h"
+
+FIELDS_BEGIN(Bullet)
+    GM_FIELD(m_trailWidthCurve);
+    GM_FIELD(m_trailColorCurve);
+FIELDS_END()
+
+void Bullet::OnStart()
+{
+    m_trailRenderer = GetComponent<TrailRenderer>();
+    ApplyTrailSettings();
+}
+
+void Bullet::ApplyTrailSettings()
+{
+    if (!m_trailRenderer)
+    {
+        return;
+    }
+
+    m_trailRenderer->SetWidthCurve(m_trailWidthCurve);
+    m_trailRenderer->SetColorCurve(m_trailColorCurve);
+}
+
+void Bullet::SetTrailWidthCurve(const Curve<float>& curve)
+{
+    m_trailWidthCurve = curve;
+    ApplyTrailSettings();
+}
+
+void Bullet::SetTrailColorCurve(const CurveColor& curve)
+{
+    m_trailColorCurve = curve;
+    ApplyTrailSettings();
+}
 
 void Bullet::Update()
 {
@@ -16,24 +52,44 @@ void Bullet::Update()
         return;
     }
 
-    // 当たり判定
-    auto enemies = Manager::GetObjectsByComponent<Enemy>();
-    for( auto& enemyObj : enemies)
+}
+
+void Bullet::OnHitBegin(const HitInfo& hitInfo)
+{
+    if (hitInfo.objectA != m_owner || !hitInfo.objectB)
     {
-        Transform* enemyTransform = enemyObj->GetTransform();
-        // 簡易的な当たり判定（距離が一定以下ならヒットとする
-        float distance =
-            (transform()->GetPosition() - enemyTransform->GetPosition()).LengthSqr();
-        if (distance < HIT_RADIUS * HIT_RADIUS) // ヒットの閾値
-        {
-            enemyObj->Destroy();    // 敵を破壊
-            m_owner->Destroy();     // 弾を破壊
-            Manager::Instantiate(
-                "Assets/Prefabs/Explosion.prefab",
-                enemyTransform->GetPosition() + Vector3(0.0f, 0.5f, 0.0f), // 敵の位置に少し上げてエフェクトを生成
-                Vector3::Zero(),
-                Vector3::One() * 3.0f); // 爆発エフェクトを生成
-        }
+        return;
     }
 
+    if (m_isEnemyProjectile)
+    {
+        if (hitInfo.objectB->GetTag() == "Player")
+        {
+            if (Player* player = hitInfo.objectB->GetComponent<Player>())
+            {
+                player->TakeDamage(10.0f);
+            }
+            m_owner->Destroy();
+        }
+        else if (hitInfo.objectB->GetTag() == "Wall")
+        {
+            m_owner->Destroy();
+        }
+        return;
+    }
+
+    if (Enemy* enemy = hitInfo.objectB->GetComponent<Enemy>())
+    {
+        enemy->TakeDamage(1);
+        m_owner->Destroy();
+        Manager::Instantiate(
+            "Assets/Prefabs/Explosion.prefab",
+            hitInfo.objectB->GetTransform()->GetPosition() + Vector3(0.0f, 0.5f, 0.0f),
+            Vector3::Zero(),
+            Vector3::One() * 3.0f);
+    }
+    else if (hitInfo.objectB->GetTag() == "Wall")
+    {
+        m_owner->Destroy();
+    }
 }

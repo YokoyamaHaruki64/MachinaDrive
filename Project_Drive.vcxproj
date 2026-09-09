@@ -238,9 +238,12 @@
     <ClCompile Include="source\Scene\ResultScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\Script\Bullet.cpp" />
+    <ClCompile Include="source\Script\BasicEnemy.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\ComboUI.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
+    <ClCompile Include="source\Script\HeavyEnemy.cpp" />
+    <ClCompile Include="source\Script\MovingEnemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
     <ClCompile Include="source\Script\FillBar.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
@@ -450,9 +453,12 @@
     <ClInclude Include="include\Scene\Scene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
     <ClInclude Include="include\Script\Bullet.h" />
+    <ClInclude Include="include\Script\BasicEnemy.h" />
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\ComboUI.h" />
     <ClInclude Include="include\Script\Enemy.h" />
+    <ClInclude Include="include\Script\HeavyEnemy.h" />
+    <ClInclude Include="include\Script\MovingEnemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
     <ClInclude Include="include\Script\FillBar.h" />
     <ClInclude Include="include\Script\Player.h" />

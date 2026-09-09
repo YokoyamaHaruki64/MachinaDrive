@@ -240,7 +240,16 @@
     <ClCompile Include="source\Script\Bullet.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\BasicEnemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\Enemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\HeavyEnemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\MovingEnemy.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Rendering\RendererBase.cpp">
@@ -587,7 +596,16 @@
     <ClInclude Include="include\Script\Bullet.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\BasicEnemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="include\Script\Enemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\HeavyEnemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\MovingEnemy.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\GM_Time.h">
