@@ -80,20 +80,21 @@ gameObjects:
       - type: PlayerAnimation
         fields:
           enabled: true
-          m_floatHeight: 0.08
+          m_stateColors:
+            - [0.231660232,0.62264806,0.714285731,1]
+            - [0.822393835,0.680013061,0.244495466,1]
+            - [1,0.0888031125,0.0888031125,1]
+            - [0.523365319,0.308880329,1,1]
+          m_attackReadyBlinkSpeed: 5
+          m_attackReadyBlinkAmount: 0.35
+          m_attackingBlinkSpeed: 16
+          m_attackingBlinkAmount: 0.7
+          m_floatHeight: 0.200000003
           m_floatSpeed: 2
-          m_idleYawSpeed: 0.65
-          m_attackReadyYawSpeed: 2.4
-          m_attackReadyPitchAngle: 0.16
-          m_attackReadyRollAngle: 0.22
-          m_attackReadyPitchSpeed: 3.2
-          m_attackReadyRollSpeed: 2.6
-          m_attackStartYawSpeed: 20
-          m_attackSpinDecay: 4.5
-          m_attackingPitchAngle: 0.1
-          m_attackingRollAngle: 0.14
-          m_attackingPitchSpeed: 6
-          m_attackingRollSpeed: 5
+          m_idleYawSpeed: 1
+          m_atkReadyRotSpeed: 8
+          m_atkStartRotSpeed: 35
+          m_attackSpinDecay: 0.5
           m_rotationSpeedTransitionRate: 8
   - id: 63
     name: PlayerHit

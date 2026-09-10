@@ -2,7 +2,10 @@
 
 #include "System/Core/Script.h"
 
+#include <vector>
+
 class Player;
+class ModelRenderer;
 
 // Playerの子Modelだけを動かし、親の物理形状を固定したまま見た目をアニメーションする。
 class PlayerAnimation : public Script
@@ -13,6 +16,18 @@ class PlayerAnimation : public Script
 
 private:
     // 角度・角速度はラジアン、時間は秒で指定する。
+    // 要素の順番はPlayer::AttackState（Idle、AttackReady、Attacking、AttackEnd）に対応する。
+    std::vector<Color> m_stateColors = {
+        Color(0.21f, 0.85f, 1.0f, 1.0f),
+        Color(1.0f, 0.83f, 0.31f, 1.0f),
+        Color(1.0f, 0.29f, 0.14f, 1.0f),
+        Color(0.60f, 0.42f, 1.0f, 1.0f),
+    };
+    float m_attackReadyBlinkSpeed = 5.0f;
+    float m_attackReadyBlinkAmount = 0.35f;
+    float m_attackingBlinkSpeed = 16.0f;
+    float m_attackingBlinkAmount = 0.70f;
+
     float m_floatHeight = 0.08f;
     float m_floatSpeed = 2.0f;
 
@@ -33,6 +48,7 @@ private:
     float m_rotationSpeedTransitionRate = 8.0f;
 
     Player* m_player = nullptr;
+    ModelRenderer* m_modelRenderer = nullptr;
     Vector3 m_initialLocalPosition = Vector3::Zero();
     Quaternion m_initialLocalRotation = Quaternion::Identity();
 
@@ -42,6 +58,7 @@ private:
 
     static float Approach(float current, float target, float rate, float deltaTime);
     void UpdateRotation(float deltaTime);
+    void ApplyCoreColor();
     void ApplyAnimation();
 
 public:
