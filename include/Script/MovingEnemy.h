@@ -16,7 +16,7 @@ class MovingEnemy final : public Enemy
     float m_moveSpeed = 12.0f;
     bool m_isMoving = true;
 
-    static constexpr float STOP_DISTANCE_FROM_PLAYER = 3.0f;
+    static constexpr float STOP_DISTANCE_FROM_PLAYER = 10.0f;
 
     void SetVelocityTowardsPlayer(const Vector3& playerPosition);
     void BeginMoving(const Vector3& playerPosition);

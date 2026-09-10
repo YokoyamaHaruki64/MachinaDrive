@@ -70,3 +70,8 @@ gameObjects:
             - Assets/Materials/Enemy/MovingDrone_Body.material
             - Assets/Materials/Enemy/MovingDrone_Line.material
           m_inverseAxisFlags: 0
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.129999995
+          m_floatSpeed: 8.11999989

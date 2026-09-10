@@ -20,6 +20,7 @@ protected:
 
     void UpdateShooting(const Vector3& playerPosition, float playerDistanceSqr);
     void ShootAt(const Vector3& targetPosition);
+    void FacePlayer(const Vector3& playerPosition);
     virtual void UpdateBehavior(const Vector3& playerPosition) = 0;
 
     explicit Enemy(GameObject* owner)

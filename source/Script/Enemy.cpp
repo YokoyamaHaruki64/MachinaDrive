@@ -52,9 +52,29 @@ void Enemy::Update()
         toPlayer.y = 0.0f;
         const float playerDistanceSqr = toPlayer.LengthSqr();
 
+        FacePlayer(playerPosition);
         UpdateBehavior(playerPosition);
         UpdateShooting(playerPosition, playerDistanceSqr);
     }
+}
+
+void Enemy::FacePlayer(const Vector3& playerPosition)
+{
+    Transform* enemyTransform = transform();
+    if (!enemyTransform)
+    {
+        return;
+    }
+
+    Vector3 direction = playerPosition - enemyTransform->GetPosition();
+    direction.y = 0.0f;
+    if (direction.LengthSqr() <= 1.0e-6f)
+    {
+        // 同じ位置では向きが定まらないため、現在の回転を維持する。
+        return;
+    }
+
+    enemyTransform->SetRotation(Quaternion::LookRotation(direction));
 }
 
 bool Enemy::TakeDamage(float damage)

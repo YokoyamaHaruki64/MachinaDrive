@@ -13,7 +13,7 @@ gameObjects:
           enabled: true
           m_localPosition: [0,1,2.61216004e-15]
           m_localRotation: [0,1,0,0]
-          m_localScale: [1,1,1]
+          m_localScale: [1.20000005,1.20000005,1.20000005]
       - type: CapsuleCollider
         fields:
           enabled: true
@@ -86,9 +86,9 @@ gameObjects:
             - [1,0.0888031125,0.0888031125,1]
             - [0.523365319,0.308880329,1,1]
           m_attackReadyBlinkSpeed: 5
-          m_attackReadyBlinkAmount: 0.35
+          m_attackReadyBlinkAmount: 0.349999994
           m_attackingBlinkSpeed: 16
-          m_attackingBlinkAmount: 0.7
+          m_attackingBlinkAmount: 0.699999988
           m_floatHeight: 0.200000003
           m_floatSpeed: 2
           m_idleYawSpeed: 1

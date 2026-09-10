@@ -53,9 +53,9 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [-2.65906874e-06,2.27999997,0]
-          m_localRotation: [0,-0.707106829,0,0.707106769]
-          m_localScale: [0.00499999989,0.00400000019,0.00400000019]
+          m_localPosition: [-2.65906965e-06,2.18000007,0]
+          m_localRotation: [0,0.707106829,0,-0.707106709]
+          m_localScale: [0.00499991933,0.00400000112,0.00399993965]
       - type: ModelRenderer
         fields:
           enabled: true
@@ -67,3 +67,8 @@ gameObjects:
             - Assets/Materials/Enemy/HeavyDrone_Body.material
             - Assets/Materials/Enemy/HeavyDrone_Line.material
           m_inverseAxisFlags: 0
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.400000006
+          m_floatSpeed: 1.5
