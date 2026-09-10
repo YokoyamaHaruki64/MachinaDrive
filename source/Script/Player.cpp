@@ -114,7 +114,8 @@ void Player::Update()
 
     if (m_debug)
     {
-        MaterialPropertyOverride& debugMaterial = GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(1);
+        GameObject* model = transform()->GetChildren()[1]->GetOwner();
+        MaterialPropertyOverride& debugMaterial = model->GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(0);
         debugMaterial.SetColor("_BaseColor", m_debugColor[m_state]);
 
         if(Input::GetKeyTrigger(Input::KeyCode::G))

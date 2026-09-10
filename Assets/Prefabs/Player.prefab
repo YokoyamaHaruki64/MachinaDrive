@@ -11,30 +11,17 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,2.61216004e-15]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1.00034523,1,1.00034523]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - Assets/Materials/Player/PlayerBody.material
-            - Assets/Materials/Player/PlayerFlont.material
-            - Assets/Materials/Player/PlayerHead.material
-          m_inverseAxisFlags: 0
+          m_localPosition: [0,1,2.61216004e-15]
+          m_localRotation: [0,1,0,0]
+          m_localScale: [1,1,1]
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_center: [0,0.600000024,0]
           m_isTrigger: false
           m_layer: 1
-          m_radius: 0.5
-          m_height: 2
+          m_radius: 0.769999981
+          m_height: 3.75
       - type: Health
         fields:
           enabled: true
@@ -42,6 +29,8 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
+          m_hpBarObject: 
+          m_comboUIObject: 
           m_speed: 100
           m_attackTime: 5
           m_speedFriction: 0.300000012
@@ -62,7 +51,33 @@ gameObjects:
           m_useGravity: true
           m_allowSleep: true
           m_freezeRotation: true
-  - id: 39
+  - id: 64
+    name: Model
+    tag: 
+    active: true
+    prefab: 
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0.939999938,2.61216004e-15]
+          m_localRotation: [0.103015825,0.168601349,-0.017720513,0.980126202]
+          m_localScale: [0.0100004338,0.0100000054,0.0100004757]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player_2.fbx
+          m_materialPaths:
+            - Assets/Materials/Player/Player_Core.material
+            - Assets/Materials/Player/Player_DefArmor.material
+            - Assets/Materials/Player/Player_SpecialArmor.material
+            - Assets/Materials/Player/Player_SensorArmor.material
+          m_inverseAxisFlags: 0
+  - id: 63
     name: PlayerHit
     tag: 
     active: true
@@ -78,12 +93,14 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_center: [0,0.769999981,0]
           m_isTrigger: true
           m_layer: 4
-          m_radius: 1.20000005
+          m_radius: 1.62
       - type: PlayerHit
         fields:
           enabled: true
+          m_comboUIObject: 
           m_shakeDuration: 0.800000012
           m_shakeMagnitude: 3
+          m_hitStopDuration: 0.300000012

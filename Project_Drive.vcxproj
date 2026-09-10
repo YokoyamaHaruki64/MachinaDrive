@@ -543,6 +543,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Assets\Shaders\PBRLighting.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -623,6 +627,8 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
+    <None Include="Assets\Shaders\PBRDefault.shader" />
+    <None Include="Assets\Shaders\PBRToon.shader" />
     <None Include="Assets\Shaders\FillBarShader.shader" />
     <None Include="Assets\Shaders\PostProcessBloom.shader" />
     <None Include="Assets\Shaders\ShotDirector.shader" />
