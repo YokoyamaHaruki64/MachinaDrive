@@ -33,9 +33,17 @@ void Camera::SetActiveMainCamera(Camera* camera)
 
 void Camera::SetViewProjection()
 {
+    const Vector3 eyePosition = transform()->GetPosition();
+    Vector3 targetPosition = m_target;
+    if ((targetPosition - eyePosition).LengthSqr() <= 1.0e-8f)
+    {
+        // EyeとTargetが一致するとXMMatrixLookAtLHが方向ベクトルを作れないため、正面を向かせる。
+        targetPosition = eyePosition + Vector3::Forward();
+    }
+
     XMMATRIX viewMatrix = XMMatrixLookAtLH(
-        XMLoadFloat3((XMFLOAT3*)&transform()->GetPosition()),
-        XMLoadFloat3((XMFLOAT3*)&m_target),
+        XMLoadFloat3((XMFLOAT3*)&eyePosition),
+        XMLoadFloat3((XMFLOAT3*)&targetPosition),
         XMLoadFloat3((XMFLOAT3*)&m_up)
     );
 

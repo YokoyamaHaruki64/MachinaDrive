@@ -24,7 +24,8 @@ gameObjects:
           enabled: true
           m_distance: 10
           m_sensitivity: 0.00100000005
-          m_offset: [0,1,0]
+          m_offset: [0,2,0]
+          m_collisionPadding: 0.300000012
   - id: 2
     name: Field
     tag: 
