@@ -56,5 +56,6 @@ void Camera::SetViewProjection()
 
     Renderer::SetViewMatrix(viewMatrix);
     Renderer::SetProjectionMatrix(projMatrix);
+    Renderer::SetCameraPosition(eyePosition);
 
 }
