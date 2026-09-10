@@ -3,15 +3,74 @@
 #include "Component/ComponentInc.h"
 #include "Common/Random.h"
 
+#include "Component/BoxCollider.h"
+#include "Component/Transform.h"
 #include "Script/CameraController.h"
 
 
 #include "Script/Player.h"
+#include "System/Core/manager.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace
+{
+    constexpr float SEGMENT_EPSILON = 1.0e-6f;
+
+    bool IntersectSegmentWithBox(
+        const Vector3& segmentStart,
+        const Vector3& segmentEnd,
+        const Vector3& boxCenter,
+        const Quaternion& boxRotation,
+        const Vector3& halfExtents,
+        float& outEnter)
+    {
+        const Quaternion inverseRotation = boxRotation.Inversed();
+        const Vector3 localStart = inverseRotation.RotateVector(segmentStart - boxCenter);
+        const Vector3 localDirection = inverseRotation.RotateVector(segmentEnd - segmentStart);
+
+        float enter = 0.0f;
+        float exit = 1.0f;
+
+        const auto updateSlab = [&enter, &exit](float start, float direction, float extent)
+        {
+            if (std::abs(direction) <= SEGMENT_EPSILON)
+            {
+                return start >= -extent && start <= extent;
+            }
+
+            float nearDistance = (-extent - start) / direction;
+            float farDistance = (extent - start) / direction;
+            if (nearDistance > farDistance)
+            {
+                std::swap(nearDistance, farDistance);
+            }
+
+            enter = std::max(enter, nearDistance);
+            exit = std::min(exit, farDistance);
+            return enter <= exit;
+        };
+
+        if (!updateSlab(localStart.x, localDirection.x, halfExtents.x)
+            || !updateSlab(localStart.y, localDirection.y, halfExtents.y)
+            || !updateSlab(localStart.z, localDirection.z, halfExtents.z)
+            || exit < 0.0f
+            || enter > 1.0f)
+        {
+            return false;
+        }
+
+        outEnter = std::clamp(enter, 0.0f, 1.0f);
+        return true;
+    }
+}
 
 FIELDS_BEGIN(CameraController)
     GM_FIELD(m_distance);
     GM_FIELD(m_sensitivity);
     GM_FIELD(m_offset);
+    GM_FIELD(m_collisionPadding);
 FIELDS_END()
 
 void CameraController::Shake(float duration, float magnitude)
@@ -36,6 +95,69 @@ void CameraController::OnStart()
     }
     m_camera = Camera::GetMainCamera();
 
+}
+
+// 物理Raycastを使わず、WallのBoxColliderをOBBとしてカメラの通過を判定する。
+Vector3 CameraController::ResolveWallCollision(
+    const Vector3& anchorPosition,
+    const Vector3& desiredPosition,
+    const Vector3& fallbackPosition) const
+{
+    const Vector3 segment = desiredPosition - anchorPosition;
+    if (segment.LengthSqr() <= SEGMENT_EPSILON)
+    {
+        return desiredPosition;
+    }
+
+    const float padding = std::max(m_collisionPadding, 0.0f);
+    float nearestEnter = 1.0f;
+    bool hasCollision = false;
+
+    for (GameObject* wallObject : Manager::GetObjectsByTag("Wall"))
+    {
+        if (!wallObject || !wallObject->IsActive())
+        {
+            continue;
+        }
+
+        BoxCollider* wallCollider = wallObject->GetComponent<BoxCollider>();
+        Transform* wallTransform = wallObject->GetTransform();
+        if (!wallCollider || !wallCollider->IsEnabled() || !wallTransform)
+        {
+            continue;
+        }
+
+        const Vector3 worldScale = wallTransform->GetScale();
+        const Vector3 colliderSize = wallCollider->GetSize();
+        const Vector3 halfExtents(
+            std::abs(worldScale.x * colliderSize.x) * 0.5f + padding,
+            std::abs(worldScale.y * colliderSize.y) * 0.5f + padding,
+            std::abs(worldScale.z * colliderSize.z) * 0.5f + padding);
+
+        float enter = 1.0f;
+        if (IntersectSegmentWithBox(
+                anchorPosition,
+                desiredPosition,
+                wallCollider->GetWorldCenter(),
+                wallTransform->GetRotation(),
+                halfExtents,
+                enter)
+            && enter < nearestEnter)
+        {
+            nearestEnter = enter;
+            hasCollision = true;
+        }
+    }
+
+    if (!hasCollision)
+    {
+        return desiredPosition;
+    }
+
+    // Anchor自身が余白内にある場合は、Anchorへ戻すとEyeとTargetが一致するため直前位置を維持する。
+    return nearestEnter <= SEGMENT_EPSILON
+        ? fallbackPosition
+        : anchorPosition + segment * nearestEnter;
 }
 
 void CameraController::LateUpdate()
@@ -68,6 +190,11 @@ void CameraController::LateUpdate()
                 m_distance * std::sin(m_pitch),
                 m_distance * std::cos(m_pitch) * std::cos(m_yaw));
 
+        const Vector3 previousCameraPosition = cameraPos;
+        cameraPos = ResolveWallCollision(
+            targetPos + m_offset,
+            cameraPos,
+            previousCameraPosition);
         m_camera->transform()->SetPosition(cameraPos);
     }
 
@@ -94,9 +221,15 @@ void CameraController::LateUpdate()
                 right * m_shakeOffset.x * shakeFactor +
                 Vector3::Up() * m_shakeOffset.y * shakeFactor;
 
-            m_camera->transform()->SetPosition(cameraPos + shakeOffset);
+            const Vector3 shakenCameraPosition = ResolveWallCollision(
+                targetPos + m_offset,
+                cameraPos + shakeOffset,
+                cameraPos);
+            const Vector3 appliedShakeOffset = shakenCameraPosition - cameraPos;
 
-            m_camera->SetTarget(targetPos + m_offset + shakeOffset);
+            m_camera->transform()->SetPosition(shakenCameraPosition);
+
+            m_camera->SetTarget(targetPos + m_offset + appliedShakeOffset);
         }
         else
         {

@@ -16,6 +16,7 @@ class CameraController : public Script
     float m_distance = 10.0f;
     float m_sensitivity = 0.05f;
     Vector3 m_offset = Vector3(0.0f, 1.0f, 0.0f);
+    float m_collisionPadding = 0.3f;
 
     float m_yaw = Math::PI;
     float m_pitch = 0.0f;
@@ -28,6 +29,10 @@ class CameraController : public Script
 
     bool isLocked = false;
 
+    Vector3 ResolveWallCollision(
+        const Vector3& anchorPosition,
+        const Vector3& desiredPosition,
+        const Vector3& fallbackPosition) const;
 
 
 public:
