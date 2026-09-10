@@ -34,7 +34,7 @@ gameObjects:
       - type: Rigidbody
         fields:
           enabled: true
-          m_motionType: 1
+          m_motionType: 2
           m_mass: 1
           m_bounciness: 0
           m_friction: 0
@@ -44,7 +44,6 @@ gameObjects:
       - type: MovingEnemy
         fields:
           enabled: true
-          m_moveSpeed: 7
           m_chaseRange: 0
           m_attackRange: 10
           m_shootCooldown: 1.2
@@ -54,7 +53,7 @@ gameObjects:
           m_projectileSpeed: 34
           m_preferredDistance: 3
           m_chasePlayer: false
-          m_teleportNearPlayer: true
-          m_teleportInterval: 3
-          m_teleportDistance: 8
+          m_moveDuration: 3
+          m_stopDuration: 1
+          m_moveSpeed: 12
           m_bulletPrefab: Assets/Prefabs/Bullet.prefab

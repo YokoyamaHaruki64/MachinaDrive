@@ -180,7 +180,7 @@ gameObjects:
       - type: Rigidbody
         fields:
           enabled: true
-          m_motionType: 1
+          m_motionType: 2
           m_mass: 1
           m_bounciness: 0
           m_friction: 0
@@ -232,7 +232,7 @@ gameObjects:
       - type: Rigidbody
         fields:
           enabled: true
-          m_motionType: 1
+          m_motionType: 2
           m_mass: 1
           m_bounciness: 0
           m_friction: 0
@@ -247,8 +247,9 @@ gameObjects:
           m_maxHP: 1
           m_projectileSpeed: 34
           m_bulletPrefab: Assets/Prefabs/Bullet.prefab
-          m_teleportInterval: 3
-          m_teleportDistance: 8
+          m_moveDuration: 4
+          m_stopDuration: 3
+          m_moveSpeed: 20
   - id: 7
     name: HeavyEnemy
     tag: Enemy
