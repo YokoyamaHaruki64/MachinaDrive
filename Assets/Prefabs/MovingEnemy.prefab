@@ -41,6 +41,10 @@ gameObjects:
           m_useGravity: false
           m_allowSleep: false
           m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 1
       - type: MovingEnemy
         fields:
           enabled: true
@@ -49,7 +53,6 @@ gameObjects:
           m_shootCooldown: 1.2
           m_turnInterval: 0.6
           m_randomTurnAngle: 90
-          m_maxHP: 1
           m_projectileSpeed: 34
           m_preferredDistance: 3
           m_chasePlayer: false

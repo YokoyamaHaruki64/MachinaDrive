@@ -4,6 +4,7 @@
 
 #include "Script/Bullet.h"
 #include "Script/Enemy.h"
+#include "Script/Health.h"
 #include "Script/Score.h"
 #include "System/Editor/FieldRegistry.h"
 
@@ -13,15 +14,27 @@ void Enemy::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD(m_attackRange);
     GM_FIELD(m_shootCooldown);
-    GM_FIELD(m_maxHP);
     GM_FIELD(m_projectileSpeed);
     GM_FIELD(m_bulletPrefab);
 }
 
 void Enemy::OnStart()
 {
-    m_currentHP = Math::Max(m_maxHP, 1);
     m_playerObject = Manager::GetObjectFirstByTag("Player");
+    m_health = GetComponent<Health>();
+    if (!m_health)
+    {
+        Logger::Error("Enemy: Health component not found.");
+        return;
+    }
+
+    m_health->OnDeath.emplace_back([this]()
+    {
+        if (!m_owner->IsDestroyed())
+        {
+            m_owner->Destroy();
+        }
+    });
 }
 
 void Enemy::Update()
@@ -36,20 +49,6 @@ void Enemy::Update()
 
         UpdateBehavior(playerPosition);
         UpdateShooting(playerPosition, playerDistanceSqr);
-    }
-}
-
-void Enemy::TakeDamage(int damage)
-{
-    if (damage <= 0 || m_owner->IsDestroyed())
-    {
-        return;
-    }
-
-    m_currentHP -= damage;
-    if (m_currentHP <= 0)
-    {
-        m_owner->Destroy();
     }
 }
 

@@ -41,6 +41,10 @@ gameObjects:
           m_useGravity: false
           m_allowSleep: false
           m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 3
       - type: HeavyEnemy
         fields:
           enabled: true
@@ -50,7 +54,6 @@ gameObjects:
           m_shootCooldown: 2
           m_turnInterval: 1.2
           m_randomTurnAngle: 45
-          m_maxHP: 3
           m_projectileSpeed: 28
           m_preferredDistance: 3
           m_chasePlayer: true

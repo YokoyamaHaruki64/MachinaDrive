@@ -7,6 +7,7 @@
 
 class Audio;
 class Collider;
+class Health;
 struct HitInfo;
 class CameraController;
 
@@ -29,6 +30,7 @@ public:
 
 private:
     Rigidbody* m_rigidbody = nullptr;
+    Health* m_health = nullptr;
     CameraController* m_cameraController = nullptr;
     GameObjectReference m_director;
 
@@ -76,7 +78,6 @@ public:
     void OnHitEnd(const HitInfo& hitInfo) override;
 
     void HitStop(float duration);
-    void TakeDamage(float damage);
 
     const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
     const AttackState GetAttackState() const { return m_state; }

@@ -7,13 +7,12 @@ class Enemy : public Script
 {
 protected:
     GameObjectReference m_playerObject;
+    class Health* m_health{};
 
     float m_shootTimer = 0.0f;
-    int m_currentHP = 1;
 
     float m_attackRange = 10.0f;
     float m_shootCooldown = 1.5f;
-    int m_maxHP = 1;
     float m_projectileSpeed = 30.0f;
     PrefabReference m_bulletPrefab{ "Assets/Prefabs/Bullet.prefab" };
 
@@ -34,5 +33,4 @@ public:
     void OnHitBegin(const HitInfo& hitInfo) override;
     void OnDestroy() override;
 
-    void TakeDamage(int damage);
 };

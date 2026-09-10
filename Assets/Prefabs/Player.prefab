@@ -35,6 +35,10 @@ gameObjects:
           m_layer: 1
           m_radius: 0.5
           m_height: 2
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 100
       - type: Player
         fields:
           enabled: true
