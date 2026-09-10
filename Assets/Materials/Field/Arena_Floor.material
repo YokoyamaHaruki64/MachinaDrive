@@ -1,8 +1,16 @@
 version: 1
 name: Arena_Floor
-shader: Assets/Shaders/DefaultLit.shader
+shader: Assets/Shaders/PBRToon.shader
 properties:
-  _BaseColor: [0.184313729,0.254901975,0.34117648,1]
+  _BaseColor: [0.397668481,0.416039407,0.451737463,1]
   _Emission: [0,0,0,1]
-  _Shininess: 27.0400009
+  _Metallic: 0.449999988
+  _Roughness: 0.439999998
+  _ToonBands: 4
+  _ToonShadowColor: [0.455807149,0.54433006,0.803088784,1]
+  _ToonSpecularColor: [0.529658198,0.608380437,0.722007751,1]
+  _ToonSpecularThreshold: 0
+  _RimColor: [0.128411934,0.176265106,0.227799237,1]
+  _RimPower: 4
+  _RimStrength: 1
   _MainTex: 

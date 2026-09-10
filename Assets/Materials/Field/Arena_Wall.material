@@ -1,8 +1,16 @@
 version: 1
 name: Arena_Wall
-shader: Assets/Shaders/DefaultLit.shader
+shader: Assets/Shaders/PBRToon.shader
 properties:
-  _BaseColor: [0.0627451017,0.0980392173,0.200000003,1]
+  _BaseColor: [0.123313606,0.196858034,0.33976835,1]
   _Emission: [0,0,0,1]
-  _Shininess: 46.2400017
+  _Metallic: 0.449999988
+  _Roughness: 0.449999988
+  _ToonBands: 4
+  _ToonShadowColor: [0.543596566,0.595921397,0.752895772,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0
+  _RimColor: [0.263412863,0.315104127,0.366795361,1]
+  _RimPower: 4
+  _RimStrength: 1
   _MainTex: 

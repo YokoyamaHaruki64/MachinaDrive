@@ -1039,6 +1039,9 @@
     <FxCompile Include="Assets\Shaders\common.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Shaders\PBRLighting.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
     <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
@@ -1100,6 +1103,12 @@
       <Filter>External\Assimp</Filter>
     </None>
     <None Include="Assets\Shaders\DefaultLit.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PBRDefault.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PBRToon.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\FillBarShader.shader">
