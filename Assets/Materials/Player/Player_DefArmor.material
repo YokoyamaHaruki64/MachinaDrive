@@ -1,0 +1,8 @@
+version: 1
+name: Player_DefArmor
+shader: Assets/Shaders/DefaultLit.shader
+properties:
+  _BaseColor: [0.800000012,0.800000012,0.800000012,1]
+  _Emission: [0,0,0,1]
+  _Shininess: 25
+  _MainTex: 
