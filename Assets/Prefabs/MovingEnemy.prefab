@@ -1,0 +1,63 @@
+version: 1
+name: MovingEnemy
+gameObjects:
+  - id: 1
+    name: MovingEnemy
+    tag: Enemy
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths: ['', '', '', '']
+          m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 0.5
+          m_height: 2
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 1
+      - type: MovingEnemy
+        fields:
+          enabled: true
+          m_chaseRange: 0
+          m_attackRange: 10
+          m_shootCooldown: 1.2
+          m_invincibilityDuration: 0.5
+          m_turnInterval: 0.6
+          m_randomTurnAngle: 90
+          m_projectileSpeed: 34
+          m_preferredDistance: 3
+          m_chasePlayer: false
+          m_moveDuration: 3
+          m_stopDuration: 1
+          m_moveSpeed: 12
+          m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab

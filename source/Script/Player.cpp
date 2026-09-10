@@ -6,10 +6,10 @@
 #include "System/Editor/FieldRegistry.h"
 #include "System/Core/Physics.h"
 #include "Scene/ResultScene.h"
-#include "Script/Bullet.h"
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
 #include "Script/FillBar.h"
+#include "Script/Health.h"
 #include "Script/ComboUI.h"
 
 FIELDS_BEGIN(Player)
@@ -25,6 +25,7 @@ void Player::OnStart()
 {
     m_jumpSE = GetComponent<Audio>();
     m_rigidbody = GetComponent<Rigidbody>();
+    m_health = GetComponent<Health>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
     m_hpBar = m_hpBarObject.Get() ? m_hpBarObject->GetComponent<FillBar>() : nullptr;
@@ -33,11 +34,35 @@ void Player::OnStart()
     if( !m_rigidbody )
         Logger::Error("Player: Rigidbody component not found.");
 
+    if (!m_health)
+        Logger::Error("Player: Health component not found.");
+
     if( !m_cameraController )
         Logger::Error("Player: CameraController component not found.");
 
     if( !m_hpBar )
         Logger::Error("Player: FillBar component not found in the specified HP Bar GameObject.");
+
+    if (m_health && m_hpBar)
+    {
+        m_hpBar->SetMax(m_health->GetMaxHP());
+        m_hpBar->SetCurrent(m_health->GetCurrentHP());
+        m_health->OnDamage.emplace_back([this](float damage)
+        {
+            if (m_hpBar)
+            {
+                m_hpBar->AddCurrent(-damage);
+            }
+        });
+
+        m_health->OnDamage.emplace_back([this](float damage)
+        {
+            if(m_cameraController)
+            {
+                m_cameraController->Shake(0.3f, 0.2f);
+            }
+        });
+    }
 
     if (!m_comboUI)
         Logger::Error("Player: ComboUI component not found in the specified Combo UI GameObject.");

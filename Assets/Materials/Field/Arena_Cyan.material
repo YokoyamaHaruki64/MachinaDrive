@@ -1,0 +1,8 @@
+version: 1
+name: Arena_Cyan
+shader: Assets/Shaders/DefaultLit.shader
+properties:
+  _BaseColor: [0.0862745121,0.964705884,0.956862748,1]
+  _Emission: [0,0.0470588244,0.227450982,1]
+  _Shininess: 64
+  _MainTex: 

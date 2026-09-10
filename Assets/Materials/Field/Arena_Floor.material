@@ -1,0 +1,8 @@
+version: 1
+name: Arena_Floor
+shader: Assets/Shaders/DefaultLit.shader
+properties:
+  _BaseColor: [0.184313729,0.254901975,0.34117648,1]
+  _Emission: [0,0,0,1]
+  _Shininess: 27.0400009
+  _MainTex: 

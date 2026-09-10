@@ -48,26 +48,28 @@ void CameraController::LateUpdate()
         m_camera->SetTarget(Vector3::Zero()); // ターゲットがない場合は原点を向く
     else
         m_camera->SetTarget(targetPos + m_offset);
-    
-    if (isLocked)
-        return;
+    Vector3 cameraPos = m_camera->transform()->GetPosition();
 
-    m_yaw += mouseDelta.x * m_sensitivity;
-    m_pitch += mouseDelta.y * m_sensitivity;
+    if (!isLocked)
+    {
 
-    // ピッチの制限
-    const float pitchLimit_min = 10.0f * Math::DEG2RAD;
-    const float pitchLimit_max = 30.0f * Math::DEG2RAD;
-    m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
+        m_yaw += mouseDelta.x * m_sensitivity;
+        m_pitch += mouseDelta.y * m_sensitivity;
 
-    // カメラの位置を計算
-    Vector3 cameraPos =
-        targetPos + Vector3(
-            m_distance * std::cos(m_pitch) * std::sin(m_yaw),
-            m_distance * std::sin(m_pitch),
-            m_distance * std::cos(m_pitch) * std::cos(m_yaw));
+        // ピッチの制限
+        const float pitchLimit_min = 10.0f * Math::DEG2RAD;
+        const float pitchLimit_max = 30.0f * Math::DEG2RAD;
+        m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
 
-    m_camera->transform()->SetPosition(cameraPos);
+        // カメラの位置を計算
+        cameraPos =
+            targetPos + Vector3(
+                m_distance * std::cos(m_pitch) * std::sin(m_yaw),
+                m_distance * std::sin(m_pitch),
+                m_distance * std::cos(m_pitch) * std::cos(m_yaw));
+
+        m_camera->transform()->SetPosition(cameraPos);
+    }
 
     // カメラの揺れ処理
     if(m_isShaking)

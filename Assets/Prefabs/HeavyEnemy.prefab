@@ -1,0 +1,64 @@
+version: 1
+name: HeavyEnemy
+gameObjects:
+  - id: 1
+    name: HeavyEnemy
+    tag: Enemy
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1.7,1.7,1.7]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Player.obj
+          m_materialPaths: ['', '', '', '']
+          m_inverseAxisFlags: 0
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1.7,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 0.85
+          m_height: 3.4
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 3
+      - type: HeavyEnemy
+        fields:
+          enabled: true
+          m_moveSpeed: 3
+          m_chaseRange: 12
+          m_attackRange: 10
+          m_shootCooldown: 2
+          m_invincibilityDuration: 0.5
+          m_turnInterval: 1.2
+          m_randomTurnAngle: 45
+          m_projectileSpeed: 28
+          m_preferredDistance: 3
+          m_chasePlayer: true
+          m_teleportNearPlayer: false
+          m_teleportInterval: 3
+          m_teleportDistance: 8
+          m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab

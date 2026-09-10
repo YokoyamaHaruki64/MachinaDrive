@@ -1,0 +1,98 @@
+version: 1
+name: EnemyBullet
+gameObjects:
+  - id: 1
+    name: EnemyBullet
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: ModelRenderer
+        fields:
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/bullet.obj
+          m_materialPaths: []
+          m_inverseAxisFlags: 0
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: true
+          m_layer: 0
+          m_radius: 0.3
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: TrailRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          m_materialPath: Assets/Materials/Trail.material
+          m_offset: [0,0,0]
+          m_fixedDirection: [0,1,0]
+          m_trailLifetime: 0.3
+          m_minSegmentDistance: 0.05
+          m_width: 0.4
+          faceMode: 0
+      - type: EnemyBullet
+        fields:
+          m_trailWidthCurve:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+          m_trailColorCurve:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            g:
+              - time: 0
+                value: 0.3
+                inControl: 0.3
+                outControl: 0.3
+              - time: 1
+                value: 0.3
+                inControl: 0.3
+                outControl: 0.3
+            b:
+              - time: 0
+                value: 0.1
+                inControl: 0.1
+                outControl: 0.1
+              - time: 1
+                value: 0.1
+                inControl: 0.1
+                outControl: 0.1
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0

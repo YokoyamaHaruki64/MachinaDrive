@@ -7,6 +7,7 @@
 
 class Audio;
 class Collider;
+class Health;
 struct HitInfo;
 class CameraController;
 
@@ -15,8 +16,21 @@ class Player : public Script
     GM_SCRIPT(Player, "Player");
     USE_FIELDS
 
+public:
+    enum AttackState
+    {
+        Idle,
+        AttackReady,
+        Attacking,
+        AttackEnd,
+
+        Count
+    };
+
+
 private:
     Rigidbody* m_rigidbody = nullptr;
+    Health* m_health = nullptr;
     CameraController* m_cameraController = nullptr;
     GameObjectReference m_director;
 
@@ -40,15 +54,6 @@ private:
     bool m_isHitStop = false;
     float m_hitStopTimer = 0.0f;
 
-    enum AttackState
-    {
-        Idle,
-        AttackReady,
-        Attacking,
-        AttackEnd,
-
-        Count
-    };
     AttackState m_state = Idle;
 
     void UpdateIdle();
@@ -75,4 +80,6 @@ public:
     void HitStop(float duration);
 
     const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
+    const AttackState GetAttackState() const { return m_state; }
+
 };
