@@ -8,6 +8,7 @@
 #include "Scene/ResultScene.h"
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
+#include "Script/PlayerAnimation.h"
 #include "Script/FillBar.h"
 #include "Script/Health.h"
 #include "Script/ComboUI.h"
@@ -28,6 +29,16 @@ void Player::OnStart()
     m_health = GetComponent<Health>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
+    for (auto* childTransform : transform()->GetChildren())
+    {
+        GameObject* childObject = childTransform ? childTransform->GetOwner() : nullptr;
+        m_playerAnimation = childObject ? childObject->GetComponent<PlayerAnimation>() : nullptr;
+        if (m_playerAnimation)
+        {
+            break;
+        }
+    }
+
     m_hpBar = m_hpBarObject.Get() ? m_hpBarObject->GetComponent<FillBar>() : nullptr;
     m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
 
@@ -40,8 +51,14 @@ void Player::OnStart()
     if( !m_cameraController )
         Logger::Error("Player: CameraController component not found.");
 
+    if (!m_playerAnimation)
+        Logger::Error("Player: PlayerAnimation component not found on a child Model.");
+
     if( !m_hpBar )
         Logger::Error("Player: FillBar component not found in the specified HP Bar GameObject.");
+
+    if (!m_comboUI)
+        Logger::Error("Player: ComboUI component not found in the specified Combo UI GameObject.");
 
     if (m_health && m_hpBar)
     {
@@ -64,8 +81,6 @@ void Player::OnStart()
         });
     }
 
-    if (!m_comboUI)
-        Logger::Error("Player: ComboUI component not found in the specified Combo UI GameObject.");
 
 #ifndef _DEBUG
     m_debug = false;
@@ -139,6 +154,11 @@ void Player::UpdateIdle()
     {
         m_state = AttackReady;
 
+        if (m_playerAnimation)
+        {
+            m_playerAnimation->StartAttackReadyAnimation();
+        }
+
         m_cameraController->BeginLock();
         Input::SetMousePositionNormalized({ 0.5f, 0.5f });
         m_rigidbody->SetVelocity(Vector3::Zero());
@@ -167,6 +187,10 @@ void Player::UpdateAttackReady()
     {
         m_state = Attacking;
         m_attackTimer = m_attackTime;
+        if (m_playerAnimation)
+        {
+            m_playerAnimation->StartAttackAnimation();
+        }
 
         Vector3 move = cameraForward * m_accumulatedMouse.y + cameraRight * -m_accumulatedMouse.x;
 

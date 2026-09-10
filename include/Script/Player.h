@@ -10,6 +10,7 @@ class Collider;
 class Health;
 struct HitInfo;
 class CameraController;
+class PlayerAnimation;
 
 class Player : public Script
 {
@@ -32,6 +33,7 @@ private:
     Rigidbody* m_rigidbody = nullptr;
     Health* m_health = nullptr;
     CameraController* m_cameraController = nullptr;
+    PlayerAnimation* m_playerAnimation = nullptr;
     GameObjectReference m_director;
 
     GameObjectReference m_hpBarObject;

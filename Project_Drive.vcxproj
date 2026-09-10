@@ -248,6 +248,7 @@
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
     <ClCompile Include="source\Script\FillBar.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
+    <ClCompile Include="source\Script\PlayerAnimation.cpp" />
     <ClCompile Include="source\Script\PlayerHit.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
@@ -464,6 +465,7 @@
     <ClInclude Include="include\Script\ExplosionEffect.h" />
     <ClInclude Include="include\Script\FillBar.h" />
     <ClInclude Include="include\Script\Player.h" />
+    <ClInclude Include="include\Script\PlayerAnimation.h" />
     <ClInclude Include="include\Script\PlayerHit.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\RotateCube.h" />

@@ -729,3 +729,13 @@ gameObjects:
             - Assets/Materials/Player/Player_SpecialArmor.material
             - Assets/Materials/Player/Player_SensorArmor.material
           m_inverseAxisFlags: 0
+      - type: PlayerAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.200000003
+          m_floatSpeed: 2
+          m_idleYawSpeed: 1
+          m_atkReadyRotSpeed: 8
+          m_atkStartRotSpeed: 35
+          m_attackSpinDecay: 0.5
+          m_rotationSpeedTransitionRate: 8
