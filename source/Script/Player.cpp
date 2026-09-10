@@ -54,6 +54,14 @@ void Player::OnStart()
                 m_hpBar->AddCurrent(-damage);
             }
         });
+
+        m_health->OnDamage.emplace_back([this](float damage)
+        {
+            if(m_cameraController)
+            {
+                m_cameraController->Shake(0.3f, 0.2f);
+            }
+        });
     }
 
     if (!m_comboUI)
