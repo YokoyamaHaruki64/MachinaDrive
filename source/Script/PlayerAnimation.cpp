@@ -50,8 +50,22 @@ void PlayerAnimation::ApplyAnimation()
         0.0f);
     modelTransform->SetLocalPosition(m_initialLocalPosition + floatingOffset);
 
-    const Quaternion animationRotation = Quaternion::EulerToQuat(m_rotationEuler);
-    modelTransform->SetLocalRotation(m_initialLocalRotation * animationRotation);
+    modelTransform->SetLocalRotation(m_initialLocalRotation * m_animationRotation);
+}
+
+void PlayerAnimation::UpdateRotation(float deltaTime)
+{
+    const float angularSpeed = m_rotationSpeed.Length();
+    if (angularSpeed <= 1.0e-6f)
+    {
+        return;
+    }
+
+    const Vector3 rotationAxis = m_rotationSpeed / angularSpeed;
+    const Quaternion deltaRotation = Quaternion::FromAxisAngle(
+        rotationAxis,
+        angularSpeed * deltaTime);
+    m_animationRotation = (m_animationRotation * deltaRotation).Normalized();
 }
 
 void PlayerAnimation::OnStart()
@@ -61,7 +75,6 @@ void PlayerAnimation::OnStart()
     {
         m_initialLocalPosition = modelTransform->GetLocalPosition();
         m_initialLocalRotation = modelTransform->GetLocalRotation();
-        m_rotationEuler = m_initialLocalRotation.QuatToEuler();
     }
 
     GameObject* playerObject = m_owner ? m_owner->GetParent() : nullptr;
@@ -119,6 +132,6 @@ void PlayerAnimation::Update()
             break;
     }
 
-    m_rotationEuler += m_rotationSpeed * deltaTime;
+    UpdateRotation(deltaTime);
     ApplyAnimation();
 }

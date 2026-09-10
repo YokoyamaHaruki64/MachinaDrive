@@ -12,7 +12,7 @@ class PlayerAnimation : public Script
     USE_FIELDS
 
 private:
-    // 角度・角速度は、時間は秒で指定する。
+    // 角度・角速度はラジアン、時間は秒で指定する。
     float m_floatHeight = 0.08f;
     float m_floatSpeed = 2.0f;
 
@@ -37,10 +37,11 @@ private:
     Quaternion m_initialLocalRotation = Quaternion::Identity();
 
     float m_elapsedTime = 0.0f;
-    Vector3 m_rotationEuler = Vector3::Zero();
+    Quaternion m_animationRotation = Quaternion::Identity();
     Vector3 m_rotationSpeed = Vector3(0.0f, m_idleYawSpeed, 0.0f);
 
     static float Approach(float current, float target, float rate, float deltaTime);
+    void UpdateRotation(float deltaTime);
     void ApplyAnimation();
 
 public:
