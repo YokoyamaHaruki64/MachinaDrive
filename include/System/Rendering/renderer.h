@@ -132,6 +132,7 @@ public:
 	static void SetWorldViewProjection2D();
 	static void SetWorldMatrix(XMMATRIX WorldMatrix);
 	static void SetViewMatrix(XMMATRIX ViewMatrix);
+	static void SetCameraPosition(const Vector3& position);
 	static void SetProjectionMatrix(XMMATRIX ProjectionMatrix);
 	static void SetLight(LIGHT Light);
     static void SetBlendMode(BlendMode mode);

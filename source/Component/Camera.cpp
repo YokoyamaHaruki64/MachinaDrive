@@ -33,8 +33,9 @@ void Camera::SetActiveMainCamera(Camera* camera)
 
 void Camera::SetViewProjection()
 {
+    const Vector3 eyePosition = transform()->GetPosition();
     XMMATRIX viewMatrix = XMMatrixLookAtLH(
-        XMLoadFloat3((XMFLOAT3*)&transform()->GetPosition()),
+        XMLoadFloat3((XMFLOAT3*)&eyePosition),
         XMLoadFloat3((XMFLOAT3*)&m_target),
         XMLoadFloat3((XMFLOAT3*)&m_up)
     );
@@ -48,5 +49,6 @@ void Camera::SetViewProjection()
 
     Renderer::SetViewMatrix(viewMatrix);
     Renderer::SetProjectionMatrix(projMatrix);
+    Renderer::SetCameraPosition(eyePosition);
 
 }

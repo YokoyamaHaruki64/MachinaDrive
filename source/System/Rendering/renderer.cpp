@@ -805,6 +805,13 @@ void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 	m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
 }
 
+void Renderer::SetCameraPosition(const Vector3& position)
+{
+    // PBRの視線方向をワールド座標で計算できるよう、カメラ移動時に更新する。
+    m_PerFrame.CameraPosition = XMFLOAT3(position.x, position.y, position.z);
+    m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
+}
+
 void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 {
     m_ProjectionMatrix = ProjectionMatrix;
