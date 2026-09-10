@@ -1,5 +1,5 @@
 version: 1
-name: BasicEnemy
+name: Enemy
 gameObjects:
   - id: 5
     name: BasicEnemy
@@ -11,34 +11,13 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
+          m_localPosition: [13,0,4.01000023]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
-        fields:
-          enabled: true
-          m_center: [0,1,0]
-          m_isTrigger: false
-          m_layer: 2
-          m_radius: 0.5
-          m_height: 2
       - type: Rigidbody
         fields:
           enabled: true
-          m_motionType: 1
+          m_motionType: 2
           m_mass: 1
           m_bounciness: 0
           m_friction: 0
@@ -52,17 +31,39 @@ gameObjects:
       - type: BasicEnemy
         fields:
           enabled: true
-          m_moveSpeed: 4
-          m_chaseRange: 12
-          m_attackRange: 10
+          m_attackRange: 15
           m_shootCooldown: 1.5
           m_invincibilityDuration: 0.5
-          m_turnInterval: 1
-          m_randomTurnAngle: 60
           m_projectileSpeed: 30
-          m_preferredDistance: 3
-          m_chasePlayer: true
-          m_teleportNearPlayer: false
-          m_teleportInterval: 3
-          m_teleportDistance: 8
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.50999999,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 1.79999995
+  - id: 66
+    name: Model
+    tag: 
+    active: true
+    prefab: 
+    parent: 5
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/BasicDrone_Body.material
+            - Assets/Materials/Enemy/BasicDrone_Line.material
+          m_inverseAxisFlags: 0

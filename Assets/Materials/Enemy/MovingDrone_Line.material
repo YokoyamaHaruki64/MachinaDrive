@@ -1,0 +1,16 @@
+version: 1
+name: BasicDrone_Line
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [0.117647059,1,1,1]
+  _Emission: [0.0941176489,1,1,1]
+  _Metallic: 0
+  _Roughness: 0
+  _ToonBands: 1
+  _ToonShadowColor: [0,1,0.862745106,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.450000018
+  _RimColor: [0,1,1,1]
+  _RimPower: 4
+  _RimStrength: 1
+  _MainTex: 

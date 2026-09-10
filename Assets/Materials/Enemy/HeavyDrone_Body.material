@@ -1,0 +1,16 @@
+version: 1
+name: HeavyDrone_Body
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [1,0.741312683,0,1]
+  _Emission: [0,0,0,1]
+  _Metallic: 0
+  _Roughness: 0.5
+  _ToonBands: 4
+  _ToonShadowColor: [0,0,0,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.0299999993
+  _RimColor: [0.350082159,0.389961362,0.0948554575,1]
+  _RimPower: 4
+  _RimStrength: 0.479999989
+  _MainTex: 

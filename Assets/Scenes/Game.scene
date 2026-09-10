@@ -145,30 +145,9 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [13.3599997,0,4]
+          m_localPosition: [13,0,4.01000023]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
-        fields:
-          enabled: true
-          m_center: [0,1,0]
-          m_isTrigger: false
-          m_layer: 2
-          m_radius: 0.5
-          m_height: 2
       - type: Rigidbody
         fields:
           enabled: true
@@ -191,6 +170,13 @@ gameObjects:
           m_invincibilityDuration: 0.5
           m_projectileSpeed: 30
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.50999999,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 1.79999995
   - id: 6
     name: MovingEnemy
     tag: Enemy
@@ -204,27 +190,6 @@ gameObjects:
           m_localPosition: [-16.4599991,0,4]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
-        fields:
-          enabled: true
-          m_center: [0,1,0]
-          m_isTrigger: false
-          m_layer: 2
-          m_radius: 0.5
-          m_height: 2
       - type: Rigidbody
         fields:
           enabled: true
@@ -250,6 +215,13 @@ gameObjects:
           m_moveDuration: 4
           m_stopDuration: 3
           m_moveSpeed: 20
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.50999999,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 1.79999995
   - id: 7
     name: HeavyEnemy
     tag: Enemy
@@ -260,30 +232,9 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,18.9599991]
+          m_localPosition: [0,0,8.59000015]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1.70000005,1.70000005,1.70000005]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
-        fields:
-          enabled: true
-          m_center: [0,1.70000005,0]
-          m_isTrigger: false
-          m_layer: 2
-          m_radius: 0.850000024
-          m_height: 3.4000001
       - type: Rigidbody
         fields:
           enabled: true
@@ -306,6 +257,13 @@ gameObjects:
           m_invincibilityDuration: 0.5
           m_projectileSpeed: 28
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,3.74000001,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 2.3599999
   - id: 8
     name: Tree(Instance)
     tag: 
@@ -738,9 +696,9 @@ gameObjects:
             - [1,0.0888031125,0.0888031125,1]
             - [0.523365319,0.308880329,1,1]
           m_attackReadyBlinkSpeed: 5
-          m_attackReadyBlinkAmount: 0.35
+          m_attackReadyBlinkAmount: 0.349999994
           m_attackingBlinkSpeed: 16
-          m_attackingBlinkAmount: 0.7
+          m_attackingBlinkAmount: 0.699999988
           m_floatHeight: 0.200000003
           m_floatSpeed: 2
           m_idleYawSpeed: 1
@@ -748,3 +706,75 @@ gameObjects:
           m_atkStartRotSpeed: 35
           m_attackSpinDecay: 0.5
           m_rotationSpeedTransitionRate: 8
+  - id: 66
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 5
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/BasicDrone_Body.material
+            - Assets/Materials/Enemy/BasicDrone_Line.material
+          m_inverseAxisFlags: 0
+  - id: 74
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/MovingEnemy.prefab
+    parent: 6
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/MovingDrone_Body.material
+            - Assets/Materials/Enemy/MovingDrone_Line.material
+          m_inverseAxisFlags: 0
+  - id: 75
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/HeavyEnemy.prefab
+    parent: 7
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-2.65906874e-06,2.27999997,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00499999989,0.00400000019,0.00400000019]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/HeavyDrone_Body.material
+            - Assets/Materials/Enemy/HeavyDrone_Line.material
+          m_inverseAxisFlags: 0
