@@ -3,7 +3,7 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/PlayerHit.h"
-#include "Script/Health.h"
+#include "Script/Enemy.h"
 #include "Script/Player.h"
 #include "Script/CameraController.h"
 #include "Script/ComboUI.h"
@@ -59,8 +59,9 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
             return;
 
 
-        if (Health* health = otherObject->GetComponent<Health>())
-            health->TakeDamage(1.0f);
+        Enemy* enemy = otherObject->GetComponent<Enemy>();
+        if (!enemy || !enemy->TakeDamage(1.0f))
+            return;
 
         if(m_cameraController)  m_cameraController->Shake(m_shakeDuration, m_shakeMagnitude);
 

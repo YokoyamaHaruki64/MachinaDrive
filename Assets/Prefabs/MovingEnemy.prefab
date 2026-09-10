@@ -51,6 +51,7 @@ gameObjects:
           m_chaseRange: 0
           m_attackRange: 10
           m_shootCooldown: 1.2
+          m_invincibilityDuration: 0.5
           m_turnInterval: 0.6
           m_randomTurnAngle: 90
           m_projectileSpeed: 34

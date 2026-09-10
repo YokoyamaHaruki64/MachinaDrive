@@ -13,6 +13,8 @@ protected:
 
     float m_attackRange = 10.0f;
     float m_shootCooldown = 1.5f;
+    float m_invincibilityDuration = 0.5f;
+    float m_invincibilityTimer = 0.0f;
     float m_projectileSpeed = 30.0f;
     PrefabReference m_enemyBulletPrefab{ "Assets/Prefabs/EnemyBullet.prefab" };
 
@@ -33,4 +35,5 @@ public:
     void OnHitBegin(const HitInfo& hitInfo) override;
     void OnDestroy() override;
 
+    bool TakeDamage(float damage);
 };

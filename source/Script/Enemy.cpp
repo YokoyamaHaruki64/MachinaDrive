@@ -14,6 +14,7 @@ void Enemy::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD(m_attackRange);
     GM_FIELD(m_shootCooldown);
+    GM_FIELD(m_invincibilityDuration);
     GM_FIELD(m_projectileSpeed);
     GM_FIELD(m_enemyBulletPrefab);
 }
@@ -28,6 +29,8 @@ void Enemy::OnStart()
         return;
     }
 
+    m_invincibilityTimer = 0.0f;
+
     m_health->OnDeath.emplace_back([this]()
     {
         if (!m_owner->IsDestroyed())
@@ -39,6 +42,8 @@ void Enemy::OnStart()
 
 void Enemy::Update()
 {
+    m_invincibilityTimer = Math::Max(m_invincibilityTimer - Time::GetDeltaTime(), 0.0f);
+
     const Vector3 position = transform()->GetPosition();
     if (m_playerObject && m_playerObject->GetTransform())
     {
@@ -50,6 +55,18 @@ void Enemy::Update()
         UpdateBehavior(playerPosition);
         UpdateShooting(playerPosition, playerDistanceSqr);
     }
+}
+
+bool Enemy::TakeDamage(float damage)
+{
+    if (!m_health || m_health->IsDead() || m_owner->IsDestroyed() || damage <= 0.0f || m_invincibilityTimer > 0.0f)
+    {
+        return false;
+    }
+
+    m_invincibilityTimer = Math::Max(m_invincibilityDuration, 0.0f);
+    m_health->TakeDamage(damage);
+    return true;
 }
 
 void Enemy::UpdateShooting(const Vector3& playerPosition, float playerDistanceSqr)

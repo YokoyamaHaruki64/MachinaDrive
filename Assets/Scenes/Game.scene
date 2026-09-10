@@ -200,6 +200,7 @@ gameObjects:
           enabled: true
           m_attackRange: 15
           m_shootCooldown: 1.5
+          m_invincibilityDuration: 0.5
           m_projectileSpeed: 30
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
   - id: 6
@@ -255,6 +256,7 @@ gameObjects:
           enabled: true
           m_attackRange: 10
           m_shootCooldown: 1.20000005
+          m_invincibilityDuration: 0.5
           m_projectileSpeed: 34
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
           m_moveDuration: 4
@@ -313,6 +315,7 @@ gameObjects:
           enabled: true
           m_attackRange: 15
           m_shootCooldown: 2
+          m_invincibilityDuration: 0.5
           m_projectileSpeed: 28
           m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
   - id: 8
