@@ -5,4 +5,4 @@ properties:
   _BaseColor: [0.600000024,0.600000024,0.600000024,1]
   _UVScale: [1,1]
   _UVOffset: [0,0]
-  _MainTex: Assets/Local/Textures/sky.jpg
+  _MainTex: Assets/Local/Textures/Sky2.png
