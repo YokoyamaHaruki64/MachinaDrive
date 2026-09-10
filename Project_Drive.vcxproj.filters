@@ -237,7 +237,7 @@
     <ClCompile Include="source\System\Core\GM_Time.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
-    <ClCompile Include="source\Script\Bullet.cpp">
+    <ClCompile Include="source\Script\EnemyBullet.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\Script\BasicEnemy.cpp">
@@ -596,7 +596,7 @@
     <ClInclude Include="include\System\Rendering\RendererBase.h">
       <Filter>ヘッダー ファイル\System\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="include\Script\Bullet.h">
+    <ClInclude Include="include\Script\EnemyBullet.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\BasicEnemy.h">

@@ -59,4 +59,4 @@ gameObjects:
           m_moveDuration: 3
           m_stopDuration: 1
           m_moveSpeed: 12
-          m_bulletPrefab: Assets/Prefabs/Bullet.prefab
+          m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab

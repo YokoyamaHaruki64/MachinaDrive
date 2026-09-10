@@ -14,7 +14,7 @@ protected:
     float m_attackRange = 10.0f;
     float m_shootCooldown = 1.5f;
     float m_projectileSpeed = 30.0f;
-    PrefabReference m_bulletPrefab{ "Assets/Prefabs/Bullet.prefab" };
+    PrefabReference m_enemyBulletPrefab{ "Assets/Prefabs/EnemyBullet.prefab" };
 
     void UpdateShooting(const Vector3& playerPosition, float playerDistanceSqr);
     void ShootAt(const Vector3& targetPosition);

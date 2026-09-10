@@ -1,8 +1,8 @@
 version: 1
-name: Bullet
+name: EnemyBullet
 gameObjects:
   - id: 1
-    name: Bullet
+    name: EnemyBullet
     prefab:
     parent:
     components:
@@ -48,7 +48,7 @@ gameObjects:
           m_minSegmentDistance: 0.05
           m_width: 0.4
           faceMode: 0
-      - type: Bullet
+      - type: EnemyBullet
         fields:
           m_trailWidthCurve:
             - time: 0

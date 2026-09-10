@@ -2,7 +2,7 @@
 
 #include "Component/ComponentInc.h"
 
-#include "Script/Bullet.h"
+#include "Script/EnemyBullet.h"
 #include "Script/Enemy.h"
 #include "Script/Health.h"
 #include "Script/Score.h"
@@ -15,7 +15,7 @@ void Enemy::RegisterFields(FieldRegistry& fields)
     GM_FIELD(m_attackRange);
     GM_FIELD(m_shootCooldown);
     GM_FIELD(m_projectileSpeed);
-    GM_FIELD(m_bulletPrefab);
+    GM_FIELD(m_enemyBulletPrefab);
 }
 
 void Enemy::OnStart()
@@ -77,22 +77,21 @@ void Enemy::ShootAt(const Vector3& targetPosition)
     }
 
     direction.Normalize();
-    if (!m_bulletPrefab)
+    if (!m_enemyBulletPrefab)
     {
         return;
     }
 
     GameObject* projectileObject = Manager::Instantiate(
-        m_bulletPrefab.GetPath(),
+        m_enemyBulletPrefab.GetPath(),
         transform()->GetPosition() + direction * 0.8f + Vector3(0.0f, 1.0f, 0.0f),
         Vector3::Zero(),
         Vector3::One());
     if (projectileObject)
     {
-        if (Bullet* projectile = projectileObject->GetComponent<Bullet>())
+        if (EnemyBullet* projectile = projectileObject->GetComponent<EnemyBullet>())
         {
             projectile->SetVelocity(direction * m_projectileSpeed);
-            projectile->SetEnemyProjectile(true);
         }
     }
 }

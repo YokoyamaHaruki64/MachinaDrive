@@ -237,7 +237,7 @@
     <ClCompile Include="source\Scene\GameScene.cpp" />
     <ClCompile Include="source\Scene\ResultScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
-    <ClCompile Include="source\Script\Bullet.cpp" />
+    <ClCompile Include="source\Script\EnemyBullet.cpp" />
     <ClCompile Include="source\Script\BasicEnemy.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\ComboUI.cpp" />
@@ -453,7 +453,7 @@
     <ClInclude Include="include\Scene\ResultScene.h" />
     <ClInclude Include="include\Scene\Scene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
-    <ClInclude Include="include\Script\Bullet.h" />
+    <ClInclude Include="include\Script\EnemyBullet.h" />
     <ClInclude Include="include\Script\BasicEnemy.h" />
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\ComboUI.h" />

@@ -64,4 +64,4 @@ gameObjects:
           m_teleportNearPlayer: false
           m_teleportInterval: 3
           m_teleportDistance: 8
-          m_bulletPrefab: Assets/Prefabs/Bullet.prefab
+          m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
