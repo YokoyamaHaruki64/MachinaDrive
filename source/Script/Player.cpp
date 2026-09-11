@@ -23,6 +23,9 @@ FIELDS_END()
 
 void Player::OnStart()
 {
+    // Player操作はマウスを相対移動で使うため、Runtime開始時からカーソルを捕捉する。
+    Input::ShowCursor(false);
+
     m_jumpSE = GetComponent<Audio>();
     m_rigidbody = GetComponent<Rigidbody>();
     m_health = GetComponent<Health>();
