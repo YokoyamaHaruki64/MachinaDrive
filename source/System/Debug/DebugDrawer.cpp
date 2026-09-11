@@ -29,6 +29,7 @@ std::vector<DebugDrawer::DebugVertex> DebugDrawer::s_unitCylinderVertices;
 Microsoft::WRL::ComPtr<ID3D11Buffer> DebugDrawer::s_vertexBuffer;
 std::size_t DebugDrawer::s_vertexBufferCapacity = 0;
 GraphicsShader* DebugDrawer::s_shader = nullptr;
+bool DebugDrawer::s_enabled = true;
 
 float DebugDrawer::GetMaximumAbsScale(const Transform* transform)
 {
@@ -358,6 +359,7 @@ bool DebugDrawer::EnsureVertexBuffer(std::size_t vertexCount)
 
 void DebugDrawer::Initialize()
 {
+    s_enabled = true;
     BuildUnitShapes();
     s_shader = ShaderManager::LoadShaderFromFile(DEBUG_COLLIDER_SHADER_PATH);
     if (!s_shader)
@@ -379,6 +381,7 @@ void DebugDrawer::Uninitialize()
     s_unitCylinderVertices.clear();
     s_colliders.clear();
     s_shader = nullptr;
+    s_enabled = false;
 }
 
 void DebugDrawer::RegisterCollider(Collider* collider)
@@ -406,7 +409,7 @@ void DebugDrawer::UnregisterCollider(Collider* collider)
 
 void DebugDrawer::Draw()
 {
-    if (!s_shader || !s_shader->IsValid() || !Renderer::GetDeviceContext())
+    if (!s_enabled || !s_shader || !s_shader->IsValid() || !Renderer::GetDeviceContext())
     {
         return;
     }

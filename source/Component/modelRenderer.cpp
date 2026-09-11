@@ -31,7 +31,7 @@ namespace
             matrix.m[3][0], matrix.m[3][1], matrix.m[3][2], matrix.m[3][3]);
     }
 
-    void DrawMesh(ModelRenderer& renderer, const Mesh& mesh, const XMMATRIX& worldMatrix)
+    void DrawMesh(ModelRenderer& renderer, const Mesh& mesh, const XMMATRIX& worldMatrix, RenderPhase phase)
     {
         ID3D11DeviceContext* deviceContext = Renderer::GetDeviceContext();
         deviceContext->IASetIndexBuffer(mesh.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
@@ -40,14 +40,24 @@ namespace
         if (!material)
             return;
 
-        Renderer::SetWorldMatrix(worldMatrix);
-        material->Bind(0, renderer.FindMaterialPropertyOverride(mesh.materialSlot));
-        const GraphicsShaderPass& shaderPass = material->GetShaderPass(0);
+        if (phase == RenderPhase::Shadow && !renderer.GetCastShadow())
+            return;
 
-        // Passが要求するStreamだけを、その入力スロットへ対応付ける。
-        bool hasAllRequiredStreams = true;
-        for (const InputSlotBinding& binding : shaderPass.GetInputSlotBindings())
+        const std::vector<GraphicsShaderPass>& shaderPasses = material->GetShader().GetShaderPasses();
+        for (size_t passIndex = 0; passIndex < shaderPasses.size(); ++passIndex)
         {
+            const GraphicsShaderPass& shaderPass = shaderPasses[passIndex];
+            if (shaderPass.GetRenderState().renderPhase != phase)
+                continue;
+
+            Renderer::SetWorldMatrix(worldMatrix);
+            Renderer::SetReceiveShadow(renderer.GetReceiveShadow());
+            material->Bind(passIndex, renderer.FindMaterialPropertyOverride(mesh.materialSlot));
+
+            // Passが要求するStreamだけを、その入力スロットへ対応付ける。
+            bool hasAllRequiredStreams = true;
+            for (const InputSlotBinding& binding : shaderPass.GetInputSlotBindings())
+            {
                 ID3D11Buffer* vertexBuffer = mesh.GetVertexBuffer(binding.streamType);
                 const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
                 if (stride == 0)
@@ -81,24 +91,25 @@ namespace
 
             const UINT offset = 0;
             deviceContext->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
-        }
+            }
 
-        if (hasAllRequiredStreams)
-            deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
+            if (hasAllRequiredStreams)
+                deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
+        }
     }
 
-    void DrawNode(ModelRenderer& renderer, const ModelAsset& modelAsset, const ModelNode& node, const XMMATRIX& parentWorldMatrix)
+    void DrawNode(ModelRenderer& renderer, const ModelAsset& modelAsset, const ModelNode& node, const XMMATRIX& parentWorldMatrix, RenderPhase phase)
     {
         // 行ベクトル系のため、ローカル変換を親変換の左側へ積算する。
         const XMMATRIX worldMatrix = ToXMMATRIX(node.localTransform) * parentWorldMatrix;
         for (const uint32_t meshIndex : node.meshIndices)
         {
             if (meshIndex < modelAsset.meshes.size())
-                DrawMesh(renderer, modelAsset.meshes[meshIndex], worldMatrix);
+                DrawMesh(renderer, modelAsset.meshes[meshIndex], worldMatrix, phase);
         }
 
         for (const ModelNode& child : node.children)
-            DrawNode(renderer, modelAsset, child, worldMatrix);
+            DrawNode(renderer, modelAsset, child, worldMatrix, phase);
     }
 }
 
@@ -166,6 +177,8 @@ void ModelRenderer::RegisterFields(FieldRegistry& fields)
     GM_FIELD_PATH(m_modelPath, "Assets/Local/Models", ".obj", ".fbx", ".gltf");
     GM_FIELD_TYPE(m_materialPaths, InspectorFieldType::Hidden);
     GM_FIELD(m_inverseAxisFlags);
+    GM_FIELD(m_castShadow);
+    GM_FIELD(m_receiveShadow);
 }
 
 void ModelRenderer::SetModel(ModelAsset* modelAsset)
@@ -240,5 +253,39 @@ void ModelRenderer::Draw()
     const XMMATRIX componentWorldMatrix = transform() ? CalcWorldMatrix() : XMMatrixIdentity();
 
     // ModelAssetのNode階層を辿り、各MeshをComponentのWorld座標へ配置して描画する。
-    DrawNode(*this, *m_model, m_model->rootNode, axisInverse * componentWorldMatrix);
+    DrawNode(*this, *m_model, m_model->rootNode, axisInverse * componentWorldMatrix, Renderer::GetCurrentRenderPhase());
+}
+
+void ModelRenderer::Submit()
+{
+    if (!m_model)
+        return;
+
+    std::unordered_set<RenderPhase> phases;
+    for (const Mesh& mesh : m_model->meshes)
+    {
+        Material* material = GetMaterial(mesh.materialSlot);
+        if (!material)
+            continue;
+
+        for (const GraphicsShaderPass& shaderPass : material->GetShader().GetShaderPasses())
+        {
+            const RenderPhase phase = shaderPass.GetRenderState().renderPhase;
+            if (phase != RenderPhase::PostProcess)
+                phases.insert(phase);
+        }
+    }
+
+    for (size_t phaseIndex = 0; phaseIndex < static_cast<size_t>(RenderPhase::Count); ++phaseIndex)
+    {
+        const RenderPhase phase = static_cast<RenderPhase>(phaseIndex);
+        if (!phases.contains(phase))
+            continue;
+
+        DrawItem item{};
+        item.renderer = this;
+        item.meshID = GetMeshID();
+        item.sortKey = static_cast<uint64_t>(GetDrawLayer() + 32768);
+        Renderer::SubmitDrawCommand(phase, item);
+    }
 }

@@ -1054,6 +1054,9 @@
     <FxCompile Include="Assets\Shaders\PBRLighting.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Shaders\lighting.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
     <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>

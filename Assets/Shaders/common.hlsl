@@ -12,11 +12,23 @@ cbuffer PerFrame : register(b0)
 cbuffer PerObject : register(b1)
 {
 	matrix World;
+	uint ReceiveShadow;
+	float3 PerObjectPadding;
 }
 
 SamplerState LinearSampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
 SamplerState ClampSampler : register(s2);
+Texture2DArray ShadowMap : register(t1);
+
+cbuffer ShadowParameters : register(b4)
+{
+	matrix LightViewProjection[4];
+	float2 ShadowMapTexelSize;
+	uint CurrentCascadeIndex;
+	float ShadowParametersPadding;
+	float4 CascadeFarDistances;
+}
 
 
 

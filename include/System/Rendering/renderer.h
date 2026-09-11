@@ -42,6 +42,19 @@ struct PerFrame
 struct PerObject
 {
 	XMFLOAT4X4	World;
+	UINT        ReceiveShadow;
+	UINT        Padding[3];
+};
+
+constexpr size_t SHADOW_CASCADE_COUNT = 4;
+
+struct ShadowParameters
+{
+    XMFLOAT4X4 LightViewProjection[SHADOW_CASCADE_COUNT];
+    XMFLOAT2 ShadowMapTexelSize;
+    UINT CurrentCascadeIndex;
+    float Padding;
+    XMFLOAT4 CascadeFarDistances;
 };
 
 
@@ -83,6 +96,7 @@ private:
 	static ID3D11Buffer*			m_PerFrameBuffer;
 	static ID3D11Buffer*			m_PerObjectBuffer;
 	static ID3D11Buffer*			m_LightingBuffer;
+	static ID3D11Buffer*            m_ShadowParametersBuffer;
     static std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> m_FallbackVertexBuffers;
 
     static std::array<ID3D11DepthStencilState*, 14> m_DepthStates;
@@ -90,6 +104,7 @@ private:
     static ID3D11RasterizerState* m_RasterizerState;
     static ID3D11RasterizerState* m_RasterizerStateNoCull;
     static ID3D11RasterizerState* m_RasterizerStateFront;
+    static ID3D11RasterizerState* m_ShadowRasterizerState;
 
 	static ID3D11BlendState*		m_BlendState;
     static ID3D11BlendState*        m_BlendStateAdd;
@@ -97,11 +112,17 @@ private:
 	static ID3D11SamplerState*		m_LinearSampler;
 	static ID3D11SamplerState*		m_ClampSampler;
 	static ID3D11SamplerState*		m_ShadowSampler;
+	static ID3D11Texture2D*         m_ShadowMapTexture;
+	static std::array<ID3D11DepthStencilView*, SHADOW_CASCADE_COUNT> m_ShadowMapDSVs;
+	static ID3D11ShaderResourceView* m_ShadowMapSRV;
 
     static XMMATRIX m_ViewMatrix;
     static XMMATRIX m_ProjectionMatrix;
     static PerFrame m_PerFrame;
     static PerObject m_PerObject;
+    static ShadowParameters m_ShadowParameters;
+    static LIGHT m_Light;
+    static RenderPhase m_CurrentRenderPhase;
 
     static std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> m_DrawQueues;
     static std::vector<PostProcess*> m_postEffects;
@@ -115,6 +136,10 @@ private:
     static bool CreateGameRenderTargets(UINT width, UINT height);
     static void ReleaseGameRenderTargets();
     static void SetSrcRTV();
+    static bool CreateShadowMap();
+    static void BeginShadowPass(size_t cascadeIndex);
+    static void EndShadowPass();
+    static void UpdateShadowParameters();
     static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);
 
 public:
@@ -131,6 +156,7 @@ public:
 	static void SetATCEnable(bool Enable);
 	static void SetWorldViewProjection2D();
 	static void SetWorldMatrix(XMMATRIX WorldMatrix);
+	static void SetReceiveShadow(bool receiveShadow);
 	static void SetViewMatrix(XMMATRIX ViewMatrix);
 	static void SetCameraPosition(const Vector3& position);
 	static void SetProjectionMatrix(XMMATRIX ProjectionMatrix);
@@ -147,6 +173,7 @@ public:
     static XMMATRIX GetProjectionMatrix();
     static BlendMode GetCurrentBlendMode() { return m_CurrentBlendMode; }
     static CullMode GetCurrentCullMode() { return m_CurrentCullMode; }
+    static RenderPhase GetCurrentRenderPhase() { return m_CurrentRenderPhase; }
 
     static void SubmitDrawItem(RenderPhase phase, DrawItem item);
     static void SubmitDrawCommand(RenderPhase phase, DrawItem item);

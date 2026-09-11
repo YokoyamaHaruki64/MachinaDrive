@@ -53,4 +53,37 @@ Shader "UnlitTexture"
         }
         HLSL_END
     }
+
+    Pass
+    {
+        RenderPhase = Shadow
+        Cull = Front
+        Blend = None
+        ZWrite = On
+        ZTest = LessEqual
+
+        #pragma vertex VSShadow
+        #pragma pixel PSShadow
+        #pragma shader_model 5.0
+
+        HLSL_BEGIN
+        #include "common.hlsl"
+        #include "lighting.hlsl"
+
+        struct ShadowVSInput
+        {
+            float3 position : POSITION0;
+        };
+
+        float4 VSShadow(ShadowVSInput input) : SV_POSITION
+        {
+            return GetShadowClipPosition(mul(float4(input.position, 1.0f), World));
+        }
+
+        float4 PSShadow() : SV_TARGET
+        {
+            return 0.0f;
+        }
+        HLSL_END
+    }
 }

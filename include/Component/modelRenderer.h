@@ -25,6 +25,8 @@ private:
     std::vector<Material*> m_materialOverrides{};
     std::vector<std::string> m_materialPaths{};
     int m_inverseAxisFlags{};
+    bool m_castShadow = true;
+    bool m_receiveShadow = true;
 
     void InitializeMaterialOverrides();
     Material* ResolveMaterial(uint32_t materialSlot) const;
@@ -49,7 +51,13 @@ public:
     uint32_t GetMaterialSlotCount() const override { return static_cast<uint32_t>(m_materialOverrides.size()); }
     uint32_t GetMeshID() const override;
 
+    bool GetCastShadow() const { return m_castShadow; }
+    void SetCastShadow(bool value) { m_castShadow = value; }
+    bool GetReceiveShadow() const { return m_receiveShadow; }
+    void SetReceiveShadow(bool value) { m_receiveShadow = value; }
+
     void Draw() override;
+    void Submit() override;
     void OnLoaded() override;
     void OnEditorUpdate() override;
 

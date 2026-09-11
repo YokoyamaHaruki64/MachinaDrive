@@ -87,7 +87,7 @@ public:
             m_owner->IsActive() &&
             IsEnabled();
     }
-    void Submit();
+    virtual void Submit();
 
     int GetDrawLayer() const { return m_drawLayer; }
     void SetDrawLayer(int layer) { m_drawLayer = layer; }

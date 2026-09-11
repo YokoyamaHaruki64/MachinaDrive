@@ -6,6 +6,7 @@
 
 #include "System/Core/manager.h"
 #include "System/Core/input.h"
+#include "System/Debug/DebugDrawer.h"
 #include "System/Rendering/renderer.h"
 
 namespace
@@ -62,6 +63,12 @@ void GameWindow::DrawImGui()
     if (!Manager::IsPlayMode() && ImGui::Button(m_displayUI ? "Hide UI" : "Display UI"))
     {
         m_displayUI = !m_displayUI;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button(DebugDrawer::IsEnabled() ? "Hide Colliders" : "Show Colliders"))
+    {
+        DebugDrawer::SetEnabled(!DebugDrawer::IsEnabled());
     }
 
     ImGui::SameLine();

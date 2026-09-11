@@ -42,6 +42,7 @@ private:
     static Microsoft::WRL::ComPtr<ID3D11Buffer> s_vertexBuffer;
     static std::size_t s_vertexBufferCapacity;
     static GraphicsShader* s_shader;
+    static bool s_enabled;
 
     static float GetMaximumAbsScale(const Transform* transform);
     static Quaternion GetWorldRotation(const Collider& collider);
@@ -80,6 +81,9 @@ public:
 
     static void RegisterCollider(Collider* collider);
     static void UnregisterCollider(Collider* collider);
+
+    static bool IsEnabled() { return s_enabled; }
+    static void SetEnabled(bool enabled) { s_enabled = enabled; }
 
     // 現在登録されている有効なColliderから頂点を生成し、LineListで一度だけ描画する。
     static void Draw();
