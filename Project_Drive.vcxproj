@@ -241,6 +241,8 @@
     <ClCompile Include="source\Script\BasicEnemy.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
     <ClCompile Include="source\Script\ComboUI.cpp" />
+    <ClCompile Include="source\Script\UI\GameHud.cpp" />
+    <ClCompile Include="source\Script\UI\HudNumber.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
     <ClCompile Include="source\Script\EnemyAnimation.cpp" />
     <ClCompile Include="source\Script\Health.cpp" />
@@ -460,6 +462,8 @@
     <ClInclude Include="include\Script\BasicEnemy.h" />
     <ClInclude Include="include\Script\CameraController.h" />
     <ClInclude Include="include\Script\ComboUI.h" />
+    <ClInclude Include="include\Script\UI\GameHud.h" />
+    <ClInclude Include="include\Script\UI\HudNumber.h" />
     <ClInclude Include="include\Script\Enemy.h" />
     <ClInclude Include="include\Script\EnemyAnimation.h" />
     <ClInclude Include="include\Script\Health.h" />
@@ -636,12 +640,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Assets\Shaders\ChannelPackedNumber.shader" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
+    <None Include="Assets\Shaders\GaugeInner.shader" />
     <None Include="Assets\Shaders\PBRDefault.shader" />
     <None Include="Assets\Shaders\PBRToon.shader" />
     <None Include="Assets\Shaders\FillBarShader.shader" />
     <None Include="Assets\Shaders\PostProcessBloom.shader" />
     <None Include="Assets\Shaders\ShotDirector.shader" />
+    <None Include="Assets\Shaders\UI.shader" />
     <None Include="Assets\Shaders\UIImageFill.shader" />
     <None Include="Assets\Shaders\UnlitAdditive.shader" />
     <None Include="Assets\Shaders\UnlitTexture.shader" />
