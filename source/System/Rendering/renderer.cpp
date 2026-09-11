@@ -4,6 +4,7 @@
 #include "System/Core/GM_Time.h"
 #include "System/Rendering/renderer.h"
 #include "System/Rendering/RendererBase.h"
+#include "Component/Camera.h"
 #include "Component/PostEffect.h"
 #include "Graphics/Material.h"
 #include "Graphics/TextureManager.h"
@@ -30,6 +31,7 @@ int Renderer::dstBufferIndex = 1;
 ID3D11Buffer*			Renderer::m_PerFrameBuffer{};
 ID3D11Buffer*			Renderer::m_PerObjectBuffer{};
 ID3D11Buffer*			Renderer::m_LightingBuffer{};
+ID3D11Buffer*            Renderer::m_ShadowParametersBuffer{};
 std::array<ID3D11Buffer*, static_cast<size_t>(VertexStreamType::Count)> Renderer::m_FallbackVertexBuffers{};
 
 
@@ -40,6 +42,7 @@ std::array<ID3D11DepthStencilState*,
 ID3D11RasterizerState* Renderer::m_RasterizerState{};
 ID3D11RasterizerState* Renderer::m_RasterizerStateNoCull{};
 ID3D11RasterizerState* Renderer::m_RasterizerStateFront{};
+ID3D11RasterizerState* Renderer::m_ShadowRasterizerState{};
 
 
 ID3D11BlendState*		Renderer::m_BlendState{};
@@ -48,11 +51,17 @@ ID3D11BlendState*		Renderer::m_BlendStateATC{};
 ID3D11SamplerState*		Renderer::m_LinearSampler{};
 ID3D11SamplerState*		Renderer::m_ClampSampler{};
 ID3D11SamplerState*		Renderer::m_ShadowSampler{};
+ID3D11Texture2D* Renderer::m_ShadowMapTexture{};
+ID3D11DepthStencilView* Renderer::m_ShadowMapDSV{};
+ID3D11ShaderResourceView* Renderer::m_ShadowMapSRV{};
 
 XMMATRIX Renderer::m_ViewMatrix{};
 XMMATRIX Renderer::m_ProjectionMatrix{};
 PerFrame Renderer::m_PerFrame{};
 PerObject Renderer::m_PerObject{};
+ShadowParameters Renderer::m_ShadowParameters{};
+LIGHT Renderer::m_Light{};
+RenderPhase Renderer::m_CurrentRenderPhase{ RenderPhase::Opaque };
 
 std::array<std::vector<DrawItem>, static_cast<size_t>(RenderPhase::Count)> Renderer::m_DrawQueues{};
 std::vector<PostProcess*> Renderer::m_postEffects{};
@@ -64,6 +73,8 @@ namespace
 {
     // 再生成を行わないため、一般的なモデルの頂点数を十分に上回る2^20頂点を確保する。
     constexpr UINT FALLBACK_VERTEX_COUNT = 1u << 20;
+    constexpr UINT SHADOW_MAP_SIZE = 4096;
+    constexpr float SHADOW_DISTANCE = 100.0f;
 
     template <typename VertexType>
     ID3D11Buffer* CreateFallbackVertexBuffer(ID3D11Device* device, const VertexType& defaultVertex)
@@ -108,6 +119,121 @@ namespace
             return D3D11_COMPARISON_ALWAYS;
         }
     }
+}
+
+bool Renderer::CreateShadowMap()
+{
+    D3D11_TEXTURE2D_DESC textureDesc{};
+    textureDesc.Width = SHADOW_MAP_SIZE;
+    textureDesc.Height = SHADOW_MAP_SIZE;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.Usage = D3D11_USAGE_DEFAULT;
+    textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+    if (FAILED(m_Device->CreateTexture2D(&textureDesc, nullptr, &m_ShadowMapTexture)))
+        return false;
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    if (FAILED(m_Device->CreateDepthStencilView(m_ShadowMapTexture, &dsvDesc, &m_ShadowMapDSV)))
+        return false;
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    return SUCCEEDED(m_Device->CreateShaderResourceView(m_ShadowMapTexture, &srvDesc, &m_ShadowMapSRV));
+}
+
+void Renderer::UpdateShadowParameters()
+{
+    const XMMATRIX inverseViewProjection = XMMatrixInverse(nullptr, m_ViewMatrix * m_ProjectionMatrix);
+    XMVECTOR center = XMVectorZero();
+    XMVECTOR corners[8]{};
+    size_t index = 0;
+    for (float z : { 0.0f, 1.0f })
+    {
+        for (float y : { -1.0f, 1.0f })
+        {
+            for (float x : { -1.0f, 1.0f })
+            {
+                corners[index] = XMVector3TransformCoord(XMVectorSet(x, y, z, 1.0f), inverseViewProjection);
+                center += corners[index++];
+            }
+        }
+    }
+
+    // カメラFar（1000m）全域では解像度が分散するため、影はカメラ前方100mまでに限定する。
+    const float farCornerRatio = (SHADOW_DISTANCE - 0.1f) / (1000.0f - 0.1f);
+    for (size_t cornerIndex = 4; cornerIndex < 8; ++cornerIndex)
+        corners[cornerIndex] = XMVectorLerp(corners[cornerIndex - 4], corners[cornerIndex], farCornerRatio);
+
+    center = XMVectorZero();
+    for (const XMVECTOR corner : corners)
+        center += corner;
+    center /= 8.0f;
+
+    XMVECTOR direction = XMVector3Normalize(XMLoadFloat4(&m_Light.Direction));
+    if (XMVectorGetX(XMVector3LengthSq(direction)) < 0.0001f)
+        direction = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+
+    const XMVECTOR up = abs(XMVectorGetY(direction)) > 0.99f
+        ? XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)
+        : XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    const XMMATRIX lightView = XMMatrixLookAtLH(center - direction * 100.0f, center, up);
+
+    XMVECTOR minPoint = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 0.0f);
+    XMVECTOR maxPoint = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0f);
+    for (const XMVECTOR corner : corners)
+    {
+        const XMVECTOR lightSpace = XMVector3TransformCoord(corner, lightView);
+        minPoint = XMVectorMin(minPoint, lightSpace);
+        maxPoint = XMVectorMax(maxPoint, lightSpace);
+    }
+
+    const float width = XMVectorGetX(maxPoint) - XMVectorGetX(minPoint);
+    const float height = XMVectorGetY(maxPoint) - XMVectorGetY(minPoint);
+    const float texelWidth = width / SHADOW_MAP_SIZE;
+    const float texelHeight = height / SHADOW_MAP_SIZE;
+    const float centerX = floorf((XMVectorGetX(minPoint) + XMVectorGetX(maxPoint)) * 0.5f / texelWidth) * texelWidth;
+    const float centerY = floorf((XMVectorGetY(minPoint) + XMVectorGetY(maxPoint)) * 0.5f / texelHeight) * texelHeight;
+    const float minX = centerX - width * 0.5f;
+    const float maxX = centerX + width * 0.5f;
+    const float minY = centerY - height * 0.5f;
+    const float maxY = centerY + height * 0.5f;
+    const float minZ = XMVectorGetZ(minPoint) - 100.0f;
+    const float maxZ = XMVectorGetZ(maxPoint) + 100.0f;
+    const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, minZ, maxZ);
+
+    XMStoreFloat4x4(&m_ShadowParameters.LightViewProjection, XMMatrixTranspose(lightView * lightProjection));
+    m_ShadowParameters.ShadowMapTexelSize = XMFLOAT2(1.0f / SHADOW_MAP_SIZE, 1.0f / SHADOW_MAP_SIZE);
+    m_DeviceContext->UpdateSubresource(m_ShadowParametersBuffer, 0, nullptr, &m_ShadowParameters, 0, 0);
+}
+
+void Renderer::BeginShadowPass()
+{
+    ID3D11ShaderResourceView* nullSRV{};
+    m_DeviceContext->PSSetShaderResources(1, 1, &nullSRV);
+    UpdateShadowParameters();
+    m_DeviceContext->OMSetRenderTargets(0, nullptr, m_ShadowMapDSV);
+    m_DeviceContext->ClearDepthStencilView(m_ShadowMapDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+    D3D11_VIEWPORT viewport{};
+    viewport.Width = static_cast<float>(SHADOW_MAP_SIZE);
+    viewport.Height = static_cast<float>(SHADOW_MAP_SIZE);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_DeviceContext->RSSetViewports(1, &viewport);
+}
+
+void Renderer::EndShadowPass()
+{
+    SetSrcRTV();
+    m_DeviceContext->PSSetShaderResources(1, 1, &m_ShadowMapSRV);
 }
 
 bool Renderer::CreateGameRenderTargets(UINT width, UINT height)
@@ -273,7 +399,7 @@ void Renderer::Init()
 
 	// ImGui と Runtime の最終出力先になる BackBuffer の RTV を作成する。
     if (FAILED(m_Device->CreateRenderTargetView(m_BackBufferTexture, nullptr, &m_BackBufferRTV)) ||
-        !CreateGameRenderTargets(backBufferDesc.Width, backBufferDesc.Height))
+        !CreateGameRenderTargets(backBufferDesc.Width, backBufferDesc.Height) || !CreateShadowMap())
     {
         return;
     }
@@ -308,6 +434,12 @@ void Renderer::Init()
 
     rasterizerDesc.CullMode = D3D11_CULL_FRONT;
     m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerStateFront);
+
+    // 固定Biasを主にし、傾斜面だけSlope Biasで補う。接地影の浮きを抑えるため各値は小さく保つ。
+    rasterizerDesc.DepthBias = 100;
+    rasterizerDesc.SlopeScaledDepthBias = 0.25f;
+    rasterizerDesc.DepthBiasClamp = 0.0001f;
+    m_Device->CreateRasterizerState(&rasterizerDesc, &m_ShadowRasterizerState);
 
     m_DeviceContext->RSSetState(m_RasterizerState);
 
@@ -414,6 +546,11 @@ void Renderer::Init()
 	m_DeviceContext->VSSetConstantBuffers(2, 1, &m_LightingBuffer);
 	m_DeviceContext->PSSetConstantBuffers(2, 1, &m_LightingBuffer);
 
+    bufferDesc.ByteWidth = sizeof(ShadowParameters);
+    m_Device->CreateBuffer(&bufferDesc, nullptr, &m_ShadowParametersBuffer);
+    m_DeviceContext->VSSetConstantBuffers(4, 1, &m_ShadowParametersBuffer);
+    m_DeviceContext->PSSetConstantBuffers(4, 1, &m_ShadowParametersBuffer);
+
 
 	// 行列は単位行列で初期化し、初回描画前に不定値を渡さないようにする。
 	SetWorldMatrix(XMMatrixIdentity());
@@ -444,6 +581,14 @@ void Renderer::Uninit()
 	m_PerFrameBuffer->Release();
 	m_PerObjectBuffer->Release();
 	m_LightingBuffer->Release();
+	if (m_ShadowParametersBuffer)
+        m_ShadowParametersBuffer->Release();
+	if (m_ShadowMapSRV)
+        m_ShadowMapSRV->Release();
+	if (m_ShadowMapDSV)
+        m_ShadowMapDSV->Release();
+	if (m_ShadowMapTexture)
+        m_ShadowMapTexture->Release();
 
     for (ID3D11Buffer* fallbackVertexBuffer : m_FallbackVertexBuffers)
     {
@@ -455,6 +600,8 @@ void Renderer::Uninit()
 	m_LinearSampler->Release();
 	m_ClampSampler->Release();
 	m_ShadowSampler->Release();
+	if (m_ShadowRasterizerState)
+        m_ShadowRasterizerState->Release();
 
     for (ID3D11DepthStencilState* depthState : m_DepthStates)
     {
@@ -521,6 +668,7 @@ void Renderer::Draw()
     for (size_t phaseIndex = 0; phaseIndex < m_DrawQueues.size(); ++phaseIndex)
     {
         const RenderPhase phase = static_cast<RenderPhase>(phaseIndex);
+        m_CurrentRenderPhase = phase;
 
         // PostProcessの描画
         if (phase == RenderPhase::PostProcess)
@@ -535,6 +683,9 @@ void Renderer::Draw()
             SetSrcRTV();
             continue;
         }
+
+        if (phase == RenderPhase::Shadow)
+            BeginShadowPass();
 
         auto& queue = m_DrawQueues[phaseIndex];
         std::sort(queue.begin(), queue.end(), [](const DrawItem& a, const DrawItem& b)
@@ -551,6 +702,9 @@ void Renderer::Draw()
         }
 
         queue.clear();
+
+        if (phase == RenderPhase::Shadow)
+            EndShadowPass();
     }
 }
 
@@ -798,6 +952,12 @@ void Renderer::SetWorldMatrix(XMMATRIX WorldMatrix)
 	m_DeviceContext->UpdateSubresource(m_PerObjectBuffer, 0, nullptr, &m_PerObject, 0, 0);
 }
 
+void Renderer::SetReceiveShadow(bool receiveShadow)
+{
+    m_PerObject.ReceiveShadow = receiveShadow ? 1u : 0u;
+    m_DeviceContext->UpdateSubresource(m_PerObjectBuffer, 0, nullptr, &m_PerObject, 0, 0);
+}
+
 void Renderer::SetViewMatrix(XMMATRIX ViewMatrix)
 {
     m_ViewMatrix = ViewMatrix;
@@ -822,6 +982,7 @@ void Renderer::SetProjectionMatrix(XMMATRIX ProjectionMatrix)
 
 void Renderer::SetLight( LIGHT Light )
 {
+	m_Light = Light;
 	m_DeviceContext->UpdateSubresource(m_LightingBuffer, 0, nullptr, &Light, 0, 0);
 }
 
@@ -861,6 +1022,13 @@ void Renderer::SetBlendMode(BlendMode mode)
 
 void Renderer::SetRasterizerState(CullMode cull)
 {
+    if (m_CurrentRenderPhase == RenderPhase::Shadow)
+    {
+        m_DeviceContext->RSSetState(m_ShadowRasterizerState);
+        m_CurrentCullMode = cull;
+        return;
+    }
+
     switch (cull)
     {
     case CullMode::None:

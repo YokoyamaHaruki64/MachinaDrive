@@ -56,8 +56,10 @@ Mesh を持たない Renderer の MeshID は `0` とする。ModelRenderer は�
 | `b1` | PerObject（World） | Renderer |
 | `b2` | Light | Renderer |
 | `b3` | Material Properties | Material |
+| `b4` | Shadow（LightViewProjection、ShadowMap情報） | Renderer |
 | `s0` | LinearSampler | Renderer |
 | `s1` | ShadowSampler | Renderer |
+| `t1` | Directional ShadowMap | Renderer |
 | `t16` 以降 | Material Property の Texture2D | Material |
 
 頂点属性は `VertexStreamType` ごとの独立バッファで扱う。Shader Pass が要求する Stream が Model にない場合、Position 以外は Renderer の既定頂点バッファで補う。Position は形状を定義する必須属性なので補完せず、描画側でエラーとする。
@@ -113,6 +115,10 @@ Assimp の aiMesh は 1 Mesh : 1 Material として取り込み、Material slot 
 Mesh の `materialSlot` は `embeddedMaterials` を参照する。`SetMaterial(slot, material)` による override があればそれを優先し、`nullptr` なら embedded Material へ戻す。組み込み Primitive は初期状態で共通の DefaultLit Material を使う。
 
 Node のローカル変換と Component の World 変換を描画時に合成して各 Mesh を描画する。`InverseAxis` は座標の鏡映ではなく、指定軸に π 回転を合成してモデルの向きを補正する。頂点座標や三角形の表裏は変更しない。
+
+`castShadow` と `receiveShadow` は ModelRenderer 単位の設定で、どちらも既定値は有効である。Shader Pass の `RenderPhase = Shadow` はShadowMapへの描画を表し、`castShadow` が無効なModelはそのPhaseでは描画されない。Shadow Passを持たないShaderは影を落とさない。受影可否はPerObject（b1）へ渡され、共通の `lighting.hlsl` は `receiveShadow` が無効なら影係数1を即座に返す。
+
+RendererはShadow Phaseの開始時だけ描画先を4096²のShadowMap深度バッファへ切り替え、終了時にGame RenderTargetと通常Viewportへ復帰する。ShadowMapはカメラ前方100mに限定し、ライト空間のテクセルスナップで移動時の揺れを抑える。Shadow PassのRasterizerは小さい固定Depth BiasとSlope-Scaled Depth Biasを併用し、DefaultLitなど法線を持つShadow Passは `lighting.hlsl` の最小限の法線方向オフセットを適用する。受影側の比較バイアスも微小値に保つ。ライト空間変換、深度比較、5×5 PCFは `lighting.hlsl` に共通化する。Opaque用Shadow Passは深度のみ、Cutout用Shadow PassはShader自身が同じalpha clipを行い、透過・エフェクト等はShadow Passを定義しないことで対象外にする。ShadowCasterModeのような別設定は設けない。
 
 Sprite と Trail は ModelAsset を持たない。Sprite は 2D 用の不変頂点バッファ、Trail は動的頂点バッファを直接保持する。Particle は共有 Quad Mesh を参照する専用 Renderer である。
 
