@@ -64,7 +64,7 @@ gameObjects:
   - id: 3
     name: MateoCube
     tag: 
-    active: true
+    active: false
     prefab: 
     parent: 
     components:
@@ -148,7 +148,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [13,0,4.01000023]
+          m_localPosition: [26.9799995,0,13.6199999]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: Rigidbody
@@ -190,7 +190,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [-16.4599991,0,4]
+          m_localPosition: [-34.9799995,0,18.5]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: Rigidbody
@@ -235,7 +235,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,8.59000015]
+          m_localPosition: [0,0,26.1900005]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1.70000005,1.70000005,1.70000005]
       - type: Rigidbody
@@ -597,7 +597,7 @@ gameObjects:
               outControl: 0
   - id: 50
     name: HPBar
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 101
@@ -641,10 +641,10 @@ gameObjects:
           m_horizontalFromRight: false
   - id: 51
     name: PostProcess
-    tag:
+    tag: 
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
@@ -659,7 +659,7 @@ gameObjects:
           m_materialPath: Assets/Materials/PostProcess/Bloom.material
   - id: 64
     name: Model
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: 4
@@ -706,7 +706,7 @@ gameObjects:
           m_rotationSpeedTransitionRate: 8
   - id: 66
     name: Model
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/Enemy.prefab
     parent: 5
@@ -737,7 +737,7 @@ gameObjects:
           m_floatSpeed: 2.5
   - id: 74
     name: Model
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/MovingEnemy.prefab
     parent: 6
@@ -768,7 +768,7 @@ gameObjects:
           m_floatSpeed: 8.11999989
   - id: 75
     name: Model
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/HeavyEnemy.prefab
     parent: 7
@@ -799,10 +799,10 @@ gameObjects:
           m_floatSpeed: 1.5
   - id: 100
     name: GameHUD
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent:
+    parent: 
     components:
       - type: UITransform
         fields:
@@ -839,7 +839,7 @@ gameObjects:
           m_comboVisible: true
   - id: 101
     name: HUD_Health
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 100
@@ -857,7 +857,7 @@ gameObjects:
           m_aspectRatio: 0
   - id: 102
     name: HUD_Wave
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 100
@@ -875,7 +875,7 @@ gameObjects:
           m_aspectRatio: 0
   - id: 103
     name: HUD_Combo
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 100
@@ -893,7 +893,7 @@ gameObjects:
           m_aspectRatio: 0
   - id: 104
     name: HUD_Drive
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 100
@@ -911,7 +911,7 @@ gameObjects:
           m_aspectRatio: 0
   - id: 105
     name: HUD_Shards
-    tag:
+    tag: 
     active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 100
@@ -929,7 +929,7 @@ gameObjects:
           m_aspectRatio: 0
   - id: 110
     name: HP_Background
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 101
@@ -956,7 +956,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 111
     name: HP_Frame
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 101
@@ -983,7 +983,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 112
     name: Player_Icon
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 101
@@ -1010,7 +1010,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 113
     name: Wave_Frame
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 102
@@ -1037,7 +1037,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 114
     name: Wave_Labels
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 102
@@ -1064,7 +1064,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/HudWaveLabels.material
   - id: 115
     name: Combo_Frame
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 103
@@ -1091,7 +1091,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 116
     name: Combo_Label
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 103
@@ -1118,7 +1118,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 120
     name: Drive_Gauge
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104
@@ -1145,7 +1145,7 @@ gameObjects:
           m_materialPath: Assets/Materials/GaugeInner.material
   - id: 121
     name: Drive_Icon
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104
@@ -1172,7 +1172,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 130
     name: Wave_Number
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 102
@@ -1194,7 +1194,7 @@ gameObjects:
           m_value: 1
   - id: 131
     name: Wave_Number_Digit0
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 130
@@ -1221,7 +1221,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 132
     name: Wave_Number_Digit1
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 130
@@ -1248,7 +1248,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 133
     name: Enemy_Number
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 102
@@ -1270,7 +1270,7 @@ gameObjects:
           m_value: 3
   - id: 134
     name: Enemy_Number_Digit0
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 133
@@ -1297,7 +1297,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 135
     name: Enemy_Number_Digit1
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 133
@@ -1324,7 +1324,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 136
     name: Combo_Number
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 103
@@ -1346,7 +1346,7 @@ gameObjects:
           m_value: 1
   - id: 137
     name: Combo_Number_Digit0
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 136
@@ -1373,7 +1373,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/ComboNumber.material
   - id: 140
     name: Shards_Number
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 105
@@ -1395,7 +1395,7 @@ gameObjects:
           m_value: 23
   - id: 141
     name: Shards_Number_Digit0
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 140
@@ -1422,7 +1422,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 142
     name: Shards_Number_Digit1
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 140
@@ -1449,7 +1449,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 143
     name: Shards_Number_Digit2
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 140
@@ -1476,7 +1476,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI/WaveNumber.material
   - id: 187
     name: Drive_Frame
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104
@@ -1503,7 +1503,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 188
     name: Drive_DriveText
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104
@@ -1530,7 +1530,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 190
     name: Drive_ChargingText
-    tag:
+    tag: 
     active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104
@@ -1557,7 +1557,7 @@ gameObjects:
           m_materialPath: Assets/Materials/UI.material
   - id: 191
     name: Drive_ReadyText
-    tag:
+    tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 104

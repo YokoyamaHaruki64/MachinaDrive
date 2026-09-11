@@ -183,7 +183,7 @@ void CameraController::LateUpdate()
 
         // ピッチの制限
         const float pitchLimit_min = 10.0f * Math::DEG2RAD;
-        const float pitchLimit_max = 30.0f * Math::DEG2RAD;
+        const float pitchLimit_max = 60.0f * Math::DEG2RAD;
         m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
 
         // カメラの位置を計算
