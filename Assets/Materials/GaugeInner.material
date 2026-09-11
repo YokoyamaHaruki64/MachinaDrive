@@ -1,0 +1,9 @@
+version: 1
+name: GaugeInner
+shader: Assets/Shaders/GaugeInner.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  Progress: 1
+  _UVScale: [1,1]
+  _UVOffset: [0,0]
+  _Center: [0.5,0.810000002]
