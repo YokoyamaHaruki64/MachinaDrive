@@ -7,6 +7,7 @@ Shader "PBRToon"
         _Metallic("Metallic", Float) = 0
         _Roughness("Roughness", Float) = 0.5
         _ToonBands("Toon Bands", Float) = 4
+        _ToonDiffuseStrength("Toon Diffuse Strength", Float) = 1
         _ToonShadowColor("Toon Shadow Color", Color) = (0.35,0.4,0.55,1)
         _ToonSpecularColor("Toon Specular Color", Color) = (1,1,1,1)
         _ToonSpecularThreshold("Toon Specular Threshold", Float) = 0.45
@@ -97,7 +98,7 @@ Shader "PBRToon"
             const float3 shadowColor = Light.Enable
                 ? albedo * _ToonShadowColor.rgb * (1.0f - toonLight)
                 : float3(0.0f, 0.0f, 0.0f);
-            const float3 diffuse = lighting.diffuseResponse * toonLight * shadow;
+            const float3 diffuse = lighting.diffuseResponse * toonLight * shadow * max(_ToonDiffuseStrength, 0.0f);
 
             // スペキュラはPBRの応答を閾値化し、細いハイライトとして残す。
             const float3 physicalSpecular = lighting.specularResponse * lighting.lightAmount;

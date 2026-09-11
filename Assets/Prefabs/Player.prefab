@@ -77,6 +77,8 @@ gameObjects:
             - Assets/Materials/Player/Player_SpecialArmor.material
             - Assets/Materials/Player/Player_SensorArmor.material
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
       - type: PlayerAnimation
         fields:
           enabled: true
