@@ -29,6 +29,7 @@ gameObjects:
           m_waveNumber: 130
           m_enemyNumber: 133
           m_comboNumber: 136
+          m_comboUIObject: 45
           m_shardsNumber: 140
           m_healthRoot: 101
           m_waveRoot: 102

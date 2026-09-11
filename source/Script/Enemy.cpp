@@ -6,6 +6,7 @@
 #include "Script/Enemy.h"
 #include "Script/Health.h"
 #include "Script/Score.h"
+#include "Script/UI/GameHud.h"
 #include "System/Editor/FieldRegistry.h"
 
 #include <cmath>
@@ -144,6 +145,14 @@ void Enemy::OnHitBegin(const HitInfo& hitInfo)
 
 void Enemy::OnDestroy()
 {
+    if (GameObject* hudObject = Manager::GetFirstObjectByComponent<GameHud>())
+    {
+        if (GameHud* gameHud = hudObject->GetComponent<GameHud>())
+        {
+            gameHud->SetEnemyCount(static_cast<int>(Manager::GetObjectsByTag("Enemy").size()));
+        }
+    }
+
     auto obj = Manager::GetFirstObjectByComponent<Score>();
     if (obj)
     {

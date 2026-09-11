@@ -9,16 +9,14 @@
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
 #include "Script/PlayerAnimation.h"
-#include "Script/FillBar.h"
 #include "Script/Health.h"
-#include "Script/ComboUI.h"
+#include "Script/UI/GameHud.h"
 #include "Script/Pause.h"
 
 FIELDS_BEGIN(Player)
-    GM_FIELD(m_hpBarObject);
-    GM_FIELD(m_comboUIObject);
     GM_FIELD(m_speed);
     GM_FIELD(m_attackTime);
+    GM_FIELD(m_attackEndDuration);
     GM_FIELD(m_speedFriction);
     GM_FIELD(m_debug);
 FIELDS_END()
@@ -40,8 +38,10 @@ void Player::OnStart()
         }
     }
 
-    m_hpBar = m_hpBarObject.Get() ? m_hpBarObject->GetComponent<FillBar>() : nullptr;
-    m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
+    if (GameObject* hudObject = Manager::GetFirstObjectByComponent<GameHud>())
+    {
+        m_gameHud = hudObject->GetComponent<GameHud>();
+    }
 
     if( !m_rigidbody )
         Logger::Error("Player: Rigidbody component not found.");
@@ -55,21 +55,27 @@ void Player::OnStart()
     if (!m_playerAnimation)
         Logger::Error("Player: PlayerAnimation component not found on a child Model.");
 
-    if( !m_hpBar )
-        Logger::Error("Player: FillBar component not found in the specified HP Bar GameObject.");
+    if (!m_gameHud)
+        Logger::Error("Player: GameHud component not found.");
 
-    if (!m_comboUI)
-        Logger::Error("Player: ComboUI component not found in the specified Combo UI GameObject.");
-
-    if (m_health && m_hpBar)
+    if (m_gameHud)
     {
-        m_hpBar->SetMax(m_health->GetMaxHP());
-        m_hpBar->SetCurrent(m_health->GetCurrentHP());
+        m_gameHud->SetDriveGauge(1.0f);
+        m_gameHud->SetDriveReady(true);
+    }
+
+    if (m_health)
+    {
+        if (m_gameHud)
+        {
+            m_gameHud->SetHealth(m_health->GetCurrentHP(), m_health->GetMaxHP());
+        }
+
         m_health->OnDamage.emplace_back([this](float damage)
         {
-            if (m_hpBar)
+            if (m_gameHud)
             {
-                m_hpBar->AddCurrent(-damage);
+                m_gameHud->ApplyHealthDamage(damage);
             }
         });
 
@@ -136,7 +142,10 @@ void Player::Update()
 
         if(Input::GetKeyTrigger(Input::KeyCode::G))
         {
-            m_hpBar->AddCurrent(-10.0f);
+            if (m_health)
+            {
+                m_health->TakeDamage(10.0f);
+            }
         }
 
         if(Input::GetKeyTrigger(Input::KeyCode::P))
@@ -192,7 +201,14 @@ void Player::UpdateAttackReady()
     if (Input::GetMouseRelease(Input::MouseButton::Left))
     {
         m_state = Attacking;
-        m_attackTimer = m_attackTime;
+        m_attackTimer = (std::max)(m_attackTime, 0.0f);
+        m_attackEndTimer = (std::max)(m_attackEndDuration, 0.0f);
+        if (m_gameHud)
+        {
+            m_gameHud->SetDriveGauge(0.0f);
+            m_gameHud->SetDriveReady(false);
+        }
+
         if (m_playerAnimation)
         {
             m_playerAnimation->StartAttackAnimation();
@@ -219,10 +235,18 @@ void Player::UpdateAttacking()
     m_attackTimer -= Time::GetDeltaTime();
     if (m_attackTimer <= 0.0f)
     {
+        m_attackTimer = 0.0f;
+        m_attackEndTimer = (std::max)(m_attackEndDuration, 0.0f);
         m_state = AttackEnd;
-        m_comboUI->ResetCombo();
+        UpdateAttackProgress();
+        if (m_gameHud)
+        {
+            m_gameHud->ResetCombo();
+        }
         return;
     }
+
+    UpdateAttackProgress();
     float damping = std::exp(-m_speedFriction * Time::GetDeltaTime());
 
     m_rigidbody->SetVelocity(m_rigidbody->GetVelocity() * damping);
@@ -230,9 +254,12 @@ void Player::UpdateAttacking()
 
 void Player::UpdateAttackEnd()
 {
+    m_attackEndTimer -= Time::GetDeltaTime();
+    UpdateAttackProgress();
+
     Vector3 velocity = m_rigidbody->GetVelocity();
 
-    if (velocity.LengthSqr() > 1.0f)
+    if (m_attackEndTimer > 0.0f)
     {
         m_rigidbody->SetVelocity(Math::Lerp(Vector3::Zero(), velocity, 0.95f));
     }
@@ -240,9 +267,30 @@ void Player::UpdateAttackEnd()
     {
         m_rigidbody->SetVelocity(Vector3::Zero());
         m_state = Idle;
+        if (m_gameHud)
+        {
+            m_gameHud->SetDriveGauge(1.0f);
+            m_gameHud->SetDriveReady(true);
+        }
+    }
+}
+
+void Player::UpdateAttackProgress()
+{
+    if (!m_gameHud)
+    {
+        return;
     }
 
+    const float attackDuration = (std::max)(m_attackTime, 0.0f);
+    const float attackEndDuration = (std::max)(m_attackEndDuration, 0.0f);
+    const float totalDuration = attackDuration + attackEndDuration;
+    const float attackElapsed = attackDuration - (std::max)(m_attackTimer, 0.0f);
+    const float attackEndElapsed = attackEndDuration - (std::max)(m_attackEndTimer, 0.0f);
+    const float elapsed = attackElapsed + attackEndElapsed;
+    const float progress = totalDuration > 0.0f ? elapsed / totalDuration : 1.0f;
 
+    m_gameHud->SetDriveGauge(progress);
 }
 
 bool Player::GetCameraDirection(Vector3& forward, Vector3& right) const

@@ -2,9 +2,11 @@
 #include "Script/UI/GameHud.h"
 
 #include "Script/UI/HudNumber.h"
+#include "Script/ComboUI.h"
 #include "Script/FillBar.h"
 #include "Component/UIImage.h"
 #include "System/Core/GameObject.h"
+#include "System/Core/manager.h"
 #include "System/Editor/FieldRegistry.h"
 
 namespace
@@ -41,6 +43,7 @@ FIELDS_BEGIN(GameHud)
     GM_FIELD(m_waveNumber);
     GM_FIELD(m_enemyNumber);
     GM_FIELD(m_comboNumber);
+    GM_FIELD(m_comboUIObject);
     GM_FIELD(m_shardsNumber);
     GM_FIELD(m_healthRoot);
     GM_FIELD(m_waveRoot);
@@ -56,6 +59,12 @@ FIELDS_END()
 
 void GameHud::OnStart()
 {
+    m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
+
+    // 現時点でシーンから確定できる初期値だけを表示へ反映する。
+    SetWave(1);
+    SetEnemyCount(static_cast<int>(Manager::GetObjectsByTag("Enemy").size()));
+    ResetCombo();
     ApplyVisibility();
     ApplyDriveState();
 }
@@ -74,6 +83,19 @@ void GameHud::SetHealth(float current, float maximum)
     }
 }
 
+void GameHud::ApplyHealthDamage(float damage)
+{
+    if (!m_healthBar || !std::isfinite(damage) || damage <= 0.0f)
+    {
+        return;
+    }
+
+    if (auto* bar = m_healthBar->GetComponent<FillBar>())
+    {
+        bar->AddCurrent(-damage);
+    }
+}
+
 void GameHud::SetWave(int wave)
 {
     SetNumber(m_waveNumber, wave);
@@ -86,8 +108,29 @@ void GameHud::SetEnemyCount(int count)
 
 void GameHud::SetCombo(int count)
 {
-    SetNumber(m_comboNumber, count);
-    SetComboVisible(count > 0);
+    m_comboCount = (std::max)(0, count);
+    SetNumber(m_comboNumber, m_comboCount);
+    SetComboVisible(m_comboCount > 0);
+}
+
+void GameHud::AddCombo()
+{
+    if (m_comboUI)
+    {
+        m_comboUI->AddCombo();
+    }
+
+    SetCombo(m_comboCount + 1);
+}
+
+void GameHud::ResetCombo()
+{
+    if (m_comboUI)
+    {
+        m_comboUI->ResetCombo();
+    }
+
+    SetCombo(0);
 }
 
 void GameHud::SetShards(int count)
@@ -147,12 +190,4 @@ void GameHud::SetDriveReady(bool ready)
 {
     m_driveReady = ready;
     ApplyDriveState();
-
-    if (m_driveGauge)
-    {
-        if (auto* image = m_driveGauge->GetComponent<UIImage>())
-        {
-            image->SetColor(ready ? Color::White() : Color(0.35f, 0.35f, 0.35f, 1.0f));
-        }
-    }
 }

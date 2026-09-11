@@ -11,8 +11,7 @@ private:
     class Player* m_player = nullptr;
     class CameraController* m_cameraController = nullptr;
 
-    GameObjectReference m_comboUIObject;
-    class ComboUI* m_comboUI = nullptr;
+    class GameHud* m_gameHud = nullptr;
 
     float m_shakeDuration = 0.5f;
     float m_shakeMagnitude = 0.5f;

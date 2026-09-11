@@ -29,10 +29,9 @@ gameObjects:
       - type: Player
         fields:
           enabled: true
-          m_hpBarObject: 
-          m_comboUIObject: 
           m_speed: 100
           m_attackTime: 5
+          m_attackEndDuration: 0.5
           m_speedFriction: 0.300000012
           m_debug: true
       - type: Audio
@@ -121,7 +120,6 @@ gameObjects:
       - type: PlayerHit
         fields:
           enabled: true
-          m_comboUIObject: 
           m_shakeDuration: 0.800000012
           m_shakeMagnitude: 3
           m_hitStopDuration: 0.300000012

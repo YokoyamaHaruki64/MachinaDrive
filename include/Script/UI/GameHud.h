@@ -12,6 +12,7 @@ class GameHud final : public Script
     GameObjectReference m_waveNumber;
     GameObjectReference m_enemyNumber;
     GameObjectReference m_comboNumber;
+    GameObjectReference m_comboUIObject;
     GameObjectReference m_shardsNumber;
     GameObjectReference m_healthRoot;
     GameObjectReference m_waveRoot;
@@ -21,9 +22,11 @@ class GameHud final : public Script
     GameObjectReference m_driveGauge;
     GameObjectReference m_driveChargingText;
     GameObjectReference m_driveReadyText;
+    class ComboUI* m_comboUI = nullptr;
     bool m_visible = true;
     bool m_comboVisible = true;
     bool m_driveReady = true;
+    int m_comboCount = 0;
 
     void ApplyVisibility();
     void ApplyDriveState();
@@ -31,9 +34,13 @@ class GameHud final : public Script
 public:
     void OnStart() override;
     void SetHealth(float current, float maximum);
+    // 被ダメージ量を反映し、FillBarのChip表示を維持する。
+    void ApplyHealthDamage(float damage);
     void SetWave(int wave);
     void SetEnemyCount(int count);
     void SetCombo(int count);
+    void AddCombo();
+    void ResetCombo();
     void SetShards(int count);
     void SetVisible(bool visible);
     void SetComboVisible(bool visible);

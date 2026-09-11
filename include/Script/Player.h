@@ -11,6 +11,7 @@ class Health;
 struct HitInfo;
 class CameraController;
 class PlayerAnimation;
+class GameHud;
 
 class Player : public Script
 {
@@ -36,11 +37,7 @@ private:
     PlayerAnimation* m_playerAnimation = nullptr;
     GameObjectReference m_director;
 
-    GameObjectReference m_hpBarObject;
-    GameObjectReference m_comboUIObject;
-
-    class FillBar* m_hpBar = nullptr;
-    class ComboUI* m_comboUI = nullptr;
+    GameHud* m_gameHud = nullptr;
 
     Audio* m_jumpSE = nullptr;
 
@@ -49,9 +46,11 @@ private:
     
     float m_speed = 10.0f;
     float m_attackTime = 5.0f;
+    float m_attackEndDuration = 0.5f;
     float m_speedFriction = 0.9f;
 
     float m_attackTimer = 0.0f;
+    float m_attackEndTimer = 0.0f;
 
     bool m_isHitStop = false;
     float m_hitStopTimer = 0.0f;
@@ -62,6 +61,7 @@ private:
     void UpdateAttackReady();
     void UpdateAttacking();
     void UpdateAttackEnd();
+    void UpdateAttackProgress();
 
     Color m_debugColor[Count] = {
         Color(0.0f, 1.0f, 0.0f, 1.0f), // Idle
