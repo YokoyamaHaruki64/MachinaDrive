@@ -91,7 +91,6 @@ void Player::OnStart()
         });
     }
 
-
 #ifndef _DEBUG
     m_debug = false;
 #endif // !_DEBUG
@@ -102,6 +101,15 @@ void Player::Update()
     if (!m_rigidbody)
     {
         return;
+    }
+    if (Input::GetKeyTrigger(Input::KeyCode::E))
+    {
+        Vector3 playerForward = transform()->GetForward();
+        Manager::Instantiate("Assets/Prefabs/Enemy.prefab",
+            playerForward * 20.0f + transform()->GetPosition(),
+            Quaternion::Identity().QuatToEuler(),
+            Vector3::One());
+
     }
 
     if(m_isHitStop)

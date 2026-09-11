@@ -22,7 +22,7 @@ gameObjects:
       - type: CameraController
         fields:
           enabled: true
-          m_distance: 15
+          m_distance: 20
           m_sensitivity: 0.00100000005
           m_offset: [0,2,0]
           m_collisionPadding: 0.300000012
