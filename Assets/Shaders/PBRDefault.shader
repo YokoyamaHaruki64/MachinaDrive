@@ -23,6 +23,7 @@ Shader "PBRDefault"
 
         HLSL_BEGIN
         #include "common.hlsl"
+        #include "lighting.hlsl"
         #include "PBRLighting.hlsl"
 
         struct VSInput
@@ -72,11 +73,49 @@ Shader "PBRDefault"
                 Light.Ambient.rgb,
                 _Metallic,
                 _Roughness);
+            const float shadow = GetShadowAttenuation(input.worldPosition);
             const float3 directLighting =
-                (lighting.diffuseResponse + lighting.specularResponse) * lighting.lightAmount;
+                (lighting.diffuseResponse + lighting.specularResponse) * lighting.lightAmount * shadow;
             const float3 color = lighting.ambientResponse + directLighting + _Emission.rgb;
 
             return float4(color, _BaseColor.a * input.color.a * textureColor.a);
+        }
+        HLSL_END
+    }
+
+    Pass
+    {
+        RenderPhase = Shadow
+        Cull = Front
+        Blend = None
+        ZWrite = On
+        ZTest = LessEqual
+
+        #pragma vertex VSShadow
+        #pragma pixel PSShadow
+        #pragma shader_model 5.0
+
+        HLSL_BEGIN
+        #include "common.hlsl"
+        #include "lighting.hlsl"
+
+        struct ShadowVSInput
+        {
+            float3 position : POSITION0;
+            float3 normal : NORMAL0;
+        };
+
+        float4 VSShadow(ShadowVSInput input) : SV_POSITION
+        {
+            float4 worldPosition = mul(float4(input.position, 1.0f), World);
+            const float3 worldNormal = normalize(mul(float4(input.normal, 0.0f), World).xyz);
+            worldPosition = ApplyShadowNormalBias(worldPosition, worldNormal);
+            return GetShadowClipPosition(worldPosition);
+        }
+
+        float4 PSShadow() : SV_TARGET
+        {
+            return 0.0f;
         }
         HLSL_END
     }

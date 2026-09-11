@@ -30,6 +30,7 @@ Shader "PBRToon"
 
         HLSL_BEGIN
         #include "common.hlsl"
+        #include "lighting.hlsl"
         #include "PBRLighting.hlsl"
 
         struct VSInput
@@ -89,13 +90,14 @@ Shader "PBRToon"
                 _Metallic,
                 _Roughness);
 
+            const float shadow = GetShadowAttenuation(input.worldPosition);
             const float toonLight = Light.Enable
                 ? QuantizeToon(lighting.lightAmount, _ToonBands)
                 : 0.0f;
             const float3 shadowColor = Light.Enable
                 ? albedo * _ToonShadowColor.rgb * (1.0f - toonLight)
                 : float3(0.0f, 0.0f, 0.0f);
-            const float3 diffuse = lighting.diffuseResponse * toonLight;
+            const float3 diffuse = lighting.diffuseResponse * toonLight * shadow;
 
             // スペキュラはPBRの応答を閾値化し、細いハイライトとして残す。
             const float3 physicalSpecular = lighting.specularResponse * lighting.lightAmount;
@@ -105,7 +107,7 @@ Shader "PBRToon"
             const float specularMask = Light.Enable
                 ? step(_ToonSpecularThreshold, specularStrength)
                 : 0.0f;
-            const float3 specular = physicalSpecular * specularMask * _ToonSpecularColor.rgb;
+            const float3 specular = physicalSpecular * specularMask * _ToonSpecularColor.rgb * shadow;
 
             const float rimFactor = pow(
                 saturate(1.0f - lighting.viewAmount),
@@ -116,6 +118,43 @@ Shader "PBRToon"
 
             const float3 color = lighting.ambientResponse + shadowColor + diffuse + specular + rim + _Emission.rgb;
             return float4(color, _BaseColor.a * input.color.a * textureColor.a);
+        }
+        HLSL_END
+    }
+
+    Pass
+    {
+        RenderPhase = Shadow
+        Cull = Front
+        Blend = None
+        ZWrite = On
+        ZTest = LessEqual
+
+        #pragma vertex VSShadow
+        #pragma pixel PSShadow
+        #pragma shader_model 5.0
+
+        HLSL_BEGIN
+        #include "common.hlsl"
+        #include "lighting.hlsl"
+
+        struct ShadowVSInput
+        {
+            float3 position : POSITION0;
+            float3 normal : NORMAL0;
+        };
+
+        float4 VSShadow(ShadowVSInput input) : SV_POSITION
+        {
+            float4 worldPosition = mul(float4(input.position, 1.0f), World);
+            const float3 worldNormal = normalize(mul(float4(input.normal, 0.0f), World).xyz);
+            worldPosition = ApplyShadowNormalBias(worldPosition, worldNormal);
+            return GetShadowClipPosition(worldPosition);
+        }
+
+        float4 PSShadow() : SV_TARGET
+        {
+            return 0.0f;
         }
         HLSL_END
     }
