@@ -46,11 +46,15 @@ struct PerObject
 	UINT        Padding[3];
 };
 
+constexpr size_t SHADOW_CASCADE_COUNT = 4;
+
 struct ShadowParameters
 {
-    XMFLOAT4X4 LightViewProjection;
+    XMFLOAT4X4 LightViewProjection[SHADOW_CASCADE_COUNT];
     XMFLOAT2 ShadowMapTexelSize;
-    XMFLOAT2 Padding;
+    UINT CurrentCascadeIndex;
+    float Padding;
+    XMFLOAT4 CascadeFarDistances;
 };
 
 
@@ -109,7 +113,7 @@ private:
 	static ID3D11SamplerState*		m_ClampSampler;
 	static ID3D11SamplerState*		m_ShadowSampler;
 	static ID3D11Texture2D*         m_ShadowMapTexture;
-	static ID3D11DepthStencilView*  m_ShadowMapDSV;
+	static std::array<ID3D11DepthStencilView*, SHADOW_CASCADE_COUNT> m_ShadowMapDSVs;
 	static ID3D11ShaderResourceView* m_ShadowMapSRV;
 
     static XMMATRIX m_ViewMatrix;
@@ -133,7 +137,7 @@ private:
     static void ReleaseGameRenderTargets();
     static void SetSrcRTV();
     static bool CreateShadowMap();
-    static void BeginShadowPass();
+    static void BeginShadowPass(size_t cascadeIndex);
     static void EndShadowPass();
     static void UpdateShadowParameters();
     static ID3D11DepthStencilState* GetDepthStencilState(DepthTestMode testMode, DepthWriteMode writeMode);

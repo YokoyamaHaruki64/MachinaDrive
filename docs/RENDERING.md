@@ -118,7 +118,7 @@ Node のローカル変換と Component の World 変換を描画時に合成し
 
 `castShadow` と `receiveShadow` は ModelRenderer 単位の設定で、どちらも既定値は有効である。Shader Pass の `RenderPhase = Shadow` はShadowMapへの描画を表し、`castShadow` が無効なModelはそのPhaseでは描画されない。Shadow Passを持たないShaderは影を落とさない。受影可否はPerObject（b1）へ渡され、共通の `lighting.hlsl` は `receiveShadow` が無効なら影係数1を即座に返す。
 
-RendererはShadow Phaseの開始時だけ描画先を4096²のShadowMap深度バッファへ切り替え、終了時にGame RenderTargetと通常Viewportへ復帰する。ShadowMapはカメラ前方100mに限定し、ライト空間のテクセルスナップで移動時の揺れを抑える。Shadow PassのRasterizerは小さい固定Depth BiasとSlope-Scaled Depth Biasを併用し、DefaultLitなど法線を持つShadow Passは `lighting.hlsl` の最小限の法線方向オフセットを適用する。受影側の比較バイアスも微小値に保つ。ライト空間変換、深度比較、5×5 PCFは `lighting.hlsl` に共通化する。Opaque用Shadow Passは深度のみ、Cutout用Shadow PassはShader自身が同じalpha clipを行い、透過・エフェクト等はShadow Passを定義しないことで対象外にする。ShadowCasterModeのような別設定は設けない。
+RendererはShadow Phaseの開始時だけ描画先を4カスケード×2048²のShadowMap深度配列へ切り替え、終了時にGame RenderTargetと通常Viewportへ復帰する。カスケードはカメラ深度 `0.1–10 / 10–25 / 25–55 / 55–100m` を担当し、各カスケードでライト空間のテクセルスナップを行って移動時の揺れを抑える。受影Shaderは視点深度からカスケードを選択し、分割境界の10%を隣接カスケードと補間する。Shadow PassのRasterizerは小さい固定Depth BiasとSlope-Scaled Depth Biasを併用し、DefaultLitなど法線を持つShadow Passは `lighting.hlsl` の最小限の法線方向オフセットを適用する。受影側の比較バイアスも微小値に保つ。ライト空間変換、深度比較、5×5 PCFは `lighting.hlsl` に共通化する。Opaque用Shadow Passは深度のみ、Cutout用Shadow PassはShader自身が同じalpha clipを行い、透過・エフェクト等はShadow Passを定義しないことで対象外にする。ShadowCasterModeのような別設定は設けない。
 
 Sprite と Trail は ModelAsset を持たない。Sprite は 2D 用の不変頂点バッファ、Trail は動的頂点バッファを直接保持する。Particle は共有 Quad Mesh を参照する専用 Renderer である。
 

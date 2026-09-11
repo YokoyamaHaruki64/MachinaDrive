@@ -52,7 +52,7 @@ ID3D11SamplerState*		Renderer::m_LinearSampler{};
 ID3D11SamplerState*		Renderer::m_ClampSampler{};
 ID3D11SamplerState*		Renderer::m_ShadowSampler{};
 ID3D11Texture2D* Renderer::m_ShadowMapTexture{};
-ID3D11DepthStencilView* Renderer::m_ShadowMapDSV{};
+std::array<ID3D11DepthStencilView*, SHADOW_CASCADE_COUNT> Renderer::m_ShadowMapDSVs{};
 ID3D11ShaderResourceView* Renderer::m_ShadowMapSRV{};
 
 XMMATRIX Renderer::m_ViewMatrix{};
@@ -73,8 +73,13 @@ namespace
 {
     // 再生成を行わないため、一般的なモデルの頂点数を十分に上回る2^20頂点を確保する。
     constexpr UINT FALLBACK_VERTEX_COUNT = 1u << 20;
-    constexpr UINT SHADOW_MAP_SIZE = 4096;
-    constexpr float SHADOW_DISTANCE = 100.0f;
+    constexpr UINT SHADOW_MAP_SIZE = 2048;
+    constexpr float CAMERA_NEAR_DISTANCE = 0.1f;
+    constexpr float CAMERA_FAR_DISTANCE = 1000.0f;
+    constexpr std::array<float, SHADOW_CASCADE_COUNT + 1> SHADOW_CASCADE_DISTANCES
+    {
+        CAMERA_NEAR_DISTANCE, 10.0f, 25.0f, 55.0f, 100.0f,
+    };
 
     template <typename VertexType>
     ID3D11Buffer* CreateFallbackVertexBuffer(ID3D11Device* device, const VertexType& defaultVertex)
@@ -127,7 +132,7 @@ bool Renderer::CreateShadowMap()
     textureDesc.Width = SHADOW_MAP_SIZE;
     textureDesc.Height = SHADOW_MAP_SIZE;
     textureDesc.MipLevels = 1;
-    textureDesc.ArraySize = 1;
+    textureDesc.ArraySize = SHADOW_CASCADE_COUNT;
     textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
     textureDesc.SampleDesc.Count = 1;
     textureDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -138,22 +143,27 @@ bool Renderer::CreateShadowMap()
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
     dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    if (FAILED(m_Device->CreateDepthStencilView(m_ShadowMapTexture, &dsvDesc, &m_ShadowMapDSV)))
-        return false;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+    dsvDesc.Texture2DArray.ArraySize = 1;
+    for (size_t cascadeIndex = 0; cascadeIndex < SHADOW_CASCADE_COUNT; ++cascadeIndex)
+    {
+        dsvDesc.Texture2DArray.FirstArraySlice = static_cast<UINT>(cascadeIndex);
+        if (FAILED(m_Device->CreateDepthStencilView(m_ShadowMapTexture, &dsvDesc, &m_ShadowMapDSVs[cascadeIndex])))
+            return false;
+    }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
     srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = 1;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+    srvDesc.Texture2DArray.MipLevels = 1;
+    srvDesc.Texture2DArray.ArraySize = SHADOW_CASCADE_COUNT;
     return SUCCEEDED(m_Device->CreateShaderResourceView(m_ShadowMapTexture, &srvDesc, &m_ShadowMapSRV));
 }
 
 void Renderer::UpdateShadowParameters()
 {
     const XMMATRIX inverseViewProjection = XMMatrixInverse(nullptr, m_ViewMatrix * m_ProjectionMatrix);
-    XMVECTOR center = XMVectorZero();
-    XMVECTOR corners[8]{};
+    XMVECTOR frustumCorners[8]{};
     size_t index = 0;
     for (float z : { 0.0f, 1.0f })
     {
@@ -161,21 +171,10 @@ void Renderer::UpdateShadowParameters()
         {
             for (float x : { -1.0f, 1.0f })
             {
-                corners[index] = XMVector3TransformCoord(XMVectorSet(x, y, z, 1.0f), inverseViewProjection);
-                center += corners[index++];
+                frustumCorners[index++] = XMVector3TransformCoord(XMVectorSet(x, y, z, 1.0f), inverseViewProjection);
             }
         }
     }
-
-    // カメラFar（1000m）全域では解像度が分散するため、影はカメラ前方100mまでに限定する。
-    const float farCornerRatio = (SHADOW_DISTANCE - 0.1f) / (1000.0f - 0.1f);
-    for (size_t cornerIndex = 4; cornerIndex < 8; ++cornerIndex)
-        corners[cornerIndex] = XMVectorLerp(corners[cornerIndex - 4], corners[cornerIndex], farCornerRatio);
-
-    center = XMVectorZero();
-    for (const XMVECTOR corner : corners)
-        center += corner;
-    center /= 8.0f;
 
     XMVECTOR direction = XMVector3Normalize(XMLoadFloat4(&m_Light.Direction));
     if (XMVectorGetX(XMVector3LengthSq(direction)) < 0.0001f)
@@ -184,43 +183,61 @@ void Renderer::UpdateShadowParameters()
     const XMVECTOR up = abs(XMVectorGetY(direction)) > 0.99f
         ? XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)
         : XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    const XMMATRIX lightView = XMMatrixLookAtLH(center - direction * 100.0f, center, up);
-
-    XMVECTOR minPoint = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 0.0f);
-    XMVECTOR maxPoint = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0f);
-    for (const XMVECTOR corner : corners)
+    for (size_t cascadeIndex = 0; cascadeIndex < SHADOW_CASCADE_COUNT; ++cascadeIndex)
     {
-        const XMVECTOR lightSpace = XMVector3TransformCoord(corner, lightView);
-        minPoint = XMVectorMin(minPoint, lightSpace);
-        maxPoint = XMVectorMax(maxPoint, lightSpace);
+        const float nearRatio = (SHADOW_CASCADE_DISTANCES[cascadeIndex] - CAMERA_NEAR_DISTANCE) /
+            (CAMERA_FAR_DISTANCE - CAMERA_NEAR_DISTANCE);
+        const float farRatio = (SHADOW_CASCADE_DISTANCES[cascadeIndex + 1] - CAMERA_NEAR_DISTANCE) /
+            (CAMERA_FAR_DISTANCE - CAMERA_NEAR_DISTANCE);
+        XMVECTOR corners[8]{};
+        XMVECTOR center = XMVectorZero();
+        for (size_t cornerIndex = 0; cornerIndex < 4; ++cornerIndex)
+        {
+            corners[cornerIndex] = XMVectorLerp(frustumCorners[cornerIndex], frustumCorners[cornerIndex + 4], nearRatio);
+            corners[cornerIndex + 4] = XMVectorLerp(frustumCorners[cornerIndex], frustumCorners[cornerIndex + 4], farRatio);
+            center += corners[cornerIndex] + corners[cornerIndex + 4];
+        }
+        center /= 8.0f;
+
+        const XMMATRIX lightView = XMMatrixLookAtLH(center - direction * 100.0f, center, up);
+        XMVECTOR minPoint = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 0.0f);
+        XMVECTOR maxPoint = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0f);
+        for (const XMVECTOR corner : corners)
+        {
+            const XMVECTOR lightSpace = XMVector3TransformCoord(corner, lightView);
+            minPoint = XMVectorMin(minPoint, lightSpace);
+            maxPoint = XMVectorMax(maxPoint, lightSpace);
+        }
+
+        const float width = XMVectorGetX(maxPoint) - XMVectorGetX(minPoint);
+        const float height = XMVectorGetY(maxPoint) - XMVectorGetY(minPoint);
+        const float texelWidth = width / SHADOW_MAP_SIZE;
+        const float texelHeight = height / SHADOW_MAP_SIZE;
+        const float centerX = floorf((XMVectorGetX(minPoint) + XMVectorGetX(maxPoint)) * 0.5f / texelWidth) * texelWidth;
+        const float centerY = floorf((XMVectorGetY(minPoint) + XMVectorGetY(maxPoint)) * 0.5f / texelHeight) * texelHeight;
+        const float minZ = XMVectorGetZ(minPoint) - 100.0f;
+        const float maxZ = XMVectorGetZ(maxPoint) + 100.0f;
+        const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(
+            centerX - width * 0.5f, centerX + width * 0.5f,
+            centerY - height * 0.5f, centerY + height * 0.5f,
+            minZ, maxZ);
+        XMStoreFloat4x4(&m_ShadowParameters.LightViewProjection[cascadeIndex], XMMatrixTranspose(lightView * lightProjection));
     }
 
-    const float width = XMVectorGetX(maxPoint) - XMVectorGetX(minPoint);
-    const float height = XMVectorGetY(maxPoint) - XMVectorGetY(minPoint);
-    const float texelWidth = width / SHADOW_MAP_SIZE;
-    const float texelHeight = height / SHADOW_MAP_SIZE;
-    const float centerX = floorf((XMVectorGetX(minPoint) + XMVectorGetX(maxPoint)) * 0.5f / texelWidth) * texelWidth;
-    const float centerY = floorf((XMVectorGetY(minPoint) + XMVectorGetY(maxPoint)) * 0.5f / texelHeight) * texelHeight;
-    const float minX = centerX - width * 0.5f;
-    const float maxX = centerX + width * 0.5f;
-    const float minY = centerY - height * 0.5f;
-    const float maxY = centerY + height * 0.5f;
-    const float minZ = XMVectorGetZ(minPoint) - 100.0f;
-    const float maxZ = XMVectorGetZ(maxPoint) + 100.0f;
-    const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, minZ, maxZ);
-
-    XMStoreFloat4x4(&m_ShadowParameters.LightViewProjection, XMMatrixTranspose(lightView * lightProjection));
     m_ShadowParameters.ShadowMapTexelSize = XMFLOAT2(1.0f / SHADOW_MAP_SIZE, 1.0f / SHADOW_MAP_SIZE);
-    m_DeviceContext->UpdateSubresource(m_ShadowParametersBuffer, 0, nullptr, &m_ShadowParameters, 0, 0);
+    m_ShadowParameters.CascadeFarDistances = XMFLOAT4(
+        SHADOW_CASCADE_DISTANCES[1], SHADOW_CASCADE_DISTANCES[2],
+        SHADOW_CASCADE_DISTANCES[3], SHADOW_CASCADE_DISTANCES[4]);
 }
 
-void Renderer::BeginShadowPass()
+void Renderer::BeginShadowPass(size_t cascadeIndex)
 {
     ID3D11ShaderResourceView* nullSRV{};
     m_DeviceContext->PSSetShaderResources(1, 1, &nullSRV);
-    UpdateShadowParameters();
-    m_DeviceContext->OMSetRenderTargets(0, nullptr, m_ShadowMapDSV);
-    m_DeviceContext->ClearDepthStencilView(m_ShadowMapDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+    m_ShadowParameters.CurrentCascadeIndex = static_cast<UINT>(cascadeIndex);
+    m_DeviceContext->UpdateSubresource(m_ShadowParametersBuffer, 0, nullptr, &m_ShadowParameters, 0, 0);
+    m_DeviceContext->OMSetRenderTargets(0, nullptr, m_ShadowMapDSVs[cascadeIndex]);
+    m_DeviceContext->ClearDepthStencilView(m_ShadowMapDSVs[cascadeIndex], D3D11_CLEAR_DEPTH, 1.0f, 0);
 
     D3D11_VIEWPORT viewport{};
     viewport.Width = static_cast<float>(SHADOW_MAP_SIZE);
@@ -585,8 +602,12 @@ void Renderer::Uninit()
         m_ShadowParametersBuffer->Release();
 	if (m_ShadowMapSRV)
         m_ShadowMapSRV->Release();
-	if (m_ShadowMapDSV)
-        m_ShadowMapDSV->Release();
+	for (ID3D11DepthStencilView* shadowMapDSV : m_ShadowMapDSVs)
+    {
+        if (shadowMapDSV)
+            shadowMapDSV->Release();
+    }
+    m_ShadowMapDSVs = {};
 	if (m_ShadowMapTexture)
         m_ShadowMapTexture->Release();
 
@@ -684,9 +705,6 @@ void Renderer::Draw()
             continue;
         }
 
-        if (phase == RenderPhase::Shadow)
-            BeginShadowPass();
-
         auto& queue = m_DrawQueues[phaseIndex];
         std::sort(queue.begin(), queue.end(), [](const DrawItem& a, const DrawItem& b)
         {
@@ -695,10 +713,26 @@ void Renderer::Draw()
             return a.submitOrder < b.submitOrder;
         });
 
-        for (const DrawItem& item : queue)
+        if (phase == RenderPhase::Shadow)
         {
-            if (item.renderer)
-                item.renderer->Draw();
+            UpdateShadowParameters();
+            for (size_t cascadeIndex = 0; cascadeIndex < SHADOW_CASCADE_COUNT; ++cascadeIndex)
+            {
+                BeginShadowPass(cascadeIndex);
+                for (const DrawItem& item : queue)
+                {
+                    if (item.renderer)
+                        item.renderer->Draw();
+                }
+            }
+        }
+        else
+        {
+            for (const DrawItem& item : queue)
+            {
+                if (item.renderer)
+                    item.renderer->Draw();
+            }
         }
 
         queue.clear();
