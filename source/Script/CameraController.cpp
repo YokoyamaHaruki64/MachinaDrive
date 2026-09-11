@@ -9,7 +9,7 @@
 
 
 #include "Script/Player.h"
-#include "System/Core/manager.h"
+#include "Script/Pause.h"
 
 #include <algorithm>
 #include <cmath>
@@ -162,6 +162,9 @@ Vector3 CameraController::ResolveWallCollision(
 
 void CameraController::LateUpdate()
 {
+    if(Pause::IsPause())
+        return;
+
     Vector2 mouseDelta = Input::GetMouseRawDelta();
     Vector3 targetPos = m_target ? m_target->GetTransform()->GetPosition() : Vector3::Zero();
 

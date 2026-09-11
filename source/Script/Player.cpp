@@ -12,6 +12,7 @@
 #include "Script/FillBar.h"
 #include "Script/Health.h"
 #include "Script/ComboUI.h"
+#include "Script/Pause.h"
 
 FIELDS_BEGIN(Player)
     GM_FIELD(m_hpBarObject);
@@ -136,6 +137,11 @@ void Player::Update()
         if(Input::GetKeyTrigger(Input::KeyCode::G))
         {
             m_hpBar->AddCurrent(-10.0f);
+        }
+
+        if(Input::GetKeyTrigger(Input::KeyCode::P))
+        {
+            Pause::SetPause(!Pause::IsPause());
         }
 
     }

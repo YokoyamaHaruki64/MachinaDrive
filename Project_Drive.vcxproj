@@ -251,6 +251,7 @@
     <ClCompile Include="source\Script\Player.cpp" />
     <ClCompile Include="source\Script\PlayerAnimation.cpp" />
     <ClCompile Include="source\Script\PlayerHit.cpp" />
+    <ClCompile Include="source\Script\Pause.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="include\Script\Player.h" />
     <ClInclude Include="include\Script\PlayerAnimation.h" />
     <ClInclude Include="include\Script\PlayerHit.h" />
+    <ClInclude Include="include\Script\Pause.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
