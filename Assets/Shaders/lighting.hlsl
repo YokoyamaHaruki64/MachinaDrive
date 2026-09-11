@@ -25,9 +25,9 @@ uint GetShadowCascadeIndex(float viewDepth)
     return 3u;
 }
 
-float SampleShadowCascade(float4 worldPosition, uint cascadeIndex)
+float SampleShadowCascade(float3 worldPosition, uint cascadeIndex)
 {
-    const float4 shadowPosition = mul(worldPosition, LightViewProjection[cascadeIndex]);
+    const float4 shadowPosition = mul(float4(worldPosition, 1.0f), LightViewProjection[cascadeIndex]);
     const float3 projectedPosition = shadowPosition.xyz / shadowPosition.w;
     const float2 shadowUV = projectedPosition.xy * float2(0.5f, -0.5f) + 0.5f;
     if (any(shadowUV < 0.0f) || any(shadowUV > 1.0f) || projectedPosition.z < 0.0f || projectedPosition.z > 1.0f)
@@ -48,12 +48,12 @@ float SampleShadowCascade(float4 worldPosition, uint cascadeIndex)
     return visibility / 25.0f;
 }
 
-float GetShadowAttenuation(float4 worldPosition)
+float GetShadowAttenuation(float3 worldPosition)
 {
     if (ReceiveShadow == 0u || !Light.Enable)
         return 1.0f;
 
-    const float viewDepth = mul(worldPosition, View).z;
+    const float viewDepth = mul(float4(worldPosition, 1.0f), View).z;
     if (viewDepth > CascadeFarDistances.w)
         return 1.0f;
 

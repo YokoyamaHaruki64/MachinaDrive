@@ -58,7 +58,7 @@ Shader "DefaultLit"
             const float3 normal = normalize(input.normal);
             const float lightAmount = Light.Enable ? saturate(dot(normal, -Light.Direction.xyz)) : 1.0f;
             const float4 textureColor = _MainTex.Sample(LinearSampler, input.texCoord);
-            const float shadow = GetShadowAttenuation(input.worldPosition);
+            const float shadow = GetShadowAttenuation(input.worldPosition.xyz);
             const float3 lighting = Light.Ambient.rgb + Light.Diffuse.rgb * lightAmount * shadow;
             return float4((_BaseColor.rgb * input.color.rgb * textureColor.rgb * lighting) + _Emission.rgb,
                 _BaseColor.a * input.color.a * textureColor.a);
