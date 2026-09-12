@@ -6,6 +6,20 @@
 
 class FontAsset;
 
+enum class UITextHorizontalAlignment
+{
+    Left,
+    Center,
+    Right,
+};
+
+enum class UITextVerticalAlignment
+{
+    Top,
+    Center,
+    Bottom,
+};
+
 // BMFontのGlyphをCanvas配下へ描画するテキストComponent。
 class UIText final : public RendererBase
 {
@@ -23,6 +37,8 @@ class UIText final : public RendererBase
     std::string m_text;
     float m_fontSize{ 32.0f };
     Color m_color{ Color::White() };
+    int m_horizontalAlignment{ static_cast<int>(UITextHorizontalAlignment::Left) };
+    int m_verticalAlignment{ static_cast<int>(UITextVerticalAlignment::Top) };
 
     void CreateVertexBuffers();
 
@@ -48,4 +64,14 @@ public:
     // 文字のレイアウト原点を維持したサイズ演出用。UITransformのScaleとは独立する。
     void SetFontSize(float fontSize) { m_fontSize = fontSize > 0.0f ? fontSize : 0.0f; }
     float GetFontSize() const { return m_fontSize; }
+
+    void SetHorizontalAlignment(UITextHorizontalAlignment alignment);
+    UITextHorizontalAlignment GetHorizontalAlignment() const;
+    int GetHorizontalAlignmentValue() const { return m_horizontalAlignment; }
+    void SetHorizontalAlignmentValue(int alignment);
+
+    void SetVerticalAlignment(UITextVerticalAlignment alignment);
+    UITextVerticalAlignment GetVerticalAlignment() const;
+    int GetVerticalAlignmentValue() const { return m_verticalAlignment; }
+    void SetVerticalAlignmentValue(int alignment);
 };

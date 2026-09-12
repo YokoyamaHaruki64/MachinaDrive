@@ -74,7 +74,6 @@ public:
     const Vector2& GetOffset() const { return m_offset; }
     float GetUIRotation() const { return m_uiRotation; }
     const Vector2& GetUIScale() const { return m_uiScale; }
-    const Vector2& GetPivotPosition() const { return m_pivot; }
     float GetAspectRatio() const { return m_aspectRatio; }
     bool IsAspectRatioLocked() const { return m_lockAspectRatio; }
     UIPositionPreset GetAnchor() const;
