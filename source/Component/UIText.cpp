@@ -64,6 +64,65 @@ namespace
         }
         return true;
     }
+
+    struct TextLayoutMetrics
+    {
+        std::vector<float> lineWidths{ 0.0f };
+    };
+
+    TextLayoutMetrics MeasureText(const std::string& text, const FontAsset& font, float pixelScale)
+    {
+        TextLayoutMetrics metrics;
+        size_t index = 0;
+        uint32_t codePoint{};
+        while (ReadUTF8CodePoint(text, index, codePoint))
+        {
+            if (codePoint == '\n')
+            {
+                metrics.lineWidths.push_back(0.0f);
+                continue;
+            }
+
+            const FontGlyph* const glyph = font.FindGlyph(codePoint);
+            if (glyph)
+            {
+                metrics.lineWidths.back() += static_cast<float>(glyph->xAdvance) * pixelScale;
+            }
+        }
+        return metrics;
+    }
+
+    float GetHorizontalAlignmentOffset(
+        UITextHorizontalAlignment alignment,
+        float lineWidth,
+        float containerWidth)
+    {
+        switch (alignment)
+        {
+        case UITextHorizontalAlignment::Center:
+            return (containerWidth - lineWidth) * 0.5f;
+        case UITextHorizontalAlignment::Right:
+            return containerWidth - lineWidth;
+        default:
+            return 0.0f;
+        }
+    }
+
+    float GetVerticalAlignmentOffset(
+        UITextVerticalAlignment alignment,
+        float textHeight,
+        float containerHeight)
+    {
+        switch (alignment)
+        {
+        case UITextVerticalAlignment::Center:
+            return (containerHeight - textHeight) * 0.5f;
+        case UITextVerticalAlignment::Bottom:
+            return containerHeight - textHeight;
+        default:
+            return 0.0f;
+        }
+    }
 }
 
 UIText::UIText(GameObject* owner)
@@ -136,8 +195,7 @@ void UIText::Draw()
         return;
     }
 
-    // UITransformのScaleでは、テキストのレイアウト原点を基準にGlyphを拡大する。
-    // UIの矩形Pivotで文字列が押し出されないよう、Scaleによる原点移動を相殺する。
+    // 文字列の揃え位置をRect内で決め、UITransformのScaleはRect全体へ適用する。
     const Vector2 unscaledSize(
         rect.GetSize().x / uiScale.x,
         rect.GetSize().y / uiScale.y);
@@ -146,14 +204,20 @@ void UIText::Draw()
         return;
     }
 
-    const Vector2& pivot = transform->GetPivotPosition();
-    const Vector2 scaleOriginOffset(
-        pivot.x * (1.0f - 1.0f / uiScale.x),
-        pivot.y * (1.0f - 1.0f / uiScale.y));
-
     const float pixelScale = m_fontSize * transform->GetCanvas()->GetScale() / static_cast<float>(m_font->GetLineHeight());
-    float cursorX = 0.0f;
-    float cursorY = 0.0f;
+    const TextLayoutMetrics metrics = MeasureText(m_text, *m_font, pixelScale);
+    const float lineHeight = static_cast<float>(m_font->GetLineHeight()) * pixelScale;
+    const float textHeight = lineHeight * static_cast<float>(metrics.lineWidths.size());
+    const float verticalOffset = GetVerticalAlignmentOffset(
+        GetVerticalAlignment(),
+        textHeight,
+        unscaledSize.y);
+    size_t lineIndex = 0;
+    float cursorX = GetHorizontalAlignmentOffset(
+        GetHorizontalAlignment(),
+        metrics.lineWidths.front(),
+        unscaledSize.x);
+    float cursorY = verticalOffset;
 
     const XMMATRIX originalView = Renderer::GetViewMatrix();
     const XMMATRIX originalProjection = Renderer::GetProjectionMatrix();
@@ -168,8 +232,12 @@ void UIText::Draw()
     {
         if (codePoint == '\n')
         {
-            cursorX = 0.0f;
-            cursorY += static_cast<float>(m_font->GetLineHeight()) * pixelScale;
+            ++lineIndex;
+            cursorX = GetHorizontalAlignmentOffset(
+                GetHorizontalAlignment(),
+                metrics.lineWidths[lineIndex],
+                unscaledSize.x);
+            cursorY += lineHeight;
             continue;
         }
 
@@ -182,8 +250,8 @@ void UIText::Draw()
         const float width = static_cast<float>(glyph->width) * pixelScale;
         const float height = static_cast<float>(glyph->height) * pixelScale;
         const Vector3 localPosition(
-            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f + scaleOriginOffset.x,
-            (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f + scaleOriginOffset.y,
+            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f,
+            (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f,
             0.0f);
 
         MaterialPropertyOverride properties;
@@ -241,6 +309,48 @@ void UIText::SetMaterial(uint32_t slot, Material* material)
     }
 }
 
+void UIText::SetHorizontalAlignment(UITextHorizontalAlignment alignment)
+{
+    SetHorizontalAlignmentValue(static_cast<int>(alignment));
+}
+
+UITextHorizontalAlignment UIText::GetHorizontalAlignment() const
+{
+    return static_cast<UITextHorizontalAlignment>(Math::Clamp(
+        m_horizontalAlignment,
+        static_cast<int>(UITextHorizontalAlignment::Left),
+        static_cast<int>(UITextHorizontalAlignment::Right)));
+}
+
+void UIText::SetHorizontalAlignmentValue(int alignment)
+{
+    m_horizontalAlignment = Math::Clamp(
+        alignment,
+        static_cast<int>(UITextHorizontalAlignment::Left),
+        static_cast<int>(UITextHorizontalAlignment::Right));
+}
+
+void UIText::SetVerticalAlignment(UITextVerticalAlignment alignment)
+{
+    SetVerticalAlignmentValue(static_cast<int>(alignment));
+}
+
+UITextVerticalAlignment UIText::GetVerticalAlignment() const
+{
+    return static_cast<UITextVerticalAlignment>(Math::Clamp(
+        m_verticalAlignment,
+        static_cast<int>(UITextVerticalAlignment::Top),
+        static_cast<int>(UITextVerticalAlignment::Bottom)));
+}
+
+void UIText::SetVerticalAlignmentValue(int alignment)
+{
+    m_verticalAlignment = Math::Clamp(
+        alignment,
+        static_cast<int>(UITextVerticalAlignment::Top),
+        static_cast<int>(UITextVerticalAlignment::Bottom));
+}
+
 void UIText::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD(m_drawLayer);
@@ -248,5 +358,7 @@ void UIText::RegisterFields(FieldRegistry& fields)
     fields.Add("text", m_text, InspectorFieldType::Multiline);
     GM_FIELD(m_fontSize);
     GM_FIELD(m_color);
+    GM_FIELD_ACCESSOR_TYPE(int, "horizontalAlignment", GetHorizontalAlignmentValue(), SetHorizontalAlignmentValue(value), All, InspectorFieldType::Auto, true);
+    GM_FIELD_ACCESSOR_TYPE(int, "verticalAlignment", GetVerticalAlignmentValue(), SetVerticalAlignmentValue(value), All, InspectorFieldType::Auto, true);
     GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
 }
