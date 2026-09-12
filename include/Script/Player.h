@@ -80,6 +80,7 @@ public:
     void OnHitEnd(const HitInfo& hitInfo) override;
 
     void HitStop(float duration);
+    bool IsHitStop() const { return m_isHitStop; }
 
     const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
     const AttackState GetAttackState() const { return m_state; }

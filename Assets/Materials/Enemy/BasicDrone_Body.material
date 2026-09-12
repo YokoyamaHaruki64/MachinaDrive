@@ -2,11 +2,12 @@ version: 1
 name: BasicDrone_Body
 shader: Assets/Shaders/PBRToon.shader
 properties:
-  _BaseColor: [0.65637064,0.65637064,0.65637064,1]
-  _Emission: [0,0,0,1]
+  _BaseColor: [1,0,0,1]
+  _Emission: [0.119691133,0.0563796051,0.0563796051,1]
   _Metallic: 0.300000012
   _Roughness: 0.5
   _ToonBands: 4.25
+  _ToonDiffuseStrength: 1
   _ToonShadowColor: [0.243243217,0.1399353,0.1399353,1]
   _ToonSpecularColor: [1,1,1,1]
   _ToonSpecularThreshold: 0.0299999993

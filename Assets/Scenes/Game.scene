@@ -5,8 +5,8 @@ gameObjects:
     name: Camera
     tag: 
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -30,8 +30,8 @@ gameObjects:
     name: Field
     tag: 
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -65,8 +65,8 @@ gameObjects:
     name: MateoCube
     tag: 
     active: false
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -371,8 +371,8 @@ gameObjects:
     name: Skydome
     tag: 
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -1582,3 +1582,70 @@ gameObjects:
           m_raycastTarget: true
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
+  - id: 192
+    name: Field_LeftUp
+    tag: EnemySpawnArea
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-45,0,45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 193
+    name: Field_RightUp
+    tag: EnemySpawnArea
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [45,0,45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 194
+    name: Field_LeftBottom
+    tag: EnemySpawnArea
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-45,0,-45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 195
+    name: Field_RightBottom
+    tag: EnemySpawnArea
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [45,0,-45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 196
+    name: Wave Director
+    tag:
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: WaveDirector
+        fields: {}

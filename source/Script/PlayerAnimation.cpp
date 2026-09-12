@@ -149,9 +149,11 @@ void PlayerAnimation::StartAttackReadyAnimation()
 void PlayerAnimation::Update()
 {
     if (!m_player || !transform())
-    {
         return;
-    }
+
+    if(m_player->IsHitStop())
+        return;
+
 
     const float deltaTime = Time::GetDeltaTime();
     m_elapsedTime += deltaTime;

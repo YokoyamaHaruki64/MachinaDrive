@@ -259,6 +259,7 @@
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
     <ClCompile Include="source\Script\ShotDirector.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
+    <ClCompile Include="source\Script\WaveDirector.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
     <ClCompile Include="source\System\Core\Mouse.cpp" />
@@ -482,6 +483,7 @@
     <ClInclude Include="include\Script\ShotDirector.h" />
     <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\WaveDirector.h" />
     <ClInclude Include="include\System\Core\component.h" />
     <ClInclude Include="include\System\Core\component.inl" />
     <ClInclude Include="include\System\Core\ComponentRegistry.h" />
