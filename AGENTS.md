@@ -21,7 +21,7 @@
 - HLSL（`.hlsl`、`.hlsli`、`.fx`、`.fxh`）は BOM なし UTF-8・CRLF・スペース4個インデントとする。fxc互換性のため BOM を付けない。
 - 実行時に読み込むテキストデータ（`.json`、`.yml`、`.yaml`、`.scene`、`.prefab`、`.material`、`.shader`、`.ini`、`.toml`）は BOM なし UTF-8・CRLFとする。Parser間のBOM対応差を避けるため、BOMを付けない。
 - Visual Studio プロジェクト設定（`.vcxproj`、`.vcxproj.filters`、`.vcxproj.props`、`.props`、`.targets`）と XML、CMake、JSON、YAML、Markdown はスペース2個インデントとする。ソリューション（`.sln`、`.slnx`）はタブインデントとする。
-- Markdown は行末空白を保持してよいが、その他の対象ファイルでは行末空白を残さない。
+- Markdown は行末空白を保持してよい。YAML系の実行時データ（`.yml`、`.yaml`、`.scene`、`.prefab`、`.material`）も、出力ライブラリがNullを`key: `として出力する場合があるため、行末空白の検査・削除対象外とする。その他の対象ファイルでは行末空白を残さない。
 - Visual Studio のフィルタ構造は実際の `source/`・`include/` 配下のフォルダ構造に対応させる。ファイル追加・移動時は、`.vcxproj.filters` の登録先も同じ階層へ更新する。
 - 関数内は処理の目的が変わる単位で空白行を分け、意図がコードだけでは読み取りにくい処理には簡潔な日本語コメントを付ける。コメントは処理の再説明ではなく、責務・前提・理由を示す。
 - 関数間には空白行を置き、関連する初期化・検証・GPU設定・描画などの処理群を視覚的に区切る。過剰な装飾や自明なコメントは避ける。

@@ -42,4 +42,8 @@ public:
 
     void SetColor(const Color& color) { m_color = color; }
     const Color& GetColor() const { return m_color; }
+
+    // 文字のレイアウト原点を維持したサイズ演出用。UITransformのScaleとは独立する。
+    void SetFontSize(float fontSize) { m_fontSize = fontSize > 0.0f ? fontSize : 0.0f; }
+    float GetFontSize() const { return m_fontSize; }
 };
