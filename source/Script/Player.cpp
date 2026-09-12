@@ -18,6 +18,7 @@ FIELDS_BEGIN(Player)
     GM_FIELD(m_attackTime);
     GM_FIELD(m_attackEndDuration);
     GM_FIELD(m_speedFriction);
+    GM_FIELD(m_attackReadyVfxPrefab);
     GM_FIELD(m_debug);
 FIELDS_END()
 
@@ -191,6 +192,15 @@ void Player::UpdateIdle()
         m_accumulatedMouse = Vector2::Zero();
 
         m_director = Manager::Instantiate("Assets/Prefabs/ShotDirector.prefab");
+
+        if (m_attackReadyVfxPrefab)
+        {
+            m_attackReadyVfx = Manager::Instantiate(
+                m_attackReadyVfxPrefab.GetPath(),
+                transform()->GetPosition(),
+                Vector3::Zero(),
+                Vector3::One());
+        }
     }
 
 }
@@ -237,6 +247,12 @@ void Player::UpdateAttackReady()
         {
             m_director->Destroy();
             m_director.Clear();
+        }
+
+        if (m_attackReadyVfx.Get())
+        {
+            m_attackReadyVfx->Destroy();
+            m_attackReadyVfx.Clear();
         }
     }
 }

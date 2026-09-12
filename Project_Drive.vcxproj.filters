@@ -248,6 +248,15 @@
     <ClCompile Include="source\Script\TimeRecoveryItem.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\AttackReadyVfx.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\AttackChargeHead.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\CollisionVfx.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\BasicEnemy.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -629,6 +638,15 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\TimeRecoveryItem.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackReadyVfx.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackChargeHead.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\CollisionVfx.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\BasicEnemy.h">

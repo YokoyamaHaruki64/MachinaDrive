@@ -1,0 +1,8 @@
+version: 1
+name: VFX Attack Charge Head
+shader: Assets/Shaders/UnlitAdditive.shader
+properties:
+  _BaseColor: [0.35, 0.9, 1, 1]
+  _UVScale: [1, 1]
+  _UVOffset: [0, 0]
+  _MainTex: Assets/Local/Textures/VFX/VFX_Spark.png

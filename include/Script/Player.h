@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 #include "System/Core/GameObject.h"
 
@@ -36,6 +37,8 @@ private:
     CameraController* m_cameraController = nullptr;
     PlayerAnimation* m_playerAnimation = nullptr;
     GameObjectReference m_director;
+    PrefabReference m_attackReadyVfxPrefab{ "Assets/Prefabs/VFX_AttackReady.prefab" };
+    GameObjectReference m_attackReadyVfx;
 
     GameHud* m_gameHud = nullptr;
 

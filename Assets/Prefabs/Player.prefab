@@ -33,6 +33,7 @@ gameObjects:
           m_attackTime: 5
           m_attackEndDuration: 0.5
           m_speedFriction: 0.300000012
+          m_attackReadyVfxPrefab: Assets/Prefabs/VFX_AttackReady.prefab
           m_debug: true
       - type: Audio
         fields:

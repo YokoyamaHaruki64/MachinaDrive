@@ -1,0 +1,25 @@
+version: 1
+name: VFX Attack Ready
+gameObjects:
+  - id: 1
+    name: VFX_AttackReady
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: AttackReadyVfx
+        fields:
+          enabled: true
+          m_headPrefab: Assets/Prefabs/VFX_AttackChargeHead.prefab
+          m_spawnInterval: 0.16
+          m_maxActiveHeads: 8
+          m_spawnRadiusMin: 3
+          m_spawnRadiusMax: 4.5
+          m_spawnHeightMin: 0.4
+          m_spawnHeightMax: 2.2
