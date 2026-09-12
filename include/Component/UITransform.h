@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <array>
+
 #include "System/Core/main.h"
 #include "System/Core/component.h"
 #include "System/Core/ComponentRegistry.h"
@@ -84,6 +86,9 @@ public:
     Vector2 GetCenterPixels() const { return m_pixelRect.GetCenter(); }
     Vector2 GetSizePixels() const { return m_pixelRect.GetSize(); }
     XMMATRIX GetWorldMatrix() const;
+    std::array<Vector2, 4> GetWorldCorners() const;
+    bool ContainsPoint(const Vector2& point) const;
+    bool Overlaps(const UITransform& other) const;
 
     void UpdateLayout(const UIRect& parentRect, float canvasScale);
 };

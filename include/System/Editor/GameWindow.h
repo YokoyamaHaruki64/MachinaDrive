@@ -23,7 +23,10 @@ private:
 
     AspectMode m_aspectMode = AspectMode::Free;
     bool m_displayUI = false;
+    bool m_showUIRects = false;
     bool m_viewportHovered = false;
     Vector2 m_displayPosition = Vector2::Zero();
     Vector2 m_displaySize = Vector2::Zero();
+
+    void DrawUIRects(const Vector2& imagePosition, const Vector2& imageSize) const;
 };
