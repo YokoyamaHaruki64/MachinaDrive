@@ -400,8 +400,8 @@ gameObjects:
     name: BGM
     tag: 
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -419,8 +419,8 @@ gameObjects:
     name: Wall_Left
     tag: Wall
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -439,8 +439,8 @@ gameObjects:
     name: Wall_Right
     tag: Wall
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -459,8 +459,8 @@ gameObjects:
     name: Wall_Fore
     tag: Wall
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -479,8 +479,8 @@ gameObjects:
     name: Wall_Back
     tag: Wall
     active: true
-    prefab: 
-    parent: 
+    prefab:
+    parent:
     components:
       - type: Transform
         fields:
@@ -521,124 +521,6 @@ gameObjects:
           m_shakeDuration: 0.800000012
           m_shakeMagnitude: 3
           m_hitStopDuration: 0.300000012
-  - id: 44
-    name: Canvas
-    tag: 
-    active: true
-    prefab: 
-    parent: 
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.0520833321,0.0925925896]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UICanvas
-        fields:
-          enabled: true
-  - id: 45
-    name: Combo
-    tag: 
-    active: true
-    prefab: 
-    parent: 44
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [1,0]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0,0]
-          m_pos: [-0.280000001,0.200000003]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIText
-        fields:
-          enabled: false
-          m_drawLayer: 0
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: ''
-          m_fontSize: 100
-          m_color: [1,0,0,1]
-          m_materialPath: Assets/Materials/UI.material
-      - type: ComboUI
-        fields:
-          enabled: true
-          m_boundTime: 0.5
-          m_boundScale: 75
-          m_boundCurve:
-            - time: 0
-              value: 0
-              inControl: 0
-              outControl: 0
-            - time: 0.250460416
-              value: 1
-              inControl: 1
-              outControl: 1
-            - time: 0.500920832
-              value: 0
-              inControl: 0
-              outControl: 0
-            - time: 0.753222823
-              value: 0.49444443
-              inControl: 0.49444443
-              outControl: 0.49444443
-            - time: 1
-              value: 0
-              inControl: 0
-              outControl: 0
-  - id: 50
-    name: HPBar
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 101
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0.5]
-          m_stretch: [0.195999995,0.0219999999]
-          m_pos: [0.0820000023,0.0920000002]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 102
-          image: ''
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/FillBar.material
-      - type: FillBar
-        fields:
-          enabled: true
-          m_max: 100
-          m_current: 100
-          m_barColor: [1,1,1,1]
-          m_chipColor: [1,0.200000003,0.200000003,1]
-          m_chipDecreaseSpeed: 10
-          m_chipDecreaseDelay: 0.5
-          m_verticalFill: false
-          m_horizontalFill: true
-          m_verticalFromTop: false
-          m_verticalFromCenter: false
-          m_verticalFromBottom: false
-          m_horizontalFromLeft: true
-          m_horizontalFromCenter: false
-          m_horizontalFromRight: false
   - id: 51
     name: PostProcess
     tag: 
@@ -807,8 +689,8 @@ gameObjects:
       - type: UITransform
         fields:
           enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
           m_stretch: [1,1]
           m_pos: [0,0]
           m_offset: [0,0]
@@ -821,767 +703,22 @@ gameObjects:
       - type: GameHud
         fields:
           enabled: true
-          m_healthBar: 50
-          m_waveNumber: 130
-          m_enemyNumber: 133
-          m_comboNumber: 136
-          m_comboUIObject: 45
-          m_shardsNumber: 140
-          m_healthRoot: 101
-          m_waveRoot: 102
-          m_comboRoot: 103
-          m_driveRoot: 104
-          m_shardsRoot: 105
-          m_driveGauge: 120
-          m_driveChargingText: 190
-          m_driveReadyText: 191
+          m_healthBar: 203
+          m_timerText: 205
+          m_waveNumber: 249
+          m_enemyNumber: 250
+          m_comboUIObject: 259
+          m_shardsNumber:
+          m_healthRoot: 200
+          m_waveRoot: 210
+          m_comboRoot: 259
+          m_driveRoot: 220
+          m_shardsRoot:
+          m_driveGauge: 223
+          m_driveChargingText: 225
+          m_driveReadyText: 226
           m_visible: true
           m_comboVisible: true
-  - id: 101
-    name: HUD_Health
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [1.14999998,1.14999998]
-          m_pos: [-0.00999999978,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-  - id: 102
-    name: HUD_Wave
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0]
-          m_pivot: [0.5,0]
-          m_stretch: [1.38999999,1.38999999]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-  - id: 103
-    name: HUD_Combo
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [1,0]
-          m_pivot: [1,0]
-          m_stretch: [1.48000002,1.48000002]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-  - id: 104
-    name: HUD_Drive
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [1,1]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-  - id: 105
-    name: HUD_Shards
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [1,1]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-  - id: 110
-    name: HP_Background
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 101
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.28125,0.166666672]
-          m_pos: [0.0208333302,0.00740741007]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 100
-          image: Assets/Local/Textures/UI/HP_Inner.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 111
-    name: HP_Frame
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 101
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.28125,0.166666672]
-          m_pos: [0.0208333302,0.00740741007]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 103
-          image: Assets/Local/Textures/UI/HP_Frame.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 112
-    name: Player_Icon
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 101
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0385416709,0.0685185194]
-          m_pos: [0.0379999988,0.0489999987]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 104
-          image: Assets/Local/Textures/UI/Player_Icon.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 113
-    name: Wave_Frame
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 102
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.234375,0.234500006]
-          m_pos: [0.3828125,-0.0694444403]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 100
-          image: Assets/Local/Textures/UI/Wave_Frame.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 114
-    name: Wave_Labels
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 102
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0572916716,0.057407409]
-          m_pos: [0.442708343,0.023]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 104
-          image: Assets/Local/Textures/UI/Wave_Text.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/HudWaveLabels.material
-  - id: 115
-    name: Combo_Frame
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 103
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.1640625,0.0972222164]
-          m_pos: [0.8125,0.0212963]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 100
-          image: Assets/Local/Textures/UI/ComboFrame.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 116
-    name: Combo_Label
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 103
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0860000029,0.0509659089]
-          m_pos: [0.870999992,0.0453703701]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 104
-          image: Assets/Local/Textures/UI/ComboText.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 120
-    name: Drive_Gauge
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.184,0.18410407]
-          m_pos: [0,-0.0799999982]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 100
-          image: Assets/Local/Textures/UI/Gauge_Inner.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/GaugeInner.material
-  - id: 121
-    name: Drive_Icon
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.0489999987,0.0871110931]
-          m_pos: [0,-0.105999999]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 104
-          image: Assets/Local/Textures/UI/Player_Icon.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 130
-    name: Wave_Number
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 102
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0]
-          m_pivot: [0.5,0]
-          m_stretch: [1.45500004,1.45500004]
-          m_pos: [-0.00600000005,-0.00100000005]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: HudNumber
-        fields:
-          enabled: true
-          m_value: 1
-  - id: 131
-    name: Wave_Number_Digit0
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 130
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0166666694,0.0296296291]
-          m_pos: [0.503125012,0.00925926026]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 132
-    name: Wave_Number_Digit1
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 130
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0166666694,0.0296296291]
-          m_pos: [0.51700002,0.00925926026]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 133
-    name: Enemy_Number
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 102
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0]
-          m_pivot: [0.5,0]
-          m_stretch: [1.28999996,1.28999996]
-          m_pos: [-0.00600000005,-0.00400000019]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: HudNumber
-        fields:
-          enabled: true
-          m_value: 3
-  - id: 134
-    name: Enemy_Number_Digit0
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 133
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0119791701,0.0212963]
-          m_pos: [0.5078125,0.05185185]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 135
-    name: Enemy_Number_Digit1
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 133
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0119791701,0.0212963]
-          m_pos: [0.519791663,0.05185185]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 136
-    name: Combo_Number
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 103
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [1,1]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: HudNumber
-        fields:
-          enabled: true
-          m_value: 1
-  - id: 137
-    name: Combo_Number_Digit0
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 136
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.0260000005,0.04919485]
-          m_pos: [0.363000005,-0.426999986]
-          m_offset: [0,0]
-          m_uiRotation: -0.0860000029
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/ComboNumber.material
-  - id: 140
-    name: Shards_Number
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 105
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [1,1]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: HudNumber
-        fields:
-          enabled: true
-          m_value: 23
-  - id: 141
-    name: Shards_Number_Digit0
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 140
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0171875004,0.0305555593]
-          m_pos: [0.875,0.902777791]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 142
-    name: Shards_Number_Digit1
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 140
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0171875004,0.0305555593]
-          m_pos: [0.892187476,0.902777791]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 143
-    name: Shards_Number_Digit2
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 140
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,0]
-          m_pivot: [0,0]
-          m_stretch: [0.0171875004,0.0305555593]
-          m_pos: [0.909375012,0.902777791]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 105
-          image: Assets/Local/Textures/UI/PackedNumber.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI/WaveNumber.material
-  - id: 187
-    name: Drive_Frame
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.239999995,0.239999995]
-          m_pos: [0,-0.00499999989]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          image: Assets/Local/Textures/UI/Gauge_Frame.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: true
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 188
-    name: Drive_DriveText
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.187999994,0.192136064]
-          m_pos: [0,0.00300000003]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 119
-          image: Assets/Local/Textures/UI/Gauge_DriveText.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: true
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 190
-    name: Drive_ChargingText
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.158000007,0.158000007]
-          m_pos: [0,-0.00800000038]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 175
-          image: Assets/Local/Textures/UI/Gauge_ChargingText.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: true
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 191
-    name: Drive_ReadyText
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 104
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,1]
-          m_pivot: [0.5,1]
-          m_stretch: [0.166999996,0.167088777]
-          m_pos: [0,0.0270000007]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 1.77683318
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 179
-          image: Assets/Local/Textures/UI/Gauge_ReadyText.png
-          m_color: [1,1,1,1]
-          m_raycastTarget: true
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
   - id: 192
     name: Field_LeftUp
     tag: EnemySpawnArea
@@ -1648,4 +785,676 @@ gameObjects:
           m_localRotation: [0,0,0,1]
           m_localScale: [1,1,1]
       - type: WaveDirector
-        fields: {}
+        fields:
+          enabled: true
+          m_basicEnemyPrefab: Assets/Prefabs/Enemy.prefab
+          m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
+          m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
+          m_maxTime: 60
+          m_startTime: 60
+          m_timeDrainPerSecond: 1
+          m_baseClearTimeBonus: 8
+          m_clearTimeGrowth: 2
+          m_maxClearTimeBonus: 20
+          m_waveStartDelay: 2
+          m_baseEnemyCount: 3
+          m_enemyCountGrowth: 1.5
+          m_enemyCountExponent: 1.25
+          m_maxEnemyCount: 16
+          m_movingStart: 0.150000006
+          m_movingGrowth: 0.0199999996
+          m_movingMax: 0.400000006
+          m_heavyStartWave: 3
+          m_heavyGrowth: 0.0299999993
+          m_heavyMax: 0.349999994
+          m_minPlayerDistance: 12
+          m_spawnAttemptCount: 16
+          m_spawnHeight: 0
+  - id: 224
+    name: Drive_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.860000014,0.159999996]
+          m_pos: [0.136000007,-0.0689999983]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: DRIVE
+          m_fontSize: 40
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 200
+    name: HUD_Timer
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.289999992,0.120374054]
+          m_pos: [0.159999996,0.100000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+  - id: 201
+    name: Timer_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Panel.png
+          m_color: [1,1,1,0.607843161]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 220
+    name: HUD_Drive
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.310000002,0.204999998]
+          m_pos: [0.174999997,-0.136000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+  - id: 221
+    name: Drive_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 222
+    name: Drive_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 223
+    name: Drive_Gauge
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.513000011,0.671000004]
+          m_pos: [-0.202000007,-0.123999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1.96186435
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/GaugeInner.material
+  - id: 225
+    name: Drive_ChargingText
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.319999993,0.200000003]
+          m_pos: [-0.150000006,0.270000011]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: CHARGING...
+          m_fontSize: 32
+          m_color: [0.957528949,0.930993199,0.428854674,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 226
+    name: Drive_ReadyText
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.280000001,0.200000003]
+          m_pos: [-0.109999999,0.273999989]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: READY!!
+          m_fontSize: 32
+          m_color: [0.378378391,1,0.978399098,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 210
+    name: HUD_Wave
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.125]
+          m_pos: [0,0.0670000017]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+  - id: 211
+    name: Wave_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 212
+    name: Wave_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 213
+    name: Wave_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.32100001,0.300999999]
+          m_pos: [0.00700000022,-0.175999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: WAVE
+          m_fontSize: 40
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 214
+    name: Enemy_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.449999988,0.219999999]
+          m_pos: [0.0680000037,0.298999995]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: ENEMIES
+          m_fontSize: 28
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 202
+    name: Timer_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 203
+    name: Timer_Bar
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.73299998,0.141055852]
+          m_pos: [-0.0199999996,0.243000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Bar_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 60
+          m_current: 60
+          m_barColor: [1,1,1,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 204
+    name: Timer_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.180000007,0.319999993]
+          m_pos: [-0.280000001,-0.0890000015]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: TIME
+          m_fontSize: 40
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 205
+    name: Timer_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.600000024,0.5]
+          m_pos: [0.237000003,-0.150999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 060.00
+          m_fontSize: 75.8000031
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 233
+    name: Timer_Separator
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,0.999999881]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Separator.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 249
+    name: Wave_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.449999988,0.219999999]
+          m_pos: [0.287,-0.303000003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 00
+          m_fontSize: 60
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 250
+    name: Enemy_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.449999988,0.219999999]
+          m_pos: [0.294999987,0.225999996]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 00
+          m_fontSize: 43.8400002
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 259
+    name: HUD_Combo
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0.5]
+          m_pivot: [1,0.5]
+          m_stretch: [0.0520833321,0.0925925896]
+          m_pos: [-0.119999997,-0.289999992]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: ComboUI
+        fields:
+          enabled: true
+          m_comboValue: 261
+          m_boundTime: 0.800000012
+          m_boundScale: 1
+          m_boundCurve:
+            - time: 0
+              value: 0
+              inControl: 0
+              outControl: 0
+            - time: 0.25698325
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+  - id: 260
+    name: Combo_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: Combo!!
+          m_fontSize: 70
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material
+  - id: 261
+    name: Combo_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [-1.27999997,-0.239999995]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 00
+          m_fontSize: 90
+          m_color: [1,1,1,1]
+          m_materialPath: Assets/Materials/UI.material

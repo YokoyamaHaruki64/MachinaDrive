@@ -9,9 +9,9 @@ class GameHud final : public Script
     USE_FIELDS
 
     GameObjectReference m_healthBar;
+    GameObjectReference m_timerText;
     GameObjectReference m_waveNumber;
     GameObjectReference m_enemyNumber;
-    GameObjectReference m_comboNumber;
     GameObjectReference m_comboUIObject;
     GameObjectReference m_shardsNumber;
     GameObjectReference m_healthRoot;
@@ -22,6 +22,7 @@ class GameHud final : public Script
     GameObjectReference m_driveGauge;
     GameObjectReference m_driveChargingText;
     GameObjectReference m_driveReadyText;
+
     class ComboUI* m_comboUI = nullptr;
     bool m_visible = true;
     bool m_comboVisible = true;

@@ -1,23 +1,27 @@
 ﻿#include "pch.h"
 #include "Script/UI/GameHud.h"
 
-#include "Script/UI/HudNumber.h"
 #include "Script/ComboUI.h"
 #include "Script/FillBar.h"
 #include "Component/UIImage.h"
+#include "Component/UIText.h"
 #include "System/Core/GameObject.h"
 #include "System/Core/manager.h"
 #include "System/Editor/FieldRegistry.h"
 
+#include <cstdio>
+
 namespace
 {
-    void SetNumber(const GameObjectReference& target, int value)
+    void SetText(const GameObjectReference& target, const char* format, int value)
     {
         if (target)
         {
-            if (auto* number = target->GetComponent<HudNumber>())
+            if (auto* text = target->GetComponent<UIText>())
             {
-                number->SetValue(value);
+                char buffer[32]{};
+                std::snprintf(buffer, sizeof(buffer), format, value);
+                text->SetText(buffer);
             }
         }
     }
@@ -40,9 +44,9 @@ namespace
 
 FIELDS_BEGIN(GameHud)
     GM_FIELD(m_healthBar);
+    GM_FIELD(m_timerText);
     GM_FIELD(m_waveNumber);
     GM_FIELD(m_enemyNumber);
-    GM_FIELD(m_comboNumber);
     GM_FIELD(m_comboUIObject);
     GM_FIELD(m_shardsNumber);
     GM_FIELD(m_healthRoot);
@@ -71,15 +75,30 @@ void GameHud::OnStart()
 
 void GameHud::SetHealth(float current, float maximum)
 {
-    if (!m_healthBar || !std::isfinite(current) || !std::isfinite(maximum))
+    if (!std::isfinite(current) || !std::isfinite(maximum))
     {
         return;
     }
 
-    if (auto* bar = m_healthBar->GetComponent<FillBar>())
+    const float clampedMaximum = (std::max)(0.0f, maximum);
+    const float clampedCurrent = Math::Clamp(current, 0.0f, clampedMaximum);
+    if (m_healthBar)
     {
-        bar->SetMax((std::max)(0.0f, maximum));
-        bar->SetCurrent(current);
+        if (auto* bar = m_healthBar->GetComponent<FillBar>())
+        {
+            bar->SetMax(clampedMaximum);
+            bar->SetCurrent(clampedCurrent);
+        }
+    }
+
+    if (m_timerText)
+    {
+        if (auto* text = m_timerText->GetComponent<UIText>())
+        {
+            char buffer[16]{};
+            std::snprintf(buffer, sizeof(buffer), "%06.2f", Math::Min(clampedCurrent, 999.99f));
+            text->SetText(buffer);
+        }
     }
 }
 
@@ -98,44 +117,37 @@ void GameHud::ApplyHealthDamage(float damage)
 
 void GameHud::SetWave(int wave)
 {
-    SetNumber(m_waveNumber, wave);
+    SetText(m_waveNumber, "%02d", (std::max)(0, wave));
 }
 
 void GameHud::SetEnemyCount(int count)
 {
-    SetNumber(m_enemyNumber, count);
+    SetText(m_enemyNumber, "%02d", (std::max)(0, count));
 }
 
 void GameHud::SetCombo(int count)
 {
     m_comboCount = (std::max)(0, count);
-    SetNumber(m_comboNumber, m_comboCount);
     SetComboVisible(m_comboCount > 0);
+    if (m_comboUI)
+    {
+        m_comboUI->SetCount(m_comboCount);
+    }
 }
 
 void GameHud::AddCombo()
 {
-    if (m_comboUI)
-    {
-        m_comboUI->AddCombo();
-    }
-
     SetCombo(m_comboCount + 1);
 }
 
 void GameHud::ResetCombo()
 {
-    if (m_comboUI)
-    {
-        m_comboUI->ResetCombo();
-    }
-
     SetCombo(0);
 }
 
 void GameHud::SetShards(int count)
 {
-    SetNumber(m_shardsNumber, count);
+    (void)count;
 }
 
 void GameHud::SetVisible(bool visible)

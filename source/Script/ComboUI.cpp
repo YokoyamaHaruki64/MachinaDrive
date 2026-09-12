@@ -4,8 +4,12 @@
 
 #include "Component/UIText.h"
 
+#include <cmath>
+#include <cstdio>
+#include <numbers>
 
 FIELDS_BEGIN(ComboUI)
+    GM_FIELD(m_comboValue);
     GM_FIELD(m_boundTime);
     GM_FIELD(m_boundScale);
     GM_FIELD(m_boundCurve);
@@ -13,73 +17,68 @@ FIELDS_END()
 
 void ComboUI::OnStart()
 {
+    m_comboTransform = GetComponent<UITransform>();
+    m_comboText = m_comboValue.Get() ? m_comboValue->GetComponent<UIText>() : nullptr;
+    if (!m_comboTransform || !m_comboText)
+    {
+        Logger::Error("ComboUI: HUD_ComboとCombo_Valueの参照を解決できません。");
+        return;
+    }
 
+    m_boundTime = Math::Max(0.0f, m_boundTime);
+    m_boundScale = Math::Max(0.0f, m_boundScale);
+    m_baseScale = m_comboTransform->GetUIScale();
     ResetCombo();
 }
 
 void ComboUI::Update()
 {
 
-    if( !m_comboText )
+    if (!m_comboTransform || m_timer <= 0.0f)
     {
-        m_comboText = GetComponent<UIText>();
-        if( !m_comboText )
-        {
-            Logger::Error("ComboUI: UIText component not found in the specified GameObject.");
-            return;
-        }
+        return;
     }
 
-    if( !m_comboTextTransform )
-    {
-        m_comboTextTransform = GetComponent<UITransform>();
-        if( !m_comboTextTransform )
-        {
-            Logger::Error("ComboUI: UITransform component not found in the specified GameObject.");
-            return;
-        }
-    }
+    m_timer = Math::Max(0.0f, m_timer - Time::GetDeltaTime());
+    const float normalizedTime = 1.0f - m_timer / m_boundTime;
+    const float curveValue = m_boundCurve.Evaluate(normalizedTime);
+    m_comboTransform->SetUIScale(m_baseScale * (1.0f + m_boundScale * curveValue));
 
-    if(m_timer > 0.0f)
+    if (m_timer <= 0.0f)
     {
-        m_timer -= Time::GetDeltaTime();
-        float t = 1.0f - (m_timer / m_boundTime);
-        float curveValue = m_boundCurve.Evaluate(t);
-        if(m_timer <= 0.0f)
-        {
-            m_timer = 0.0f;
-            m_comboTextTransform->SetOffset(Vector2::Zero());
-        }
-        else
-        {
-            Vector2 offset = Vector2(0.0f, -m_boundScale * curveValue);
-            m_comboTextTransform->SetOffset(offset);
-        }
+        m_comboTransform->SetUIScale(m_baseScale);
     }
 }
 
 void ComboUI::AddCombo()
 {
-    if(!m_comboText)
+    SetCount(m_comboCount + 1);
+}
+
+void ComboUI::SetCount(int count)
+{
+    m_comboCount = Math::Max(0, count);
+    if (!m_comboText || !m_comboTransform)
     {
-        m_comboText = GetComponent<UIText>();
-        if(!m_comboText)
-        {
-            Logger::Error("ComboUI: UIText component not found in the specified GameObject.");
-            return;
-        }
+        return;
     }
 
-    m_comboCount++;
-    m_comboText->SetText(std::to_string(m_comboCount) + " Combo!");
-    m_timer = m_boundTime;
+    char buffer[16]{};
+    std::snprintf(buffer, sizeof(buffer), "%02d", m_comboCount);
+    m_comboText->SetText(buffer);
+
+    if (m_comboCount > 0 && m_boundTime > 0.0f)
+    {
+        m_timer = m_boundTime;
+    }
+    else
+    {
+        m_timer = 0.0f;
+        m_comboTransform->SetUIScale(m_baseScale);
+    }
 }
 
 void ComboUI::ResetCombo()
 {
-    m_comboCount = 0;
-    if(m_comboText)
-    {
-        m_comboText->SetText("");
-    }
+    SetCount(0);
 }
