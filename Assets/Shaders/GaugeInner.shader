@@ -4,9 +4,10 @@ Shader "GaugeInner"
   {
     _BaseColor("Base Color", Color) = (1,1,1,1)
     Progress("Progress", float) = 1.0
+    SpriteTexture("Sprite Texture", 2D) = ""
+    ProgressMask("Progress Mask", Texture2D) = ""
     _UVScale("UV Scale", float2) = (1,1)
     _UVOffset("UV Offset", float2) = (0,0)
-    _Center("Center", float2) = (0.5, 0.5)
   }
 
   Pass
@@ -23,8 +24,6 @@ Shader "GaugeInner"
 
     HLSL_BEGIN
     #include "common.hlsl"
-
-    Texture2D SpriteTexture : register(t2);
 
     struct VSInput
     {
@@ -59,21 +58,12 @@ Shader "GaugeInner"
         clip(-1.0f);
       }
 
-      // 左端を開始点として、半弧の上側を右端へ向かって表示する。
-      const float2 direction = float2(
-        input.texCoord.x - _Center.x,
-        _Center.y - input.texCoord.y);
-
-      const float angle = atan2(direction.y, direction.x);
-
-      const float arcProgress = saturate((3.14159265f - angle) / 3.14159265f);
-
-      if (arcProgress > progress)
-      {
-        clip(-1.0f);
-      }
-
       const float2 uv = input.texCoord * _UVScale + _UVOffset;
+
+      // MaskのR値は実際のゲージ形状に沿った開始0から終了1までの進行度。
+      const float maskProgress = ProgressMask.Sample(LinearSampler, input.texCoord).r;
+      clip(progress - maskProgress);
+
       const float4 color = SpriteTexture.Sample(LinearSampler, uv);
       return color * _BaseColor * input.color;
     }
