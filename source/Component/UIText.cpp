@@ -136,7 +136,8 @@ void UIText::Draw()
         return;
     }
 
-    // UITransformのScaleをGlyphのローカル座標へ適用し、文字列全体を同じPivotで変形する。
+    // UITransformのScaleでは、テキストのレイアウト原点を基準にGlyphを拡大する。
+    // UIの矩形Pivotで文字列が押し出されないよう、Scaleによる原点移動を相殺する。
     const Vector2 unscaledSize(
         rect.GetSize().x / uiScale.x,
         rect.GetSize().y / uiScale.y);
@@ -144,6 +145,11 @@ void UIText::Draw()
     {
         return;
     }
+
+    const Vector2& pivot = transform->GetPivotPosition();
+    const Vector2 scaleOriginOffset(
+        pivot.x * (1.0f - 1.0f / uiScale.x),
+        pivot.y * (1.0f - 1.0f / uiScale.y));
 
     const float pixelScale = m_fontSize * transform->GetCanvas()->GetScale() / static_cast<float>(m_font->GetLineHeight());
     float cursorX = 0.0f;
@@ -176,8 +182,8 @@ void UIText::Draw()
         const float width = static_cast<float>(glyph->width) * pixelScale;
         const float height = static_cast<float>(glyph->height) * pixelScale;
         const Vector3 localPosition(
-            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f,
-            (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f,
+            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f + scaleOriginOffset.x,
+            (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f + scaleOriginOffset.y,
             0.0f);
 
         MaterialPropertyOverride properties;
