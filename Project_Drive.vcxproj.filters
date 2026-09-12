@@ -242,6 +242,12 @@
     <ClCompile Include="source\Script\EnemyBullet.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ObjectShake.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\TimeRecoveryItem.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\BasicEnemy.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -617,6 +623,12 @@
       <Filter>ヘッダー ファイル\System\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\EnemyBullet.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ObjectShake.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\TimeRecoveryItem.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\BasicEnemy.h">

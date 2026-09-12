@@ -2,16 +2,18 @@
 
 #include "Component/ComponentInc.h"
 
+#include "Common/Random.h"
 #include "Script/MovingEnemy.h"
 
-#include <algorithm>
+#include <cmath>
 
 void MovingEnemy::RegisterFields(FieldRegistry& fields)
 {
     Enemy::RegisterFields(fields);
-    GM_FIELD(m_moveDuration);
-    GM_FIELD(m_stopDuration);
-    GM_FIELD(m_moveSpeed);
+    GM_FIELD(m_amplitudeMin);
+    GM_FIELD(m_amplitudeMax);
+    GM_FIELD(m_frequencyMin);
+    GM_FIELD(m_frequencyMax);
 }
 
 void MovingEnemy::OnStart()
@@ -24,69 +26,31 @@ void MovingEnemy::OnStart()
         return;
     }
 
-    if (m_playerObject && m_playerObject->GetTransform())
-    {
-        // 開始直後からプレイヤーへ向かう移動フェーズに入る。
-        BeginMoving(m_playerObject->GetTransform()->GetPosition());
-    }
+    SelectMovementParameters();
 }
 
-void MovingEnemy::UpdateBehavior(const Vector3& playerPosition)
+void MovingEnemy::SelectMovementParameters()
+{
+    const float angle = Random::Range(0.0f, Math::PI * 2.0f);
+    m_moveDirection = Vector3(std::cos(angle), 0.0f, std::sin(angle));
+    m_amplitude = Random::Range(
+        Math::Min(m_amplitudeMin, m_amplitudeMax),
+        Math::Max(m_amplitudeMin, m_amplitudeMax));
+    m_frequency = Random::Range(
+        Math::Min(m_frequencyMin, m_frequencyMax),
+        Math::Max(m_frequencyMin, m_frequencyMax));
+    m_elapsedTime = 0.0f;
+}
+
+void MovingEnemy::UpdateBehavior(const Vector3&)
 {
     if (!m_rigidbody)
     {
         return;
     }
 
-    if (m_isMoving)
-    {
-        // プレイヤーが動いても、移動フェーズ中は常に現在位置へ向かう。
-        SetVelocityTowardsPlayer(playerPosition);
-    }
-
-    m_stateTimer -= Time::GetDeltaTime();
-    if (m_stateTimer > 0.0f)
-    {
-        return;
-    }
-
-    if (m_isMoving)
-    {
-        BeginStopping();
-    }
-    else
-    {
-        BeginMoving(playerPosition);
-    }
-}
-
-void MovingEnemy::SetVelocityTowardsPlayer(const Vector3& playerPosition)
-{
-    Vector3 direction = playerPosition - transform()->GetPosition();
-    direction.y = 0.0f;
-    if (direction.LengthSqr() <= STOP_DISTANCE_FROM_PLAYER * STOP_DISTANCE_FROM_PLAYER)
-    {
-        // 接触して押し合い続けないよう、所定距離内では物理速度を明示的に止める。
-        m_rigidbody->SetVelocity(Vector3::Zero());
-        return;
-    }
-
-    direction.Normalize();
-
-    // Dynamic Rigidbodyの速度だけを変更し、Transformを直接操作しない。
-    m_rigidbody->SetVelocity(direction * std::max(m_moveSpeed, 0.0f));
-}
-
-void MovingEnemy::BeginMoving(const Vector3& playerPosition)
-{
-    m_isMoving = true;
-    SetVelocityTowardsPlayer(playerPosition);
-    m_stateTimer = Math::Max(m_moveDuration, 0.01f);
-}
-
-void MovingEnemy::BeginStopping()
-{
-    m_isMoving = false;
-    m_rigidbody->SetVelocity(Vector3::Zero());
-    m_stateTimer = Math::Max(m_stopDuration, 0.01f);
+    m_elapsedTime += Time::GetDeltaTime();
+    const float angularFrequency = Math::PI * 2.0f * Math::Max(0.0f, m_frequency);
+    const float speed = m_amplitude * angularFrequency * std::cos(angularFrequency * m_elapsedTime);
+    m_rigidbody->SetVelocity(m_moveDirection * speed);
 }

@@ -1,0 +1,48 @@
+version: 1
+name: TimeRecoveryItem
+gameObjects:
+  - id: 1
+    name: TimeRecoveryItem
+    tag: TimeRecoveryItem
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [0.5,0.5,0.5]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/bullet.obj
+          m_materialPaths:
+            - Assets/Materials/Particle.material
+          m_inverseAxisFlags: 0
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: true
+          m_layer: 0
+          m_radius: 1
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: TimeRecoveryItem
+        fields:
+          enabled: true
+          m_recoveryTime: 3
+          m_lifetime: 12
