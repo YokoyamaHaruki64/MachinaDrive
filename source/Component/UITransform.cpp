@@ -33,6 +33,52 @@ namespace
         const int row = value.y < 0.25f ? 0 : value.y > 0.75f ? 2 : 1;
         return static_cast<UIPositionPreset>(row * 3 + column);
     }
+
+    XMMATRIX CreateWorldMatrix(const Vector2& size, const Vector2& pivot, const Vector2& pivotPosition, float rotation)
+    {
+        const Vector2 localPivotOffset(
+            (0.5f - pivot.x) * size.x,
+            (0.5f - pivot.y) * size.y);
+        return XMMatrixScaling(size.x, size.y, 1.0f)
+            * XMMatrixTranslation(localPivotOffset.x, localPivotOffset.y, 0.0f)
+            * XMMatrixRotationZ(rotation)
+            * XMMatrixTranslation(pivotPosition.x, pivotPosition.y, 0.0f);
+    }
+
+    bool AreQuadsOverlapping(const std::array<Vector2, 4>& first, const std::array<Vector2, 4>& second)
+    {
+        const auto isSeparatedOnEdgeNormals = [](const std::array<Vector2, 4>& source, const std::array<Vector2, 4>& target)
+        {
+            for (size_t index = 0; index < source.size(); ++index)
+            {
+                const Vector2 edge = source[(index + 1) % source.size()] - source[index];
+                const Vector2 axis(-edge.y, edge.x);
+                float sourceMinimum = Vector2::Dot(source[0], axis);
+                float sourceMaximum = sourceMinimum;
+                float targetMinimum = Vector2::Dot(target[0], axis);
+                float targetMaximum = targetMinimum;
+
+                for (size_t cornerIndex = 1; cornerIndex < source.size(); ++cornerIndex)
+                {
+                    const float sourceProjection = Vector2::Dot(source[cornerIndex], axis);
+                    sourceMinimum = (std::min)(sourceMinimum, sourceProjection);
+                    sourceMaximum = (std::max)(sourceMaximum, sourceProjection);
+                    const float targetProjection = Vector2::Dot(target[cornerIndex], axis);
+                    targetMinimum = (std::min)(targetMinimum, targetProjection);
+                    targetMaximum = (std::max)(targetMaximum, targetProjection);
+                }
+
+                if (sourceMaximum < targetMinimum || targetMaximum < sourceMinimum)
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        return !isSeparatedOnEdgeNormals(first, second)
+            && !isSeparatedOnEdgeNormals(second, first);
+    }
 }
 
 UITransform::UITransform(GameObject* owner)
@@ -150,13 +196,65 @@ XMMATRIX UITransform::GetWorldMatrix() const
 {
     const Vector2 size = m_pixelRect.GetSize();
     const Vector2 pivotPosition = m_pixelRect.min + Vector2::Multiply(m_pivot, size);
-    const Vector2 localPivotOffset(
-        (0.5f - m_pivot.x) * size.x,
-        (0.5f - m_pivot.y) * size.y);
-    return XMMatrixScaling(size.x, size.y, 1.0f)
-        * XMMatrixTranslation(localPivotOffset.x, localPivotOffset.y, 0.0f)
-        * XMMatrixRotationZ(m_uiRotation)
-        * XMMatrixTranslation(pivotPosition.x, pivotPosition.y, 0.0f);
+    const UITransform* const parent = dynamic_cast<const UITransform*>(GetParent());
+    if (!parent || parent->GetOwner()->GetComponent<UICanvas>())
+    {
+        return CreateWorldMatrix(size, m_pivot, pivotPosition, m_uiRotation);
+    }
+
+    const Vector2 parentSize = parent->m_pixelRect.GetSize();
+    if (std::abs(parentSize.x) <= 1.0e-6f || std::abs(parentSize.y) <= 1.0e-6f)
+    {
+        return CreateWorldMatrix(size, m_pivot, pivotPosition, m_uiRotation);
+    }
+
+    // 子は親Rect内の正規化座標で組み、親のScaleとRotationを一度だけ継承する。
+    const Vector2 localSize(size.x / parentSize.x, size.y / parentSize.y);
+    const Vector2 localPivotPosition(
+        (pivotPosition.x - parent->m_pixelRect.min.x) / parentSize.x - 0.5f,
+        (pivotPosition.y - parent->m_pixelRect.min.y) / parentSize.y - 0.5f);
+    return CreateWorldMatrix(localSize, m_pivot, localPivotPosition, m_uiRotation)
+        * parent->GetWorldMatrix();
+}
+
+std::array<Vector2, 4> UITransform::GetWorldCorners() const
+{
+    static constexpr std::array<Vector2, 4> localCorners{
+        Vector2(-0.5f, -0.5f), Vector2(0.5f, -0.5f),
+        Vector2(0.5f, 0.5f), Vector2(-0.5f, 0.5f),
+    };
+
+    const XMMATRIX worldMatrix = GetWorldMatrix();
+    std::array<Vector2, 4> corners;
+    for (size_t index = 0; index < corners.size(); ++index)
+    {
+        const XMVECTOR transformed = XMVector3TransformCoord(
+            XMVectorSet(localCorners[index].x, localCorners[index].y, 0.0f, 1.0f),
+            worldMatrix);
+        corners[index] = Vector2(XMVectorGetX(transformed), XMVectorGetY(transformed));
+    }
+    return corners;
+}
+
+bool UITransform::ContainsPoint(const Vector2& point) const
+{
+    const XMMATRIX worldMatrix = GetWorldMatrix();
+    const XMVECTOR determinant = XMMatrixDeterminant(worldMatrix);
+    if (std::abs(XMVectorGetX(determinant)) <= 1.0e-6f)
+    {
+        return false;
+    }
+
+    const XMVECTOR local = XMVector3TransformCoord(
+        XMVectorSet(point.x, point.y, 0.0f, 1.0f),
+        XMMatrixInverse(nullptr, worldMatrix));
+    return std::abs(XMVectorGetX(local)) <= 0.5f
+        && std::abs(XMVectorGetY(local)) <= 0.5f;
+}
+
+bool UITransform::Overlaps(const UITransform& other) const
+{
+    return AreQuadsOverlapping(GetWorldCorners(), other.GetWorldCorners());
 }
 
 void UITransform::SetUIScale(const Vector2& value)

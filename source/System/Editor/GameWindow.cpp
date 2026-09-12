@@ -4,6 +4,8 @@
 
 #include "imgui.h"
 
+#include "Component/UITransform.h"
+#include "System/Core/GameObject.h"
 #include "System/Core/manager.h"
 #include "System/Core/input.h"
 #include "System/Debug/DebugDrawer.h"
@@ -19,6 +21,60 @@ namespace
         const float clamped = std::clamp(value, static_cast<float>(MIN_GAME_SIZE), static_cast<float>(MAX_GAME_SIZE));
         return static_cast<uint32_t>(std::lround(clamped));
     }
+}
+
+void GameWindow::DrawUIRects(const Vector2& imagePosition, const Vector2& imageSize) const
+{
+    const float renderWidth = static_cast<float>(Renderer::GetGameWidth());
+    const float renderHeight = static_cast<float>(Renderer::GetGameHeight());
+    if (renderWidth <= 0.0f || renderHeight <= 0.0f)
+    {
+        return;
+    }
+
+    ImDrawList* const drawList = ImGui::GetWindowDrawList();
+    const ImVec2 clipMinimum(imagePosition.x, imagePosition.y);
+    const ImVec2 clipMaximum(imagePosition.x + imageSize.x, imagePosition.y + imageSize.y);
+    drawList->PushClipRect(clipMinimum, clipMaximum, true);
+
+    const auto toScreenPosition = [&imagePosition, &imageSize, renderWidth, renderHeight](const Vector2& position)
+    {
+        return ImVec2(
+            imagePosition.x + position.x / renderWidth * imageSize.x,
+            imagePosition.y + position.y / renderHeight * imageSize.y);
+    };
+
+    for (const std::unique_ptr<GameObject>& object : Manager::GetActiveGameObjects())
+    {
+        if (!object || object->IsDestroyed() || !object->IsActive())
+        {
+            continue;
+        }
+
+        const UITransform* const transform = object->GetUITransform();
+        if (!transform || !transform->GetCanvas())
+        {
+            continue;
+        }
+
+        const Vector2 size = transform->GetSizePixels();
+        if (std::abs(size.x) <= 1.0e-6f || std::abs(size.y) <= 1.0e-6f)
+        {
+            continue;
+        }
+
+        const std::array<Vector2, 4> corners = transform->GetWorldCorners();
+        for (size_t index = 0; index < corners.size(); ++index)
+        {
+            drawList->AddLine(
+                toScreenPosition(corners[index]),
+                toScreenPosition(corners[(index + 1) % corners.size()]),
+                IM_COL32(0, 220, 255, 220),
+                1.0f);
+        }
+    }
+
+    drawList->PopClipRect();
 }
 
 bool GameWindow::ApplyRenderTargetSize()
@@ -72,6 +128,9 @@ void GameWindow::DrawImGui()
     }
 
     ImGui::SameLine();
+    ImGui::Checkbox("Show UI Rects", &m_showUIRects);
+
+    ImGui::SameLine();
     m_aspectMode = (Manager::IsPlayMode() || m_displayUI) ? AspectMode::Ratio16x9 : AspectMode::Free;
     ImGui::TextUnformatted(m_aspectMode == AspectMode::Ratio16x9 ? "16:9" : "Free");
     ImGui::SameLine();
@@ -109,6 +168,11 @@ void GameWindow::DrawImGui()
         && ImGui::IsItemClicked(ImGuiMouseButton_Left))
     {
         Input::ShowCursor(false);
+    }
+
+    if (m_showUIRects && (Manager::IsPlayMode() || m_displayUI))
+    {
+        DrawUIRects(m_displayPosition, m_displaySize);
     }
 
     EndWindow();
