@@ -249,13 +249,19 @@ void UIText::Draw()
 
         const float width = static_cast<float>(glyph->width) * pixelScale;
         const float height = static_cast<float>(glyph->height) * pixelScale;
+        const float glyphCenterX = cursorX + static_cast<float>(glyph->xOffset) * pixelScale + width * 0.5f;
         const Vector3 localPosition(
-            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f,
+            glyphCenterX / unscaledSize.x - 0.5f,
             (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f,
             0.0f);
 
         MaterialPropertyOverride properties;
         properties.SetColor("_BaseColor", m_color);
+        properties.SetColor("OutlineColor", m_outlineColor);
+        properties.SetFloat("OutlineWidth", m_outlineWidth);
+        properties.SetVector2("FontTexelSize", Vector2(
+            1.0f / static_cast<float>(m_font->GetTextureWidth()),
+            1.0f / static_cast<float>(m_font->GetTextureHeight())));
         properties.SetVector2("_UVOffset", Vector2(
             static_cast<float>(glyph->x) / static_cast<float>(m_font->GetTextureWidth()),
             static_cast<float>(glyph->y) / static_cast<float>(m_font->GetTextureHeight())));
@@ -358,6 +364,8 @@ void UIText::RegisterFields(FieldRegistry& fields)
     fields.Add("text", m_text, InspectorFieldType::Multiline);
     GM_FIELD(m_fontSize);
     GM_FIELD(m_color);
+    GM_FIELD(m_outlineColor);
+    GM_FIELD(m_outlineWidth);
     GM_FIELD_ACCESSOR_TYPE(int, "horizontalAlignment", GetHorizontalAlignmentValue(), SetHorizontalAlignmentValue(value), All, InspectorFieldType::Auto, true);
     GM_FIELD_ACCESSOR_TYPE(int, "verticalAlignment", GetVerticalAlignmentValue(), SetVerticalAlignmentValue(value), All, InspectorFieldType::Auto, true);
     GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
