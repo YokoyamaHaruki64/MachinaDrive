@@ -1,0 +1,104 @@
+version: 1
+name: VFX Time Recovery Pickup
+gameObjects:
+  - id: 1
+    name: VFX_TimeRecoveryPickup
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0, 0, 0]
+          m_localRotation: [0, 0, 0, 1]
+          m_localScale: [1, 1, 1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0, 0, 0]
+          maxParticles: 6
+          burst: true
+          burstCount: 5
+          burstTime: 0.08
+          finishedDestroy: true
+          emitRate: 0
+          lifetimeMin: 0.75
+          lifetimeMax: 1.05
+          gravity: [0, 0, 0]
+          drag: 1.4
+          size: [0.65, 0.65, 0.65]
+          scaleOverLifetime:
+            - time: 0
+              value: 0.65
+              inControl: 0.65
+              outControl: 0.65
+            - time: 0.18
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0.8
+              inControl: 0.8
+              outControl: 0.8
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 0.35
+                inControl: 0.35
+                outControl: 0.35
+              - time: 1
+                value: 0.2
+                inControl: 0.2
+                outControl: 0.2
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.8
+                inControl: 0.8
+                outControl: 0.8
+            b:
+              - time: 0
+                value: 0.5
+                inControl: 0.5
+                outControl: 0.5
+              - time: 1
+                value: 0.2
+                inControl: 0.2
+                outControl: 0.2
+            a:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 0.15
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.7
+                value: 0.75
+                inControl: 0.75
+                outControl: 0.75
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          randomizeSpeed: true
+          speed: 1.2
+          speedMin: 0.8
+          speedMax: 1.5
+          velocityType: 1
+          direction: [0, 1, 0]
+          coneAngle: 30
+          spawnType: 1
+          spawnRadius: 1.2
+          spawnNormal: [0, 1, 0]
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/RecoveryPlus.material

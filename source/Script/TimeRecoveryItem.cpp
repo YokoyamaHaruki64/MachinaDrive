@@ -10,6 +10,7 @@
 FIELDS_BEGIN(TimeRecoveryItem)
     GM_FIELD(m_recoveryTime);
     GM_FIELD(m_lifetime);
+    GM_FIELD(m_pickupVfxPrefab);
 FIELDS_END()
 
 void TimeRecoveryItem::OnStart()
@@ -44,6 +45,13 @@ void TimeRecoveryItem::OnHitBegin(const HitInfo& hitInfo)
     if (m_waveDirector)
     {
         m_waveDirector->AddRemainingTime(m_recoveryTime);
+    }
+
+    if (m_pickupVfxPrefab && hitInfo.objectB->GetTransform())
+    {
+        // 取得者の周囲から上昇するプラス記号で、時間回復をワールド上でも通知する。
+        const Vector3 vfxPosition = hitInfo.objectB->GetTransform()->GetPosition() + Vector3::Up() * 1.0f;
+        Manager::Instantiate(m_pickupVfxPrefab.GetPath(), vfxPosition, Vector3::Zero(), Vector3::One());
     }
 
     m_isCollected = true;
