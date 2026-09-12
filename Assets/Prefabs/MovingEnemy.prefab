@@ -11,7 +11,7 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [-16.4599991,0,4]
+          m_localPosition: [-34.9799995,0,18.5]
           m_localRotation: [0,1,0,-1.19209304e-07]
           m_localScale: [1,1,1]
       - type: Rigidbody
@@ -31,14 +31,14 @@ gameObjects:
       - type: MovingEnemy
         fields:
           enabled: true
-          m_attackRange: 10
-          m_shootCooldown: 1.20000005
           m_invincibilityDuration: 0.5
-          m_projectileSpeed: 34
-          m_enemyBulletPrefab: Assets/Prefabs/EnemyBullet.prefab
-          m_moveDuration: 4
-          m_stopDuration: 3
-          m_moveSpeed: 20
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 6
+          m_amplitudeMin: 5
+          m_amplitudeMax: 10
+          m_frequencyMin: 0.300000012
+          m_frequencyMax: 0.800000012
       - type: SphereCollider
         fields:
           enabled: true
@@ -70,8 +70,13 @@ gameObjects:
             - Assets/Materials/Enemy/MovingDrone_Body.material
             - Assets/Materials/Enemy/MovingDrone_Line.material
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
       - type: EnemyAnimation
         fields:
           enabled: true
           m_floatHeight: 0.129999995
           m_floatSpeed: 8.11999989
+      - type: ObjectShake
+        fields:
+          enabled: true

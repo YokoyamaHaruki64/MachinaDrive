@@ -10,17 +10,16 @@ class MovingEnemy final : public Enemy
 
     Rigidbody* m_rigidbody{ nullptr };
 
-    float m_stateTimer = 0.0f;
-    float m_moveDuration = 3.0f;
-    float m_stopDuration = 1.0f;
-    float m_moveSpeed = 12.0f;
-    bool m_isMoving = true;
+    Vector3 m_moveDirection{ Vector3::Right() };
+    float m_amplitudeMin = 5.0f;
+    float m_amplitudeMax = 10.0f;
+    float m_frequencyMin = 0.3f;
+    float m_frequencyMax = 0.8f;
+    float m_amplitude = 0.0f;
+    float m_frequency = 0.0f;
+    float m_elapsedTime = 0.0f;
 
-    static constexpr float STOP_DISTANCE_FROM_PLAYER = 10.0f;
-
-    void SetVelocityTowardsPlayer(const Vector3& playerPosition);
-    void BeginMoving(const Vector3& playerPosition);
-    void BeginStopping();
+    void SelectMovementParameters();
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;
