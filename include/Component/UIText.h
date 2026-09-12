@@ -42,4 +42,6 @@ public:
 
     void SetText(const std::string& text) { m_text = text; }
     const std::string& GetText() const { return m_text; }
+    void SetColor(const Color& color) { m_color = color; }
+    const Color& GetColor() const { return m_color; }
 };
