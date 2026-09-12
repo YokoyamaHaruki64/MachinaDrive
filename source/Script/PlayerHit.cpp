@@ -3,12 +3,14 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/PlayerHit.h"
+#include "Script/CollisionVfx.h"
 #include "Script/Enemy.h"
 #include "Script/Player.h"
 #include "Script/CameraController.h"
 #include "Script/UI/GameHud.h"
 
 FIELDS_BEGIN(PlayerHit)
+    GM_FIELD(m_collisionVfxPrefab);
     GM_FIELD(m_shakeDuration);
     GM_FIELD(m_shakeMagnitude);
     GM_FIELD(m_hitStopDuration);
@@ -57,6 +59,33 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
         Enemy* enemy = otherObject->GetComponent<Enemy>();
         if (!enemy || !enemy->TakeDamage(1.0f))
             return;
+
+        Logger::Log("PlayerHit: Enemyへの有効ヒットを検出しました。");
+
+        if (m_collisionVfxPrefab)
+        {
+            GameObject* vfxObject = Manager::Instantiate(
+                m_collisionVfxPrefab.GetPath(),
+                hitInfo.point,
+                Vector3::Zero(),
+                Vector3::One());
+            if (vfxObject)
+            {
+                if (CollisionVfx* collisionVfx = vfxObject->GetComponent<CollisionVfx>())
+                {
+                    collisionVfx->Configure(hitInfo.normal, hitInfo.point);
+                    Logger::Log("PlayerHit: 衝突VFXを設定しました。");
+                }
+                else
+                {
+                    Logger::Error("PlayerHit: VFX_CollisionにCollisionVfxがありません。");
+                }
+            }
+            else
+            {
+                Logger::Error("PlayerHit: VFX_Collisionの生成に失敗しました。");
+            }
+        }
 
         if(m_cameraController)  m_cameraController->Shake(m_shakeDuration, m_shakeMagnitude);
 

@@ -121,6 +121,7 @@ gameObjects:
       - type: PlayerHit
         fields:
           enabled: true
+          m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
           m_shakeDuration: 0.800000012
           m_shakeMagnitude: 3
           m_hitStopDuration: 0.300000012

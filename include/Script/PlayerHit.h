@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 #include "System/Core/GameObject.h"
 
@@ -12,6 +13,7 @@ private:
     class CameraController* m_cameraController = nullptr;
 
     class GameHud* m_gameHud = nullptr;
+    PrefabReference m_collisionVfxPrefab{ "Assets/Prefabs/VFX_Collision.prefab" };
 
     float m_shakeDuration = 0.5f;
     float m_shakeMagnitude = 0.5f;
