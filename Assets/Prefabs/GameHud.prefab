@@ -30,12 +30,12 @@ gameObjects:
           m_waveNumber: 249
           m_enemyNumber: 250
           m_comboUIObject: 259
-          m_shardsNumber:
+          m_shardsNumber: 
           m_healthRoot: 200
           m_waveRoot: 210
           m_comboRoot: 259
           m_driveRoot: 220
-          m_shardsRoot:
+          m_shardsRoot: 
           m_driveGauge: 223
           m_driveChargingText: 225
           m_driveReadyText: 226
@@ -63,17 +63,23 @@ gameObjects:
         fields:
           enabled: true
           m_comboValue: 261
-          m_boundTime: 0.5
-          m_boundScale: 0.25
+          m_comboLabel: 260
+          m_boundTime: 0.319999993
+          m_boundScale: 0.5
+          m_gap: 100
           m_boundCurve:
             - time: 0
               value: 0
               inControl: 0
-              outControl: 0
-            - time: 1
+              outControl: 0.533333302
+            - time: 0.5
               value: 1
               inControl: 1
               outControl: 1
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
   - id: 261
     name: Combo_Value
     tag: 
@@ -87,7 +93,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [1,1]
-          m_pos: [-1.27999997,-0.239999995]
+          m_pos: [-1.24000001,-0.200000003]
           m_offset: [0,0]
           m_uiRotation: 0.0799999982
           m_uiScale: [1,1]
@@ -100,6 +106,8 @@ gameObjects:
           text: 00
           m_fontSize: 90
           m_color: [1,1,1,1]
+          horizontalAlignment: 1
+          verticalAlignment: 1
           m_materialPath: Assets/Materials/UI.material
   - id: 260
     name: Combo_Label
@@ -114,7 +122,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [1,1]
-          m_pos: [0,0]
+          m_pos: [0.649999976,0]
           m_offset: [0,0]
           m_uiRotation: 0.0799999982
           m_uiScale: [1,1]
@@ -127,6 +135,8 @@ gameObjects:
           text: Combo!!
           m_fontSize: 70
           m_color: [1,1,1,1]
+          horizontalAlignment: 1
+          verticalAlignment: 1
           m_materialPath: Assets/Materials/UI.material
   - id: 220
     name: HUD_Drive
@@ -158,8 +168,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.280000001,0.200000003]
-          m_pos: [-0.109999999,0.273999989]
+          m_stretch: [0.312999994,0.129999995]
+          m_pos: [-0.164000005,0.238999993]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -172,6 +182,8 @@ gameObjects:
           text: READY!!
           m_fontSize: 32
           m_color: [0.378378391,1,0.978399098,1]
+          horizontalAlignment: 1
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 225
     name: Drive_ChargingText
@@ -185,8 +197,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.319999993,0.200000003]
-          m_pos: [-0.150000006,0.270000011]
+          m_stretch: [0.316000015,0.200000003]
+          m_pos: [-0.163000003,0.270000011]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -199,6 +211,8 @@ gameObjects:
           text: CHARGING...
           m_fontSize: 32
           m_color: [0.957528949,0.930993199,0.428854674,1]
+          horizontalAlignment: 1
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 224
     name: Drive_Label
@@ -212,8 +226,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.860000014,0.159999996]
-          m_pos: [0.136000007,-0.0689999983]
+          m_stretch: [0.200000003,0.159999996]
+          m_pos: [-0.201000005,-0.0689999983]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -226,6 +240,8 @@ gameObjects:
           text: DRIVE
           m_fontSize: 40
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 223
     name: Drive_Gauge
@@ -338,8 +354,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.449999988,0.219999999]
-          m_pos: [0.294999987,0.225999996]
+          m_stretch: [0.075000003,0.300000012]
+          m_pos: [0.108999997,0.273999989]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -352,6 +368,8 @@ gameObjects:
           text: 00
           m_fontSize: 43.8400002
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 249
     name: Wave_Value
@@ -365,8 +383,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.449999988,0.219999999]
-          m_pos: [0.287,-0.303000003]
+          m_stretch: [0.100000001,0.389999986]
+          m_pos: [0.112000003,-0.217999995]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -379,6 +397,8 @@ gameObjects:
           text: 00
           m_fontSize: 60
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 214
     name: Enemy_Label
@@ -392,8 +412,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.449999988,0.219999999]
-          m_pos: [0.0680000037,0.298999995]
+          m_stretch: [0.159999996,0.219999999]
+          m_pos: [-0.0780000016,0.298999995]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -406,6 +426,8 @@ gameObjects:
           text: ENEMIES
           m_fontSize: 28
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 213
     name: Wave_Label
@@ -419,8 +441,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.32100001,0.300999999]
-          m_pos: [0.00700000022,-0.175999999]
+          m_stretch: [0.141000003,0.300999999]
+          m_pos: [-0.0810000002,-0.175999999]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -433,6 +455,8 @@ gameObjects:
           text: WAVE
           m_fontSize: 40
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 212
     name: Wave_Line
@@ -545,8 +569,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.600000024,0.5]
-          m_pos: [0.237000003,-0.150999993]
+          m_stretch: [0.460000008,0.5]
+          m_pos: [0.177000001,-0.150999993]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -559,6 +583,8 @@ gameObjects:
           text: 060.00
           m_fontSize: 75.8000031
           m_color: [1,1,1,1]
+          horizontalAlignment: 1
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 204
     name: Timer_Label
@@ -586,6 +612,8 @@ gameObjects:
           text: TIME
           m_fontSize: 40
           m_color: [1,1,1,1]
+          horizontalAlignment: 0
+          verticalAlignment: 0
           m_materialPath: Assets/Materials/UI.material
   - id: 203
     name: Timer_Bar
