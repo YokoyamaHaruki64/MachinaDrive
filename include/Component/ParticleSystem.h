@@ -15,6 +15,8 @@
 
 #include "Graphics/GraphicInc.h"
 
+#include <wrl/client.h>
+
 class ParticleEmitter : public Component
 {
     REGISTER_COMPONENT(ParticleEmitter, "Particle Emitter");
@@ -66,6 +68,15 @@ public:
             Curve<float>(1.0f, 0.0f);
         CurveColor colorOverLifetime =
             CurveColor(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f)); // 色を変化させるカーブ
+        Color emissionColor = Color::Black();
+        CurveColor emissionColorOverLifetime = CurveColor(Color::Black(), Color::Black());
+        float emissionStrength = 0.0f;
+
+        float rotationMin = 0.0f;
+        float rotationMax = 0.0f;
+        float angularVelocityMin = 0.0f;
+        float angularVelocityMax = 0.0f;
+        float velocityStretch = 0.0f;
 
         // 速度共通
         bool randomizeSpeed = true; // true:初速をランダム化する
@@ -91,23 +102,23 @@ public:
         // Circle
         Vector3 spawnNormal = Vector3::Up(); // 生成時の法線方向
     };
-private:
-    class Particle
+public:
+    struct Particle
     {
-    public:
         bool active{ false };
 
         Vector3 position{ Vector3::Zero() };
-        Vector3 rotation{ Vector3::Zero() };
+        float rotation{ 0.0f };
+        float angularVelocity{ 0.0f };
         float scale{ 1.0f };
         Vector3 velocity{ Vector3::Zero() };
         Color color{ Color::White() };
+        Color emissionColor{ Color::Black() };
         float lifetime{ 1.0f };
         float age{ 0.0f };
     };
 
-public :
-
+public:
     ParticleEmitter(GameObject* owner): Component(owner)
     {
     }
@@ -153,6 +164,7 @@ public :
         {
             p.active = false;
         }
+        m_activeParticles = 0;
     }
 
     void ResetBurst()
@@ -188,9 +200,21 @@ private:
     ParticleEmitter* m_emitter{};
     const Mesh* m_mesh{};
     Material* m_material{};
-    std::string m_materialPath{ "Assets/Materials/Particle.material" };
+    std::string m_materialPath{ "Assets/Materials/ParticleInstanced.material" };
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_instanceBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_instanceBufferView;
+    uint32_t m_instanceCapacity{};
 
-    void BindMesh(const XMMATRIX& worldMatrix, const Color& color);
+    struct ParticleInstanceData
+    {
+        XMFLOAT4X4 world;
+        XMFLOAT4 color;
+        XMFLOAT4 emissionColor;
+    };
+
+    bool EnsureInstanceBuffer(uint32_t count);
+    XMMATRIX CalcParticleWorldMatrix(const ParticleEmitter::Particle& particle) const;
+    void BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color);
 
 public:
     ParticleRenderer() = delete;

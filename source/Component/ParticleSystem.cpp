@@ -9,6 +9,10 @@
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 
+#include <algorithm>
+#include <bit>
+#include <cstring>
+
 void ParticleEmitter::Update()
 {
     float dt = Time::GetDeltaTime();
@@ -41,7 +45,7 @@ void ParticleEmitter::Update()
     }
     else
     {
-        while (m_emitTimer >= m_emitInterval)
+        while (m_emitInterval > 0.0f && m_emitTimer >= m_emitInterval)
         {
             m_emitTimer -= m_emitInterval;
             EmitOne();
@@ -81,6 +85,10 @@ void ParticleEmitter::ActivateParticle(Particle& p)
     p.lifetime = Random::Range(m_settings.lifetimeMin, m_settings.lifetimeMax);
     p.scale = m_settings.scaleOverLifetime.Evaluate(0.0f);
     p.color = m_settings.colorOverLifetime.Evaluate(0.0f);
+    p.emissionColor = m_settings.emissionColor +
+        m_settings.emissionColorOverLifetime.Evaluate(0.0f) * m_settings.emissionStrength;
+    p.rotation = Random::Range(m_settings.rotationMin, m_settings.rotationMax);
+    p.angularVelocity = Random::Range(m_settings.angularVelocityMin, m_settings.angularVelocityMax);
     m_activeParticles++;
 
     // 位置の初期化
@@ -169,10 +177,14 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
         p.velocity += m_settings.gravity * dt;
         // 抵抗
         p.velocity *= Math::Max(0.0f, 1.0f - m_settings.drag * dt);
-        // サイズと色の更新
-        float normalizedAge = p.age / p.lifetime;
+        p.rotation += p.angularVelocity * dt;
+
+        // サイズと色は寿命の正規化値で統一して評価し、Prefab間で時間調整を再利用できるようにする。
+        float normalizedAge = p.age / Math::Max(p.lifetime, 0.0001f);
         p.scale = m_settings.scaleOverLifetime.Evaluate(normalizedAge);
         p.color = m_settings.colorOverLifetime.Evaluate(normalizedAge);
+        p.emissionColor = m_settings.emissionColor +
+            m_settings.emissionColorOverLifetime.Evaluate(normalizedAge) * m_settings.emissionStrength;
     }
 }
 void ParticleEmitter::RegisterFields(FieldRegistry& fields)
@@ -191,6 +203,14 @@ void ParticleEmitter::RegisterFields(FieldRegistry& fields)
     GM_FIELD_KEY("size", m_settings.size);
     GM_FIELD_KEY_TYPE("scaleOverLifetime", m_settings.scaleOverLifetime, InspectorFieldType::Curve);
     GM_FIELD_KEY_TYPE("colorOverLifetime", m_settings.colorOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY("emissionColor", m_settings.emissionColor);
+    GM_FIELD_KEY_TYPE("emissionColorOverLifetime", m_settings.emissionColorOverLifetime, InspectorFieldType::Curve);
+    GM_FIELD_KEY("emissionStrength", m_settings.emissionStrength);
+    GM_FIELD_KEY("rotationMin", m_settings.rotationMin);
+    GM_FIELD_KEY("rotationMax", m_settings.rotationMax);
+    GM_FIELD_KEY("angularVelocityMin", m_settings.angularVelocityMin);
+    GM_FIELD_KEY("angularVelocityMax", m_settings.angularVelocityMax);
+    GM_FIELD_KEY("velocityStretch", m_settings.velocityStretch);
     GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
     GM_FIELD_KEY("speed", m_settings.speed);
     GM_FIELD_KEY("speedMin", m_settings.speedMin);
@@ -269,11 +289,68 @@ void ParticleRenderer::SetMaterial(uint32_t slot, Material* material)
     }
 }
 
-void ParticleRenderer::BindMesh(const XMMATRIX& worldMatrix, const Color& color)
+bool ParticleRenderer::EnsureInstanceBuffer(uint32_t count)
 {
-    if (!m_mesh || !m_material)
-        return;
+    if (count <= m_instanceCapacity && m_instanceBuffer && m_instanceBufferView)
+    {
+        return true;
+    }
 
+    const uint32_t capacity = std::max(1u, std::bit_ceil(count));
+    D3D11_BUFFER_DESC description{};
+    description.Usage = D3D11_USAGE_DYNAMIC;
+    description.ByteWidth = sizeof(ParticleInstanceData) * capacity;
+    description.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    description.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    description.StructureByteStride = sizeof(ParticleInstanceData);
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
+    if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, nullptr, buffer.GetAddressOf())))
+        return false;
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC viewDescription{};
+    viewDescription.Format = DXGI_FORMAT_UNKNOWN;
+    viewDescription.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+    viewDescription.BufferEx.FirstElement = 0;
+    viewDescription.BufferEx.NumElements = capacity;
+    viewDescription.BufferEx.Flags = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bufferView;
+    if (FAILED(Renderer::GetDevice()->CreateShaderResourceView(buffer.Get(), &viewDescription, bufferView.GetAddressOf())))
+        return false;
+
+    m_instanceCapacity = capacity;
+    m_instanceBuffer = std::move(buffer);
+    m_instanceBufferView = std::move(bufferView);
+    return true;
+}
+
+XMMATRIX ParticleRenderer::CalcParticleWorldMatrix(const ParticleEmitter::Particle& particle) const
+{
+    const ParticleEmitter::EmitterSettings& settings = m_emitter->GetSettingsRef();
+    Vector3 scale = Vector3::Multiply(settings.size, transform()->GetScale()) * particle.scale;
+    scale.x *= 1.0f + particle.velocity.Length() * settings.velocityStretch;
+
+    if (m_billboardType == BillboardType::CameraFacing)
+    {
+        const XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
+        const XMVECTOR cameraRight = XMVector3Normalize(inverseView.r[0]);
+        const XMVECTOR cameraUp = XMVector3Normalize(inverseView.r[1]);
+        const float projectedX = XMVectorGetX(XMVector3Dot(XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&particle.velocity)), cameraRight));
+        const float projectedY = XMVectorGetX(XMVector3Dot(XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&particle.velocity)), cameraUp));
+
+        const float roll = particle.rotation + (projectedX == 0.0f && projectedY == 0.0f ? 0.0f : atan2f(projectedY, projectedX));
+        return XMMatrixScaling(scale.x, scale.y, scale.z) *
+            XMMatrixRotationZ(roll) * inverseView *
+            XMMatrixTranslation(particle.position.x, particle.position.y, particle.position.z);
+    }
+
+    return CalcWorldMatrix(particle.position, Vector3(0.0f, 0.0f, particle.rotation), scale, m_billboardType);
+}
+
+void ParticleRenderer::BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color)
+{
     Renderer::SetWorldMatrix(worldMatrix);
     MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
     propertyOverride.SetColor("_BaseColor", color);
@@ -302,21 +379,70 @@ void ParticleRenderer::Draw()
     if (!m_emitter || !m_mesh || !m_material)
         return;
 
-    const ParticleEmitter::EmitterSettings& settings = m_emitter->GetSettingsRef();
-    for (auto& p : m_emitter->GetParticles())
+    if (!m_material->GetShaderPass(0).IsInstanced())
     {
-        if (!p.active) continue;
+        // 既存Prefabの任意Materialはインスタンス入力を持たないため、旧経路で表示互換を維持する。
+        for (const ParticleEmitter::Particle& particle : m_emitter->GetParticles())
+        {
+            if (!particle.active)
+                continue;
 
-        // Particleごとの座標と色をMaterialへ設定し、共有するQuad形状を描画する。
-        BindMesh(CalcWorldMatrix(
-            p.position,
-            p.rotation,
-            Vector3::Multiply(settings.size, transform()->GetScale()) * p.scale,
-            m_billboardType),
-            p.color);
-
-        Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
-
+            BindLegacyMesh(CalcParticleWorldMatrix(particle), particle.color);
+            Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
+        }
+        return;
     }
+
+    std::vector<ParticleInstanceData> instances;
+    instances.reserve(m_emitter->GetParticles().size());
+    for (const ParticleEmitter::Particle& particle : m_emitter->GetParticles())
+    {
+        if (!particle.active)
+            continue;
+
+        ParticleInstanceData instance{};
+        XMStoreFloat4x4(&instance.world, CalcParticleWorldMatrix(particle));
+        instance.color = XMFLOAT4(particle.color.r, particle.color.g, particle.color.b, particle.color.a);
+        instance.emissionColor = XMFLOAT4(
+            particle.emissionColor.r,
+            particle.emissionColor.g,
+            particle.emissionColor.b,
+            particle.emissionColor.a);
+        instances.push_back(instance);
+    }
+
+    if (instances.empty() || !EnsureInstanceBuffer(static_cast<uint32_t>(instances.size())))
+        return;
+
+    ID3D11DeviceContext* context = Renderer::GetDeviceContext();
+    D3D11_MAPPED_SUBRESOURCE mappedResource{};
+    if (FAILED(context->Map(m_instanceBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+        return;
+
+    std::memcpy(mappedResource.pData, instances.data(), sizeof(ParticleInstanceData) * instances.size());
+    context->Unmap(m_instanceBuffer.Get(), 0);
+
+    Renderer::SetWorldMatrix(XMMatrixIdentity());
+    m_material->Bind(0, FindMaterialPropertyOverride());
+    ID3D11ShaderResourceView* instanceView = m_instanceBufferView.Get();
+    context->VSSetShaderResources(2, 1, &instanceView);
+
+    for (const InputSlotBinding& binding : m_material->GetShaderPass(0).GetInputSlotBindings())
+    {
+        ID3D11Buffer* vertexBuffer = m_mesh->GetVertexBuffer(binding.streamType);
+        if (!vertexBuffer)
+            vertexBuffer = Renderer::GetFallbackVertexBuffer(binding.streamType);
+
+        const UINT stride = Mesh::GetVertexStreamStride(binding.streamType);
+        const UINT offset = 0;
+        if (!vertexBuffer || stride == 0)
+            return;
+
+        context->IASetVertexBuffers(binding.inputSlot, 1, &vertexBuffer, &stride, &offset);
+    }
+
+    context->IASetIndexBuffer(m_mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    context->DrawIndexedInstanced(m_mesh->indexCount, static_cast<UINT>(instances.size()), 0, 0, 0);
 }

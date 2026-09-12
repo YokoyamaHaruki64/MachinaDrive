@@ -68,6 +68,7 @@ public:
         const std::string& pixelEntryPoint,
         const std::string& pixelShaderModel,
         const RenderState& renderState,
+        bool isInstanced,
         GraphicsShaderPass& outShaderPass);
 
 
