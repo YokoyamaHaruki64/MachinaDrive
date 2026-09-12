@@ -129,10 +129,25 @@ void UIText::Draw()
         return;
     }
 
-    const float pixelScale = m_fontSize * transform->GetCanvas()->GetScale() / static_cast<float>(m_font->GetLineHeight());
     const UIRect& rect = transform->GetPixelRect();
-    float cursorX = rect.min.x;
-    float cursorY = rect.min.y;
+    const Vector2& uiScale = transform->GetUIScale();
+    if (std::abs(uiScale.x) <= 1.0e-6f || std::abs(uiScale.y) <= 1.0e-6f)
+    {
+        return;
+    }
+
+    // UITransformのScaleをGlyphのローカル座標へ適用し、文字列全体を同じPivotで変形する。
+    const Vector2 unscaledSize(
+        rect.GetSize().x / uiScale.x,
+        rect.GetSize().y / uiScale.y);
+    if (std::abs(unscaledSize.x) <= 1.0e-6f || std::abs(unscaledSize.y) <= 1.0e-6f)
+    {
+        return;
+    }
+
+    const float pixelScale = m_fontSize * transform->GetCanvas()->GetScale() / static_cast<float>(m_font->GetLineHeight());
+    float cursorX = 0.0f;
+    float cursorY = 0.0f;
 
     const XMMATRIX originalView = Renderer::GetViewMatrix();
     const XMMATRIX originalProjection = Renderer::GetProjectionMatrix();
@@ -147,7 +162,7 @@ void UIText::Draw()
     {
         if (codePoint == '\n')
         {
-            cursorX = rect.min.x;
+            cursorX = 0.0f;
             cursorY += static_cast<float>(m_font->GetLineHeight()) * pixelScale;
             continue;
         }
@@ -160,9 +175,9 @@ void UIText::Draw()
 
         const float width = static_cast<float>(glyph->width) * pixelScale;
         const float height = static_cast<float>(glyph->height) * pixelScale;
-        const Vector3 position(
-            cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f,
-            cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f,
+        const Vector3 localPosition(
+            (cursorX + (static_cast<float>(glyph->xOffset) * pixelScale) + width * 0.5f) / unscaledSize.x - 0.5f,
+            (cursorY + (static_cast<float>(glyph->yOffset) * pixelScale) + height * 0.5f) / unscaledSize.y - 0.5f,
             0.0f);
 
         MaterialPropertyOverride properties;
@@ -173,7 +188,12 @@ void UIText::Draw()
         properties.SetVector2("_UVScale", Vector2(
             static_cast<float>(glyph->width) / static_cast<float>(m_font->GetTextureWidth()),
             static_cast<float>(glyph->height) / static_cast<float>(m_font->GetTextureHeight())));
-        Renderer::SetWorldMatrix(RendererBase::CalcWorldMatrix(position, Vector3::Zero(), Vector3(width, height, 1.0f), BillboardType::None));
+        const XMMATRIX glyphMatrix = RendererBase::CalcWorldMatrix(
+            localPosition,
+            Vector3::Zero(),
+            Vector3(width / unscaledSize.x, height / unscaledSize.y, 1.0f),
+            BillboardType::None);
+        Renderer::SetWorldMatrix(glyphMatrix * transform->GetWorldMatrix());
         m_material->Bind(0, &properties);
 
         const GraphicsShaderPass& pass = m_material->GetShaderPass(0);
