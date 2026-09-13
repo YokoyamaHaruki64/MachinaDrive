@@ -1,8 +1,8 @@
 version: 1
 name: PostProcessImpulse_PlayerShot
 gameObjects:
-  - id: 1
-    name: PostProcessImpulse_PlayerShot
+  - id: 727
+    name: PostProcessImpulse_PlayerShot(Instance)
     tag: 
     active: true
     prefab: 
@@ -18,18 +18,27 @@ gameObjects:
         fields:
           enabled: true
           m_settings:
-            duration: 0.18
+            duration: 1.70000005
             easeType: OutQuad
             targets:
               - postProcessName: RadialBlur
                 floats:
                   - name: _Intensity
-                    value: 0.35
+                    value: 0.0799999982
+                vector2s: []
+                vector3s: []
+                vector4s: []
               - postProcessName: ChromaticAberration
                 floats:
                   - name: _Intensity
                     value: 1
+                vector2s: []
+                vector3s: []
+                vector4s: []
               - postProcessName: Bloom
                 floats:
                   - name: _Intensity
-                    value: 0.2
+                    value: 0.899999976
+                vector2s: []
+                vector3s: []
+                vector4s: []

@@ -1,7 +1,7 @@
 version: 1
 name: PostProcessImpulse_EnemyHit
 gameObjects:
-  - id: 443
+  - id: 1834
     name: PostProcessImpulse_EnemyHit(Instance)
     tag: 
     active: true
@@ -31,11 +31,11 @@ gameObjects:
               - postProcessName: ChromaticAberration
                 floats:
                   - name: _Intensity
-                    value: 0.25
+                    value: 0.100000001
                 vector2s:
                   - name: _RedOffset
-                    value: [0.0500000007,0.0500000007]
+                    value: [0.0299999993,0.0299999993]
                   - name: _BlueOffset
-                    value: [-0.0500000007,-0.0500000007]
+                    value: [-0.0299999993,-0.0299999993]
                 vector3s: []
                 vector4s: []

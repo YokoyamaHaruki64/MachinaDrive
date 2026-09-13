@@ -850,8 +850,8 @@ gameObjects:
           m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
           m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
           m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
-          m_maxTime: 60
-          m_startTime: 60
+          m_maxTime: 11111
+          m_startTime: 11111
           m_timeDrainPerSecond: 1
           m_baseClearTimeBonus: 8
           m_clearTimeGrowth: 2
@@ -1609,7 +1609,7 @@ gameObjects:
           enabled: true
           m_max: 1
           m_current: 1
-          m_barColor: [0.972549021,1,0.345098048,1]
+          m_barColor: [0.345098048,0.933333337,1,1]
           m_chipColor: [1,1,1,1]
           m_chipDecreaseSpeed: 10
           m_chipDecreaseDelay: 0
@@ -1756,9 +1756,9 @@ gameObjects:
           enabled: true
           m_drawLayer: 0
           font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: Waiting...
+          text: Next...
           m_fontSize: 53.5400009
-          m_color: [0.972123325,1,0.34362936,1]
+          m_color: [0.34362936,0.931575298,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 6.82999992
           horizontalAlignment: 0
