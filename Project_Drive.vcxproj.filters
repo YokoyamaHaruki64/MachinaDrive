@@ -330,6 +330,9 @@
     <ClCompile Include="source\Component\Bloom.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\FXAA.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
     <ClCompile Include="source\Component\audio.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -660,6 +663,9 @@
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\Bloom.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\FXAA.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\GraphicInc.h">
@@ -1064,6 +1070,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessBloom.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessFXAA.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\UnlitAdditive.shader">

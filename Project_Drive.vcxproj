@@ -147,6 +147,7 @@
     <ClCompile Include="source\Component\BoxCollider.cpp" />
     <ClCompile Include="source\Component\Bloom.cpp" />
     <ClCompile Include="source\Component\Camera.cpp" />
+    <ClCompile Include="source\Component\FXAA.cpp" />
     <ClCompile Include="source\Component\CapsuleCollider.cpp" />
     <ClCompile Include="source\Component\Collider.cpp" />
     <ClCompile Include="source\Component\modelRenderer.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="include\Component\Collider.h" />
     <ClInclude Include="include\Component\BoxCollider.h" />
     <ClInclude Include="include\Component\Bloom.h" />
+    <ClInclude Include="include\Component\FXAA.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\ParticleSystem.h" />
     <ClInclude Include="include\Component\PostEffect.h" />
@@ -614,6 +616,7 @@
     <None Include=".editorconfig" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
     <None Include="Assets\Shaders\PostProcessBloom.shader" />
+    <None Include="Assets\Shaders\PostProcessFXAA.shader" />
     <None Include="Assets\Shaders\UnlitAdditive.shader" />
     <None Include="Assets\Shaders\UnlitTexture.shader" />
     <None Include="Assets\Shaders\UnlitTransparent.shader" />
