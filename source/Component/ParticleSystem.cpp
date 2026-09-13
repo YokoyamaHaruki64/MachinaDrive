@@ -493,15 +493,35 @@ void ParticleRenderer::Draw()
     if (!m_emitter || !m_mesh || !m_material)
         return;
 
+    std::vector<const ParticleEmitter::Particle*> particles;
+    particles.reserve(m_emitter->GetParticles().size());
+    for (const ParticleEmitter::Particle& particle : m_emitter->GetParticles())
+    {
+        if (particle.active)
+        {
+            particles.push_back(&particle);
+        }
+    }
+
+    if (m_material->GetShaderPass(0).GetRenderState().blendMode == BlendMode::AlphaBlend)
+    {
+        const XMMATRIX viewMatrix = Renderer::GetViewMatrix();
+        std::stable_sort(particles.begin(), particles.end(), [viewMatrix](const auto* lhs, const auto* rhs)
+            {
+                const XMVECTOR lhsPosition = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&lhs->position));
+                const XMVECTOR rhsPosition = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&rhs->position));
+                const float lhsDepth = XMVectorGetZ(XMVector3TransformCoord(lhsPosition, viewMatrix));
+                const float rhsDepth = XMVectorGetZ(XMVector3TransformCoord(rhsPosition, viewMatrix));
+                return lhsDepth > rhsDepth;
+            });
+    }
+
     if (!m_material->GetShaderPass(0).IsInstanced())
     {
         // 既存Prefabの任意Materialはインスタンス入力を持たないため、旧経路で表示互換を維持する。
-        for (const ParticleEmitter::Particle& particle : m_emitter->GetParticles())
+        for (const ParticleEmitter::Particle* particle : particles)
         {
-            if (!particle.active)
-                continue;
-
-            BindLegacyMesh(CalcParticleWorldMatrix(particle), particle.color, particle.uvScale, particle.uvOffset);
+            BindLegacyMesh(CalcParticleWorldMatrix(*particle), particle->color, particle->uvScale, particle->uvOffset);
             Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
         }
@@ -509,25 +529,22 @@ void ParticleRenderer::Draw()
     }
 
     std::vector<ParticleInstanceData> instances;
-    instances.reserve(m_emitter->GetParticles().size());
-    for (const ParticleEmitter::Particle& particle : m_emitter->GetParticles())
+    instances.reserve(particles.size());
+    for (const ParticleEmitter::Particle* particle : particles)
     {
-        if (!particle.active)
-            continue;
-
         ParticleInstanceData instance{};
-        XMStoreFloat4x4(&instance.world, CalcParticleWorldMatrix(particle));
-        instance.color = XMFLOAT4(particle.color.r, particle.color.g, particle.color.b, particle.color.a);
+        XMStoreFloat4x4(&instance.world, CalcParticleWorldMatrix(*particle));
+        instance.color = XMFLOAT4(particle->color.r, particle->color.g, particle->color.b, particle->color.a);
         instance.emissionColor = XMFLOAT4(
-            particle.emissionColor.r,
-            particle.emissionColor.g,
-            particle.emissionColor.b,
-            particle.emissionColor.a);
+            particle->emissionColor.r,
+            particle->emissionColor.g,
+            particle->emissionColor.b,
+            particle->emissionColor.a);
         instance.uvTransform = XMFLOAT4(
-            particle.uvScale.x,
-            particle.uvScale.y,
-            particle.uvOffset.x,
-            particle.uvOffset.y);
+            particle->uvScale.x,
+            particle->uvScale.y,
+            particle->uvOffset.x,
+            particle->uvOffset.y);
         instances.push_back(instance);
     }
 
