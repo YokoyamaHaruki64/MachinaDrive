@@ -549,6 +549,29 @@ gameObjects:
           enabled: true
           m_name: FXAA
           m_materialPath: Assets/Materials/PostProcess/FXAA.material
+      - type: RadialBlurPostProcess
+        fields:
+          enabled: true
+          m_name: RadialBlur
+          m_materialPath: Assets/Materials/PostProcess/RadialBlur.material
+      - type: ChromaticAberrationPostProcess
+        fields:
+          enabled: true
+          m_name: ChromaticAberration
+          m_materialPath: Assets/Materials/PostProcess/ChromaticAberration.material
+      - type: NoisePostProcess
+        fields:
+          enabled: true
+          m_name: Noise
+          m_materialPath: Assets/Materials/PostProcess/Noise.material
+      - type: PostProcessImpulse
+        fields:
+          enabled: true
+          m_presets:
+            - name: PlayerShot
+              prefab: Assets/Prefabs/PostProcessImpulse_PlayerShot.prefab
+            - name: EnemyHit
+              prefab: Assets/Prefabs/PostProcessImpulse_EnemyHit.prefab
   - id: 64
     name: Model
     tag: 

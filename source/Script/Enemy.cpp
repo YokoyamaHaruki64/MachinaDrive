@@ -7,6 +7,7 @@
 #include "Script/Enemy.h"
 #include "Script/Health.h"
 #include "Script/Player.h"
+#include "Script/PostProcessImpulse.h"
 #include "Script/Score.h"
 #include "Script/ObjectShake.h"
 #include "Script/UI/GameHud.h"
@@ -111,6 +112,7 @@ bool Enemy::TakeDamage(float damage)
         m_objectShake->Shake(m_hitShakeDuration, m_hitShakePower);
     }
     m_health->TakeDamage(damage);
+    PostProcessImpulse::Play("EnemyHit");
     return true;
 }
 

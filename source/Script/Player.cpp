@@ -10,6 +10,7 @@
 #include "Script/CameraController.h"
 #include "Script/PlayerAnimation.h"
 #include "Script/Health.h"
+#include "Script/PostProcessImpulse.h"
 #include "Script/UI/GameHud.h"
 #include "Script/Pause.h"
 
@@ -85,13 +86,14 @@ void Player::OnStart()
             }
         });
 
-        m_health->OnDamage.emplace_back([this](float damage)
+        m_health->OnDamage.emplace_back([this](float)
         {
             if(m_cameraController)
             {
                 m_cameraController->Shake(0.3f, 0.2f);
             }
         });
+
     }
 
 #ifndef _DEBUG
@@ -256,6 +258,8 @@ void Player::UpdateAttackReady()
             m_attackReadyVfx->Destroy();
             m_attackReadyVfx.Clear();
         }
+
+        PostProcessImpulse::Play("PlayerShot");
 
         // 発進の瞬間と移動中の軌跡を分け、開始方向を見失わないようにする。
         if (m_playerLaunchVfxPrefab)

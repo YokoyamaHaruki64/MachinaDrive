@@ -163,7 +163,7 @@ bool PostProcess::ExecuteScreenPassAndSwap(size_t passIndex)
 
     // 画面出力では、現在のSourceと異なるDstへ描画して完了後にSwapする。
     Renderer::SetDstRTV();
-    m_material->Bind(passIndex);
+    m_material->Bind(passIndex, m_impulseOverride.Empty() ? nullptr : &m_impulseOverride);
     BindSourceTexture();
     const bool canDraw = BindFullscreenVertices(shaderPass);
     if (canDraw)
@@ -196,7 +196,7 @@ bool PostProcess::ExecuteMiddlePass(size_t passIndex, TextureHandle renderTarget
         return false;
 
     // 中間RTへの出力ではSwapせず、次のPassも同じ画面入力を参照できるようにする。
-    m_material->Bind(passIndex);
+    m_material->Bind(passIndex, m_impulseOverride.Empty() ? nullptr : &m_impulseOverride);
     BindSourceTexture();
     const bool canDraw = BindFullscreenVertices(shaderPass);
     if (canDraw)

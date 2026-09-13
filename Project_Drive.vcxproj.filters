@@ -431,6 +431,18 @@
     <ClCompile Include="source\Script\PlayerHit.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\ChromaticAberrationPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\NoisePostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\RadialBlurPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PostProcessImpulse.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\Pause.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -1120,6 +1132,18 @@
     <ClInclude Include="include\Script\PlayerHit.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\ChromaticAberrationPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\NoisePostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\RadialBlurPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PostProcessImpulse.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="include\Script\PlayerAnimation.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
@@ -1246,6 +1270,15 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessFXAA.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessChromaticAberration.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessNoise.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessRadialBlur.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\UnlitAdditive.shader">
