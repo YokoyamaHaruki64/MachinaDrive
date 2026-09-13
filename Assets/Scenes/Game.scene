@@ -574,6 +574,11 @@ gameObjects:
           enabled: true
           m_name: BlockGlitch
           m_materialPath: Assets/Materials/PostProcess/BlockGlitch.material
+      - type: DigitalWipeTransition
+        fields:
+          enabled: true
+          m_name: DigitalWipeTransition
+          m_materialPath: Assets/Materials/PostProcess/DigitalWipeTransition.material
       - type: PostProcessImpulse
         fields:
           enabled: true
