@@ -272,6 +272,9 @@
     <ClCompile Include="source\Script\DigitalWipeTransition.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\HorizontalGlitchTransition.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\GlitchPostProcess.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -704,6 +707,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\DigitalWipeTransition.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\HorizontalGlitchTransition.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\GlitchPostProcess.h">
@@ -1294,6 +1300,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessDigitalWipeTransition.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessHorizontalGlitchTransition.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessGlitch.shader">
