@@ -564,6 +564,11 @@ gameObjects:
           enabled: true
           m_name: Noise
           m_materialPath: Assets/Materials/PostProcess/Noise.material
+      - type: GlitchPostProcess
+        fields:
+          enabled: true
+          m_name: Glitch
+          m_materialPath: Assets/Materials/PostProcess/Glitch.material
       - type: PostProcessImpulse
         fields:
           enabled: true

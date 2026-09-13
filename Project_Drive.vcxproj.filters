@@ -266,6 +266,9 @@
     <ClCompile Include="source\Script\Enemy.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\GlitchPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\EnemyAnimation.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -689,6 +692,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\Enemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\GlitchPostProcess.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\EnemyAnimation.h">
@@ -1270,6 +1276,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessFXAA.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessGlitch.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\PostProcessChromaticAberration.shader">

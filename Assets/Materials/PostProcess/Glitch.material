@@ -1,0 +1,13 @@
+version: 1
+name: Glitch
+shader: Assets/Shaders/PostProcessGlitch.shader
+properties:
+  _Intensity: 0
+  _SliceCount: 48
+  _SliceStrength: 0.015
+  _BlockScale: [32,12]
+  _BlockStrength: 0.02
+  _BlockProbability: 0.3
+  _ChromaticOffset: [0.003,0]
+  _Speed: 14
+  _Seed: 0
