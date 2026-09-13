@@ -10,6 +10,7 @@
 FIELDS_BEGIN(TimeRecoveryItem)
     GM_FIELD(m_recoveryTime);
     GM_FIELD(m_lifetime);
+    GM_FIELD(m_idleVfxPrefab);
     GM_FIELD(m_pickupVfxPrefab);
 FIELDS_END()
 
@@ -24,10 +25,24 @@ void TimeRecoveryItem::OnStart()
     m_lifetime = Math::Max(0.0f, m_lifetime);
     m_elapsedTime = 0.0f;
     m_isCollected = false;
+
+    if (m_idleVfxPrefab && transform())
+    {
+        m_idleVfx = Manager::Instantiate(
+            m_idleVfxPrefab.GetPath(),
+            transform()->GetPosition(),
+            Vector3::Zero(),
+            Vector3::One());
+    }
 }
 
 void TimeRecoveryItem::Update()
 {
+    if (m_idleVfx && transform())
+    {
+        m_idleVfx->GetTransform()->SetPosition(transform()->GetPosition());
+    }
+
     m_elapsedTime += Time::GetDeltaTime();
     if (m_elapsedTime >= m_lifetime)
     {
@@ -47,6 +62,8 @@ void TimeRecoveryItem::OnHitBegin(const HitInfo& hitInfo)
         m_waveDirector->AddRemainingTime(m_recoveryTime);
     }
 
+    DestroyIdleVfx();
+
     if (m_pickupVfxPrefab && hitInfo.objectB->GetTransform())
     {
         // 取得者の周囲から上昇するプラス記号で、時間回復をワールド上でも通知する。
@@ -56,4 +73,18 @@ void TimeRecoveryItem::OnHitBegin(const HitInfo& hitInfo)
 
     m_isCollected = true;
     m_owner->Destroy();
+}
+
+void TimeRecoveryItem::OnDestroy()
+{
+    DestroyIdleVfx();
+}
+
+void TimeRecoveryItem::DestroyIdleVfx()
+{
+    if (m_idleVfx)
+    {
+        m_idleVfx->Destroy();
+        m_idleVfx.Clear();
+    }
 }

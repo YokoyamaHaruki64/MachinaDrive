@@ -1,0 +1,152 @@
+version: 1
+name: VFX_TimeItemIdle
+gameObjects:
+  - id: 2789
+    name: VFX_TimeItemIdle(Instance)
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [3.78999996,2.57999992,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0,4.32999992,0]
+          maxParticles: 12
+          burst: false
+          burstCount: 0
+          burstTime: 0
+          finishedDestroy: false
+          emitRate: 7
+          lifetimeMin: 0.800000012
+          lifetimeMax: 1.20000005
+          gravity: [0,0.150000006,0]
+          drag: 0.5
+          size: [2,2,2]
+          scaleOverLifetime:
+            - time: 0
+              value: 0.5
+              inControl: 0.5
+              outControl: 0.5
+            - time: 0.550000012
+              value: 0.899999976
+              inControl: 0.899999976
+              outControl: 0.899999976
+            - time: 1
+              value: 0.349999994
+              inControl: 0.349999994
+              outControl: 0.349999994
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 0.100000001
+                inControl: 0.100000001
+                outControl: 0.100000001
+              - time: 1
+                value: 0.400000006
+                inControl: 0.400000006
+                outControl: 0.400000006
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            b:
+              - time: 0
+                value: 0.300000012
+                inControl: 0.300000012
+                outControl: 0.300000012
+              - time: 1
+                value: 0.550000012
+                inControl: 0.550000012
+                outControl: 0.550000012
+            a:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0.800000012
+              - time: 0.180000007
+                value: 0.899999976
+                inControl: 0.899999976
+                outControl: 0.899999976
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0.0500000007,0.300000012,0.100000001,1]
+          emissionColorOverLifetime:
+            r:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            g:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 1
+          flipbookRows: 1
+          flipbookFrameCount: 0
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: false
+          randomizeSpeed: true
+          speed: 1.25
+          speedMin: 1.03999996
+          speedMax: 2.0999999
+          direction: [0,1,0]
+          coneAngle: 12
+          spawnRadius: 1
+          spawnNormal: [0,1,0]
+          velocityType: 1
+          spawnType: 1
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/RecoveryPlus.material

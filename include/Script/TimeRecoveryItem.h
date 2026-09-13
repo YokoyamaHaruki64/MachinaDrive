@@ -13,13 +13,18 @@ class TimeRecoveryItem final : public Script
 
     float m_recoveryTime = 3.0f;
     float m_lifetime = 12.0f;
+    PrefabReference m_idleVfxPrefab{ "Assets/Prefabs/VFX_TimeItemIdle.prefab" };
     PrefabReference m_pickupVfxPrefab{ "Assets/Prefabs/VFX_TimeRecoveryPickup.prefab" };
     float m_elapsedTime = 0.0f;
     bool m_isCollected = false;
     WaveDirector* m_waveDirector = nullptr;
+    GameObjectReference m_idleVfx;
+
+    void DestroyIdleVfx();
 
 public:
     void OnStart() override;
     void Update() override;
     void OnHitBegin(const HitInfo& hitInfo) override;
+    void OnDestroy() override;
 };
