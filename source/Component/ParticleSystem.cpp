@@ -5,6 +5,7 @@
 
 #include "System/Rendering/renderer.h"
 #include "Component/ParticleSystem.h"
+#include "Component/VfxLifetime.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
@@ -12,6 +13,50 @@
 #include <algorithm>
 #include <bit>
 #include <cstring>
+#include <limits>
+
+void ParticleEmitter::OnStart()
+{
+    SetSettings(m_settings);
+
+    for (GameObject* target = m_owner; target; target = target->GetParent())
+    {
+        if (VfxLifetime* lifetime = target->GetComponent<VfxLifetime>())
+        {
+            m_vfxLifetime = lifetime;
+            lifetime->RegisterEmitter(*this);
+            break;
+        }
+    }
+}
+
+void ParticleEmitter::OnDestroy()
+{
+    NotifyFinished();
+}
+
+void ParticleEmitter::ClearVfxLifetime(VfxLifetime* lifetime)
+{
+    if (m_vfxLifetime == lifetime)
+    {
+        m_vfxLifetime = nullptr;
+    }
+}
+
+void ParticleEmitter::NotifyFinished()
+{
+    if (m_completionNotified)
+    {
+        return;
+    }
+
+    m_completionNotified = true;
+    if (m_vfxLifetime)
+    {
+        m_vfxLifetime->NotifyEmitterFinished(*this);
+        m_vfxLifetime = nullptr;
+    }
+}
 
 void ParticleEmitter::Update()
 {
@@ -34,12 +79,13 @@ void ParticleEmitter::Update()
 
             m_burstFinished = (m_burstEmitted >= m_settings.burstCount);
         }
-        if (m_burstFinished &&
-            m_settings.finishedDestroy &&
-            m_activeParticles == 0)
-
+        if (m_burstFinished && m_activeParticles == 0)
         {
-            m_owner->Destroy();
+            NotifyFinished();
+            if (m_settings.finishedDestroy)
+            {
+                m_owner->Destroy();
+            }
         }
 
     }
@@ -81,6 +127,7 @@ void ParticleEmitter::EmitOne()
 void ParticleEmitter::ActivateParticle(Particle& p)
 {
     p.active = true;
+    m_completionNotified = false;
     p.age = 0.0f;
     p.lifetime = Random::Range(m_settings.lifetimeMin, m_settings.lifetimeMax);
     p.scale = m_settings.scaleOverLifetime.Evaluate(0.0f);
@@ -89,6 +136,7 @@ void ParticleEmitter::ActivateParticle(Particle& p)
         m_settings.emissionColorOverLifetime.Evaluate(0.0f) * m_settings.emissionStrength;
     p.rotation = Random::Range(m_settings.rotationMin, m_settings.rotationMax);
     p.angularVelocity = Random::Range(m_settings.angularVelocityMin, m_settings.angularVelocityMax);
+    p.randomSeed = static_cast<uint32_t>(Random::Range(0, std::numeric_limits<int>::max()));
     m_activeParticles++;
 
     // 位置の初期化

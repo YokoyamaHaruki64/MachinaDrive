@@ -17,6 +17,8 @@
 
 #include <wrl/client.h>
 
+class VfxLifetime;
+
 class ParticleEmitter : public Component
 {
     REGISTER_COMPONENT(ParticleEmitter, "Particle Emitter");
@@ -114,6 +116,7 @@ public:
         Vector3 velocity{ Vector3::Zero() };
         Color color{ Color::White() };
         Color emissionColor{ Color::Black() };
+        uint32_t randomSeed{};
         float lifetime{ 1.0f };
         float age{ 0.0f };
     };
@@ -122,7 +125,8 @@ public:
     ParticleEmitter(GameObject* owner): Component(owner)
     {
     }
-    void OnStart() override { SetSettings(m_settings); }
+    void OnStart() override;
+    void OnDestroy() override;
     void Update() override;
     std::vector<Particle>& GetParticles() { return m_particles; }
 
@@ -160,6 +164,7 @@ public:
         m_emitTimer = 0.0f;
         m_burstEmitted = 0;
         m_burstFinished = false;
+        m_completionNotified = false;
         for (auto& p : m_particles)
         {
             p.active = false;
@@ -172,7 +177,10 @@ public:
         m_emitTimer = 0.0f;
         m_burstEmitted = 0;
         m_burstFinished = false;
+        m_completionNotified = false;
     }
+
+    void ClearVfxLifetime(VfxLifetime* lifetime);
 
 private:
     std::vector<Particle> m_particles;
@@ -183,10 +191,13 @@ private:
     int m_burstEmitted{ 0 }; // バースト時の生成済みパーティクル数
     int m_activeParticles{ 0 }; // 現在アクティブなパーティクル数
     bool m_burstFinished{ false }; // バーストが完了したかどうか
+    bool m_completionNotified{ false };
+    VfxLifetime* m_vfxLifetime{};
 
     void EmitOne();
     void ActivateParticle(Particle& p);
     void UpdateParticle(Particle& p, float dt);
+    void NotifyFinished();
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;
