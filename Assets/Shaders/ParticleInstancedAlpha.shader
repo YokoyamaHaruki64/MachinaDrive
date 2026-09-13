@@ -29,6 +29,7 @@ Shader "ParticleInstancedAlpha"
             float4x4 world;
             float4 color;
             float4 emissionColor;
+            float4 uvTransform;
         };
 
         StructuredBuffer<ObjectInput> ObjectInputs : register(t2);
@@ -55,7 +56,8 @@ Shader "ParticleInstancedAlpha"
             output.position = mul(mul(worldPosition, View), Projection);
             output.color = particle.color;
             output.emissionColor = particle.emissionColor;
-            output.texCoord = input.texCoord * _UVScale + _UVOffset;
+            output.texCoord = input.texCoord * (particle.uvTransform.xy * _UVScale) +
+                particle.uvTransform.zw + _UVOffset;
             return output;
         }
 

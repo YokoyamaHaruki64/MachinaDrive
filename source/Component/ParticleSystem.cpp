@@ -66,9 +66,24 @@ void ParticleEmitter::Update()
 
     if (m_settings.burst)
     {
+        if (m_settings.burstCount <= 0)
+        {
+            m_burstFinished = true;
+        }
+
         if (m_burstEmitted < m_settings.burstCount && !m_burstFinished)
         {
-            while (m_emitTimer >= m_emitInterval &&
+            if (m_emitInterval <= 0.0f)
+            {
+                // burstTimeが0の場合は、同一フレームで全粒子を生成する。
+                while (m_burstEmitted < m_settings.burstCount)
+                {
+                    EmitOne();
+                    m_burstEmitted++;
+                }
+                m_emitTimer = 0.0f;
+            }
+            else while (m_emitTimer >= m_emitInterval &&
                 m_burstEmitted < m_settings.burstCount)
             {
                 m_emitTimer -= m_emitInterval;
@@ -137,6 +152,8 @@ void ParticleEmitter::ActivateParticle(Particle& p)
     p.rotation = Random::Range(m_settings.rotationMin, m_settings.rotationMax);
     p.angularVelocity = Random::Range(m_settings.angularVelocityMin, m_settings.angularVelocityMax);
     p.randomSeed = static_cast<uint32_t>(Random::Range(0, std::numeric_limits<int>::max()));
+    p.flipbookStartFrame = 0;
+    UpdateFlipbookFrame(p);
     m_activeParticles++;
 
     // 位置の初期化
@@ -233,8 +250,49 @@ void ParticleEmitter::UpdateParticle(Particle& p, float dt)
         p.color = m_settings.colorOverLifetime.Evaluate(normalizedAge);
         p.emissionColor = m_settings.emissionColor +
             m_settings.emissionColorOverLifetime.Evaluate(normalizedAge) * m_settings.emissionStrength;
+        UpdateFlipbookFrame(p);
     }
 }
+
+void ParticleEmitter::UpdateFlipbookFrame(Particle& p) const
+{
+    const int columns = std::max(1, m_settings.flipbookColumns);
+    const int rows = std::max(1, m_settings.flipbookRows);
+    const int maxFrameCount = static_cast<int>(std::min<int64_t>(
+        static_cast<int64_t>(columns) * rows,
+        std::numeric_limits<int>::max()));
+    const int frameCount = m_settings.flipbookFrameCount > 0
+        ? std::min(m_settings.flipbookFrameCount, maxFrameCount)
+        : maxFrameCount;
+
+    p.uvScale = Vector2(1.0f / static_cast<float>(columns), 1.0f / static_cast<float>(rows));
+    if (frameCount <= 1)
+    {
+        p.flipbookStartFrame = 0;
+        p.uvOffset = Vector2::Zero();
+        return;
+    }
+
+    if (p.age == 0.0f && m_settings.flipbookRandomStart)
+    {
+        p.flipbookStartFrame = static_cast<int>(p.randomSeed % static_cast<uint32_t>(frameCount));
+    }
+
+    int frame = p.flipbookStartFrame % frameCount;
+    if (m_settings.flipbookFrameRate > 0.0f)
+    {
+        const int advancedFrameCount = static_cast<int>(p.age * m_settings.flipbookFrameRate);
+        frame += advancedFrameCount;
+        frame = m_settings.flipbookLoop
+            ? frame % frameCount
+            : std::min(frame, frameCount - 1);
+    }
+
+    const int column = frame % columns;
+    const int row = frame / columns;
+    p.uvOffset = Vector2(p.uvScale.x * column, p.uvScale.y * row);
+}
+
 void ParticleEmitter::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD_KEY("offset", m_settings.offset);
@@ -259,6 +317,12 @@ void ParticleEmitter::RegisterFields(FieldRegistry& fields)
     GM_FIELD_KEY("angularVelocityMin", m_settings.angularVelocityMin);
     GM_FIELD_KEY("angularVelocityMax", m_settings.angularVelocityMax);
     GM_FIELD_KEY("velocityStretch", m_settings.velocityStretch);
+    GM_FIELD_KEY("flipbookColumns", m_settings.flipbookColumns);
+    GM_FIELD_KEY("flipbookRows", m_settings.flipbookRows);
+    GM_FIELD_KEY("flipbookFrameCount", m_settings.flipbookFrameCount);
+    GM_FIELD_KEY("flipbookFrameRate", m_settings.flipbookFrameRate);
+    GM_FIELD_KEY("flipbookLoop", m_settings.flipbookLoop);
+    GM_FIELD_KEY("flipbookRandomStart", m_settings.flipbookRandomStart);
     GM_FIELD_KEY("randomizeSpeed", m_settings.randomizeSpeed);
     GM_FIELD_KEY("speed", m_settings.speed);
     GM_FIELD_KEY("speedMin", m_settings.speedMin);
@@ -397,11 +461,13 @@ XMMATRIX ParticleRenderer::CalcParticleWorldMatrix(const ParticleEmitter::Partic
     return CalcWorldMatrix(particle.position, Vector3(0.0f, 0.0f, particle.rotation), scale, m_billboardType);
 }
 
-void ParticleRenderer::BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color)
+void ParticleRenderer::BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color, const Vector2& uvScale, const Vector2& uvOffset)
 {
     Renderer::SetWorldMatrix(worldMatrix);
     MaterialPropertyOverride& propertyOverride = GetMaterialPropertyOverride();
     propertyOverride.SetColor("_BaseColor", color);
+    propertyOverride.SetVector2("_UVScale", uvScale);
+    propertyOverride.SetVector2("_UVOffset", uvOffset);
     m_material->Bind(0, &propertyOverride);
 
     ID3D11DeviceContext* context = Renderer::GetDeviceContext();
@@ -435,7 +501,7 @@ void ParticleRenderer::Draw()
             if (!particle.active)
                 continue;
 
-            BindLegacyMesh(CalcParticleWorldMatrix(particle), particle.color);
+            BindLegacyMesh(CalcParticleWorldMatrix(particle), particle.color, particle.uvScale, particle.uvOffset);
             Renderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             Renderer::GetDeviceContext()->DrawIndexed(m_mesh->indexCount, 0, 0);
         }
@@ -457,6 +523,11 @@ void ParticleRenderer::Draw()
             particle.emissionColor.g,
             particle.emissionColor.b,
             particle.emissionColor.a);
+        instance.uvTransform = XMFLOAT4(
+            particle.uvScale.x,
+            particle.uvScale.y,
+            particle.uvOffset.x,
+            particle.uvOffset.y);
         instances.push_back(instance);
     }
 

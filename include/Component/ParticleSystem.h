@@ -10,11 +10,13 @@
 #include "System/Rendering/RendererBase.h"
 
 #include "math/Vector3.h"
+#include "math/Vector2.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
 
 #include "Graphics/GraphicInc.h"
 
+#include <algorithm>
 #include <wrl/client.h>
 
 class VfxLifetime;
@@ -80,6 +82,14 @@ public:
         float angularVelocityMax = 0.0f;
         float velocityStretch = 0.0f;
 
+        // フリップブック
+        int flipbookColumns = 1;       // テクスチャを分割する横方向の数
+        int flipbookRows = 1;          // テクスチャを分割する縦方向の数
+        int flipbookFrameCount = 0;    // 0の場合は分割された全フレームを使う
+        float flipbookFrameRate = 0.0f; // 1秒あたりのフレーム送り数（0で停止）
+        bool flipbookLoop = false;
+        bool flipbookRandomStart = false;
+
         // 速度共通
         bool randomizeSpeed = true; // true:初速をランダム化する
         float speed = 5.0f;         // パーティクルの初速
@@ -117,6 +127,9 @@ public:
         Color color{ Color::White() };
         Color emissionColor{ Color::Black() };
         uint32_t randomSeed{};
+        Vector2 uvScale{ Vector2::One() };
+        Vector2 uvOffset{ Vector2::Zero() };
+        int flipbookStartFrame{};
         float lifetime{ 1.0f };
         float age{ 0.0f };
     };
@@ -154,6 +167,10 @@ public:
 
         m_settings.direction.Normalize();
         m_settings.spawnNormal.Normalize();
+        m_settings.flipbookColumns = std::max(1, m_settings.flipbookColumns);
+        m_settings.flipbookRows = std::max(1, m_settings.flipbookRows);
+        m_settings.flipbookFrameCount = std::max(0, m_settings.flipbookFrameCount);
+        m_settings.flipbookFrameRate = std::max(0.0f, m_settings.flipbookFrameRate);
     }
 
     const EmitterSettings& GetSettingsRef() const { return m_settings; }
@@ -197,6 +214,7 @@ private:
     void EmitOne();
     void ActivateParticle(Particle& p);
     void UpdateParticle(Particle& p, float dt);
+    void UpdateFlipbookFrame(Particle& p) const;
     void NotifyFinished();
 
 protected:
@@ -221,11 +239,12 @@ private:
         XMFLOAT4X4 world;
         XMFLOAT4 color;
         XMFLOAT4 emissionColor;
+        XMFLOAT4 uvTransform;
     };
 
     bool EnsureInstanceBuffer(uint32_t count);
     XMMATRIX CalcParticleWorldMatrix(const ParticleEmitter::Particle& particle) const;
-    void BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color);
+    void BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color, const Vector2& uvScale, const Vector2& uvOffset);
 
 public:
     ParticleRenderer() = delete;
