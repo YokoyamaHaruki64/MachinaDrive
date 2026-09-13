@@ -224,6 +224,10 @@ bool GameObjectYamlSerializer::SaveToFile(
                 ? YAMLValue::Null()
                 : YAMLValue::Scalar(gameObject->GetTag(), true));
         object.Add("active", ToYAMLValue(gameObject->IsActive()));
+        if (gameObject->IsNotDestroyBySceneEnd())
+        {
+            object.Add("notDestroyBySceneEnd", ToYAMLValue(true));
+        }
 
         if (prefabReferenceMode == PrefabReferenceSaveMode::Include && !gameObject->GetPrefabPath().empty())
         {
@@ -372,6 +376,16 @@ bool GameObjectYamlSerializer::LoadFromFile(
                 return false;
             }
             gameObjectPointer->SetActive(decodedActive);
+        }
+        if (const YAMLValue* persistent = sourceObject.Find("notDestroyBySceneEnd"))
+        {
+            bool decodedPersistent{};
+            if (!YAMLValueConverter<bool>::FromYAMLValue(*persistent, decodedPersistent, {}).success)
+            {
+                Logger::Error("GameObjectのnotDestroyBySceneEndが不正です: " + gameObjectPointer->GetName());
+                return false;
+            }
+            gameObjectPointer->SetNotDestroyBySceneEnd(decodedPersistent);
         }
 
         if (sourcePathMode == PrefabSourcePathMode::UseSourceFilePath)

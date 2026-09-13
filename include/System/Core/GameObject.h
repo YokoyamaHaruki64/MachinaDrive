@@ -33,6 +33,7 @@ protected:
 
     bool m_isStarted = false;
     bool m_isActive = true;
+    bool m_notDestroyBySceneEnd = false;
     bool m_isDestroyRequested = false;
     bool m_isDestroyed = false;
 public:
@@ -119,6 +120,16 @@ public:
     }
 
     void SetActive(bool active);
+
+    void SetNotDestroyBySceneEnd(bool enabled)
+    {
+        m_notDestroyBySceneEnd = enabled;
+    }
+
+    bool IsNotDestroyBySceneEnd() const
+    {
+        return m_notDestroyBySceneEnd;
+    }
 
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)

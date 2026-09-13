@@ -4,6 +4,7 @@
 #include "System/Core/GM_Time.h"
 #include "System/Rendering/renderer.h"
 #include "System/Rendering/RendererBase.h"
+#include "System/Core/GameObject.h"
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
 #include "Graphics/Material.h"
@@ -786,6 +787,16 @@ bool Renderer::IsPostProcessMaterialUsed(const Material* material, const PostPro
 void Renderer::ClearPostEffects()
 {
     m_postEffects.clear();
+}
+
+void Renderer::ClearScenePostEffects()
+{
+    std::erase_if(m_postEffects, [](PostProcess* postEffect)
+    {
+        return !postEffect
+            || !postEffect->GetOwner()
+            || !postEffect->GetOwner()->IsNotDestroyBySceneEnd();
+    });
 }
 
 void Renderer::ResizePostEffects()

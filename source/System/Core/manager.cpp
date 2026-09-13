@@ -161,7 +161,7 @@ GameObject* Manager::GetObjectFirstByTag(const std::string& tag)
     return nullptr;
 }
 
-void Manager::DestroyGameObjects()
+void Manager::DestroyGameObjects(bool destroyPersistentObjects)
 {
     // PhysicsのBodyRecordはGameObject／Colliderへの参照を持つため、
     // OnDestroyでGameObjectを解放する前に物理側のキャッシュを空にする。
@@ -172,9 +172,18 @@ void Manager::DestroyGameObjects()
 
     for (auto& gameObject : m_GameObjects)
     {
+        if (!destroyPersistentObjects && gameObject->IsNotDestroyBySceneEnd() && !gameObject->IsDestroyed())
+        {
+            continue;
+        }
         gameObject->OnDestroy();
     }
-    m_GameObjects.clear();
+    std::erase_if(m_GameObjects, [destroyPersistentObjects](const auto& gameObject)
+    {
+        return destroyPersistentObjects
+            || !gameObject->IsNotDestroyBySceneEnd()
+            || gameObject->IsDestroyed();
+    });
 
     // OnDestroyから生成されたオブジェクトを次のシーンへ持ち越さない。
     m_pendingGameObjects.clear();
@@ -592,7 +601,7 @@ bool Manager::LoadSceneObjects(const std::filesystem::path& path)
     }
 
     // 復元完了後にだけ旧Object群を破棄し、読込失敗時は現在のSceneを維持する。
-    DestroyGameObjects();
+    DestroyGameObjects(m_sceneTransitionPhase == SceneTransitionPhase::None);
     if (m_sceneTransitionPhase == SceneTransitionPhase::None)
     {
         StartLoadedGameObjects(std::move(loaded.gameObjects));
@@ -901,8 +910,8 @@ void Manager::InitScene()
     {
         m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
         m_currentScene->Uninit();
-        DestroyGameObjects();
-        Renderer::ClearPostEffects();
+        DestroyGameObjects(false);
+        Renderer::ClearScenePostEffects();
         m_currentScene.reset();
     }
 
@@ -941,7 +950,7 @@ void Manager::ReloadCurrentScene()
 
     m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
     m_currentScene->Uninit();
-    DestroyGameObjects();
+    DestroyGameObjects(true);
     Renderer::ClearPostEffects();
 
     m_sceneTransitionPhase = SceneTransitionPhase::Initializing;
@@ -1159,7 +1168,7 @@ void Manager::Uninit()
     {
         m_currentScene->Uninit();
     }
-    DestroyGameObjects();
+    DestroyGameObjects(true);
 
     // SceneのGameObject破棄後に、PhysicsのBodyと接触キャッシュを破棄する。
     Physics::Uninitialize();

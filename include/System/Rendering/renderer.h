@@ -182,6 +182,7 @@ public:
     static PostProcess* FindPostEffect(std::string_view name);
     static bool IsPostProcessMaterialUsed(const Material* material, const PostProcess* excludedPostEffect = nullptr);
     static void ClearPostEffects();
+    static void ClearScenePostEffects();
     static void ResizePostEffects();
 
     static bool SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil = false);
