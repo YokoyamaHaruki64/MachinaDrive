@@ -21,6 +21,7 @@ FIELDS_BEGIN(WaveDirector)
     GM_FIELD(m_basicEnemyPrefab);
     GM_FIELD(m_movingEnemyPrefab);
     GM_FIELD(m_heavyEnemyPrefab);
+    GM_FIELD(m_enemySpawnVfxPrefab);
     GM_FIELD(m_maxTime);
     GM_FIELD(m_startTime);
     GM_FIELD(m_timeDrainPerSecond);
@@ -220,13 +221,23 @@ bool WaveDirector::SpawnWaveEnemies()
             continue;
         }
 
+        const Vector3 spawnPosition = CreateSpawnPosition();
         if (Manager::Instantiate(
             enemyPrefab.GetPath(),
-            CreateSpawnPosition(),
+            spawnPosition,
             Vector3::Zero(),
             Vector3::One()))
         {
             spawnedAny = true;
+
+            if (m_enemySpawnVfxPrefab)
+            {
+                Manager::Instantiate(
+                    m_enemySpawnVfxPrefab.GetPath(),
+                    spawnPosition + Vector3::Up() * 0.25f,
+                    Vector3::Zero(),
+                    Vector3::One());
+            }
         }
     }
 

@@ -14,6 +14,7 @@ class WaveDirector final : public Script
     PrefabReference m_basicEnemyPrefab{ "Assets/Prefabs/Enemy.prefab" };
     PrefabReference m_movingEnemyPrefab{ "Assets/Prefabs/MovingEnemy.prefab" };
     PrefabReference m_heavyEnemyPrefab{ "Assets/Prefabs/HeavyEnemy.prefab" };
+    PrefabReference m_enemySpawnVfxPrefab{ "Assets/Prefabs/VFX_EnemySpawn.prefab" };
 
     GameObjectReference m_player;
 
