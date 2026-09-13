@@ -1,4 +1,4 @@
----
+﻿---
 name: vfx-production
 description: Project_Driveで、ゲームイベントの意味を読み取り、ParticleSystem・Trail・Quad・Shader・テクスチャを選んでワールドVFXを設計・制作する。VFXの追加や調整、素材制作に使う。
 ---
@@ -49,6 +49,7 @@ description: Project_Driveで、ゲームイベントの意味を読み取り、
 - Windows PowerShellの`System.Drawing`でPNGを生成する場合、Windows PowerShell（`powershell.exe`）を使う。PowerShell 7の`System.Drawing.Common`は実行中の.NET世代と参照DLLの不一致で失敗しやすいため、生成スクリプトは対象シェルを明示して早期エラーにする。
 - `Color.FromArgb`へ渡すAlphaは、丸めで256にならないよう0–255へClampしてからFloorする。透明素材の境界値で生成を止めない。
 - 透明背景の白素材は白いビューア上で形が見えない。生成後はAlphaを暗い背景へ合成して、シルエットと境界を確認する。
+- Additive Materialへ既存Textureを流用する前に、隅と中心のAlphaを確認する。RGBが白でもAlphaが全面不透明な画像は、加算時にQuad全体が発光する。縦ビームなどは透明アルファの専用素材を機械生成して使う。
 - `TrailRenderer`はOwnerのWorld位置履歴を保持する。移動Headを外周へリセットして再利用すると、中心から外周へ不自然な長い線が繋がるため、チャージのような反復演出は「1 Head = 1移動 = 1破棄」とし、親VFXが間隔と同時数を制限して新しいHeadを生成する。
 - 状態中だけ存在する親VFXは、生成元が解除時に破棄するだけでなく、親とHeadの両方が対象Scriptの状態を監視して自壊する。入力解除とUpdate順が前後しても、次フレームに残留しない。
 - Trail用Textureを既存素材から作る場合、色をグレースケール化しておくと、Trail Materialの`_BaseColor`だけでゲームの属性色へ再利用できる。
