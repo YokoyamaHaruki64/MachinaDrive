@@ -56,8 +56,15 @@ public:
     void SetChipDecreaseSpeed(float value);
     void SetChipDecreaseDelay(float value);
 
+    void SetProgress(float progress)
+    {
+        float clampedProgress = Math::Clamp(progress, 0.0f, 1.0f);
+        SetCurrent(clampedProgress * m_max);
+    }
+
     float GetMax() const { return m_max; }
     float GetCurrent() const { return m_current; }
+    float GetProgress() const { return m_max > 0.0f ? m_current / m_max : 0.0f; }
     float GetChip() const { return m_chip; }
     const Color& GetBarColor() const { return m_barColor; }
     const Color& GetChipColor() const { return m_chipColor; }

@@ -76,7 +76,7 @@ Shader "Text"
       const float2 uv = input.texCoord * _UVScale + _UVOffset;
       const float4 glyphSample = SpriteTexture.Sample(LinearSampler, uv);
       const float glyphAlpha = glyphSample.a;
-      const float outlineAlpha = saturate(SampleExpandedAlpha(uv, OutlineWidth) - glyphAlpha) * OutlineColor.a;
+      const float outlineAlpha = saturate(SampleExpandedAlpha(uv, OutlineWidth) - glyphAlpha) * OutlineColor.a * _BaseColor.a;
 
       float4 color = float4(OutlineColor.rgb, outlineAlpha);
       color.rgb = lerp(color.rgb, glyphSample.rgb * _BaseColor.rgb, glyphAlpha);

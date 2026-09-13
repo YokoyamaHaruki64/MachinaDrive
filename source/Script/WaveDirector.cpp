@@ -29,6 +29,7 @@ FIELDS_BEGIN(WaveDirector)
     GM_FIELD(m_clearTimeGrowth);
     GM_FIELD(m_maxClearTimeBonus);
     GM_FIELD(m_waveStartDelay);
+    GM_FIELD(m_waveBeginDuration);
     GM_FIELD(m_baseEnemyCount);
     GM_FIELD(m_enemyCountGrowth);
     GM_FIELD(m_enemyCountExponent);
@@ -62,6 +63,7 @@ void WaveDirector::OnStart()
     m_spawnAttemptCount = Math::Max(m_spawnAttemptCount, 1);
     m_minPlayerDistance = Math::Max(m_minPlayerDistance, 0.0f);
     m_waveStartDelay = Math::Max(m_waveStartDelay, 0.0f);
+    m_waveBeginDuration = Math::Max(m_waveBeginDuration, 0.0f);
     m_remainingTime = m_startTime;
     m_wave = 0;
     m_stateTimer = 0.0f;
@@ -90,6 +92,29 @@ void WaveDirector::Update()
 
     switch (m_waveState)
     {
+    case WaveState::Begin:
+        m_stateTimer = Math::Max(0.0f, m_stateTimer - Time::GetDeltaTime());
+        if (m_gameHud)
+        {
+            const float progress = m_waveBeginDuration > 0.0f
+                ? 1.0f - m_stateTimer / m_waveBeginDuration
+                : 1.0f;
+            m_gameHud->SetWaveBeginProgress(progress);
+        }
+
+        if (m_stateTimer <= 0.0f)
+        {
+            if (!SpawnWaveEnemies())
+            {
+                Logger::Error("WaveDirector: Waveの敵を生成できません。");
+                FinishGame();
+                return;
+            }
+
+            m_waveState = WaveState::Combat;
+        }
+        break;
+
     case WaveState::Combat:
         m_remainingTime = Math::Max(0.0f, m_remainingTime - m_timeDrainPerSecond * Time::GetDeltaTime());
         if (m_remainingTime <= 0.0f)
@@ -110,6 +135,10 @@ void WaveDirector::Update()
             AddTime(CalculateClearTimeBonus());
             m_stateTimer = m_waveStartDelay;
             m_waveState = WaveState::Intermission;
+            if (m_gameHud)
+            {
+                m_gameHud->SetWaveStartProgress(1.0f);
+            }
         }
         break;
 
@@ -117,7 +146,19 @@ void WaveDirector::Update()
         m_stateTimer -= Time::GetDeltaTime();
         if (m_stateTimer <= 0.0f)
         {
+            m_stateTimer = 0.0f;
+            if (m_gameHud)
+            {
+                m_gameHud->SetWaveStartProgress(0.0f);
+            }
             StartNextWave();
+        }
+        else if (m_gameHud)
+        {
+            const float progress = m_waveStartDelay > 0.0f
+                ? Math::Clamp(m_stateTimer / m_waveStartDelay, 0.0f, 1.0f)
+                : 0.0f;
+            m_gameHud->SetWaveStartProgress(progress);
         }
         break;
     }
@@ -172,14 +213,17 @@ void WaveDirector::DestroyPlacedEnemies()
 void WaveDirector::StartNextWave()
 {
     ++m_wave;
-    if (!SpawnWaveEnemies())
+    m_stateTimer = m_waveBeginDuration;
+    m_waveState = WaveState::Begin;
+    if (m_gameHud)
     {
-        Logger::Error("WaveDirector: Waveの敵を生成できません。");
-        FinishGame();
-        return;
+        m_gameHud->SetWaveStartProgress(0.0f);
+        m_gameHud->ShowWaveBegin();
+        if (m_waveBeginDuration <= 0.0f)
+        {
+            m_gameHud->SetWaveBeginProgress(1.0f);
+        }
     }
-
-    m_waveState = WaveState::Combat;
     UpdateHud();
 }
 
@@ -338,7 +382,12 @@ void WaveDirector::AddTime(float amount)
         return;
     }
 
+    const float previousTime = m_remainingTime;
     m_remainingTime = Math::Clamp(m_remainingTime + amount, 0.0f, m_maxTime);
+    if (m_gameHud && m_remainingTime > previousTime)
+    {
+        m_gameHud->ShowTimeRecovery(m_remainingTime - previousTime);
+    }
     UpdateHud();
 }
 

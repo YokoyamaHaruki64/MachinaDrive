@@ -440,6 +440,18 @@
     <ClCompile Include="source\Script\UI\HudNumber.cpp">
       <Filter>ソース ファイル\Script\UI</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\UI\TimeRecoveryUI.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\UIFade.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\UIOffset.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\WaveStartUI.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\ComboUI.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -710,6 +722,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\Color.h">
+      <Filter>ヘッダー ファイル\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Easing.h">
       <Filter>ヘッダー ファイル\Common</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\ValueType.h">
@@ -1109,6 +1124,18 @@
       <Filter>ヘッダー ファイル\Script\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\UI\HudNumber.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\TimeRecoveryUI.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\UIFade.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\UIOffset.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\WaveStartUI.h">
       <Filter>ヘッダー ファイル\Script\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\ComboUI.h">

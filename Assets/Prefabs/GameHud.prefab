@@ -105,10 +105,12 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: 00
           m_fontSize: 90
-          m_color: [1,1,1,1]
+          m_color: [0.980695009,1,0,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
           horizontalAlignment: 1
           verticalAlignment: 1
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 260
     name: Combo_Label
     tag: 
@@ -134,10 +136,12 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: Combo!!
           m_fontSize: 70
-          m_color: [1,1,1,1]
+          m_color: [1,0,0,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
           horizontalAlignment: 1
           verticalAlignment: 1
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 220
     name: HUD_Drive
     tag: 
@@ -182,9 +186,11 @@ gameObjects:
           text: READY!!
           m_fontSize: 32
           m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 1
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 225
     name: Drive_ChargingText
     tag: 
@@ -211,9 +217,11 @@ gameObjects:
           text: CHARGING...
           m_fontSize: 32
           m_color: [0.957528949,0.930993199,0.428854674,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 1
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 224
     name: Drive_Label
     tag: 
@@ -240,9 +248,11 @@ gameObjects:
           text: DRIVE
           m_fontSize: 40
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 223
     name: Drive_Gauge
     tag: 
@@ -342,6 +352,123 @@ gameObjects:
           m_uiRotation: 0
           m_uiScale: [1,1]
           m_aspectRatio: 5.64651155
+      - type: WaveStartUI
+        fields:
+          enabled: true
+          m_frame: 395
+          m_beginText: 271
+          m_onDuration: 0.150000006
+          m_offDuration: 0.150000006
+  - id: 395
+    name: Wave_Start_Progress_Frame
+    tag: 
+    active: false
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.472000003,0.232999995]
+          m_pos: [0,4.78000021]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: ''
+          m_color: [0,0,0,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 270
+    name: Wave_Start_Progress_Bar
+    tag: 
+    active: false
+    prefab: 
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.970000029,0.689999998]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: ''
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 1
+          m_current: 1
+          m_barColor: [0.378378391,1,0.978399098,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 271
+    name: Wave_Begin_Text
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.0900000036]
+          m_pos: [0,4.375]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: WAVE      BEGIN
+          m_fontSize: 153.860001
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.30000019
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
   - id: 250
     name: Enemy_Value
     tag: 
@@ -368,9 +495,11 @@ gameObjects:
           text: 00
           m_fontSize: 43.8400002
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 249
     name: Wave_Value
     tag: 
@@ -397,9 +526,11 @@ gameObjects:
           text: 00
           m_fontSize: 60
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 214
     name: Enemy_Label
     tag: 
@@ -426,9 +557,11 @@ gameObjects:
           text: ENEMIES
           m_fontSize: 28
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 213
     name: Wave_Label
     tag: 
@@ -455,9 +588,11 @@ gameObjects:
           text: WAVE
           m_fontSize: 40
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 212
     name: Wave_Line
     tag: 
@@ -530,6 +665,57 @@ gameObjects:
           m_uiRotation: 0
           m_uiScale: [1,1]
           m_aspectRatio: 4.28294563
+      - type: TimeRecoveryUI
+        fields:
+          enabled: true
+          m_recoveryText: 272
+          m_duration: 0.75
+  - id: 272
+    name: Timer_Time_Recovery_Text
+    tag: 
+    active: false
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.550000012,0.280000001]
+          m_pos: [-0.243000001,0.930000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: + 0 Sec
+          m_fontSize: 45.9599991
+          m_color: [0.381657988,0.969111979,0.472384453,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.42000008
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_offset: [0,-35]
+          m_reverse: false
+          m_reverseEaseType: true
   - id: 233
     name: Timer_Separator
     tag: 
@@ -570,7 +756,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.460000008,0.5]
-          m_pos: [0.177000001,-0.150999993]
+          m_pos: [0.166999996,-0.150999993]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -583,9 +769,11 @@ gameObjects:
           text: 060.00
           m_fontSize: 75.8000031
           m_color: [1,1,1,1]
-          horizontalAlignment: 1
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 204
     name: Timer_Label
     tag: 
@@ -612,9 +800,11 @@ gameObjects:
           text: TIME
           m_fontSize: 40
           m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
           horizontalAlignment: 0
           verticalAlignment: 0
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/Text.material
   - id: 203
     name: Timer_Bar
     tag: 

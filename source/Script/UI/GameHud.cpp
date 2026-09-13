@@ -3,12 +3,15 @@
 
 #include "Script/ComboUI.h"
 #include "Script/FillBar.h"
+#include "Script/UI/TimeRecoveryUI.h"
+#include "Script/UI/WaveStartUI.h"
 #include "Component/UIImage.h"
 #include "Component/UIText.h"
 #include "System/Core/GameObject.h"
 #include "System/Core/manager.h"
 #include "System/Editor/FieldRegistry.h"
 
+#include <cmath>
 #include <cstdio>
 
 namespace
@@ -64,13 +67,14 @@ FIELDS_END()
 void GameHud::OnStart()
 {
     m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
+    m_waveStartUI = m_waveRoot.Get() ? m_waveRoot->GetComponent<WaveStartUI>() : nullptr;
+    m_timeRecoveryUI = m_healthRoot.Get() ? m_healthRoot->GetComponent<TimeRecoveryUI>() : nullptr;
 
     // 現時点でシーンから確定できる初期値だけを表示へ反映する。
     SetWave(1);
     SetEnemyCount(static_cast<int>(Manager::GetObjectsByTag("Enemy").size()));
     ResetCombo();
     ApplyVisibility();
-    ApplyDriveState();
 }
 
 void GameHud::SetHealth(float current, float maximum)
@@ -170,6 +174,14 @@ void GameHud::ApplyVisibility()
     SetTreeVisible(m_driveRoot.Get(), m_visible);
     SetTreeVisible(m_shardsRoot.Get(), m_visible);
     ApplyDriveState();
+    if (m_waveStartUI)
+    {
+        m_waveStartUI->SetVisible(m_visible);
+    }
+    if (m_timeRecoveryUI)
+    {
+        m_timeRecoveryUI->SetVisible(m_visible);
+    }
 }
 
 void GameHud::ApplyDriveState()
@@ -202,4 +214,36 @@ void GameHud::SetDriveReady(bool ready)
 {
     m_driveReady = ready;
     ApplyDriveState();
+}
+
+void GameHud::SetWaveStartProgress(float progress)
+{
+    if (m_waveStartUI)
+    {
+        m_waveStartUI->SetProgress(progress);
+    }
+}
+
+void GameHud::ShowWaveBegin()
+{
+    if (m_waveStartUI)
+    {
+        m_waveStartUI->ShowBegin();
+    }
+}
+
+void GameHud::SetWaveBeginProgress(float progress)
+{
+    if (m_waveStartUI)
+    {
+        m_waveStartUI->SetBeginProgress(progress);
+    }
+}
+
+void GameHud::ShowTimeRecovery(float amount)
+{
+    if (m_timeRecoveryUI)
+    {
+        m_timeRecoveryUI->ShowRecovery(amount);
+    }
 }

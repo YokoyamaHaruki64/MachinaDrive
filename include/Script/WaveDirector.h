@@ -20,6 +20,7 @@ class WaveDirector final : public Script
 
     enum class WaveState
     {
+        Begin,
         Combat,
         WaitingForPlayerIdle,
         Intermission,
@@ -32,6 +33,7 @@ class WaveDirector final : public Script
     float m_clearTimeGrowth = 2.0f;
     float m_maxClearTimeBonus = 20.0f;
     float m_waveStartDelay = 2.0f;
+    float m_waveBeginDuration = 1.0f;
 
     int m_baseEnemyCount = 3;
     float m_enemyCountGrowth = 1.5f;
@@ -79,5 +81,6 @@ public:
 
     int GetWave() const { return m_wave; }
     float GetRemainingTime() const { return m_remainingTime; }
+    float GetWaveBeginDuration() const { return m_waveBeginDuration; }
     void AddRemainingTime(float amount) { AddTime(amount); }
 };

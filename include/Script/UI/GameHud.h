@@ -24,6 +24,8 @@ class GameHud final : public Script
     GameObjectReference m_driveReadyText;
 
     class ComboUI* m_comboUI = nullptr;
+    class WaveStartUI* m_waveStartUI = nullptr;
+    class TimeRecoveryUI* m_timeRecoveryUI = nullptr;
     bool m_visible = true;
     bool m_comboVisible = true;
     bool m_driveReady = true;
@@ -50,4 +52,12 @@ public:
     // ReadyとChargingの表示を排他的に切り替える。
     void SetDriveReady(bool ready);
     void SetDriveCharging(bool charging) { SetDriveReady(!charging); }
+    // Wave待機中の0.0（空）から1.0（満タン）までの進捗を表示へ渡す。
+    void SetWaveStartProgress(float progress);
+    // Wave開始表示へ切り替える。
+    void ShowWaveBegin();
+    // Wave開始表示の進捗を表示へ渡す。
+    void SetWaveBeginProgress(float progress);
+    // 実際に回復した時間を、上へ移動しながらフェードアウトさせる。
+    void ShowTimeRecovery(float amount);
 };
