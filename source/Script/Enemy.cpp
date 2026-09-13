@@ -18,6 +18,7 @@ void Enemy::RegisterFields(FieldRegistry& fields)
 {
     GM_FIELD(m_invincibilityDuration);
     GM_FIELD(m_timeRecoveryItemPrefab);
+    GM_FIELD(m_enemyDeathVfxPrefab);
     GM_FIELD(m_hitShakeDuration);
     GM_FIELD(m_hitShakePower);
 }
@@ -173,6 +174,15 @@ void Enemy::FinalizeDeath()
     }
 
     m_pendingDeath = false;
+    if (m_enemyDeathVfxPrefab)
+    {
+        Manager::Instantiate(
+            m_enemyDeathVfxPrefab.GetPath(),
+            transform()->GetPosition() + Vector3::Up(),
+            Vector3::Zero(),
+            Vector3::One());
+    }
+
     DropTimeRecoveryItem();
     m_owner->Destroy();
 }

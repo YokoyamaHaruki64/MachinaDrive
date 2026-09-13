@@ -1,0 +1,333 @@
+version: 1
+name: VFX_EnemyDeath
+gameObjects:
+  - id: 579
+    name: VFX_EnemyDeath(Instance)
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: VfxLifetime
+        fields:
+          enabled: true
+  - id: 581
+    name: EnemyDeath_Sparks
+    tag: 
+    active: true
+    prefab: 
+    parent: 579
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0,0,0]
+          maxParticles: 266
+          burst: true
+          burstCount: 110
+          burstTime: 0.0599999987
+          finishedDestroy: false
+          emitRate: 0
+          lifetimeMin: 0.379999995
+          lifetimeMax: 0.600000024
+          gravity: [0,-6,0]
+          drag: 7.05000019
+          size: [3,3,3]
+          scaleOverLifetime:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 0.5
+              value: 0
+              inControl: 0
+              outControl: 0
+            - time: 1
+              value: 0.49444443
+              inControl: 0.49444443
+              outControl: 0.49444443
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.477777779
+                inControl: 1
+                outControl: 0.477777779
+            g:
+              - time: 0
+                value: 0.50555557
+                inControl: 0.50555557
+                outControl: 0.50555557
+              - time: 1
+                value: 0
+                inControl: 0.466666639
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0.25
+                inControl: 0.25
+                outControl: 0.25
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.331950217
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 0.595435679
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0.544444442
+                outControl: 0
+          emissionColor: [0,0,0,1]
+          emissionColorOverLifetime:
+            r:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            g:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 1
+          flipbookRows: 1
+          flipbookFrameCount: 1
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: false
+          randomizeSpeed: true
+          speed: 18
+          speedMin: 27.8500004
+          speedMax: 38.2700005
+          direction: [0,1,0]
+          coneAngle: 40
+          spawnRadius: 0.300000012
+          spawnNormal: [0,1,0]
+          velocityType: 3
+          spawnType: 2
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/ParticleInstanced.material
+  - id: 580
+    name: EnemyDeath_Pulse
+    tag: 
+    active: true
+    prefab: 
+    parent: 579
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0,0,0]
+          maxParticles: 1
+          burst: true
+          burstCount: 1
+          burstTime: 0
+          finishedDestroy: false
+          emitRate: 0
+          lifetimeMin: 0.400000006
+          lifetimeMax: 0.400000006
+          gravity: [0,0,0]
+          drag: 0
+          size: [6,6,6]
+          scaleOverLifetime:
+            - time: 0
+              value: 0
+              inControl: 0
+              outControl: 1
+            - time: 0.238589212
+              value: 1
+              inControl: 1
+              outControl: 0.00555557013
+            - time: 0.547717869
+              value: 0
+              inControl: 0
+              outControl: 0.955555558
+            - time: 0.819502056
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 1
+              inControl: 1
+              outControl: 1
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.716666698
+                inControl: 1
+                outControl: 0.716666698
+            g:
+              - time: 0
+                value: 0.50555557
+                inControl: 0.50555557
+                outControl: 0.50555557
+              - time: 1
+                value: 0
+                inControl: 0.0333333611
+                outControl: 0
+            b:
+              - time: 0
+                value: 0.455555558
+                inControl: 0.455555558
+                outControl: 0
+              - time: 0.991701245
+                value: 0.49444443
+                inControl: 0
+                outControl: 0.49444443
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.3900415
+                value: 0.49444443
+                inControl: 0.49444443
+                outControl: 0.49444443
+              - time: 0.676348567
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0,0,0,1]
+          emissionColorOverLifetime:
+            r:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            g:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 1
+          flipbookRows: 1
+          flipbookFrameCount: 0
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: false
+          randomizeSpeed: false
+          speed: 0
+          speedMin: 0
+          speedMax: 0
+          direction: [0,1,0]
+          coneAngle: 0
+          spawnRadius: 0
+          spawnNormal: [0,1,0]
+          velocityType: 0
+          spawnType: 0
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/Pulse.material

@@ -33,6 +33,7 @@ gameObjects:
           enabled: true
           m_invincibilityDuration: 0.5
           m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
       - type: SphereCollider

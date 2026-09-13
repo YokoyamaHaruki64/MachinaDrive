@@ -17,6 +17,7 @@ protected:
     float m_invincibilityDuration = 0.5f;
     float m_invincibilityTimer = 0.0f;
     PrefabReference m_timeRecoveryItemPrefab{ "Assets/Prefabs/TimeRecoveryItem.prefab" };
+    PrefabReference m_enemyDeathVfxPrefab{ "Assets/Prefabs/VFX_EnemyDeath.prefab" };
     float m_hitShakeDuration = 0.2f;
     float m_hitShakePower = 0.2f;
     std::vector<ModelRenderer*> m_modelRenderers;
