@@ -1,0 +1,7 @@
+version: 1
+name: RadialBlur
+shader: Assets/Shaders/PostProcessRadialBlur.shader
+properties:
+  _Intensity: 0
+  _Center: [0.5,0.5]
+  _SampleCount: 8

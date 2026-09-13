@@ -5,6 +5,7 @@
 #include "Common/Random.h"
 #include "Scene/ResultScene.h"
 #include "Script/Player.h"
+#include "Script/PostProcessImpulse.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
 #include "System/Editor/FieldRegistry.h"
@@ -224,6 +225,7 @@ void WaveDirector::StartNextWave()
             m_gameHud->SetWaveBeginProgress(1.0f);
         }
     }
+    PostProcessImpulse::Play("WaveBegin");
     UpdateHud();
 }
 

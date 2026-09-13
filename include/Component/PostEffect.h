@@ -2,6 +2,7 @@
 
 #include "Graphics/ModelAsset.h"
 #include "Graphics/Material.h"
+#include "Graphics/MaterialPropertyOverride.h"
 #include "System/Core/ComponentRegistry.h"
 
 #include <string>
@@ -18,6 +19,7 @@ class PostProcess : public Component
     Material* m_material{};
     std::string m_name;
     std::string m_materialPath;
+    MaterialPropertyOverride m_impulseOverride;
 
     bool BindFullscreenVertices(const GraphicsShaderPass& shaderPass) const;
     void ClearBoundTextures(const GraphicsShaderPass& shaderPass) const;
@@ -56,6 +58,7 @@ public:
     const std::string& GetMaterialPath() const { return m_materialPath; }
     void SetMaterial(Material* material);
     void SetMaterialPath(const std::string& path);
+    MaterialPropertyOverride& GetImpulseOverride() { return m_impulseOverride; }
     virtual void Resize(UINT width, UINT height) { (void)width; (void)height; }
     virtual void Apply() = 0;
 };

@@ -1,0 +1,8 @@
+version: 1
+name: Noise
+shader: Assets/Shaders/PostProcessNoise.shader
+properties:
+  _Intensity: 0
+  _Scale: [320,180]
+  _Speed: [0,12]
+  _Seed: 0
