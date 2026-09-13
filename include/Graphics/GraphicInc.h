@@ -148,6 +148,8 @@ enum class VertexStreamType
     Color,
     Count,
 
+    // SV_InstanceIDのようにGPUが自動供給する入力。頂点ストリームには含めない。
+    InstanceID,
     Error = -1
 };
 
