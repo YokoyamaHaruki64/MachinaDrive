@@ -8,6 +8,7 @@
 #include "Component/Bloom.h"
 #include "Component/BoxCollider.h"
 #include "Component/Camera.h"
+#include "Component/FXAA.h"
 #include "Component/CapsuleCollider.h"
 #include "Component/Collider.h"
 #include "Component/modelRenderer.h"
