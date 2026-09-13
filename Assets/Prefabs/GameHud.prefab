@@ -302,11 +302,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 221
     name: Drive_Panel
     tag: 
@@ -615,11 +615,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 211
     name: Wave_Panel
     tag: 
@@ -871,11 +871,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 201
     name: Timer_Panel
     tag: 

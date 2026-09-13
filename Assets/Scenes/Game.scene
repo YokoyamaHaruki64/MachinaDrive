@@ -974,11 +974,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 223
     name: Drive_Gauge
     tag: 
@@ -1142,11 +1142,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 213
     name: Wave_Label
     tag: 
@@ -1231,11 +1231,11 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
+          m_materialPath: Assets/Materials/HUDFrameMask.material
   - id: 203
     name: Timer_Bar
     tag: 

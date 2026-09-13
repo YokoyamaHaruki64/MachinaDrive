@@ -1221,6 +1221,9 @@
     <None Include="Assets\Shaders\GaugeInner.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Assets\Shaders\HUDFrameMask.shader">
+      <Filter>Shader</Filter>
+    </None>
     <None Include="Assets\Shaders\UI.shader">
       <Filter>Shader</Filter>
     </None>

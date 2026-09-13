@@ -668,6 +668,7 @@
     <None Include="Assets\Shaders\ChannelPackedNumber.shader" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
     <None Include="Assets\Shaders\GaugeInner.shader" />
+    <None Include="Assets\Shaders\HUDFrameMask.shader" />
     <None Include="Assets\Shaders\PBRDefault.shader" />
     <None Include="Assets\Shaders\PBRToon.shader" />
     <None Include="Assets\Shaders\FillBarShader.shader" />

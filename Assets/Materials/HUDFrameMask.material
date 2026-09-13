@@ -1,0 +1,18 @@
+version: 1
+name: HUDFrameMask
+shader: Assets/Shaders/HUDFrameMask.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  GradientColorA: [0.149999976,0.891698897,1,1]
+  GradientColorB: [0.350000024,1,0.646138906,1]
+  GradientDirection: [1,0.100000001]
+  GradientOffset: 0
+  GradientSpeed: -0.270000011
+  HighlightColor: [1,1,1,1]
+  HighlightIntensity: 1
+  HighlightWidth: 0.0199999996
+  HighlightBlur: 0.0149999997
+  HighlightDirection: [1,0.100000001]
+  HighlightOffset: 0.200000003
+  HighlightSpeed: -0.25999999
+  UseAlphaMask: true
