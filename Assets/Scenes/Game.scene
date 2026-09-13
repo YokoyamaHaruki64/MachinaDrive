@@ -122,6 +122,8 @@ gameObjects:
           m_attackEndDuration: 0.5
           m_speedFriction: 0.300000012
           m_attackReadyVfxPrefab: Assets/Prefabs/VFX_AttackReady.prefab
+          m_playerLaunchVfxPrefab: Assets/Prefabs/VFX_PlayerLaunch.prefab
+          m_attackDashTrailPrefab: Assets/Prefabs/VFX_PlayerDashTrail.prefab
           m_debug: true
       - type: Audio
         fields:
@@ -171,6 +173,7 @@ gameObjects:
           enabled: true
           m_invincibilityDuration: 0.5
           m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
       - type: SphereCollider
@@ -212,6 +215,7 @@ gameObjects:
           enabled: true
           m_invincibilityDuration: 0.5
           m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
           m_amplitudeMin: 5
@@ -257,6 +261,7 @@ gameObjects:
           enabled: true
           m_invincibilityDuration: 0.5
           m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 8
       - type: SphereCollider
@@ -799,6 +804,7 @@ gameObjects:
           m_basicEnemyPrefab: Assets/Prefabs/Enemy.prefab
           m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
           m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
+          m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
           m_maxTime: 60
           m_startTime: 60
           m_timeDrainPerSecond: 1
