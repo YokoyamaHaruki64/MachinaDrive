@@ -271,7 +271,7 @@ void ModelRenderer::Submit()
         for (const GraphicsShaderPass& shaderPass : material->GetShader().GetShaderPasses())
         {
             const RenderPhase phase = shaderPass.GetRenderState().renderPhase;
-            if (phase != RenderPhase::PostProcess)
+            if (phase != RenderPhase::PostProcess && phase != RenderPhase::FinalPostProcess)
                 phases.insert(phase);
         }
     }

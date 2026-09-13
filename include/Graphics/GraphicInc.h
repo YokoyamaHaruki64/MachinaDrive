@@ -69,6 +69,7 @@ enum class RenderPhase : uint8_t
     Transparent,
     PostProcess,
     Overlay,
+    FinalPostProcess,
 
     Count,
 };

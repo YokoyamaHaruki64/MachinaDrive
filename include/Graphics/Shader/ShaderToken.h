@@ -39,6 +39,7 @@ namespace ShaderToken
     static constexpr char RENDER_PHASE_TRANSPARENT[] = "Transparent";
     static constexpr char RENDER_PHASE_POST_PROCESS[] = "PostProcess";
     static constexpr char RENDER_PHASE_OVERLAY[] = "Overlay";
+    static constexpr char RENDER_PHASE_FINAL_POST_PROCESS[] = "FinalPostProcess";
 
     static constexpr char CULL[] = "Cull";
     static constexpr char CULL_FRONT[] = "Front";

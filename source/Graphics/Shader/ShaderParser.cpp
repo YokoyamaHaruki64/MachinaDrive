@@ -463,6 +463,9 @@ bool ShaderParser::ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffs
                     else if (phaseStr == ShaderToken::RENDER_PHASE_OVERLAY)
                         outRenderPhase = RenderPhase::Overlay;
 
+                    else if (phaseStr == ShaderToken::RENDER_PHASE_FINAL_POST_PROCESS)
+                        outRenderPhase = RenderPhase::FinalPostProcess;
+
                     else
                         return false; // 不明なコマンド
 
