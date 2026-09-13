@@ -4,4 +4,4 @@ shader: Assets/Shaders/PostProcessFXAA.shader
 properties:
   _SubpixelBlending: 0.75
   _EdgeThreshold: 0.125
-  _EdgeThresholdMin: 0.0312
+  _EdgeThresholdMin: 0.031200001

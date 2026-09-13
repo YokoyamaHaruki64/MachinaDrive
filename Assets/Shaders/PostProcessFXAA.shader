@@ -35,10 +35,6 @@ Shader "PostProcessFXAA"
             float2 texCoord : TEXCOORD0;
         };
 
-        float _SubpixelBlending;
-        float _EdgeThreshold;
-        float _EdgeThresholdMin;
-
         VSOutput VSMain(VSInput input)
         {
             VSOutput output;

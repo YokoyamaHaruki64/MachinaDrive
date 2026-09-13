@@ -544,6 +544,11 @@ gameObjects:
           enabled: true
           m_name: Bloom
           m_materialPath: Assets/Materials/PostProcess/Bloom.material
+      - type: FXAA
+        fields:
+          enabled: true
+          m_name: FXAA
+          m_materialPath: Assets/Materials/PostProcess/FXAA.material
   - id: 64
     name: Model
     tag: 
