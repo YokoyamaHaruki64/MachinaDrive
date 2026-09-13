@@ -20,16 +20,18 @@ PostProcess ──> Material と Renderer 所有の画面 Ping-Pong バッファ
 
 ## フレームの描画フロー
 
-`Manager::Draw()` は Game RenderTarget の開始後、各 `RendererBase` の `Submit()` を呼ぶ。`Renderer` は Phase ごとにキューを安定ソートし、各 Component の `Draw()` を実行する。その後に PostProcessを適用する。Editor構成ではBackBuffer RTVへ切り替えてImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへコピーしてPresentする。
+`Manager::Draw()` は Game RenderTarget の開始後、各 `RendererBase` の `Submit()` を呼ぶ。`Renderer` は Phase ごとにキューを安定ソートし、各 Component の `Draw()` を実行する。PostProcessはMaterialの先頭Shader Passの `RenderPhase` と一致するPhaseで実行する。Editor構成では全Phaseの後にBackBuffer RTVへ切り替えてImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへコピーしてPresentする。
 
 ```text
 Renderer::Begin
   └─ RendererBase::Submit
        └─ Phase 別 DrawItem キュー
-            └─ Renderer::Draw（ソートして Component::Draw）
-                 └─ PostProcess::Apply
-                      ├─ Editor: BackBuffer RTV / GameWindow::DrawImGui / Renderer::End
-                      └─ Runtime: CopyResource / Renderer::End
+            └─ Shadow / Opaque / Transparent
+                 └─ PostProcess の PostProcess Pass
+                      └─ Overlay
+                           └─ PostProcess の FinalPostProcess Pass
+                                ├─ Editor: BackBuffer RTV / GameWindow::DrawImGui / Renderer::End
+                                └─ Runtime: CopyResource / Renderer::End
 ```
 
 `DrawItem` は Renderer、sortKey、代表 MeshID、提出順を持つ。提出順は同じ sortKey の安定した順序を保つために使う。現在のキュー単位は Renderer であり、ModelRenderer 内の複数 Mesh や Material Pass へはまだ分割しない。
@@ -40,7 +42,9 @@ Renderer::Begin
 | --- | --- | --- |
 | `Opaque` | MaterialID → MeshID → drawLayer | GPU State と頂点バッファの切替を抑える。 |
 | `Transparent` | drawLayer → 奥から手前の深度 → MaterialID / MeshID | 正しいアルファ合成順を優先する。 |
+| `PostProcess` | PostEffectの登録順 | Overlay前の画面へフルスクリーン処理を適用する。 |
 | `Overlay` | drawLayer → MaterialID → MeshID | 2D の明示的な重なり順を優先する。 |
+| `FinalPostProcess` | PostEffectの登録順 | Overlayを含む画面へフルスクリーン処理を適用する。 |
 
 Mesh を持たない Renderer の MeshID は `0` とする。ModelRenderer は複数 Mesh を描画できるため、現状は先頭 Mesh を代表値として提出する。より細かな State 最適化が必要になった時点で、Mesh / Material / Pass 単位の DrawItem 化と Bind キャッシュを導入する。
 
@@ -124,7 +128,7 @@ Sprite と Trail は ModelAsset を持たない。Sprite は 2D 用の不変頂�
 
 ## PostProcess
 
-PostProcess は通常描画キューへ提出せず、Material を使ってフルスクリーン Quad を実行する。PostProcess ごとの値は専用 Material に保持するため、通常描画と同じ Property API を利用できる。
+PostProcess は通常描画キューへ提出せず、Material を使ってフルスクリーン Quad を実行する。実行PhaseはPostProcess自身では保持せず、Materialの先頭Shader Passの `RenderPhase` で決まる。`PostProcess` を指定するとOverlay前、`FinalPostProcess` を指定するとOverlay後に実行する。PostProcess ごとの値は専用 Material に保持するため、通常描画と同じ Property API を利用できる。
 
 画面入力 `PostProcessSource` は Material Property ではなく、全 PostProcess 共通の `t0` に Bind する。Pass は番号または Tag で実行できる。画面出力では Renderer 所有の Ping-Pong バッファの出力先へ描画し、成功時にのみ入出力を交換する。明示した RenderTexture への出力は画面入力を交換しない。Pass 終了時には設定した SRV を解除し、次の RenderTarget との読み書き競合を防ぐ。
 
