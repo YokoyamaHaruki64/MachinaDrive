@@ -34,7 +34,6 @@ void AttackDashTrail::Update()
     const Player* player = m_player->GetComponent<Player>();
     if (player && player->GetAttackState() == Player::Attacking)
     {
-        transform()->SetPosition(m_player->GetTransform()->GetPosition() + m_offset);
         m_lingerTimer = 0.0f;
         return;
     }
@@ -44,5 +43,20 @@ void AttackDashTrail::Update()
     if (m_lingerTimer >= m_lingerDuration)
     {
         m_owner->Destroy();
+    }
+}
+
+void AttackDashTrail::LateUpdate()
+{
+    if (!m_player || !transform())
+    {
+        return;
+    }
+
+    const Player* player = m_player->GetComponent<Player>();
+    if (player && player->GetAttackState() == Player::Attacking)
+    {
+        // Physics同期後のPlayer座標を、Draw時に記録するTrailへ渡す。
+        transform()->SetPosition(m_player->GetTransform()->GetPosition() + m_offset);
     }
 }

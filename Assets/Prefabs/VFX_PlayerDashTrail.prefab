@@ -1,7 +1,7 @@
 version: 1
 name: VFX_PlayerDashTrail
 gameObjects:
-  - id: 2051
+  - id: 296
     name: VFX_PlayerDashTrail(Instance)
     tag: 
     active: true
@@ -24,8 +24,8 @@ gameObjects:
           m_offset: [0,0.75999999,0]
           m_fixedDirection: [0,1,0]
           m_trailLifetime: 0.400000006
-          m_minSegmentDistance: 0.0399999991
-          m_width: 3
+          m_minSegmentDistance: 0.00499999989
+          m_width: 2.74000001
           faceMode: 0
       - type: AttackDashTrail
         fields:

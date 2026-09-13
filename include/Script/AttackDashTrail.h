@@ -16,4 +16,5 @@ class AttackDashTrail final : public Script
 public:
     void OnStart() override;
     void Update() override;
+    void LateUpdate() override;
 };
