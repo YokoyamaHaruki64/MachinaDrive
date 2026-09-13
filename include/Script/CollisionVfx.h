@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Common/Color.h"
 #include "System/Core/Script.h"
 #include "math/Curve.h"
 #include "math/Vector3.h"
@@ -15,7 +16,6 @@ class CollisionVfx final : public Script
     GM_SCRIPT(CollisionVfx, "Collision VFX")
     USE_FIELDS
 
-    float m_lifetime = 0.8f;
     float m_coneAngle = 38.0f;
     float m_burstTime = 0.1f;
     int m_burstCount = 20;
@@ -27,33 +27,13 @@ class CollisionVfx final : public Script
     Vector3 m_gravity{ 0.0f, 6.0f, 0.0f };
     float m_drag = 0.8f;
     Vector3 m_particleSize{ 5.0f, 5.0f, 5.0f };
+    Color m_orangeEmissionColor{ Color::Black() };
+    Color m_yellowOrangeEmissionColor{ Color::Black() };
+    Color m_redOrangeEmissionColor{ Color::Black() };
     Curve<float> m_scaleOverLifetime{
         {
             { 0.18f, 0.0f, 0.18f, 0.18f },
             { 1.0f, 0.10f, 1.0f, 0.0f },
-            { 0.0f, 1.0f, 0.0f, 0.0f },
-        }
-    };
-    // 旧Prefabとの互換用。現在のEmitterは橙系3色のみを使用する。
-    CurveColor m_blueColorOverLifetime{
-        {
-            { 0.72f, 0.0f, 0.72f, 1.0f },
-            { 0.2f, 0.16f, 0.2f, 0.2f },
-            { 0.05f, 1.0f, 0.05f, 0.05f },
-        },
-        {
-            { 0.95f, 0.0f, 0.95f, 1.0f },
-            { 1.0f, 0.16f, 1.0f, 1.0f },
-            { 0.3f, 1.0f, 0.3f, 0.2f },
-        },
-        {
-            { 1.0f, 0.0f, 1.0f, 1.0f },
-            { 1.0f, 0.16f, 1.0f, 1.0f },
-            { 0.75f, 1.0f, 0.75f, 0.5f },
-        },
-        {
-            { 0.0f, 0.0f, 0.0f, 0.8f },
-            { 1.0f, 0.08f, 1.0f, 1.0f },
             { 0.0f, 1.0f, 0.0f, 0.0f },
         }
     };
@@ -131,18 +111,17 @@ class CollisionVfx final : public Script
     };
     std::vector<EmitterSlot> m_playerEmitters;
     std::vector<EmitterSlot> m_enemyEmitters;
-    float m_elapsed = 0.0f;
-    bool m_configured = false;
 
     void ApplyEmitterSettings(
         ParticleEmitter* emitter,
         const Vector3& direction,
-        const CurveColor& colorOverLifetime);
+        const CurveColor& colorOverLifetime,
+        const Color& emissionColor);
     const CurveColor& GetColorCurve(uint8_t colorVariant) const;
+    const Color& GetEmissionColor(uint8_t colorVariant) const;
 
 public:
     void OnStart() override;
-    void Update() override;
 
     // HitInfoの法線はBからAを押し戻す方向なので、Player側はnormalを使う。
     void Configure(const Vector3& normal, const Vector3& contactPosition);

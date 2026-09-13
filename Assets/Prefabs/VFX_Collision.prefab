@@ -1,205 +1,335 @@
 version: 1
-name: VFX Collision
+name: VFX_Collision
 gameObjects:
-  - id: 1
-    name: VFX_Collision
+  - id: 281
+    name: VFX_Collision(Instance)
     tag: VFXCollision
     active: true
-    prefab:
-    parent:
+    prefab: 
+    parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
+          m_localPosition: [1.23000002,0,3.51999998]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: VfxLifetime
+        fields:
+          enabled: true
       - type: CollisionVfx
         fields:
           enabled: true
-          m_lifetime: 0.8
-          m_coneAngle: 38
-          m_burstTime: 0.1
-          m_burstCount: 20
-          m_maxParticles: 64
-          m_particleLifetimeMin: 0.3
-          m_particleLifetimeMax: 0.6
-          m_speedMin: 30
-          m_speedMax: 60
-          m_gravity: [0, 6, 0]
-          m_drag: 0.8
-          m_particleSize: [5, 5, 5]
-  - id: 2
-    name: Collision_Player_Yellow
-    tag:
-    active: true
-    prefab:
-    parent: 1
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
-      - type: ParticleEmitter
-        fields:
-          enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
-          burst: true
-          burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
-          emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
-          randomizeSpeed: true
-          speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
-          coneAngle: 38
-          spawnRadius: 0
-          spawnNormal: [0, 1, 0]
-          velocityType: 2
-          spawnType: 0
-      - type: ParticleRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 1
-          m_materialPath: Assets/Materials/VFX/CollisionSpark.material
-  - id: 3
-    name: Collision_Player_Orange
-    tag:
-    active: true
-    prefab:
-    parent: 1
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
-      - type: ParticleEmitter
-        fields:
-          enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
-          burst: true
-          burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
-          emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
-          randomizeSpeed: true
-          speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
-          coneAngle: 38
-          spawnRadius: 0
-          spawnNormal: [0, 1, 0]
-          velocityType: 2
-          spawnType: 0
-      - type: ParticleRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 1
-          m_materialPath: Assets/Materials/VFX/CollisionSpark.material
-  - id: 4
-    name: Collision_Enemy_Yellow
-    tag:
-    active: true
-    prefab:
-    parent: 1
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
-      - type: ParticleEmitter
-        fields:
-          enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
-          burst: true
-          burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
-          emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
-          randomizeSpeed: true
-          speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
-          coneAngle: 38
-          spawnRadius: 0
-          spawnNormal: [0, 1, 0]
-          velocityType: 2
-          spawnType: 0
-      - type: ParticleRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 1
-          m_materialPath: Assets/Materials/VFX/CollisionSpark.material
-  - id: 5
+          m_coneAngle: 80.9400024
+          m_burstTime: 0.0799999982
+          m_burstCount: 25
+          m_maxParticles: 1004
+          m_particleLifetimeMin: 0.699999988
+          m_particleLifetimeMax: 1.20000005
+          m_speedMin: 62.2299995
+          m_speedMax: 91.0299988
+          m_gravity: [0,-3,0]
+          m_drag: 6
+          m_particleSize: [1.5,1.5,1.5]
+          m_orangeEmissionColor: [0.729729772,0.424353033,0.0760722086,1]
+          m_yellowOrangeEmissionColor: [0.606177568,0.441803604,0.105320416,1]
+          m_redOrangeEmissionColor: [0.613899589,0.186691165,0.0545161925,1]
+          m_scaleOverLifetime:
+            - time: 0
+              value: 0.349999994
+              inControl: 0.349999994
+              outControl: 0.349999994
+            - time: 0.119999997
+              value: 1
+              inControl: 1
+              outControl: 0
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+          m_orangeColorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.180000007
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.76111114
+                inControl: 0.76111114
+                outControl: 0.711111188
+            g:
+              - time: 0.00558659201
+                value: 1
+                inControl: 1
+                outControl: 0.561111093
+              - time: 1
+                value: 0
+                inControl: 0.166666687
+                outControl: 0
+            b:
+              - time: 0.0279329605
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.30726257
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0.800000012
+              - time: 0.0799999982
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          m_yellowOrangeColorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.180000007
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.850000024
+                inControl: 0.850000024
+                outControl: 0.699999988
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.270949721
+                value: 0.916666687
+                inControl: 0.977777779
+                outControl: 0.444444478
+              - time: 0.991620123
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0.00279329601
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.312849164
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0.800000012
+              - time: 0.0799999982
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          m_redOrangeColorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.180000007
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.550000012
+                inControl: 0.550000012
+                outControl: 0.449999988
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 0
+              - time: 1
+                value: 0.0199999996
+                inControl: 0.0199999996
+                outControl: 0
+            b:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 0.293296099
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0.800000012
+              - time: 0.0799999982
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+  - id: 285
     name: Collision_Enemy_Orange
-    tag:
+    tag: 
     active: true
-    prefab:
-    parent: 1
+    prefab: 
+    parent: 281
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
       - type: ParticleEmitter
         fields:
           enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
+          offset: [0,0,0]
+          maxParticles: 24
           burst: true
           burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
+          burstTime: 0.0799999982
+          finishedDestroy: false
           emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
+          lifetimeMin: 0.200000003
+          lifetimeMax: 0.419999987
+          gravity: [0,-3,0]
+          drag: 1.39999998
+          size: [0,0,0]
+          scaleOverLifetime:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            b:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0,0,0,1]
+          emissionColorOverLifetime:
+            r:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            g:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 4
+          flipbookRows: 4
+          flipbookFrameCount: 16
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: true
           randomizeSpeed: true
           speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
+          speedMin: 4.5
+          speedMax: 8.5
+          direction: [0,1,0]
           coneAngle: 38
           spawnRadius: 0
-          spawnNormal: [0, 1, 0]
+          spawnNormal: [0,1,0]
           velocityType: 2
           spawnType: 0
       - type: ParticleRenderer
@@ -209,87 +339,138 @@ gameObjects:
           renderPhase: 2
           billboardType: 1
           m_materialPath: Assets/Materials/VFX/CollisionSpark.material
-  - id: 6
-    name: Collision_Player_Red
-    tag:
+  - id: 283
+    name: Collision_Player_Orange
+    tag: 
     active: true
-    prefab:
-    parent: 1
+    prefab: 
+    parent: 281
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
       - type: ParticleEmitter
         fields:
           enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
+          offset: [0,0,0]
+          maxParticles: 24
           burst: true
           burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
+          burstTime: 0.0799999982
+          finishedDestroy: false
           emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
+          lifetimeMin: 0.200000003
+          lifetimeMax: 0.419999987
+          gravity: [0,-3,0]
+          drag: 1.39999998
+          size: [0,0,0]
+          scaleOverLifetime:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            b:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0,0,0,1]
+          emissionColorOverLifetime:
+            r:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            g:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            b:
+              - time: 0
+                value: 0
+                inControl: 0
+                outControl: 0
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+            a:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 1
+                inControl: 1
+                outControl: 1
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 4
+          flipbookRows: 4
+          flipbookFrameCount: 16
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: true
           randomizeSpeed: true
           speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
+          speedMin: 4.5
+          speedMax: 8.5
+          direction: [0,1,0]
           coneAngle: 38
           spawnRadius: 0
-          spawnNormal: [0, 1, 0]
-          velocityType: 2
-          spawnType: 0
-      - type: ParticleRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 1
-          m_materialPath: Assets/Materials/VFX/CollisionSpark.material
-  - id: 7
-    name: Collision_Enemy_Red
-    tag:
-    active: true
-    prefab:
-    parent: 1
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0, 0, 0]
-          m_localRotation: [0, 0, 0, 1]
-          m_localScale: [1, 1, 1]
-      - type: ParticleEmitter
-        fields:
-          enabled: true
-          offset: [0, 0, 0]
-          maxParticles: 64
-          burst: true
-          burstCount: 0
-          burstTime: 0.1
-          finishedDestroy: true
-          emitRate: 0
-          lifetimeMin: 0.3
-          lifetimeMax: 0.6
-          gravity: [0, 6, 0]
-          drag: 0.8
-          size: [5, 5, 5]
-          randomizeSpeed: true
-          speed: 5
-          speedMin: 30
-          speedMax: 60
-          direction: [0, 1, 0]
-          coneAngle: 38
-          spawnRadius: 0
-          spawnNormal: [0, 1, 0]
+          spawnNormal: [0,1,0]
           velocityType: 2
           spawnType: 0
       - type: ParticleRenderer

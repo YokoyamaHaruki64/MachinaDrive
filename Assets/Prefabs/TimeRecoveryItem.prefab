@@ -1,8 +1,8 @@
 version: 1
 name: TimeRecoveryItem
 gameObjects:
-  - id: 1
-    name: TimeRecoveryItem
+  - id: 314
+    name: TimeRecoveryItem(Instance)
     tag: TimeRecoveryItem
     active: true
     prefab: 
@@ -11,26 +11,30 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [0.5,0.5,0.5]
+          m_localPosition: [10,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.075000003,0.075000003,0.075000003]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: Assets/Local/Models/bullet.obj
+          m_modelPath: Assets/Local/Models/Battery.fbx
           m_materialPaths:
-            - Assets/Materials/Particle.material
+            - Assets/Materials/Battery_Body.material
+            - ''
+            - ''
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,0,0]
+          m_center: [0,1.89999998,0]
           m_isTrigger: true
           m_layer: 0
-          m_radius: 1
+          m_radius: 33.7700005
       - type: Rigidbody
         fields:
           enabled: true
@@ -46,3 +50,4 @@ gameObjects:
           enabled: true
           m_recoveryTime: 3
           m_lifetime: 12
+          m_pickupVfxPrefab: Assets/Prefabs/VFX_TimeRecoveryPickup.prefab

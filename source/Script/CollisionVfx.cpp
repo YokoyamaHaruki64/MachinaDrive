@@ -6,7 +6,6 @@
 #include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(CollisionVfx)
-    GM_FIELD(m_lifetime);
     GM_FIELD(m_coneAngle);
     GM_FIELD(m_burstTime);
     GM_FIELD(m_burstCount);
@@ -18,8 +17,10 @@ FIELDS_BEGIN(CollisionVfx)
     GM_FIELD(m_gravity);
     GM_FIELD(m_drag);
     GM_FIELD(m_particleSize);
+    GM_FIELD(m_orangeEmissionColor);
+    GM_FIELD(m_yellowOrangeEmissionColor);
+    GM_FIELD(m_redOrangeEmissionColor);
     GM_FIELD_TYPE(m_scaleOverLifetime, InspectorFieldType::Curve);
-    GM_FIELD_TYPE(m_blueColorOverLifetime, InspectorFieldType::Hidden);
     GM_FIELD_TYPE(m_orangeColorOverLifetime, InspectorFieldType::Curve);
     GM_FIELD_TYPE(m_yellowOrangeColorOverLifetime, InspectorFieldType::Curve);
     GM_FIELD_TYPE(m_redOrangeColorOverLifetime, InspectorFieldType::Curve);
@@ -27,7 +28,6 @@ FIELDS_END()
 
 void CollisionVfx::OnStart()
 {
-    m_lifetime = Math::Max(m_lifetime, 0.1f);
     m_coneAngle = Math::Max(m_coneAngle, 0.0f);
     m_burstTime = Math::Max(m_burstTime, 0.001f);
     m_burstCount = Math::Max(m_burstCount, 1);
@@ -37,9 +37,6 @@ void CollisionVfx::OnStart()
     m_speedMin = Math::Max(m_speedMin, 0.0f);
     m_speedMax = Math::Max(m_speedMax, m_speedMin);
     m_drag = Math::Max(m_drag, 0.0f);
-    m_elapsed = 0.0f;
-    m_configured = false;
-
     for (TransformBase* childTransform : transform()->GetChildren())
     {
         if (!childTransform || !childTransform->GetOwner())
@@ -100,10 +97,24 @@ const CurveColor& CollisionVfx::GetColorCurve(uint8_t colorVariant) const
     }
 }
 
+const Color& CollisionVfx::GetEmissionColor(uint8_t colorVariant) const
+{
+    switch (colorVariant)
+    {
+    case 1:
+        return m_yellowOrangeEmissionColor;
+    case 2:
+        return m_redOrangeEmissionColor;
+    default:
+        return m_orangeEmissionColor;
+    }
+}
+
 void CollisionVfx::ApplyEmitterSettings(
     ParticleEmitter* emitter,
     const Vector3& direction,
-    const CurveColor& colorOverLifetime)
+    const CurveColor& colorOverLifetime,
+    const Color& emissionColor)
 {
     if (!emitter)
     {
@@ -115,13 +126,15 @@ void CollisionVfx::ApplyEmitterSettings(
     settings.burst = true;
     settings.burstCount = m_burstCount;
     settings.burstTime = m_burstTime;
-    settings.finishedDestroy = true;
+    // 親のVfxLifetimeが全Emitterの完了を監視するため、Emitter自身は破棄しない。
+    settings.finishedDestroy = false;
     settings.lifetimeMin = m_particleLifetimeMin;
     settings.lifetimeMax = m_particleLifetimeMax;
     settings.gravity = m_gravity;
     settings.drag = m_drag;
     settings.offset = direction * 0.08f;
     settings.size = m_particleSize;
+    settings.emissionColor = emissionColor;
     settings.scaleOverLifetime = m_scaleOverLifetime;
     settings.colorOverLifetime = colorOverLifetime;
     settings.randomizeSpeed = true;
@@ -153,30 +166,16 @@ void CollisionVfx::Configure(const Vector3& normal, const Vector3& contactPositi
         ApplyEmitterSettings(
             slot.emitter,
             playerDirection,
-            GetColorCurve(slot.colorVariant));
+            GetColorCurve(slot.colorVariant),
+            GetEmissionColor(slot.colorVariant));
     }
     for (const EmitterSlot& slot : m_enemyEmitters)
     {
         ApplyEmitterSettings(
             slot.emitter,
             enemyDirection,
-            GetColorCurve(slot.colorVariant));
+            GetColorCurve(slot.colorVariant),
+            GetEmissionColor(slot.colorVariant));
     }
 
-    m_elapsed = 0.0f;
-    m_configured = true;
-}
-
-void CollisionVfx::Update()
-{
-    if (!m_configured)
-    {
-        return;
-    }
-
-    m_elapsed += Time::GetDeltaTime();
-    if (m_elapsed >= m_lifetime)
-    {
-        m_owner->Destroy();
-    }
 }

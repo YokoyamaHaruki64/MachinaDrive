@@ -1,4 +1,4 @@
-﻿---
+---
 name: vfx-production
 description: Project_Driveで、ゲームイベントの意味を読み取り、ParticleSystem・Trail・Quad・Shader・テクスチャを選んでワールドVFXを設計・制作する。VFXの追加や調整、素材制作に使う。
 ---

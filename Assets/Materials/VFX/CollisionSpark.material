@@ -1,8 +1,8 @@
 version: 1
 name: VFX Collision Spark
-shader: Assets/Shaders/UnlitTransparent.shader
+shader: Assets/Shaders/ParticleInstancedAlpha.shader
 properties:
   _BaseColor: [1, 1, 1, 1]
   _UVScale: [1, 1]
   _UVOffset: [0, 0]
-  _MainTex: Assets/Local/Textures/VFX/VFX_Flame.png
+  _MainTex: Assets/Local/Textures/VFX/VFX_SparkShards.png
