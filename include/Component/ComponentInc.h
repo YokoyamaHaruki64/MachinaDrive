@@ -18,6 +18,7 @@
 #include "Component/SpriteRenderer.h"
 #include "Component/SphereCollider.h"
 #include "Component/TrailRenderer.h"
+#include "Component/VfxLifetime.h"
 #include "Component/UIButton.h"
 #include "Component/UICanvas.h"
 #include "Component/UIImage.h"

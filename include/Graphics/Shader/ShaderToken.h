@@ -49,6 +49,7 @@ namespace ShaderToken
     static constexpr char BLEND_ADD[] = "Add";
 
     static constexpr char ZWRITE[] = "ZWrite";
+    static constexpr char INSTANCED[] = "Instanced";
 
     static constexpr char ZTEST[] = "ZTest";
     static constexpr char ZTEST_LESS[] = "Less";

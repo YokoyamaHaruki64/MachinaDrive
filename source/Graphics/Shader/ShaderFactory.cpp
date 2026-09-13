@@ -167,6 +167,7 @@ bool ShaderFactory::CreateGraphicsShaderPass(
     const std::string& pixelEntryPoint,
     const std::string& pixelShaderModel,
     const RenderState& renderState,
+    bool isInstanced,
     GraphicsShaderPass& outShaderPass)
 {
     // ===========================
@@ -257,6 +258,7 @@ bool ShaderFactory::CreateGraphicsShaderPass(
         std::move(pixelShader),
         std::move(inputLayout),
         renderState,
+        isInstanced,
         std::move(inputSlot),
         std::move(constantBufferInfo),
         std::move(textureInfo)
