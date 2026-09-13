@@ -254,6 +254,9 @@
     <ClCompile Include="source\Script\AttackChargeHead.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\AttackDashTrail.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\CollisionVfx.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -647,6 +650,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\AttackChargeHead.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackDashTrail.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\CollisionVfx.h">

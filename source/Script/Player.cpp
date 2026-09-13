@@ -19,6 +19,8 @@ FIELDS_BEGIN(Player)
     GM_FIELD(m_attackEndDuration);
     GM_FIELD(m_speedFriction);
     GM_FIELD(m_attackReadyVfxPrefab);
+    GM_FIELD(m_playerLaunchVfxPrefab);
+    GM_FIELD(m_attackDashTrailPrefab);
     GM_FIELD(m_debug);
 FIELDS_END()
 
@@ -253,6 +255,25 @@ void Player::UpdateAttackReady()
         {
             m_attackReadyVfx->Destroy();
             m_attackReadyVfx.Clear();
+        }
+
+        // 発進の瞬間と移動中の軌跡を分け、開始方向を見失わないようにする。
+        if (m_playerLaunchVfxPrefab)
+        {
+            Manager::Instantiate(
+                m_playerLaunchVfxPrefab.GetPath(),
+                transform()->GetPosition(),
+                Vector3::Zero(),
+                Vector3::One());
+        }
+
+        if (m_attackDashTrailPrefab)
+        {
+            Manager::Instantiate(
+                m_attackDashTrailPrefab.GetPath(),
+                transform()->GetPosition(),
+                Vector3::Zero(),
+                Vector3::One());
         }
     }
 }

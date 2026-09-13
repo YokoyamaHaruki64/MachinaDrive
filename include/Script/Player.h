@@ -38,6 +38,8 @@ private:
     PlayerAnimation* m_playerAnimation = nullptr;
     GameObjectReference m_director;
     PrefabReference m_attackReadyVfxPrefab{ "Assets/Prefabs/VFX_AttackReady.prefab" };
+    PrefabReference m_playerLaunchVfxPrefab{ "Assets/Prefabs/VFX_PlayerLaunch.prefab" };
+    PrefabReference m_attackDashTrailPrefab{ "Assets/Prefabs/VFX_PlayerDashTrail.prefab" };
     GameObjectReference m_attackReadyVfx;
 
     GameHud* m_gameHud = nullptr;

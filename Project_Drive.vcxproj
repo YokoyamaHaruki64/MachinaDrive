@@ -243,6 +243,7 @@
     <ClCompile Include="source\Script\TimeRecoveryItem.cpp" />
     <ClCompile Include="source\Script\AttackReadyVfx.cpp" />
     <ClCompile Include="source\Script\AttackChargeHead.cpp" />
+    <ClCompile Include="source\Script\AttackDashTrail.cpp" />
     <ClCompile Include="source\Script\CollisionVfx.cpp" />
     <ClCompile Include="source\Script\BasicEnemy.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
@@ -471,6 +472,7 @@
     <ClInclude Include="include\Script\TimeRecoveryItem.h" />
     <ClInclude Include="include\Script\AttackReadyVfx.h" />
     <ClInclude Include="include\Script\AttackChargeHead.h" />
+    <ClInclude Include="include\Script\AttackDashTrail.h" />
     <ClInclude Include="include\Script\CollisionVfx.h" />
     <ClInclude Include="include\Script\BasicEnemy.h" />
     <ClInclude Include="include\Script\CameraController.h" />

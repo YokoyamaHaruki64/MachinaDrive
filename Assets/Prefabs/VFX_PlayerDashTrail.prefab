@@ -1,0 +1,34 @@
+version: 1
+name: VFX_PlayerDashTrail
+gameObjects:
+  - id: 2051
+    name: VFX_PlayerDashTrail(Instance)
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: TrailRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/AttackChargeTrail.material
+          m_offset: [0,0.75999999,0]
+          m_fixedDirection: [0,1,0]
+          m_trailLifetime: 0.400000006
+          m_minSegmentDistance: 0.0399999991
+          m_width: 3
+          faceMode: 0
+      - type: AttackDashTrail
+        fields:
+          enabled: true
+          m_offset: [0,0.349999994,0]
+          m_lingerDuration: 0.25

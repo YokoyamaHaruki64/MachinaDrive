@@ -2,7 +2,7 @@ version: 1
 name: VFX Attack Charge Trail
 shader: Assets/Shaders/UnlitAdditive.shader
 properties:
-  _BaseColor: [0.2, 0.8, 1, 1]
-  _UVScale: [1, 1]
-  _UVOffset: [0, 0]
+  _BaseColor: [0.513513505,0.87837851,1,1]
+  _UVScale: [1,1]
+  _UVOffset: [0,0]
   _MainTex: Assets/Local/Textures/VFX/VFX_AttackChargeTrail.png
