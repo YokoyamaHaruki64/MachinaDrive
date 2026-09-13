@@ -1,0 +1,57 @@
+version: 1
+name: PostProcessImpulse_WaveBegin
+gameObjects:
+  - id: 431
+    name: PostProcessImpulse_WaveBegin(Instance)
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: PostProcessImpulsePreset
+        fields:
+          enabled: true
+          m_settings:
+            duration: 1.29999995
+            easeType: InQuad
+            targets:
+              - postProcessName: Glitch
+                floats:
+                  - name: _Intensity
+                    value: 0.800000012
+                vector2s:
+                  - name: _ChromaticOffset
+                    value: [0.0299999993,0]
+                vector3s: []
+                vector4s: []
+              - postProcessName: ChromaticAberration
+                floats:
+                  - name: _Intensity
+                    value: 0.5
+                vector2s:
+                  - name: _RedOffset
+                    value: [0.0149999997,0.0149999997]
+                  - name: _BlueOffset
+                    value: [-0.0149999997,-0.0149999997]
+                vector3s: []
+                vector4s: []
+              - postProcessName: BlockGlitch
+                floats:
+                  - name: _Intensity
+                    value: 0.800000012
+                vector2s: []
+                vector3s: []
+                vector4s: []
+              - postProcessName: BlockGlitch
+                floats:
+                  - name: _Intensity
+                    value: 2
+                vector2s: []
+                vector3s: []
+                vector4s: []

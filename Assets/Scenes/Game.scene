@@ -569,6 +569,11 @@ gameObjects:
           enabled: true
           m_name: Glitch
           m_materialPath: Assets/Materials/PostProcess/Glitch.material
+      - type: BlockGlitchPostProcess
+        fields:
+          enabled: true
+          m_name: BlockGlitch
+          m_materialPath: Assets/Materials/PostProcess/BlockGlitch.material
       - type: PostProcessImpulse
         fields:
           enabled: true
@@ -577,6 +582,8 @@ gameObjects:
               prefab: Assets/Prefabs/PostProcessImpulse_PlayerShot.prefab
             - name: EnemyHit
               prefab: Assets/Prefabs/PostProcessImpulse_EnemyHit.prefab
+            - name: WaveBegin
+              prefab: Assets/Prefabs/PostProcessImpulse_WaveBegin.prefab
   - id: 64
     name: Model
     tag: 

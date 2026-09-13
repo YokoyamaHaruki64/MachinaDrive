@@ -256,6 +256,7 @@
     <ClCompile Include="source\Script\UI\UIOffset.cpp" />
     <ClCompile Include="source\Script\UI\WaveStartUI.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
+    <ClCompile Include="source\Script\BlockGlitchPostProcess.cpp" />
     <ClCompile Include="source\Script\GlitchPostProcess.cpp" />
     <ClCompile Include="source\Script\EnemyAnimation.cpp" />
     <ClCompile Include="source\Script\Health.cpp" />
@@ -496,6 +497,7 @@
     <ClInclude Include="include\Script\UI\UIOffset.h" />
     <ClInclude Include="include\Script\UI\WaveStartUI.h" />
     <ClInclude Include="include\Script\Enemy.h" />
+    <ClInclude Include="include\Script\BlockGlitchPostProcess.h" />
     <ClInclude Include="include\Script\GlitchPostProcess.h" />
     <ClInclude Include="include\Script\EnemyAnimation.h" />
     <ClInclude Include="include\Script\Health.h" />
@@ -689,6 +691,7 @@
     <None Include="Assets\Shaders\UI.shader" />
     <None Include="Assets\Shaders\UIImageFill.shader" />
     <None Include="Assets\Shaders\PostProcessFXAA.shader" />
+    <None Include="Assets\Shaders\PostProcessBlockGlitch.shader" />
     <None Include="Assets\Shaders\PostProcessGlitch.shader" />
     <None Include="Assets\Shaders\PostProcessChromaticAberration.shader" />
     <None Include="Assets\Shaders\PostProcessNoise.shader" />
