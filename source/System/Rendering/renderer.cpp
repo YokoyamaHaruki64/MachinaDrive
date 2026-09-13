@@ -7,6 +7,7 @@
 #include "Component/Camera.h"
 #include "Component/PostEffect.h"
 #include "Graphics/Material.h"
+#include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
 #include <io.h>
 
@@ -80,6 +81,22 @@ namespace
     {
         CAMERA_NEAR_DISTANCE, 10.0f, 25.0f, 55.0f, 100.0f,
     };
+
+    bool IsPostProcessPhase(RenderPhase phase)
+    {
+        return phase == RenderPhase::PostProcess || phase == RenderPhase::FinalPostProcess;
+    }
+
+    bool IsPostEffectInPhase(const PostProcess& postEffect, RenderPhase phase)
+    {
+        const Material* material = postEffect.GetMaterial();
+        if (!material || material->GetShader().GetShaderPasses().empty())
+        {
+            return false;
+        }
+
+        return material->GetShaderPass(0).GetRenderState().renderPhase == phase;
+    }
 
     template <typename VertexType>
     ID3D11Buffer* CreateFallbackVertexBuffer(ID3D11Device* device, const VertexType& defaultVertex)
@@ -691,16 +708,17 @@ void Renderer::Draw()
         const RenderPhase phase = static_cast<RenderPhase>(phaseIndex);
         m_CurrentRenderPhase = phase;
 
-        // PostProcessの描画
-        if (phase == RenderPhase::PostProcess)
+        if (IsPostProcessPhase(phase))
         {
             for (PostProcess* postEffect : m_postEffects)
             {
-                if (postEffect)
+                if (postEffect && IsPostEffectInPhase(*postEffect, phase))
+                {
                     postEffect->Apply();
+                }
             }
 
-            // 失敗したPassが中間RTを残しても、Overlayは完成済みの画面バッファへ重ねる。
+            // 次の描画Phaseは、完成済みの画面バッファへ重ねる。
             SetSrcRTV();
             continue;
         }
@@ -1135,7 +1153,7 @@ XMMATRIX Renderer::GetProjectionMatrix()
 
 void Renderer::SubmitDrawItem(RenderPhase phase, DrawItem item)
 {
-    if (phase == RenderPhase::PostProcess || phase >= RenderPhase::Count)
+    if (IsPostProcessPhase(phase) || phase >= RenderPhase::Count)
         return;
 
     item.submitOrder = m_SubmitOrder++;
