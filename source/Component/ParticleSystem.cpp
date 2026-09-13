@@ -446,7 +446,9 @@ XMMATRIX ParticleRenderer::CalcParticleWorldMatrix(const ParticleEmitter::Partic
 
     if (m_billboardType == BillboardType::CameraFacing)
     {
-        const XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
+        XMMATRIX inverseView = XMMatrixInverse(nullptr, Renderer::GetViewMatrix());
+        // ビルボードの向きだけを利用し、カメラ位置は粒子のワールド位置へ加算しない。
+        inverseView.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
         const XMVECTOR cameraRight = XMVector3Normalize(inverseView.r[0]);
         const XMVECTOR cameraUp = XMVector3Normalize(inverseView.r[1]);
         const float projectedX = XMVectorGetX(XMVector3Dot(XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&particle.velocity)), cameraRight));
