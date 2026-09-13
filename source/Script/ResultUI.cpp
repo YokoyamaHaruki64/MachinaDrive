@@ -5,6 +5,7 @@
 #include "Script/ResultUI.h"
 
 #include "Scene/TitleScene.h"
+#include "Script/SceneTransition.h"
 
 
 void ResultUI::OnStart()
@@ -23,6 +24,6 @@ void ResultUI::Update()
     transform()->SetPosition(newPosition);
 
     if (Input::GetKeyTrigger(Input::KeyCode::ENTER))
-        Manager::ChangeScene<TitleScene>();
+        SceneTransition::ChangeScene<TitleScene>(0.8f, EaseType::InOutQuad);
 
 }

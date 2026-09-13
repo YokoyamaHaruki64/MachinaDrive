@@ -275,6 +275,9 @@
     <ClCompile Include="source\Script\HorizontalGlitchTransition.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\SceneTransition.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\GlitchPostProcess.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -710,6 +713,9 @@
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\HorizontalGlitchTransition.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\SceneTransition.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\GlitchPostProcess.h">

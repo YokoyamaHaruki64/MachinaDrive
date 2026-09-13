@@ -153,3 +153,25 @@ gameObjects:
             - [1,1,1]
           m_quaternionValues:
             - [0,0,0,1]
+  - id: 6
+    name: Scene Transition
+    tag: 
+    active: true
+    notDestroyBySceneEnd: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: SceneTransition
+        fields:
+          enabled: true
+      - type: HorizontalGlitchTransition
+        fields:
+          enabled: true
+          m_name: HorizontalGlitchTransition
+          m_materialPath: Assets/Materials/PostProcess/HorizontalGlitchTransition.material

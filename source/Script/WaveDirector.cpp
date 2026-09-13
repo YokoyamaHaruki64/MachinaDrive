@@ -6,6 +6,7 @@
 #include "Scene/ResultScene.h"
 #include "Script/Player.h"
 #include "Script/PostProcessImpulse.h"
+#include "Script/SceneTransition.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
 #include "System/Editor/FieldRegistry.h"
@@ -413,5 +414,5 @@ void WaveDirector::FinishGame()
     }
 
     m_hasFinished = true;
-    Manager::ChangeScene<ResultScene>();
+    SceneTransition::ChangeScene<ResultScene>(0.8f, EaseType::InOutQuad);
 }
