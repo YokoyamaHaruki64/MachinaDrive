@@ -7,13 +7,14 @@
 #include "Graphics/Shader/ShaderManager.h"
 #include "System/Rendering/renderer.h"
 
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
 
 namespace
 {
     std::unordered_map<std::string, std::unique_ptr<ModelAsset>> g_modelAssets;
-    uint32_t g_nextPrimitiveMeshID = 0x80000000;
+    uint32_t g_nextRuntimeMeshID = 0x80000000;
 
     template <typename VertexType>
     Microsoft::WRL::ComPtr<ID3D11Buffer> CreateVertexBuffer(const std::vector<VertexType>& vertices)
@@ -58,7 +59,7 @@ namespace
         modelAsset->embeddedMaterials.push_back(defaultMaterial);
 
         Mesh mesh{};
-        mesh.meshID = g_nextPrimitiveMeshID++;
+        mesh.meshID = g_nextRuntimeMeshID++;
         mesh.materialSlot = 0;
         mesh.indexCount = static_cast<unsigned int>(indices.size());
         mesh.SetVertexBuffer(VertexStreamType::Position, CreateVertexBuffer(positions));
@@ -190,6 +191,100 @@ ModelAsset* ModelManager::Load(const std::string& filePath)
 
     ModelAsset* result = modelAsset.get();
     g_modelAssets.emplace(filePath, std::move(modelAsset));
+    return result;
+}
+
+ModelAsset* ModelManager::CreateRuntimeModel(
+    const std::string& assetName,
+    const RuntimeMeshData& meshData,
+    Material* material)
+{
+    if (assetName.empty() || meshData.positions.empty() || meshData.indices.empty())
+    {
+        MessageBoxA(nullptr, "Runtime Meshにはアセット名、Position頂点、Indexが必要です。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        return nullptr;
+    }
+
+    if (const auto found = g_modelAssets.find(assetName); found != g_modelAssets.end())
+    {
+        return found->second.get();
+    }
+
+    const size_t vertexCount = meshData.positions.size();
+    const bool validVertexStreams =
+        (meshData.normalTangents.empty() || meshData.normalTangents.size() == vertexCount) &&
+        (meshData.primaryTexCoords.empty() || meshData.primaryTexCoords.size() == vertexCount) &&
+        (meshData.secondaryTexCoords.empty() || meshData.secondaryTexCoords.size() == vertexCount) &&
+        (meshData.extraTexCoords.empty() || meshData.extraTexCoords.size() == vertexCount) &&
+        (meshData.colors.empty() || meshData.colors.size() == vertexCount);
+    const bool validIndices = std::all_of(meshData.indices.begin(), meshData.indices.end(),
+        [vertexCount](uint32_t index) { return index < vertexCount; });
+    if (!validVertexStreams || !validIndices)
+    {
+        MessageBoxA(nullptr, "Runtime Meshの頂点ストリームまたはIndexが不正です。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        return nullptr;
+    }
+
+    if (!material)
+    {
+        GraphicsShader* defaultShader = ShaderManager::GetDefaultShader();
+        material = defaultShader ? MaterialManager::GetDefault(*defaultShader) : nullptr;
+    }
+    if (!material)
+    {
+        MessageBoxA(nullptr, "Runtime MeshのMaterialを取得できません。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        return nullptr;
+    }
+
+    Mesh mesh{};
+    mesh.meshID = g_nextRuntimeMeshID++;
+    mesh.materialSlot = 0;
+    mesh.indexCount = static_cast<unsigned int>(meshData.indices.size());
+
+    const auto setVertexBuffer = [&mesh](VertexStreamType streamType, const auto& vertices)
+    {
+        if (vertices.empty())
+            return true;
+
+        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = CreateVertexBuffer(vertices);
+        if (!buffer)
+            return false;
+
+        mesh.SetVertexBuffer(streamType, std::move(buffer));
+        return true;
+    };
+    if (!setVertexBuffer(VertexStreamType::Position, meshData.positions) ||
+        !setVertexBuffer(VertexStreamType::NormalTangent, meshData.normalTangents) ||
+        !setVertexBuffer(VertexStreamType::PrimaryTexCoord, meshData.primaryTexCoords) ||
+        !setVertexBuffer(VertexStreamType::SecondaryTexCoord, meshData.secondaryTexCoords) ||
+        !setVertexBuffer(VertexStreamType::ExtraTexCoord, meshData.extraTexCoords) ||
+        !setVertexBuffer(VertexStreamType::Color, meshData.colors))
+    {
+        return nullptr;
+    }
+
+    D3D11_BUFFER_DESC description{};
+    description.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * meshData.indices.size());
+    description.Usage = D3D11_USAGE_IMMUTABLE;
+    description.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA initialData{};
+    initialData.pSysMem = meshData.indices.data();
+    Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+    if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, indexBuffer.GetAddressOf())))
+    {
+        MessageBoxA(nullptr, "Runtime Meshのインデックスバッファ作成に失敗しました。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        return nullptr;
+    }
+
+    mesh.SetIndexBuffer(std::move(indexBuffer));
+    auto modelAsset = std::make_unique<ModelAsset>();
+    modelAsset->embeddedMaterials.push_back(material);
+    modelAsset->meshes.push_back(std::move(mesh));
+    modelAsset->rootNode.meshIndices.push_back(0);
+
+    ModelAsset* result = modelAsset.get();
+    g_modelAssets.emplace(assetName, std::move(modelAsset));
     return result;
 }
 
