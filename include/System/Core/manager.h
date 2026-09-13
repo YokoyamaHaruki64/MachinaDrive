@@ -102,7 +102,7 @@ private:
 
     static void InitScene();
     static void ReloadCurrentScene();
-    static void DestroyGameObjects();
+    static void DestroyGameObjects(bool destroyPersistentObjects);
     static void StartLoadedGameObjects(
         std::vector<std::unique_ptr<GameObject>> gameObjects,
         bool assignNewIds = false);
