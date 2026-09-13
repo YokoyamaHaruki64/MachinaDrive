@@ -58,6 +58,11 @@ bool InputLayoutBuilder::CreateInputLayout(
         // 入力レイアウトの情報を保存する
         InputSlotBinding binding;
         binding.streamType = getVertexAttribute(param);
+        if (binding.streamType == VertexStreamType::InstanceID)
+        {
+            // システム値はGPUが自動供給するため、InputLayout／頂点バッファへ登録しない。
+            continue;
+        }
         if( binding.streamType == VertexStreamType::Error )
         {
             Logger::Error("シェーダー入力シグネチャに未対応の頂点属性があります。");
@@ -129,6 +134,9 @@ DXGI_FORMAT InputLayoutBuilder::getFormat(const D3D11_SIGNATURE_PARAMETER_DESC& 
 
 VertexStreamType InputLayoutBuilder::getVertexAttribute(const D3D11_SIGNATURE_PARAMETER_DESC& param)
 {
+    if (param.SystemValueType == D3D_NAME_INSTANCE_ID)
+        return VertexStreamType::InstanceID;
+
     if ( strcmp(param.SemanticName, "POSITION") == 0)
         return VertexStreamType::Position;
 
