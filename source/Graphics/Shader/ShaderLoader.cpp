@@ -159,6 +159,12 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
         RenderPhase overrideRenderPhase = defaultRenderPhase;
         passParser.ExtractStateCommand(overrideRenderState);
         passParser.ExtractRenderPhase(overrideRenderPhase);
+        bool isInstanced = false;
+        if (!passParser.ExtractInstanced(isInstanced))
+        {
+            Logger::Error("シェーダーPassのInstanced指定が不正です。\nShader: " + filePath);
+            return nullptr;
+        }
 
         // RenderPhaseを確定
         overrideRenderState.renderPhase = overrideRenderPhase;
@@ -235,6 +241,7 @@ GraphicsShader* ShaderLoader::LoadShaderFromFile(const std::string& filePath, Sh
             pixelShaderEntry,
             shaderModelPS,
             overrideRenderState,
+            isInstanced,
             shaderPass))
         {
             Logger::Error("シェーダーPassの生成に失敗しました。\nShader: " + filePath);

@@ -158,6 +158,7 @@
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\SphereCollider.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\Component\VfxLifetime.cpp" />
     <ClCompile Include="source\Component\Transform.cpp" />
     <ClCompile Include="source\Component\TransformBase.cpp" />
     <ClCompile Include="source\Component\UIButton.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\SphereCollider.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
+    <ClInclude Include="include\Component\VfxLifetime.h" />
     <ClInclude Include="include\Component\Transform.h" />
     <ClInclude Include="include\Component\TransformBase.h" />
     <ClInclude Include="include\Component\UIButton.h" />

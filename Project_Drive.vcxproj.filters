@@ -288,6 +288,9 @@
     <ClCompile Include="source\Component\TrailRenderer.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
+    <ClCompile Include="source\Component\VfxLifetime.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
     <ClCompile Include="source\Component\Transform.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
@@ -621,6 +624,9 @@
       <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\TrailRenderer.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\VfxLifetime.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\ImGui\imgui.h">

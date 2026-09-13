@@ -10,10 +10,16 @@
 #include "System/Rendering/RendererBase.h"
 
 #include "math/Vector3.h"
+#include "math/Vector2.h"
 #include "math/Curve.h"
 #include "Common/Color.h"
 
 #include "Graphics/GraphicInc.h"
+
+#include <algorithm>
+#include <wrl/client.h>
+
+class VfxLifetime;
 
 class ParticleEmitter : public Component
 {
@@ -66,6 +72,23 @@ public:
             Curve<float>(1.0f, 0.0f);
         CurveColor colorOverLifetime =
             CurveColor(Color::White(), Color(1.0f, 1.0f, 1.0f, 0.0f)); // 色を変化させるカーブ
+        Color emissionColor = Color::Black();
+        CurveColor emissionColorOverLifetime = CurveColor(Color::Black(), Color::Black());
+        float emissionStrength = 0.0f;
+
+        float rotationMin = 0.0f;
+        float rotationMax = 0.0f;
+        float angularVelocityMin = 0.0f;
+        float angularVelocityMax = 0.0f;
+        float velocityStretch = 0.0f;
+
+        // フリップブック
+        int flipbookColumns = 1;       // テクスチャを分割する横方向の数
+        int flipbookRows = 1;          // テクスチャを分割する縦方向の数
+        int flipbookFrameCount = 0;    // 0の場合は分割された全フレームを使う
+        float flipbookFrameRate = 0.0f; // 1秒あたりのフレーム送り数（0で停止）
+        bool flipbookLoop = false;
+        bool flipbookRandomStart = false;
 
         // 速度共通
         bool randomizeSpeed = true; // true:初速をランダム化する
@@ -91,27 +114,32 @@ public:
         // Circle
         Vector3 spawnNormal = Vector3::Up(); // 生成時の法線方向
     };
-private:
-    class Particle
+public:
+    struct Particle
     {
-    public:
         bool active{ false };
 
         Vector3 position{ Vector3::Zero() };
-        Vector3 rotation{ Vector3::Zero() };
+        float rotation{ 0.0f };
+        float angularVelocity{ 0.0f };
         float scale{ 1.0f };
         Vector3 velocity{ Vector3::Zero() };
         Color color{ Color::White() };
+        Color emissionColor{ Color::Black() };
+        uint32_t randomSeed{};
+        Vector2 uvScale{ Vector2::One() };
+        Vector2 uvOffset{ Vector2::Zero() };
+        int flipbookStartFrame{};
         float lifetime{ 1.0f };
         float age{ 0.0f };
     };
 
-public :
-
+public:
     ParticleEmitter(GameObject* owner): Component(owner)
     {
     }
-    void OnStart() override { SetSettings(m_settings); }
+    void OnStart() override;
+    void OnDestroy() override;
     void Update() override;
     std::vector<Particle>& GetParticles() { return m_particles; }
 
@@ -139,6 +167,10 @@ public :
 
         m_settings.direction.Normalize();
         m_settings.spawnNormal.Normalize();
+        m_settings.flipbookColumns = std::max(1, m_settings.flipbookColumns);
+        m_settings.flipbookRows = std::max(1, m_settings.flipbookRows);
+        m_settings.flipbookFrameCount = std::max(0, m_settings.flipbookFrameCount);
+        m_settings.flipbookFrameRate = std::max(0.0f, m_settings.flipbookFrameRate);
     }
 
     const EmitterSettings& GetSettingsRef() const { return m_settings; }
@@ -149,10 +181,12 @@ public :
         m_emitTimer = 0.0f;
         m_burstEmitted = 0;
         m_burstFinished = false;
+        m_completionNotified = false;
         for (auto& p : m_particles)
         {
             p.active = false;
         }
+        m_activeParticles = 0;
     }
 
     void ResetBurst()
@@ -160,7 +194,10 @@ public :
         m_emitTimer = 0.0f;
         m_burstEmitted = 0;
         m_burstFinished = false;
+        m_completionNotified = false;
     }
+
+    void ClearVfxLifetime(VfxLifetime* lifetime);
 
 private:
     std::vector<Particle> m_particles;
@@ -171,10 +208,14 @@ private:
     int m_burstEmitted{ 0 }; // バースト時の生成済みパーティクル数
     int m_activeParticles{ 0 }; // 現在アクティブなパーティクル数
     bool m_burstFinished{ false }; // バーストが完了したかどうか
+    bool m_completionNotified{ false };
+    VfxLifetime* m_vfxLifetime{};
 
     void EmitOne();
     void ActivateParticle(Particle& p);
     void UpdateParticle(Particle& p, float dt);
+    void UpdateFlipbookFrame(Particle& p) const;
+    void NotifyFinished();
 
 protected:
     void RegisterFields(FieldRegistry& fields) override;
@@ -188,9 +229,22 @@ private:
     ParticleEmitter* m_emitter{};
     const Mesh* m_mesh{};
     Material* m_material{};
-    std::string m_materialPath{ "Assets/Materials/Particle.material" };
+    std::string m_materialPath{ "Assets/Materials/ParticleInstanced.material" };
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_instanceBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_instanceBufferView;
+    uint32_t m_instanceCapacity{};
 
-    void BindMesh(const XMMATRIX& worldMatrix, const Color& color);
+    struct ParticleInstanceData
+    {
+        XMFLOAT4X4 world;
+        XMFLOAT4 color;
+        XMFLOAT4 emissionColor;
+        XMFLOAT4 uvTransform;
+    };
+
+    bool EnsureInstanceBuffer(uint32_t count);
+    XMMATRIX CalcParticleWorldMatrix(const ParticleEmitter::Particle& particle) const;
+    void BindLegacyMesh(const XMMATRIX& worldMatrix, const Color& color, const Vector2& uvScale, const Vector2& uvOffset);
 
 public:
     ParticleRenderer() = delete;

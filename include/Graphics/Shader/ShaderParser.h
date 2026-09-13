@@ -104,6 +104,7 @@ public:
     bool ExtractPassBlock(std::string& outBlock, std::string& outTag, int passOffset = 0) const;
     bool ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffset = 0) const;
     bool ExtractStateCommand(RenderState& outStateCommand, int braceOffset = 0) const;
+    bool ExtractInstanced(bool& outInstanced, int braceOffset = 0) const;
     bool ExtractShaderName(std::string& outName) const;
     bool ExtractHLSL(std::string& outBlock) const;
     bool ExtractPragma(const std::string& pragmaName, std::string& outString) const;
