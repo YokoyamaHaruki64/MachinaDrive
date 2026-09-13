@@ -533,7 +533,8 @@ void ParticleRenderer::Draw()
     for (const ParticleEmitter::Particle* particle : particles)
     {
         ParticleInstanceData instance{};
-        XMStoreFloat4x4(&instance.world, CalcParticleWorldMatrix(*particle));
+        // 通常描画の定数バッファと同じ転置規約でインスタンス行列を格納する。
+        XMStoreFloat4x4(&instance.world, XMMatrixTranspose(CalcParticleWorldMatrix(*particle)));
         instance.color = XMFLOAT4(particle->color.r, particle->color.g, particle->color.b, particle->color.a);
         instance.emissionColor = XMFLOAT4(
             particle->emissionColor.r,
