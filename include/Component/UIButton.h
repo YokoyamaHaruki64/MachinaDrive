@@ -39,6 +39,7 @@ public:
     explicit UIButton(GameObject* owner);
 
     void OnLoaded() override;
+    void OnInactive() override;
     void OnEditorUpdate() override;
     void Update() override;
 

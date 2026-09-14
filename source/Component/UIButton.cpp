@@ -16,6 +16,15 @@ void UIButton::OnLoaded()
     UpdateVisualState();
 }
 
+void UIButton::OnInactive()
+{
+    // 無効化されたフレームでUpdateされず、前フレームのクリック結果が残るのを防ぐ。
+    m_pressed = false;
+    m_released = false;
+    m_clicked = false;
+    m_state = UIButtonState::Normal;
+}
+
 void UIButton::OnEditorUpdate()
 {
     UpdateVisualState();

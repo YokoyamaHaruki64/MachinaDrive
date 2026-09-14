@@ -10,6 +10,7 @@
 #include "Component/UITransform.h"
 #include "System/Core/ComponentRegistry.h"
 #include "System/Core/GameObject.h"
+#include "System/Core/manager.h"
 #include "System/Diagnostics/Logger.h"
 #include "System/Serialization/YAMLDocumentIO.h"
 #include "System/Serialization/YAMLValueConverter.h"
@@ -306,6 +307,8 @@ bool GameObjectYamlSerializer::LoadFromFile(
     std::vector<PendingComponent> pendingComponents;
     // 親子関係の復元をOnStart前にまとめて行うため、PendingParentに登録する
     std::vector<PendingParent> pendingParents;
+    std::vector<const YAMLValue*> sourceObjectsForCreatedGameObjects;
+    sourceObjectsForCreatedGameObjects.reserve(sourceObjects->sequence.size());
 
     // 参照解決より先に、ファイル内の全GameObjectを生成する。
     for (const YAMLValue& sourceObject : sourceObjects->sequence)
@@ -325,6 +328,28 @@ bool GameObjectYamlSerializer::LoadFromFile(
         {
             Logger::Error("GameObject IDまたはnameが不正です: " + path.string());
             return false;
+        }
+
+        bool isPersistent{};
+        if (const YAMLValue* persistent = sourceObject.Find("notDestroyBySceneEnd"))
+        {
+            if (!YAMLValueConverter<bool>::FromYAMLValue(*persistent, isPersistent, {}).success)
+            {
+                Logger::Error("GameObjectのnotDestroyBySceneEndが不正です: " + objectName);
+                return false;
+            }
+        }
+
+        if (isPersistent &&
+            sourcePathMode == PrefabSourcePathMode::UseSerializedPath &&
+            Manager::IsSceneTransitioning())
+        {
+            if (GameObject* const existingObject = Manager::GetObjectFirstByName(objectName);
+                existingObject && existingObject->IsNotDestroyBySceneEnd())
+            {
+                objectsById.emplace(id, existingObject);
+                continue;
+            }
         }
 
         const YAMLValue* const components = sourceObject.Find("components");
@@ -377,16 +402,7 @@ bool GameObjectYamlSerializer::LoadFromFile(
             }
             gameObjectPointer->SetActive(decodedActive);
         }
-        if (const YAMLValue* persistent = sourceObject.Find("notDestroyBySceneEnd"))
-        {
-            bool decodedPersistent{};
-            if (!YAMLValueConverter<bool>::FromYAMLValue(*persistent, decodedPersistent, {}).success)
-            {
-                Logger::Error("GameObjectのnotDestroyBySceneEndが不正です: " + gameObjectPointer->GetName());
-                return false;
-            }
-            gameObjectPointer->SetNotDestroyBySceneEnd(decodedPersistent);
-        }
+        gameObjectPointer->SetNotDestroyBySceneEnd(isPersistent);
 
         if (sourcePathMode == PrefabSourcePathMode::UseSourceFilePath)
         {// .prefabはファイル自身がPrefabのソースであるため、Prefab参照を保存する。
@@ -408,6 +424,7 @@ bool GameObjectYamlSerializer::LoadFromFile(
 
         objectsById.emplace(id, gameObjectPointer);
         loaded.gameObjects.emplace_back(std::move(gameObject));
+        sourceObjectsForCreatedGameObjects.emplace_back(&sourceObject);
 
         // 親子関係の復元
         std::optional<ObjectId> parentId;
@@ -427,10 +444,10 @@ bool GameObjectYamlSerializer::LoadFromFile(
     }
 
     // Componentをすべて生成してからFieldを復元し、Component間依存をOnStart前に揃える。
-    for (size_t index = 0; index < sourceObjects->sequence.size(); ++index)
+    for (size_t index = 0; index < loaded.gameObjects.size(); ++index)
     {
         if (!CreateComponentsFromYAMLValue(
-            sourceObjects->sequence[index],
+            *sourceObjectsForCreatedGameObjects[index],
             *loaded.gameObjects[index],
             pendingComponents))
         {
