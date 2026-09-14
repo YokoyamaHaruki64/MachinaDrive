@@ -20,6 +20,7 @@ class WaveDirector final : public Script
 
     enum class WaveState
     {
+        WaitingForTransition,
         Begin,
         Combat,
         WaitingForPlayerIdle,

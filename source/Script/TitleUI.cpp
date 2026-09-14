@@ -6,6 +6,7 @@
 
 #include "Scene/GameScene.h"
 #include "Component/UITransform.h"
+#include "Script/SceneTransition.h"
 
 
 void TitleUI::OnStart()
@@ -23,6 +24,6 @@ void TitleUI::Update()
     m_owner->GetUITransform()->SetOffset(m_originalOffset + Vector2(0.0f, offsetY));
 
     if (Input::GetKeyTrigger(Input::KeyCode::ENTER))
-        Manager::ChangeScene<GameScene>();
+        SceneTransition::ChangeScene<GameScene>(0.8f, EaseType::InOutQuad);
 
 }
