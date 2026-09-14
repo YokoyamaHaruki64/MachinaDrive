@@ -989,7 +989,6 @@ bool Manager::EnterPlayMode()
     }
 
     m_gameMode = GameMode::Play;
-    Input::ShowCursor(false);
     Camera::SetActiveMainCamera(Camera::GetSceneMainCamera());
     for (size_t index = 0; index < m_GameObjects.size(); ++index)
     {
@@ -1014,7 +1013,8 @@ bool Manager::StopPlayMode()
     }
 
     // 描画途中のRendererを破棄しないよう、次のUpdate冒頭で処理する。
-    Input::ShowCursor(true);
+    Input::SetCursorLock(false);
+    Input::SetCursorVisible(true);
     m_stopPlayRequested = true;
     return true;
 }

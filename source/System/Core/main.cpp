@@ -147,18 +147,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     if (uMsg == WM_ACTIVATEAPP)
     {
-        InputInternal::SetMouseWindowActive(wParam != FALSE);
+        if (!wParam)
+        {
+            InputInternal::SetWindowCursorState(false);
+        }
+
         return 0;
     }
 
 #if GM_ENABLE_EDITOR
-    if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE && Manager::IsPlayMode())
-    {
-        // Play中のEscはカーソルを表示し、カーソル制限も解除する。
-        Input::ShowCursor(true);
-        return 0;
-    }
-
     if (ImGui::GetCurrentContext() && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         return true;
 #endif
