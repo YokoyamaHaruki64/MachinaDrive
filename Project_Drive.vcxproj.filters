@@ -323,6 +323,9 @@
     <ClCompile Include="source\Script\TitleUI.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\TutorialDirector.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\WaveDirector.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -330,6 +333,9 @@
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="source\Scene\ResultScene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene\TutorialScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="source\Script\ResultUI.cpp">
@@ -751,6 +757,9 @@
     <ClInclude Include="include\Script\TItleUI.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\TutorialDirector.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="include\Script\WaveDirector.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
@@ -758,6 +767,9 @@
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\Scene\ResultScene.h">
+      <Filter>ヘッダー ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\TutorialScene.h">
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\ResultUI.h">
