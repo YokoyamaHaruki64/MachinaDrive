@@ -39,14 +39,14 @@ gameObjects:
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 1.77683318
+          m_aspectRatio: 1.75
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 0
-          image: Assets/Local/Textures/TitleBG.png
+          image: Assets/Local/Textures/Title/TitleBackground_MachinaDrive.png
           m_color: [1,1,1,1]
-          m_raycastTarget: true
+          m_raycastTarget: false
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
   - id: 3
@@ -61,99 +61,124 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.753000021,0.892444551]
-          m_pos: [0,-0.107000001]
+          m_stretch: [0.46875,0.44907406]
+          m_pos: [0,-0.222222224]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 1.5
+          m_aspectRatio: 1.85820889
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 0
-          image: Assets/Local/Textures/TitleLogo.png
+          image: Assets/Local/Textures/Title/Logo.png
           m_color: [1,1,1,1]
-          m_raycastTarget: true
+          m_raycastTarget: false
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
   - id: 4
-    name: Title UI
+    name: Start Button
     tag: 
     active: true
     prefab: 
-    parent: 1
+    parent: 9
     components:
       - type: UITransform
         fields:
           enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.537,0.238666698]
-          m_pos: [0,0.25]
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239999995,0.0879629627]
+          m_pos: [-0.0250000004,-0.245000005]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 4
+          m_aspectRatio: 4.8462553
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 0
-          image: Assets/Local/Textures/TitleUI.png
+          image: Assets/Local/Textures/Title/StartButton.png
           m_color: [1,1,1,1]
           m_raycastTarget: true
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
-      - type: TitleUI
+      - type: UIButton
         fields:
           enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
   - id: 5
-    name: FieldRegistry Test
+    name: Tutorial Button
     tag: 
     active: true
     prefab: 
-    parent: 
+    parent: 10
     components:
-      - type: Transform
+      - type: UITransform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [1,1,1]
-      - type: FieldRegistryTest
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239583328,0.0879629627]
+          m_pos: [-0.0250000004,-0.13611111]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
         fields:
           enabled: true
-          m_reflectSettings:
-            m_integer: 7
-            m_offset: [1,2,3]
-            m_nested:
-              m_id: 2
-              m_offset: [4,5,6]
-            m_items:
-              - m_id: 3
-                m_offset: [7,8,9]
-              - m_id: 4
-                m_offset: [10,11,12]
-          m_boolValue: true
-          m_intValue: 42
-          m_floatValue: 0.5
-          m_stringValue: Inspector test
-          m_matrix3x3Value: [1,0,0,0,1,0,0,0,1]
-          m_matrix4x4Value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
-          m_quaternionValue: [0,0,0,1]
-          m_gameObjectReference: 5
-          m_missingGameObjectReference: 
-          m_prefabReference: Assets/Prefabs/Test.prefab
-          m_missingPrefabReference: Assets/Prefabs/Missing.prefab
-          m_intValues:
-            - 1
-            - 2
-            - 3
-          m_vectorValues:
-            - [0,0,0]
-            - [1,1,1]
-          m_quaternionValues:
-            - [0,0,0,1]
+          m_drawLayer: 0
+          image: Assets/Local/Textures/Title/TutorialButton.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
   - id: 6
+    name: Exit Button
+    tag: 
+    active: true
+    prefab: 
+    parent: 11
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239583328,0.0879629627]
+          m_pos: [-0.0250000004,-0.0314814821]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/Title/ExitButton.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 7
     name: Scene Transition
     tag: 
     active: true
@@ -175,3 +200,179 @@ gameObjects:
           enabled: true
           m_name: HorizontalGlitchTransition
           m_materialPath: Assets/Materials/PostProcess/HorizontalGlitchTransition.material
+  - id: 9
+    name: Start
+    tag: 
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 10
+    name: Tutorial
+    tag: 
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 11
+    name: Exit
+    tag: 
+    active: true
+    prefab: 
+    parent: 1
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 12
+    name: Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 9
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239999995,0.0880860165]
+          m_pos: [-0.0250000004,-0.245000005]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.84375
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 13
+    name: Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 10
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239999995,0.0880860165]
+          m_pos: [-0.0250000004,-0.136000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.84375
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 14
+    name: Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 11
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.239999995,0.0879999995]
+          m_pos: [-0.0250000004,-0.0309999995]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 15
+    name: TitleUIObject
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: TitleUI
+        fields:
+          enabled: true
+          m_uiObjects:
+            - 9
+            - 10
+            - 11
