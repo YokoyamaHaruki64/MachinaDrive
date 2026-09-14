@@ -11,6 +11,7 @@
 #include "Script/PlayerAnimation.h"
 #include "Script/Health.h"
 #include "Script/PostProcessImpulse.h"
+#include "Script/Result.h"
 #include "Script/UI/GameHud.h"
 #include "Script/Pause.h"
 
@@ -106,6 +107,11 @@ void Player::OnStart()
 
 void Player::Update()
 {
+    if (Result::GetResultState() != Result::ResultState::Playing)
+    {
+        return;
+    }
+
     if (!m_rigidbody)
     {
         return;

@@ -6,6 +6,7 @@
 #include "Script/CollisionVfx.h"
 #include "Script/Enemy.h"
 #include "Script/Player.h"
+#include "Script/Result.h"
 #include "Script/CameraController.h"
 #include "Script/UI/GameHud.h"
 
@@ -59,6 +60,11 @@ void PlayerHit::OnStart()
 
 void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
 {
+    if (Result::GetResultState() != Result::ResultState::Playing)
+    {
+        return;
+    }
+
     GameObject* otherObject = hitInfo.objectB;
 
     if (otherObject && otherObject->GetTag() == "Enemy")

@@ -67,6 +67,11 @@ void Enemy::OnStart()
 
 void Enemy::Update()
 {
+    if (Result::GetResultState() != Result::ResultState::Playing)
+    {
+        return;
+    }
+
     m_invincibilityTimer = Math::Max(m_invincibilityTimer - Time::GetDeltaTime(), 0.0f);
     Player* player = m_playerObject ? m_playerObject->GetComponent<Player>() : nullptr;
 

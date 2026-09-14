@@ -10,6 +10,7 @@
 
 #include "Script/Player.h"
 #include "Script/Pause.h"
+#include "Script/Result.h"
 
 #include <algorithm>
 #include <cmath>
@@ -162,10 +163,13 @@ Vector3 CameraController::ResolveWallCollision(
 
 void CameraController::LateUpdate()
 {
-    if(Pause::IsPause())
+    if (Pause::IsPause())
+    {
         return;
+    }
 
-    Vector2 mouseDelta = Input::GetMouseRawDelta();
+    const bool isResultActive = Result::GetResultState() != Result::ResultState::Playing;
+    const Vector2 mouseDelta = isResultActive ? Vector2::Zero() : Input::GetMouseRawDelta();
     Vector3 targetPos = m_target ? m_target->GetTransform()->GetPosition() : Vector3::Zero();
 
     // カメラのターゲットを更新
@@ -175,16 +179,18 @@ void CameraController::LateUpdate()
         m_camera->SetTarget(targetPos + m_offset);
     Vector3 cameraPos = m_camera->transform()->GetPosition();
 
-    if (!isLocked)
+    if (!isLocked || isResultActive)
     {
+        if (!isResultActive)
+        {
+            m_yaw += mouseDelta.x * m_sensitivity;
+            m_pitch += mouseDelta.y * m_sensitivity;
 
-        m_yaw += mouseDelta.x * m_sensitivity;
-        m_pitch += mouseDelta.y * m_sensitivity;
-
-        // ピッチの制限
-        const float pitchLimit_min = 10.0f * Math::DEG2RAD;
-        const float pitchLimit_max = 60.0f * Math::DEG2RAD;
-        m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
+            // ピッチの制限
+            const float pitchLimit_min = 10.0f * Math::DEG2RAD;
+            const float pitchLimit_max = 60.0f * Math::DEG2RAD;
+            m_pitch = Math::Clamp(m_pitch, pitchLimit_min, pitchLimit_max);
+        }
 
         // カメラの位置を計算
         cameraPos =
@@ -199,6 +205,11 @@ void CameraController::LateUpdate()
             cameraPos,
             previousCameraPosition);
         m_camera->transform()->SetPosition(cameraPos);
+    }
+
+    if (isResultActive)
+    {
+        return;
     }
 
     // カメラの揺れ処理

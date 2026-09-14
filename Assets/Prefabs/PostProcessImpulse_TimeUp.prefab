@@ -1,0 +1,57 @@
+version: 1
+name: PostProcessImpulse_TimeUp
+gameObjects:
+  - id: 888
+    name: PostProcessImpulse_TimeUp(Instance)
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: PostProcessImpulsePreset
+        fields:
+          enabled: true
+          m_settings:
+            duration: 0.400000006
+            easeType: OutQuad
+            targets:
+              - postProcessName: Glitch
+                floats:
+                  - name: _Intensity
+                    value: 2
+                vector2s:
+                  - name: _ChromaticOffset
+                    value: [0.0599999987,0]
+                vector3s: []
+                vector4s: []
+              - postProcessName: BlockGlitch
+                floats:
+                  - name: _Intensity
+                    value: 3
+                vector2s: []
+                vector3s: []
+                vector4s: []
+              - postProcessName: ChromaticAberration
+                floats:
+                  - name: _Intensity
+                    value: 1.5
+                vector2s:
+                  - name: _RedOffset
+                    value: [0.00999999978,0.00499999989]
+                  - name: _BlueOffset
+                    value: [-0.00999999978,-0.00499999989]
+                vector3s: []
+                vector4s: []
+              - postProcessName: GrayScale
+                floats:
+                  - name: _Intensity
+                    value: 0.5
+                vector2s: []
+                vector3s: []
+                vector4s: []

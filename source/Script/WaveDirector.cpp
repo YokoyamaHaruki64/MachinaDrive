@@ -445,5 +445,8 @@ void WaveDirector::FinishGame()
     }
 
     m_hasFinished = true;
+    m_remainingTime = 0.0f;
+    UpdateHud();
+    PostProcessImpulse::Play("TimeUp");
     Result::BeginResult();
 }
