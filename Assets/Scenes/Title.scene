@@ -61,8 +61,8 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.46875,0.44907406]
-          m_pos: [0,-0.222222224]
+          m_stretch: [0.708999991,0.678311467]
+          m_pos: [-0.140000001,-0.181999996]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -376,6 +376,7 @@ gameObjects:
             - 9
             - 10
             - 11
+          m_clickAudioGain: 5
   - id: 16
     name: BGM
     tag: 
@@ -396,3 +397,4 @@ gameObjects:
           m_playOnStart: true
           m_loop: true
           m_initialVolume: 0.25
+          m_initialGain: 1

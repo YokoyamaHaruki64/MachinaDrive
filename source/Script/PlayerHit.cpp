@@ -21,6 +21,14 @@ void PlayerHit::OnStart()
     m_hitAudios[0] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Hit01.mp3");
     m_hitAudios[1] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Hit02.mp3");
 
+    for(int i = 0; i < m_hitAudios.size(); ++i)
+    {
+        if (m_hitAudios[i])
+        {
+            m_hitAudios[i]->SetGain(5.0f);
+        }
+    }
+
     m_player = GetComponent<Player>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 

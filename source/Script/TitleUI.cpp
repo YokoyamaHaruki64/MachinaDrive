@@ -14,6 +14,7 @@
 
 FIELDS_BEGIN(TitleUI)
     GM_FIELD(m_uiObjects);
+    GM_FIELD(m_clickAudioGain);
 FIELDS_END()
 
 namespace
@@ -32,6 +33,7 @@ void TitleUI::OnStart()
     m_hoverLineMaterial = MaterialManager::Load("Assets/Materials/HUDFrameMask.material");
     m_hoverAudio = m_owner->AddComponent<Audio>(HoverSoundPath);
     m_clickAudio = m_owner->AddComponent<Audio>(ClickSoundPath);
+    m_clickAudio->SetGain(m_clickAudioGain);
 
     for (const GameObjectReference& uiObjectRef : m_uiObjects)
     {

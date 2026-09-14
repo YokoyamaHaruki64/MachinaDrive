@@ -33,6 +33,8 @@ private:
     Audio* m_hoverAudio{};
     Audio* m_clickAudio{};
 
+    float m_clickAudioGain = 1.0f;
+
     void ApplyHoverVisual(UIElement& element, bool hovered);
     void UpdateElement(UIElement& element);
     void HandleClick(const UIElement& element);

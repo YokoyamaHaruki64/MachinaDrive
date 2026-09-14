@@ -33,6 +33,7 @@ void Player::OnStart()
 
     m_chargeAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Charge_Loop.wav");
     m_shotAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Shot.wav");
+    m_shotAudio->SetGain(5.0f);
     m_rigidbody = GetComponent<Rigidbody>();
     m_health = GetComponent<Health>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
