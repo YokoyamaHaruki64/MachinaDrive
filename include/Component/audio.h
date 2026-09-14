@@ -13,6 +13,7 @@ class Audio : public Component
 private:
 	static IXAudio2*				m_Xaudio;
 	static IXAudio2MasteringVoice*	m_MasteringVoice;
+	static bool						m_mediaFoundationInitialized;
 
 	IXAudio2SourceVoice*	m_SourceVoice{};
 	BYTE*					m_SoundData{};
@@ -24,6 +25,7 @@ private:
     bool                    m_loop = false;
 
     void Load(const char* FileName);
+    bool LoadMp3(const char* FileName);
     void Uninit();
 
 public:
