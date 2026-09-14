@@ -7,6 +7,8 @@ cbuffer PerFrame : register(b0)
 	matrix Projection;
 	float3 CameraPosition;
 	float Time;
+	float UnscaledTime;
+	float3 PerFramePadding;
 }
 
 cbuffer PerObject : register(b1)
