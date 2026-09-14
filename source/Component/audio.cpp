@@ -5,9 +5,9 @@
 #include <mfidl.h>
 #include <mfreadwrite.h>
 
+#include <algorithm>
 #include <cctype>
 #include <limits>
-#include <new>
 #include <vector>
 
 #pragma comment(lib, "mfplat.lib")
@@ -81,6 +81,7 @@ namespace
 IXAudio2*				Audio::m_Xaudio = NULL;
 IXAudio2MasteringVoice*	Audio::m_MasteringVoice = NULL;
 bool					Audio::m_mediaFoundationInitialized = false;
+std::unordered_map<std::string, std::unique_ptr<Audio::AudioData>> Audio::m_audioDataCache;
 
 
 void Audio::InitMaster()
@@ -109,6 +110,7 @@ void Audio::UninitMaster()
 		m_Xaudio->Release();
 		m_Xaudio = nullptr;
 	}
+	m_audioDataCache.clear();
 	if (m_mediaFoundationInitialized)
 	{
 		MFShutdown();
@@ -125,74 +127,106 @@ void Audio::UninitMaster()
 
 
 
-void Audio::Load(const char *FileName)
+void Audio::Load(const char* FileName)
 {
-	if (IsMp3File(FileName))
-	{
-		LoadMp3(FileName);
-		return;
-	}
+    if (!FileName || !m_Xaudio)
+    {
+        return;
+    }
 
-	// サウンドデータ読込
-	WAVEFORMATEX wfx = { 0 };
+    const std::string filePath(FileName);
+    const auto cachedData = m_audioDataCache.find(filePath);
+    if (cachedData != m_audioDataCache.end())
+    {
+        m_audioData = cachedData->second.get();
+    }
+    else
+    {
+        auto audioData = std::make_unique<AudioData>();
+        const bool loaded = IsMp3File(FileName)
+            ? LoadMp3(FileName, *audioData)
+            : LoadWav(FileName, *audioData);
+        if (!loaded)
+        {
+            return;
+        }
 
-	{
-		HMMIO hmmio = NULL;
-		MMIOINFO mmioinfo = { 0 };
-		MMCKINFO riffchunkinfo = { 0 };
-		MMCKINFO datachunkinfo = { 0 };
-		MMCKINFO mmckinfo = { 0 };
-		UINT32 buflen;
-		LONG readlen;
+        const auto insertedData = m_audioDataCache.emplace(filePath, std::move(audioData));
+        m_audioData = insertedData.first->second.get();
+    }
 
-
-		hmmio = mmioOpen((LPSTR)FileName, &mmioinfo, MMIO_READ);
-		assert(hmmio);
-
-		riffchunkinfo.fccType = mmioFOURCC('W', 'A', 'V', 'E');
-		mmioDescend(hmmio, &riffchunkinfo, NULL, MMIO_FINDRIFF);
-
-		mmckinfo.ckid = mmioFOURCC('f', 'm', 't', ' ');
-		mmioDescend(hmmio, &mmckinfo, &riffchunkinfo, MMIO_FINDCHUNK);
-
-		if (mmckinfo.cksize >= sizeof(WAVEFORMATEX))
-		{
-			mmioRead(hmmio, (HPSTR)&wfx, sizeof(wfx));
-		}
-		else
-		{
-			PCMWAVEFORMAT pcmwf = { 0 };
-			mmioRead(hmmio, (HPSTR)&pcmwf, sizeof(pcmwf));
-			memset(&wfx, 0x00, sizeof(wfx));
-			memcpy(&wfx, &pcmwf, sizeof(pcmwf));
-			wfx.cbSize = 0;
-		}
-		mmioAscend(hmmio, &mmckinfo, 0);
-
-		datachunkinfo.ckid = mmioFOURCC('d', 'a', 't', 'a');
-		mmioDescend(hmmio, &datachunkinfo, &riffchunkinfo, MMIO_FINDCHUNK);
-
-
-
-		buflen = datachunkinfo.cksize;
-		m_SoundData = new unsigned char[buflen];
-		readlen = mmioRead(hmmio, (HPSTR)m_SoundData, buflen);
-
-
-		m_Length = readlen;
-		m_PlayLength = readlen / wfx.nBlockAlign;
-
-
-		mmioClose(hmmio, 0);
-	}
-
-
-	// サウンドソース生成
-	m_Xaudio->CreateSourceVoice(&m_SourceVoice, &wfx);
-	assert(m_SourceVoice);
+    if (FAILED(m_Xaudio->CreateSourceVoice(&m_SourceVoice, &m_audioData->waveFormat)))
+    {
+        m_audioData = nullptr;
+        return;
+    }
+    ApplyVolume();
 }
 
-bool Audio::LoadMp3(const char* FileName)
+
+bool Audio::LoadWav(const char* FileName, AudioData& audioData)
+{
+    WAVEFORMATEX waveFormat{};
+    MMIOINFO mmioInfo{};
+    MMCKINFO riffChunkInfo{};
+    MMCKINFO dataChunkInfo{};
+    MMCKINFO formatChunkInfo{};
+    HMMIO hmmio = mmioOpen(const_cast<LPSTR>(FileName), &mmioInfo, MMIO_READ);
+    if (!hmmio)
+    {
+        return false;
+    }
+
+    riffChunkInfo.fccType = mmioFOURCC('W', 'A', 'V', 'E');
+    formatChunkInfo.ckid = mmioFOURCC('f', 'm', 't', ' ');
+    dataChunkInfo.ckid = mmioFOURCC('d', 'a', 't', 'a');
+    if (mmioDescend(hmmio, &riffChunkInfo, nullptr, MMIO_FINDRIFF) != MMSYSERR_NOERROR
+        || mmioDescend(hmmio, &formatChunkInfo, &riffChunkInfo, MMIO_FINDCHUNK) != MMSYSERR_NOERROR)
+    {
+        mmioClose(hmmio, 0);
+        return false;
+    }
+
+    if (formatChunkInfo.cksize >= sizeof(WAVEFORMATEX))
+    {
+        mmioRead(hmmio, reinterpret_cast<HPSTR>(&waveFormat), sizeof(waveFormat));
+    }
+    else
+    {
+        PCMWAVEFORMAT pcmWaveFormat{};
+        mmioRead(hmmio, reinterpret_cast<HPSTR>(&pcmWaveFormat), sizeof(pcmWaveFormat));
+        memcpy(&waveFormat, &pcmWaveFormat, sizeof(pcmWaveFormat));
+        waveFormat.cbSize = 0;
+    }
+    mmioAscend(hmmio, &formatChunkInfo, 0);
+
+    if (waveFormat.nBlockAlign == 0
+        || mmioDescend(hmmio, &dataChunkInfo, &riffChunkInfo, MMIO_FINDCHUNK) != MMSYSERR_NOERROR)
+    {
+        mmioClose(hmmio, 0);
+        return false;
+    }
+
+    audioData.soundData.resize(dataChunkInfo.cksize);
+    const LONG readLength = mmioRead(
+        hmmio,
+        reinterpret_cast<HPSTR>(audioData.soundData.data()),
+        dataChunkInfo.cksize);
+    mmioClose(hmmio, 0);
+    if (readLength <= 0)
+    {
+        audioData.soundData.clear();
+        return false;
+    }
+
+    audioData.soundData.resize(static_cast<size_t>(readLength));
+    audioData.waveFormat = waveFormat;
+    audioData.playLength = readLength / waveFormat.nBlockAlign;
+    return true;
+}
+
+
+bool Audio::LoadMp3(const char* FileName, AudioData& audioData)
 {
     if (!FileName || !m_mediaFoundationInitialized || !m_Xaudio)
     {
@@ -297,24 +331,9 @@ bool Audio::LoadMp3(const char* FileName)
         return false;
     }
 
-    BYTE* soundData = new (std::nothrow) BYTE[decodedData.size()];
-    if (!soundData)
-    {
-        return false;
-    }
-    memcpy(soundData, decodedData.data(), decodedData.size());
-
-    IXAudio2SourceVoice* sourceVoice = nullptr;
-    if (FAILED(m_Xaudio->CreateSourceVoice(&sourceVoice, &waveFormat)) || !sourceVoice)
-    {
-        delete[] soundData;
-        return false;
-    }
-
-    m_SoundData = soundData;
-    m_Length = static_cast<int>(decodedData.size());
-    m_PlayLength = static_cast<int>(playLength);
-    m_SourceVoice = sourceVoice;
+    audioData.waveFormat = waveFormat;
+    audioData.soundData = std::move(decodedData);
+    audioData.playLength = static_cast<int>(playLength);
     return true;
 }
 
@@ -328,8 +347,16 @@ void Audio::Uninit()
         m_SourceVoice = nullptr;
     }
 
-    delete[] m_SoundData;
-    m_SoundData = nullptr;
+    m_audioData = nullptr;
+}
+
+
+void Audio::ApplyVolume()
+{
+    if (m_SourceVoice)
+    {
+        m_SourceVoice->SetVolume(m_volume);
+    }
 }
 
 
@@ -343,7 +370,7 @@ void Audio::Play(bool Loop)
         m_playOnStart = true;
         m_loop = Loop;
     }
-    if (!m_SourceVoice)
+    if (!m_SourceVoice || !m_audioData)
     {
         return;
     }
@@ -356,20 +383,21 @@ void Audio::Play(bool Loop)
 	XAUDIO2_BUFFER bufinfo;
 
 	memset(&bufinfo, 0x00, sizeof(bufinfo));
-	bufinfo.AudioBytes = m_Length;
-	bufinfo.pAudioData = m_SoundData;
+	bufinfo.AudioBytes = static_cast<UINT32>(m_audioData->soundData.size());
+	bufinfo.pAudioData = m_audioData->soundData.data();
 	bufinfo.PlayBegin = 0;
-	bufinfo.PlayLength = m_PlayLength;
+	bufinfo.PlayLength = m_audioData->playLength;
 
 	// ループ設定
 	if (Loop)
 	{
 		bufinfo.LoopBegin = 0;
-		bufinfo.LoopLength = m_PlayLength;
+		bufinfo.LoopLength = m_audioData->playLength;
 		bufinfo.LoopCount = XAUDIO2_LOOP_INFINITE;
 	}
 
 	m_SourceVoice->SubmitSourceBuffer(&bufinfo, NULL);
+	ApplyVolume();
 
 /*
 	float outputMatrix[4] = { 0.0f , 0.0f, 1.0f , 0.0f };
@@ -383,11 +411,24 @@ void Audio::Play(bool Loop)
 
 }
 
+
+void Audio::SetVolume(float volume)
+{
+    m_volume = std::clamp(volume, 0.0f, 1.0f);
+    ApplyVolume();
+}
+
 void Audio::OnLoaded()
 {
+    m_volume = std::clamp(m_initialVolume, 0.0f, 1.0f);
+
     if (!m_SourceVoice && !m_filePath.empty())
     {
         Load(m_filePath.c_str());
+    }
+    else
+    {
+        ApplyVolume();
     }
 }
 
@@ -410,6 +451,7 @@ void Audio::RegisterFields(FieldRegistry& fields)
     GM_FIELD_PATH(m_filePath, "Assets/Local/Sounds", ".wav", ".mp3");
     GM_FIELD(m_playOnStart);
     GM_FIELD(m_loop);
+    GM_FIELD(m_initialVolume);
 }
 
 
