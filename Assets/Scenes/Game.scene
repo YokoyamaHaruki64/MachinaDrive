@@ -176,6 +176,10 @@ gameObjects:
           m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
       - type: SphereCollider
         fields:
           enabled: true
@@ -218,6 +222,10 @@ gameObjects:
           m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
           m_amplitudeMin: 5
           m_amplitudeMax: 10
           m_frequencyMin: 0.300000012
@@ -264,6 +272,10 @@ gameObjects:
           m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 8
+          m_knockbackDistance: 0
+          m_knockbackDuration: 0.00999999978
+          m_knockbackAngle: 0
+          m_knockbackUpwardSpeed: 0
       - type: SphereCollider
         fields:
           enabled: true
@@ -863,10 +875,10 @@ gameObjects:
           m_maxClearTimeBonus: 20
           m_waveStartDelay: 2
           m_waveBeginDuration: 2
-          m_baseEnemyCount: 3
+          m_baseEnemyCount: 91
           m_enemyCountGrowth: 1.5
           m_enemyCountExponent: 1.25
-          m_maxEnemyCount: 16
+          m_maxEnemyCount: 125
           m_movingStart: 0.150000006
           m_movingGrowth: 0.0199999996
           m_movingMax: 0.400000006
@@ -1511,7 +1523,7 @@ gameObjects:
             - time: 0
               value: 0
               inControl: 0
-              outControl: 1
+              outControl: 0.605555534
             - time: 0.5
               value: 1
               inControl: 1

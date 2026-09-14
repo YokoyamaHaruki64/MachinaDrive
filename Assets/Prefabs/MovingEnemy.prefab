@@ -36,6 +36,10 @@ gameObjects:
           m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
           m_amplitudeMin: 5
           m_amplitudeMax: 10
           m_frequencyMin: 0.300000012
@@ -81,29 +85,3 @@ gameObjects:
       - type: ObjectShake
         fields:
           enabled: true
-  - id: 76
-    name: MovingEnemy_Trail
-    tag:
-    active: true
-    prefab:
-    parent: 6
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,1.79999995,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [1,1,1]
-      - type: TrailRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 0
-          m_materialPath: Assets/Materials/VFX/MovingEnemyTrail.material
-          m_offset: [0,0,0]
-          m_fixedDirection: [0,1,0]
-          m_trailLifetime: 0.400000006
-          m_minSegmentDistance: 0.100000001
-          m_width: 0.400000006
-          faceMode: 0

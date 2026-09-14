@@ -2,7 +2,11 @@
 
 #include "Component/ComponentInc.h"
 
+#include "Common/Easing.h"
+
+#include "Component/Collider.h"
 #include "Component/modelRenderer.h"
+#include "Component/Rigidbody.h"
 #include "Component/Transform.h"
 #include "Script/Enemy.h"
 #include "Script/Health.h"
@@ -22,6 +26,10 @@ void Enemy::RegisterFields(FieldRegistry& fields)
     GM_FIELD(m_enemyDeathVfxPrefab);
     GM_FIELD(m_hitShakeDuration);
     GM_FIELD(m_hitShakePower);
+    GM_FIELD(m_knockbackDistance);
+    GM_FIELD(m_knockbackDuration);
+    GM_FIELD(m_knockbackAngle);
+    GM_FIELD(m_knockbackUpwardSpeed);
 }
 
 void Enemy::OnStart()
@@ -35,8 +43,11 @@ void Enemy::OnStart()
     }
 
     m_invincibilityTimer = 0.0f;
-    m_pendingDeath = false;
     m_hitFlashActive = false;
+    m_knockbackTimer = 0.0f;
+    m_phase = Phase::Active;
+    m_enemyRigidbody = GetComponent<Rigidbody>();
+    m_collider = GetComponent<Collider>();
     m_objectShake = nullptr;
     CacheModelRenderers();
 
@@ -44,8 +55,8 @@ void Enemy::OnStart()
     {
         if (!m_owner->IsDestroyed())
         {
-            // PlayerHitのHitStop開始はTakeDamageの後段で行われるため、ここでは死亡を保留する。
-            m_pendingDeath = true;
+            BeginHitStop();
+            SetHitFlash(true);
         }
     });
 }
@@ -53,16 +64,27 @@ void Enemy::OnStart()
 void Enemy::Update()
 {
     m_invincibilityTimer = Math::Max(m_invincibilityTimer - Time::GetDeltaTime(), 0.0f);
-
     Player* player = m_playerObject ? m_playerObject->GetComponent<Player>() : nullptr;
-    if (m_pendingDeath)
+
+    if (m_phase == Phase::HitStop)
     {
         if (player && player->IsHitStop())
         {
             return;
         }
 
-        FinalizeDeath();
+        BeginKnockBack();
+        return;
+    }
+
+    if (m_phase == Phase::KnockBack)
+    {
+        UpdateKnockBack();
+        return;
+    }
+
+    if (m_phase == Phase::Dead)
+    {
         return;
     }
 
@@ -98,15 +120,30 @@ void Enemy::FacePlayer(const Vector3& playerPosition)
     enemyTransform->SetRotation(Quaternion::LookRotation(direction));
 }
 
+void Enemy::BeginHitStop()
+{
+    m_phase = Phase::HitStop;
+    if (m_enemyRigidbody)
+    {
+        m_enemyRigidbody->SetVelocity(Vector3::Zero());
+    }
+}
+
 bool Enemy::TakeDamage(float damage)
 {
-    if (!m_health || m_health->IsDead() || m_owner->IsDestroyed() || damage <= 0.0f || m_invincibilityTimer > 0.0f)
+    if (m_phase != Phase::Active
+        || !m_health
+        || m_health->IsDead()
+        || m_owner->IsDestroyed()
+        || damage <= 0.0f
+        || m_invincibilityTimer > 0.0f)
     {
         return false;
     }
 
     m_invincibilityTimer = Math::Max(m_invincibilityDuration, 0.0f);
     SetHitFlash(true);
+    BeginHitStop();
     if (m_objectShake)
     {
         m_objectShake->Shake(m_hitShakeDuration, m_hitShakePower);
@@ -114,6 +151,122 @@ bool Enemy::TakeDamage(float damage)
     m_health->TakeDamage(damage);
     PostProcessImpulse::Play("EnemyHit");
     return true;
+}
+
+void Enemy::BeginKnockBack()
+{
+    if (m_phase != Phase::HitStop)
+        return;
+
+    m_phase = Phase::KnockBack;
+    m_knockbackDistance = Math::Max(m_knockbackDistance, 0.0f);
+    m_knockbackDuration = Math::Max(m_knockbackDuration, 0.0f);
+    m_knockbackUpwardSpeed = Math::Max(m_knockbackUpwardSpeed, 0.0f);
+    m_knockbackTimer = m_knockbackDuration;
+    SetHitFlash(true);
+
+    if (m_collider)
+    {
+        m_collider->SetEnabled(false);
+    }
+
+    Vector3 direction = Vector3::Forward();
+    if (m_playerObject)
+    {
+        if (Rigidbody* playerRigidbody = m_playerObject->GetComponent<Rigidbody>())
+        {
+            direction = playerRigidbody->GetVelocity();
+        }
+
+        direction.y = 0.0f;
+    }
+
+    if (direction.LengthSqr() <= 1.0e-6f && m_playerObject && m_playerObject->GetTransform())
+    {
+        direction = m_playerObject->GetTransform()->GetForward();
+        direction.y = 0.0f;
+    }
+
+    if (direction.LengthSqr() <= 1.0e-6f)
+    {
+        direction = Vector3::Forward();
+    }
+
+    direction.Normalize();
+
+    float angleSign = 1.0f;
+    if (m_playerObject && m_playerObject->GetTransform() && transform())
+    {
+        Vector3 toEnemy = transform()->GetPosition() - m_playerObject->GetTransform()->GetPosition();
+        toEnemy.y = 0.0f;
+
+        Vector3 playerRight = Vector3::Cross(Vector3::Up(), direction);
+        playerRight.Normalize();
+
+        const float side = Vector3::Dot(toEnemy, playerRight);
+        if (std::abs(side) > 1.0e-4f)
+        {
+            angleSign = side < 0.0f ? -1.0f : 1.0f;
+        }
+    }
+
+    m_knockbackDirection = Quaternion::FromAxisAngle(
+        Vector3::Up(),
+        m_knockbackAngle * angleSign * Math::DEG2RAD).RotateVector(direction);
+
+    m_knockbackDirection.y = 0.0f;
+    m_knockbackDirection.Normalize();
+
+    if (m_enemyRigidbody)
+    {
+        const float speed = m_knockbackDuration > 0.0f
+            ? m_knockbackDistance / m_knockbackDuration * 3.0f
+            : 0.0f;
+        Vector3 velocity = m_knockbackDirection * speed;
+        velocity.y = m_knockbackUpwardSpeed;
+        m_enemyRigidbody->SetVelocity(velocity);
+    }
+}
+
+void Enemy::UpdateKnockBack()
+{
+    m_knockbackTimer = Math::Max(m_knockbackTimer - Time::GetDeltaTime(), 0.0f);
+
+    if (m_enemyRigidbody && m_knockbackDuration > 0.0f)
+    {
+        const float progress = Math::Clamp(
+            1.0f - m_knockbackTimer / m_knockbackDuration,
+            0.0f,
+            1.0f);
+        const float speedProgress = 1.0f - Easing::Evaluate(progress, EaseType::OutQuad);
+        const float speed = m_knockbackDistance / m_knockbackDuration * 3.0f * speedProgress;
+        Vector3 velocity = m_knockbackDirection * speed;
+        velocity.y = m_knockbackUpwardSpeed * (1.0f - progress * 2.0f);
+        m_enemyRigidbody->SetVelocity(velocity);
+    }
+
+    if (m_knockbackTimer > 0.0f)
+    {
+        return;
+    }
+
+    if (m_enemyRigidbody)
+    {
+        m_enemyRigidbody->SetVelocity(Vector3::Zero());
+    }
+
+    if (m_health && m_health->IsDead())
+    {
+        FinalizeDeath();
+        return;
+    }
+
+    m_phase = Phase::Active;
+    SetHitFlash(false);
+    if (m_collider)
+    {
+        m_collider->SetEnabled(true);
+    }
 }
 
 void Enemy::CacheModelRenderers()
@@ -175,7 +328,7 @@ void Enemy::FinalizeDeath()
         return;
     }
 
-    m_pendingDeath = false;
+    m_phase = Phase::Dead;
     if (m_enemyDeathVfxPrefab)
     {
         Manager::Instantiate(

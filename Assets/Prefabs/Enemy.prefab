@@ -36,6 +36,10 @@ gameObjects:
           m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
           m_hitShakeDuration: 0.5
           m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
       - type: SphereCollider
         fields:
           enabled: true
