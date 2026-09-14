@@ -14,4 +14,7 @@ properties:
   _RimColor: [1,1,1,1]
   _RimPower: 4
   _RimStrength: 0.349999994
+  _CameraDitherEnabled: 1
+  _CameraDitherNear: 2
+  _CameraDitherFar: 5
   _MainTex: 
