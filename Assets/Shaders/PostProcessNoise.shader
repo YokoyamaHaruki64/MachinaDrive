@@ -52,7 +52,7 @@ Shader "PostProcessNoise"
         float4 PSMain(VSOutput input) : SV_TARGET
         {
             const float2 noisePosition =
-                floor(input.texCoord * _Scale) + _Speed * Time + _Seed;
+                floor(input.texCoord * _Scale) + _Speed * UnscaledTime + _Seed;
 
             const float noise =
                 Random(noisePosition) * 2.0f - 1.0f;

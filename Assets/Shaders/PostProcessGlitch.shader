@@ -59,7 +59,7 @@ Shader "PostProcessGlitch"
         {
             const float2 blockScale = max(_BlockScale, float2(1.0f, 1.0f));
             const float sliceCount = max((float)_SliceCount, 1.0f);
-            const float timeStep = floor(Time * max(_Speed, 0.0f));
+            const float timeStep = floor(UnscaledTime * max(_Speed, 0.0f));
             const float sliceId = floor(input.texCoord.y * sliceCount);
             const float2 blockId = floor(input.texCoord * blockScale);
 

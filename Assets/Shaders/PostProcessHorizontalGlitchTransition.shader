@@ -72,7 +72,7 @@ Shader "PostProcessHorizontalGlitchTransition"
             const int bandCount = min(max(_BandCount, 1), 128);
             const float bandIndex = floor(input.texCoord.y * (float)bandCount);
 
-            const float timeStep = floor(Time * max(_NoiseSpeed, 0.0f));
+            const float timeStep = floor(UnscaledTime * max(_NoiseSpeed, 0.0f));
 
             const float2 randomSeed = float2(
                 bandIndex + _Seed,

@@ -77,7 +77,7 @@ Shader "PostProcessDigitalWipeTransition"
             const float coordinate = saturate(
                 (dot(input.texCoord, normalizedDirection) - minProjection) / projectionRange);
 
-            const float timeStep = floor(Time * max(_NoiseSpeed, 0.0f));
+            const float timeStep = floor(UnscaledTime * max(_NoiseSpeed, 0.0f));
             const float2 blockId = floor(input.texCoord * blockScale);
             const float blockNoise =
                 Random(blockId + timeStep + _Seed) * 2.0f - 1.0f;

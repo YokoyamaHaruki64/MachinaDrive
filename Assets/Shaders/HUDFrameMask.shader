@@ -69,7 +69,7 @@ Shader "HUDFrameMask"
     {
       const float2 direction = NormalizeDirection(GradientDirection);
       const float position = dot(texCoord - 0.5f, direction) + 0.5f;
-      const float phase = frac(position + GradientOffset + Time * GradientSpeed);
+      const float phase = frac(position + GradientOffset + UnscaledTime * GradientSpeed);
       return 1.0f - abs(phase * 2.0f - 1.0f);
     }
 
@@ -77,7 +77,7 @@ Shader "HUDFrameMask"
     {
       const float2 direction = NormalizeDirection(HighlightDirection);
       const float position = dot(texCoord - 0.5f, direction) + 0.5f;
-      const float bandPosition = frac(position + HighlightOffset + Time * HighlightSpeed);
+      const float bandPosition = frac(position + HighlightOffset + UnscaledTime * HighlightSpeed);
       const float distanceFromBand = abs(bandPosition - 0.5f);
       const float halfWidth = max(HighlightWidth * 0.5f, 0.0001f);
       return 1.0f - smoothstep(halfWidth, halfWidth + 0.01f, distanceFromBand);
