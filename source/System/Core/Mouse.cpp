@@ -289,6 +289,11 @@ void Mouse::SetCursorVisible(bool visible)
     ApplyCursorState(m_windowCursorState);
 }
 
+bool Mouse::IsCursorVisible() const
+{
+    return m_gameCursorState.visible;
+}
+
 void Mouse::SetCursorLock(bool locked)
 {
     m_gameCursorState.locked = locked;

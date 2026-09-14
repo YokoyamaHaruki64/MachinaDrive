@@ -47,6 +47,7 @@ class Mouse final
     bool SetPositionNormalized(const Vector2& normalizedPosition);
     void SetCursorVisible(bool visible);
     void SetCursorLock(bool locked);
+    bool IsCursorVisible() const;
 
     bool QueryMousePosition(Vector2& position) const;
     bool ApplyCursorClip() const;
