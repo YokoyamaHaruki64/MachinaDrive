@@ -56,7 +56,7 @@ gameObjects:
           m_stretch: [0.0520833321,0.0925925896]
           m_pos: [-0.119999997,-0.289999992]
           m_offset: [0,0]
-          m_uiRotation: 0
+          m_uiRotation: 0.150000006
           m_uiScale: [1,1]
           m_aspectRatio: 0
       - type: ComboUI
@@ -64,18 +64,18 @@ gameObjects:
           enabled: true
           m_comboValue: 261
           m_comboLabel: 260
-          m_boundTime: 0.319999993
-          m_boundScale: 0.5
+          m_boundTime: 0.400000006
+          m_boundScale: 1
           m_gap: 100
           m_boundCurve:
             - time: 0
               value: 0
               inControl: 0
-              outControl: 0.533333302
+              outControl: 0.605555534
             - time: 0.5
               value: 1
               inControl: 1
-              outControl: 1
+              outControl: 0
             - time: 1
               value: 0
               inControl: 0
@@ -105,7 +105,7 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: 00
           m_fontSize: 90
-          m_color: [0.980695009,1,0,1]
+          m_color: [0.6795367,1,0.988864124,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 5
           horizontalAlignment: 1
@@ -136,7 +136,7 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: Combo!!
           m_fontSize: 70
-          m_color: [1,0,0,1]
+          m_color: [0,1,0.965250731,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 5
           horizontalAlignment: 1
@@ -173,7 +173,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.312999994,0.129999995]
-          m_pos: [-0.164000005,0.238999993]
+          m_pos: [-0.164000005,0.187000006]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -182,9 +182,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: READY!!
-          m_fontSize: 32
+          m_fontSize: 48
           m_color: [0.378378391,1,0.978399098,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -204,7 +204,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.316000015,0.200000003]
-          m_pos: [-0.163000003,0.270000011]
+          m_pos: [-0.163000003,0.222000003]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -213,9 +213,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: CHARGING...
-          m_fontSize: 32
+          m_fontSize: 48
           m_color: [0.957528949,0.930993199,0.428854674,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -235,7 +235,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.200000003,0.159999996]
-          m_pos: [-0.201000005,-0.0689999983]
+          m_pos: [-0.201000005,-0.123999998]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -244,9 +244,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: DRIVE
-          m_fontSize: 40
+          m_fontSize: 61.9500008
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -362,7 +362,7 @@ gameObjects:
   - id: 395
     name: Wave_Start_Progress_Frame
     tag: 
-    active: false
+    active: true
     prefab: 
     parent: 210
     components:
@@ -386,10 +386,41 @@ gameObjects:
           m_raycastTarget: true
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
+  - id: 396
+    name: Wave_Start_Progress_Text
+    tag: 
+    active: true
+    prefab: 
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.512000024,1.32299995]
+          m_pos: [-0.239999995,-1.81700003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/Exo2.fnt
+          text: Next...
+          m_fontSize: 68.9899979
+          m_color: [0.34362936,0.931575298,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.82999992
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
   - id: 270
     name: Wave_Start_Progress_Bar
     tag: 
-    active: false
+    active: true
     prefab: 
     parent: 395
     components:
@@ -418,7 +449,7 @@ gameObjects:
           enabled: true
           m_max: 1
           m_current: 1
-          m_barColor: [0.378378391,1,0.978399098,1]
+          m_barColor: [0.345098048,0.933333337,1,1]
           m_chipColor: [1,1,1,1]
           m_chipDecreaseSpeed: 10
           m_chipDecreaseDelay: 0
@@ -433,7 +464,7 @@ gameObjects:
   - id: 271
     name: Wave_Begin_Text
     tag: 
-    active: true
+    active: false
     prefab: 
     parent: 210
     components:
@@ -443,7 +474,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.400000006,0.0900000036]
-          m_pos: [0,4.375]
+          m_pos: [0,3.18000007]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -482,7 +513,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.075000003,0.300000012]
-          m_pos: [0.108999997,0.273999989]
+          m_pos: [0.115000002,0.187999994]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -491,9 +522,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 200
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: 00
-          m_fontSize: 43.8400002
+          m_fontSize: 60
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -513,7 +544,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.100000001,0.389999986]
-          m_pos: [0.112000003,-0.217999995]
+          m_pos: [0.120999999,-0.31400001]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -522,9 +553,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 200
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: 00
-          m_fontSize: 60
+          m_fontSize: 80
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -544,7 +575,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.159999996,0.219999999]
-          m_pos: [-0.0780000016,0.298999995]
+          m_pos: [-0.0780000016,0.234999999]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -553,9 +584,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: ENEMIES
-          m_fontSize: 28
+          m_fontSize: 40
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -575,7 +606,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.141000003,0.300999999]
-          m_pos: [-0.0810000002,-0.175999999]
+          m_pos: [-0.101000004,-0.31099999]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -584,9 +615,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: WAVE
-          m_fontSize: 40
+          m_fontSize: 70
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -756,7 +787,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.460000008,0.5]
-          m_pos: [0.166999996,-0.150999993]
+          m_pos: [0.187000006,-0.150999993]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -765,14 +796,14 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: 060.00
-          m_fontSize: 75.8000031
+          m_fontSize: 99.7699966
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
           horizontalAlignment: 0
-          verticalAlignment: 0
+          verticalAlignment: 1
           m_materialPath: Assets/Materials/Text.material
   - id: 204
     name: Timer_Label
@@ -787,7 +818,7 @@ gameObjects:
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
           m_stretch: [0.180000007,0.319999993]
-          m_pos: [-0.280000001,-0.0890000015]
+          m_pos: [-0.266000003,-0.241999999]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -796,9 +827,9 @@ gameObjects:
         fields:
           enabled: true
           m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          font: Assets/Local/Font/Exo2.fnt
           text: TIME
-          m_fontSize: 40
+          m_fontSize: 60.6300011
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
@@ -837,7 +868,7 @@ gameObjects:
           enabled: true
           m_max: 60
           m_current: 60
-          m_barColor: [1,1,1,1]
+          m_barColor: [0.338322341,0.98455596,0.887246609,1]
           m_chipColor: [1,1,1,1]
           m_chipDecreaseSpeed: 10
           m_chipDecreaseDelay: 0

@@ -53,10 +53,13 @@ private:
     float m_speed = 10.0f;
     float m_attackTime = 5.0f;
     float m_attackEndDuration = 0.5f;
+    float m_attackCancelEndRate = 0.5f;
     float m_speedFriction = 0.9f;
 
     float m_attackTimer = 0.0f;
     float m_attackEndTimer = 0.0f;
+    float m_additionalEnd = 0.0f;
+    bool m_didBrake = false;
 
     bool m_isHitStop = false;
     float m_hitStopTimer = 0.0f;
@@ -91,5 +94,6 @@ public:
 
     const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
     const AttackState GetAttackState() const { return m_state; }
+    bool DidBrake() const { return m_didBrake; }
 
 };

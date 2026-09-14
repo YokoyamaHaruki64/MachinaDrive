@@ -50,7 +50,7 @@ void TutorialDirector::OnStart()
     m_stateTimer = 0.0f;
     m_state = TutorialState::WaitingForShot;
 
-    SetInstruction("左クリックしながら動かして離す");
+    SetInstruction("左クリックしながら動かして離せ");
 }
 
 void TutorialDirector::Update()
@@ -68,12 +68,13 @@ void TutorialDirector::Update()
             && m_playerScript->GetShotDirection().LengthSqr() > 0.01f)
         {
             m_state = TutorialState::WaitingForPlayerStop;
-            SetInstruction("止まるまで次の発射は出来ない");
+            SetInstruction("左クリックで急ブレーキ、\n好きな位置に止まれ");
         }
         break;
 
     case TutorialState::WaitingForPlayerStop:
         if (m_playerScript->GetAttackState() == Player::Idle
+            && m_playerScript->DidBrake()
             && !m_playerScript->IsHitStop())
         {
             ReturnToCenter();

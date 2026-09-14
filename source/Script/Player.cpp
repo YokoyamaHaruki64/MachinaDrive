@@ -19,6 +19,7 @@ FIELDS_BEGIN(Player)
     GM_FIELD(m_speed);
     GM_FIELD(m_attackTime);
     GM_FIELD(m_attackEndDuration);
+    GM_FIELD(m_attackCancelEndRate);
     GM_FIELD(m_speedFriction);
     GM_FIELD(m_attackReadyVfxPrefab);
     GM_FIELD(m_playerLaunchVfxPrefab);
@@ -103,6 +104,8 @@ void Player::OnStart()
 #ifndef _DEBUG
     m_debug = false;
 #endif // !_DEBUG
+
+    m_didBrake = false;
 }
 
 void Player::Update()
@@ -216,6 +219,8 @@ void Player::StopForResult()
     m_state = Idle;
     m_attackTimer = 0.0f;
     m_attackEndTimer = 0.0f;
+    m_additionalEnd = 0.0f;
+    m_didBrake = false;
     m_accumulatedMouse = Vector2::Zero();
 
     if (m_gameHud)
@@ -242,6 +247,8 @@ void Player::UpdateIdle()
 
     if (Input::GetMouseTrigger(Input::MouseButton::Left))
     {
+        m_additionalEnd = 0.0f;
+        m_didBrake = false;
         m_state = AttackReady;
 
         if (m_chargeAudio)
@@ -357,11 +364,23 @@ void Player::UpdateAttackReady()
 
 void Player::UpdateAttacking()
 {
-    m_attackTimer -= Time::GetDeltaTime();
+    if (Input::GetMouseTrigger(Input::MouseButton::Left))
+    {
+        m_additionalEnd = (std::max)(m_attackTimer, 0.0f)
+            * Math::Clamp(m_attackCancelEndRate, 0.0f, 1.0f);
+        m_didBrake = true;
+        m_attackTimer = 0.0f;
+    }
+    else
+    {
+        m_additionalEnd = 0.0f;
+        m_attackTimer -= Time::GetDeltaTime();
+    }
+
     if (m_attackTimer <= 0.0f)
     {
         m_attackTimer = 0.0f;
-        m_attackEndTimer = (std::max)(m_attackEndDuration, 0.0f);
+        m_attackEndTimer = (std::max)(m_attackEndDuration, 0.0f) + m_additionalEnd;
         m_state = AttackEnd;
         UpdateAttackProgress();
         if (m_gameHud)
@@ -392,6 +411,7 @@ void Player::UpdateAttackEnd()
     {
         m_rigidbody->SetVelocity(Vector3::Zero());
         m_state = Idle;
+        m_additionalEnd = 0.0f;
         if (m_gameHud)
         {
             m_gameHud->SetDriveGauge(1.0f);
@@ -409,9 +429,10 @@ void Player::UpdateAttackProgress()
 
     const float attackDuration = (std::max)(m_attackTime, 0.0f);
     const float attackEndDuration = (std::max)(m_attackEndDuration, 0.0f);
-    const float totalDuration = attackDuration + attackEndDuration;
+    const float totalEndDuration = attackEndDuration + m_additionalEnd;
+    const float totalDuration = attackDuration + totalEndDuration;
     const float attackElapsed = attackDuration - (std::max)(m_attackTimer, 0.0f);
-    const float attackEndElapsed = attackEndDuration - (std::max)(m_attackEndTimer, 0.0f);
+    const float attackEndElapsed = totalEndDuration - (std::max)(m_attackEndTimer, 0.0f);
     const float elapsed = attackElapsed + attackEndElapsed;
     const float progress = totalDuration > 0.0f ? elapsed / totalDuration : 1.0f;
 
