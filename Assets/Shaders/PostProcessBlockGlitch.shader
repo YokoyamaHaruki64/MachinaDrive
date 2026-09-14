@@ -56,7 +56,7 @@ Shader "PostProcessBlockGlitch"
         float4 PSMain(VSOutput input) : SV_TARGET
         {
             const int blockCount = min(max(_BlockCount, 0), 32);
-            const float timeStep = floor(Time * max(_Speed, 0.0f));
+            const float timeStep = floor(UnscaledTime * max(_Speed, 0.0f));
             const float2 minSize = min(max(_BlockSizeMin, 0.0f), max(_BlockSizeMax, 0.0f));
             const float2 maxSize = max(max(_BlockSizeMin, 0.0f), max(_BlockSizeMax, 0.0f));
             float blockMask = 0.0f;

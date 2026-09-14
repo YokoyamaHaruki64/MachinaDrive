@@ -326,6 +326,7 @@ gameObjects:
           m_playOnStart: true
           m_loop: true
           m_initialVolume: 0.25
+          m_initialGain: 1
   - id: 33
     name: Wall_Left
     tag: Wall
@@ -406,33 +407,6 @@ gameObjects:
           m_isTrigger: false
           m_layer: 0
           m_size: [120,10,5]
-  - id: 63
-    name: PlayerHit
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/Player.prefab
-    parent: 4
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,0,-2.61125858e-15]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [0.999654889,1,0.999654889]
-      - type: SphereCollider
-        fields:
-          enabled: true
-          m_center: [0,1.41999996,0]
-          m_isTrigger: true
-          m_layer: 4
-          m_radius: 1.79999995
-      - type: PlayerHit
-        fields:
-          enabled: true
-          m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
-          m_shakeDuration: 0.600000024
-          m_shakeMagnitude: 6
-          m_hitStopDuration: 0.300000012
   - id: 51
     name: PostProcess
     tag: 
@@ -501,6 +475,33 @@ gameObjects:
               prefab: Assets/Prefabs/PostProcessImpulse_EnemyHit.prefab
             - name: WaveBegin
               prefab: Assets/Prefabs/PostProcessImpulse_WaveBegin.prefab
+  - id: 63
+    name: PlayerHit
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-2.61125858e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.41999996,0]
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.79999995
+      - type: PlayerHit
+        fields:
+          enabled: true
+          m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
+          m_shakeDuration: 0.600000024
+          m_shakeMagnitude: 6
+          m_hitStopDuration: 0.300000012
   - id: 64
     name: Model
     tag: 
@@ -784,37 +785,6 @@ gameObjects:
           m_minPlayerDistance: 12
           m_spawnAttemptCount: 16
           m_spawnHeight: 0
-  - id: 224
-    name: Drive_Label
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.200000003,0.159999996]
-          m_pos: [-0.201000005,-0.0689999983]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIText
-        fields:
-          enabled: true
-          m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: DRIVE
-          m_fontSize: 40
-          m_color: [1,1,1,1]
-          m_outlineColor: [0,0,0,1]
-          m_outlineWidth: 3
-          horizontalAlignment: 0
-          verticalAlignment: 0
-          m_materialPath: Assets/Materials/Text.material
   - id: 200
     name: HUD_Timer
     tag: 
@@ -865,30 +835,12 @@ gameObjects:
           m_raycastTarget: false
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
-  - id: 220
-    name: HUD_Drive
+  - id: 202
+    name: Timer_Line
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 100
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0,1]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.310000002,0.204999998]
-          m_pos: [0.174999997,-0.136000007]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 2.51923084
-  - id: 221
-    name: Drive_Panel
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
+    parent: 200
     components:
       - type: UITransform
         fields:
@@ -900,115 +852,74 @@ gameObjects:
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 2.51923084
-      - type: UIImage
-        fields:
-          enabled: true
-          m_drawLayer: 100
-          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Panel.png
-          m_color: [1,1,1,0.600000024]
-          m_raycastTarget: false
-          m_dragEnabled: false
-          m_materialPath: Assets/Materials/UI.material
-  - id: 222
-    name: Drive_Line
-    tag: 
-    active: true
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
-    components:
-      - type: UITransform
-        fields:
-          enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [1,1]
-          m_pos: [0,0]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 2.51923084
+          m_aspectRatio: 4.28294563
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
           m_materialPath: Assets/Materials/HUDFrameMask.material
-  - id: 223
-    name: Drive_Gauge
+  - id: 203
+    name: Timer_Bar
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
+    parent: 200
     components:
       - type: UITransform
         fields:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.513000011,0.671000004]
-          m_pos: [-0.202000007,-0.123999998]
+          m_stretch: [0.73299998,0.141055852]
+          m_pos: [-0.0199999996,0.243000001]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 1.96186435
+          m_aspectRatio: 22.833334
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 101
-          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Bar_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/GaugeInner.material
-  - id: 225
-    name: Drive_ChargingText
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
-    components:
-      - type: UITransform
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
         fields:
           enabled: true
-          m_anchor: [0.5,0.5]
-          m_pivot: [0.5,0.5]
-          m_stretch: [0.316000015,0.200000003]
-          m_pos: [-0.163000003,0.270000011]
-          m_offset: [0,0]
-          m_uiRotation: 0
-          m_uiScale: [1,1]
-          m_aspectRatio: 0
-      - type: UIText
-        fields:
-          enabled: true
-          m_drawLayer: 103
-          font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: CHARGING...
-          m_fontSize: 32
-          m_color: [0.957528949,0.930993199,0.428854674,1]
-          m_outlineColor: [0,0,0,1]
-          m_outlineWidth: 3
-          horizontalAlignment: 1
-          verticalAlignment: 0
-          m_materialPath: Assets/Materials/Text.material
-  - id: 226
-    name: Drive_ReadyText
+          m_max: 60
+          m_current: 60
+          m_barColor: [1,1,1,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 204
+    name: Timer_Label
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 220
+    parent: 200
     components:
       - type: UITransform
         fields:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.312999994,0.129999995]
-          m_pos: [-0.164000005,0.238999993]
+          m_stretch: [0.180000007,0.319999993]
+          m_pos: [-0.280000001,-0.0890000015]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -1018,12 +929,43 @@ gameObjects:
           enabled: true
           m_drawLayer: 103
           font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: READY!!
-          m_fontSize: 32
-          m_color: [0.378378391,1,0.978399098,1]
+          text: TIME
+          m_fontSize: 40
+          m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
-          horizontalAlignment: 1
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 205
+    name: Timer_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.460000008,0.5]
+          m_pos: [0.166999996,-0.150999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 060.00
+          m_fontSize: 75.8000031
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
   - id: 210
@@ -1167,12 +1109,30 @@ gameObjects:
           horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
-  - id: 202
-    name: Timer_Line
+  - id: 220
+    name: HUD_Drive
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 200
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.310000002,0.204999998]
+          m_pos: [0.174999997,-0.136000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+  - id: 221
+    name: Drive_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
     components:
       - type: UITransform
         fields:
@@ -1184,74 +1144,84 @@ gameObjects:
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 4.28294563
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 222
+    name: Drive_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 102
-          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
           m_materialPath: Assets/Materials/HUDFrameMask.material
-  - id: 203
-    name: Timer_Bar
+  - id: 223
+    name: Drive_Gauge
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 200
+    parent: 220
     components:
       - type: UITransform
         fields:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.73299998,0.141055852]
-          m_pos: [-0.0199999996,0.243000001]
+          m_stretch: [0.513000011,0.671000004]
+          m_pos: [-0.202000007,-0.123999998]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 22.833334
+          m_aspectRatio: 1.96186435
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 101
-          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Bar_Mask.png
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
-          m_materialPath: Assets/Materials/FillBar.material
-      - type: FillBar
-        fields:
-          enabled: true
-          m_max: 60
-          m_current: 60
-          m_barColor: [1,1,1,1]
-          m_chipColor: [1,1,1,1]
-          m_chipDecreaseSpeed: 10
-          m_chipDecreaseDelay: 0
-          m_verticalFill: false
-          m_horizontalFill: true
-          m_verticalFromTop: false
-          m_verticalFromCenter: false
-          m_verticalFromBottom: false
-          m_horizontalFromLeft: true
-          m_horizontalFromCenter: false
-          m_horizontalFromRight: false
-  - id: 204
-    name: Timer_Label
+          m_materialPath: Assets/Materials/GaugeInner.material
+  - id: 224
+    name: Drive_Label
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 200
+    parent: 220
     components:
       - type: UITransform
         fields:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.180000007,0.319999993]
-          m_pos: [-0.280000001,-0.0890000015]
+          m_stretch: [0.200000003,0.159999996]
+          m_pos: [-0.201000005,-0.0689999983]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -1261,7 +1231,7 @@ gameObjects:
           enabled: true
           m_drawLayer: 103
           font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: TIME
+          text: DRIVE
           m_fontSize: 40
           m_color: [1,1,1,1]
           m_outlineColor: [0,0,0,1]
@@ -1269,20 +1239,20 @@ gameObjects:
           horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
-  - id: 205
-    name: Timer_Value
+  - id: 225
+    name: Drive_ChargingText
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/GameHud.prefab
-    parent: 200
+    parent: 220
     components:
       - type: UITransform
         fields:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [0.460000008,0.5]
-          m_pos: [0.166999996,-0.150999993]
+          m_stretch: [0.316000015,0.200000003]
+          m_pos: [-0.163000003,0.270000011]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -1292,12 +1262,43 @@ gameObjects:
           enabled: true
           m_drawLayer: 103
           font: Assets/Local/Font/AprilGothicOne-R.fnt
-          text: 060.00
-          m_fontSize: 75.8000031
-          m_color: [1,1,1,1]
+          text: CHARGING...
+          m_fontSize: 32
+          m_color: [0.957528949,0.930993199,0.428854674,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 3
-          horizontalAlignment: 0
+          horizontalAlignment: 1
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 226
+    name: Drive_ReadyText
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.312999994,0.129999995]
+          m_pos: [-0.164000005,0.238999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: READY!!
+          m_fontSize: 32
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 1
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
   - id: 233
@@ -1677,56 +1678,323 @@ gameObjects:
           horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
-  - id: 457
-    name: TimeRecoveryItem(Instance)
-    tag: TimeRecoveryItem
+  - id: 458
+    name: Pause Canvas
+    tag: 
+    active: false
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 459
+    name: Pause Exit
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0,1]
+          m_stretch: [0.075000003,0.13333334]
+          m_pos: [0.0549999997,-0.795000017]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+  - id: 460
+    name: Pause Exit Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 459
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Pause_Exit.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 461
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 459
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/UI/Pause_Exit_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 462
+    name: Retry
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,0.595000029]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 463
+    name: Retry Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 462
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Retry.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 464
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 462
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 465
+    name: Return Title
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,0.754999995]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 466
+    name: Return Title Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 465
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Return.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 467
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 465
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 468
+    name: Pause UI
+    tag: 
     active: true
-    prefab: Assets/Prefabs/TimeRecoveryItem.prefab
+    prefab: 
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [10,0,0]
-          m_localRotation: [-0,0,-0.258819073,0.965925872]
-          m_localScale: [0.0500000492,0.0500000492,0.0500000007]
-      - type: ModelRenderer
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: PauseUI
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Battery.fbx
-          m_materialPaths:
-            - Assets/Materials/Battery_Body.material
-            - Assets/Materials/Battery_Cap.material
-            - Assets/Materials/Battery_Light.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
-      - type: SphereCollider
+          m_pauseCanvas: 458
+          m_uiObjects:
+            - 459
+            - 462
+            - 465
+  - id: 607
+    name: Fill
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
         fields:
           enabled: true
-          m_center: [0,1.12,0]
-          m_isTrigger: true
-          m_layer: 0
-          m_radius: 26.8199997
-      - type: Rigidbody
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
         fields:
           enabled: true
-          m_motionType: 1
-          m_mass: 1
-          m_bounciness: 0
-          m_friction: 0
-          m_useGravity: false
-          m_allowSleep: false
-          m_freezeRotation: true
-      - type: TimeRecoveryItem
-        fields:
-          enabled: true
-          m_recoveryTime: 3
-          m_lifetime: 12
-          m_idleVfxPrefab: Assets/Prefabs/VFX_TimeItemIdle.prefab
-          m_pickupVfxPrefab: Assets/Prefabs/VFX_TimeRecoveryPickup.prefab
-          m_amplitude: 0.25
-          m_frequency: 0.5
+          m_drawLayer: 999
+          image: ''
+          m_color: [0,0,0,0.670588255]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material

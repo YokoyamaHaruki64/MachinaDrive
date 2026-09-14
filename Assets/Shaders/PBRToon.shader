@@ -14,6 +14,9 @@ Shader "PBRToon"
         _RimColor("Rim Color", Color) = (0.2,0.6,1,1)
         _RimPower("Rim Power", Float) = 4
         _RimStrength("Rim Strength", Float) = 0
+        _CameraDitherEnabled("Camera Dither Enabled", Float) = 0
+        _CameraDitherNear("Camera Dither Near", Float) = 0.8
+        _CameraDitherFar("Camera Dither Far", Float) = 1.8
         _MainTex("Main Texture", 2D) = ""
     }
 
@@ -72,8 +75,30 @@ Shader "PBRToon"
             return saturate(floor(saturate(value) * safeBands) / (safeBands - 1.0f));
         }
 
+        float GetBayerDither(int2 pixel)
+        {
+            static const float pattern[16] =
+            {
+                 0.0f,  8.0f,  2.0f, 10.0f,
+                12.0f,  4.0f, 14.0f,  6.0f,
+                 3.0f, 11.0f,  1.0f,  9.0f,
+                15.0f,  7.0f, 13.0f,  5.0f,
+            };
+            const int index = (pixel.x & 3) + (pixel.y & 3) * 4;
+            return (pattern[index] + 0.5f) / 16.0f;
+        }
+
         float4 PSMain(VSOutput input) : SV_TARGET
         {
+            if (_CameraDitherEnabled > 0.5f)
+            {
+                const float nearDistance = max(_CameraDitherNear, 0.0f);
+                const float farDistance = max(_CameraDitherFar, nearDistance + 0.001f);
+                const float distanceToCamera = distance(input.worldPosition, CameraPosition);
+                const float ditherFade = 1.0f - smoothstep(nearDistance, farDistance, distanceToCamera);
+                clip(GetBayerDither(int2(input.position.xy)) - ditherFade);
+            }
+
             const float4 textureColor = _MainTex.Sample(LinearSampler, input.texCoord);
             const float3 albedo = saturate(_BaseColor.rgb * input.color.rgb * textureColor.rgb);
             const float3 normal = PBRSafeNormalize(input.normal);
