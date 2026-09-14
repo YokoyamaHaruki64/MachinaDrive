@@ -23,6 +23,9 @@ class SceneTransition final : public Script
     inline static float s_progress{};
     inline static EaseType s_easeType{ EaseType::InOutQuad };
     inline static Phase s_phase{ Phase::None };
+    inline static std::filesystem::path s_scenePathBeforeChange;
+    inline static bool s_waitingForSceneLoad = false;
+    inline static bool s_skipNextDeltaTime = false;
 
     static void SetEffectProgress();
 
@@ -57,6 +60,9 @@ public:
         s_progress = 0.0f;
         s_easeType = easeType;
         s_phase = Phase::Closing;
+        s_scenePathBeforeChange = Manager::GetCurrentSceneFilePath();
+        s_waitingForSceneLoad = true;
+        s_skipNextDeltaTime = false;
         SetEffectProgress();
         return true;
     }

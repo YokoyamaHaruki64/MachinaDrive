@@ -36,12 +36,35 @@ void SceneTransition::OnDestroy()
     s_duration = 0.0f;
     s_progress = 0.0f;
     s_phase = Phase::None;
+    s_scenePathBeforeChange.clear();
+    s_waitingForSceneLoad = false;
+    s_skipNextDeltaTime = false;
 }
 
 void SceneTransition::Update()
 {
     if (s_phase == Phase::None)
         return;
+
+    if (s_phase == Phase::Opening)
+    {
+        if (s_waitingForSceneLoad)
+        {
+            if (Manager::GetCurrentSceneFilePath() == s_scenePathBeforeChange)
+                return;
+
+            // シーン読込にかかった時間を、Openingの経過時間へ含めない。
+            s_waitingForSceneLoad = false;
+            s_skipNextDeltaTime = true;
+            return;
+        }
+
+        if (s_skipNextDeltaTime)
+        {
+            s_skipNextDeltaTime = false;
+            return;
+        }
+    }
 
     s_elapsedTime += Time::GetUnscaledDeltaTime();
     const float duration = std::max(s_duration, 0.0001f);
@@ -74,6 +97,9 @@ void SceneTransition::Update()
         s_progress = 0.0f;
         s_phase = Phase::None;
         s_changeScene = {};
+        s_scenePathBeforeChange.clear();
+        s_waitingForSceneLoad = false;
+        s_skipNextDeltaTime = false;
         SetEffectProgress();
     }
 }

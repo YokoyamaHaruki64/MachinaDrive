@@ -17,6 +17,7 @@
 namespace
 {
     constexpr const char* SpawnAreaTag = "EnemySpawnArea";
+    constexpr float SceneTransitionWaitDuration = 1.0f;
 }
 
 FIELDS_BEGIN(WaveDirector)
@@ -68,8 +69,8 @@ void WaveDirector::OnStart()
     m_waveBeginDuration = Math::Max(m_waveBeginDuration, 0.0f);
     m_remainingTime = m_startTime;
     m_wave = 0;
-    m_stateTimer = 0.0f;
-    m_waveState = WaveState::Combat;
+    m_stateTimer = SceneTransitionWaitDuration;
+    m_waveState = WaveState::WaitingForTransition;
     m_hasFinished = false;
     m_hasSpawnArea = ResolveSpawnArea();
 
@@ -82,7 +83,6 @@ void WaveDirector::OnStart()
 
     // Sceneに残る旧来の手置き敵は、Wave 1の生成前に除去する。
     DestroyPlacedEnemies();
-    StartNextWave();
 }
 
 void WaveDirector::Update()
@@ -94,6 +94,20 @@ void WaveDirector::Update()
 
     switch (m_waveState)
     {
+    case WaveState::WaitingForTransition:
+        if (SceneTransition::IsTransitionEffect())
+        {
+            m_stateTimer = SceneTransitionWaitDuration;
+            break;
+        }
+
+        m_stateTimer = Math::Max(0.0f, m_stateTimer - Time::GetDeltaTime());
+        if (m_stateTimer <= 0.0f)
+        {
+            StartNextWave();
+        }
+        break;
+
     case WaveState::Begin:
         m_stateTimer = Math::Max(0.0f, m_stateTimer - Time::GetDeltaTime());
         if (m_gameHud)
