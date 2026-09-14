@@ -94,13 +94,31 @@ bool GameWindow::IsRenderTargetReady() const
         ToRenderSize(m_displaySize.y) == Renderer::GetGameHeight();
 }
 
+void GameWindow::SetGameFocus(bool focused)
+{
+    if (m_gameFocused == focused)
+    {
+        return;
+    }
+
+    m_gameFocused = focused;
+    InputInternal::SetWindowCursorState(focused);
+}
+
 void GameWindow::DrawImGui()
 {
     m_viewportHovered = false;
     if (!BeginWindow("Game", Vector2(800.0f, 500.0f)))
     {
+        SetGameFocus(false);
         EndWindow();
         return;
+    }
+
+    const bool gameWindowFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+    if (!gameWindowFocused)
+    {
+        SetGameFocus(false);
     }
 
     if (Manager::IsPlayMode())
@@ -112,7 +130,15 @@ void GameWindow::DrawImGui()
     }
     else if (ImGui::Button("Play"))
     {
+        SetGameFocus(true);
         Manager::EnterPlayMode();
+    }
+
+    if (m_gameFocused
+        && Manager::IsPlayMode()
+        && Input::GetKeyTrigger(Input::KeyCode::ESCAPE))
+    {
+        SetGameFocus(false);
     }
 
     ImGui::SameLine();
@@ -163,11 +189,10 @@ void GameWindow::DrawImGui()
         ImVec2(0.0f, 0.0f),
         ImVec2(1.0f, 1.0f));
     m_viewportHovered = ImGui::IsItemHovered();
-    if (Manager::IsPlayMode()
-        && Input::IsCursorVisible()
-        && ImGui::IsItemClicked(ImGuiMouseButton_Left))
+    const bool gameWindowClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+    if (gameWindowClicked)
     {
-        Input::ShowCursor(false);
+        SetGameFocus(true);
     }
 
     if (m_showUIRects && (Manager::IsPlayMode() || m_displayUI))

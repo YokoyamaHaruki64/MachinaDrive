@@ -94,14 +94,14 @@ bool Input::GetMouseRelease(MouseButton button)
 	return m_mouse.GetButtonRelease(static_cast<BYTE>(button));
 }
 
-void Input::ShowCursor(bool visible)
+void Input::SetCursorVisible(bool visible)
 {
-	m_mouse.SetCursorVisible(visible);
+    m_mouse.SetCursorVisible(visible);
 }
 
-bool Input::IsCursorVisible()
+void Input::SetCursorLock(bool locked)
 {
-	return m_mouse.IsCursorVisible();
+    m_mouse.SetCursorLock(locked);
 }
 
 namespace InputInternal
@@ -111,8 +111,8 @@ namespace InputInternal
         Input::m_mouse.ProcessRawInput(rawInput);
     }
 
-    void SetMouseWindowActive(bool active)
+    void SetWindowCursorState(bool useGameCursorState)
     {
-        Input::m_mouse.SetWindowActive(active);
+        Input::m_mouse.SetWindowCursorState(useGameCursorState);
     }
 }

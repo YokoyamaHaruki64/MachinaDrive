@@ -8,7 +8,7 @@ class Mouse;
 namespace InputInternal
 {
     void ProcessRawInput(HRAWINPUT rawInput);
-    void SetMouseWindowActive(bool active);
+    void SetWindowCursorState(bool useGameCursorState);
 }
 
 class Input
@@ -16,9 +16,9 @@ class Input
 private:
 	static BYTE m_OldKeyState[256];
 	static BYTE m_KeyState[256];
-	static Mouse m_mouse;
+    static Mouse m_mouse;
     friend void InputInternal::ProcessRawInput(HRAWINPUT rawInput);
-    friend void InputInternal::SetMouseWindowActive(bool active);
+    friend void InputInternal::SetWindowCursorState(bool useGameCursorState);
     static bool GetKeyPress(BYTE KB);
     static bool GetKeyRelease(BYTE KB);
     static bool GetKeyTrigger(BYTE KB);
@@ -253,8 +253,9 @@ public:
     static bool GetMouseTrigger(MouseButton button);
     static bool GetMouseRelease(MouseButton button);
 
-    // OSカーソルの表示状態を変更・取得する。
-    static void ShowCursor(bool visible);
-    static bool IsCursorVisible();
+    // OSカーソルの表示状態を変更する。
+    static void SetCursorVisible(bool visible);
+    // OSカーソルのロック状態を変更する。
+    static void SetCursorLock(bool locked);
 
 };

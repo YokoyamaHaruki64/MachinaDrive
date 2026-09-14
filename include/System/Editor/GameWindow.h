@@ -27,6 +27,8 @@ private:
     bool m_viewportHovered = false;
     Vector2 m_displayPosition = Vector2::Zero();
     Vector2 m_displaySize = Vector2::Zero();
+    bool m_gameFocused = true;
 
+    void SetGameFocus(bool focused);
     void DrawUIRects(const Vector2& imagePosition, const Vector2& imageSize) const;
 };

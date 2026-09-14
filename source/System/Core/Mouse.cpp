@@ -28,8 +28,9 @@ void Mouse::Initialize(HWND window)
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
-    m_cursorVisible = QueryCursorVisible();
-    m_windowActive = ::GetForegroundWindow() == m_window;
+    m_gameCursorState.visible = QueryCursorVisible();
+    m_gameCursorState.locked = false;
+    m_windowCursorState = m_gameCursorState;
 
     RegisterRawInput();
 
@@ -44,7 +45,7 @@ void Mouse::Initialize(HWND window)
 
 void Mouse::Shutdown()
 {
-    SetCursorVisible(true);
+    ApplyCursorState(CursorState());
     UnregisterRawInput();
     ::ClipCursor(nullptr);
 
@@ -57,15 +58,15 @@ void Mouse::Shutdown()
     m_hasPosition = false;
     memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
     memset(m_buttonState, 0, sizeof(m_buttonState));
-    m_cursorVisible = true;
-    m_windowActive = false;
+    m_gameCursorState = CursorState();
+    m_windowCursorState = CursorState();
 }
 
 void Mouse::Update(const BYTE* keyState)
 {
     UpdateCursorClip();
 
-    if (!m_windowActive || m_cursorVisible)
+    if (!m_windowCursorState.locked)
     {
         m_rawDelta = Vector2::Zero();
         m_rawDeltaAccumulated = Vector2::Zero();
@@ -122,7 +123,7 @@ void Mouse::Update(const BYTE* keyState)
 
 void Mouse::ProcessRawInput(HRAWINPUT rawInput)
 {
-    if (!rawInput || !m_windowActive || m_cursorVisible)
+    if (!rawInput || !m_windowCursorState.locked)
     {
         return;
     }
@@ -150,12 +151,12 @@ void Mouse::ProcessRawInput(HRAWINPUT rawInput)
         static_cast<float>(input.data.mouse.lLastY));
 }
 
-void Mouse::SetWindowActive(bool active)
+void Mouse::SetWindowCursorState(bool useGameCursorState)
 {
-    m_windowActive = active;
+    m_windowCursorState = useGameCursorState ? m_gameCursorState : CursorState();
     m_rawDelta = Vector2::Zero();
     m_rawDeltaAccumulated = Vector2::Zero();
-    UpdateCursorClip();
+    ApplyCursorState(m_windowCursorState);
 }
 
 Vector2 Mouse::GetPosition() const
@@ -280,26 +281,44 @@ bool Mouse::GetButtonRelease(BYTE button) const
 
 void Mouse::SetCursorVisible(bool visible)
 {
-    m_cursorVisible = visible;
+    m_gameCursorState.visible = visible;
+    m_windowCursorState = m_gameCursorState;
 
-    if (QueryCursorVisible() != visible)
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
+    ApplyCursorState(m_windowCursorState);
+}
+
+void Mouse::SetCursorLock(bool locked)
+{
+    m_gameCursorState.locked = locked;
+    m_windowCursorState = m_gameCursorState;
+
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
+    ApplyCursorState(m_windowCursorState);
+}
+
+void Mouse::ApplyCursorState(const CursorState& state)
+{
+    if (QueryCursorVisible() != state.visible)
     {
         // ShowCursorは表示カウンター方式のため、指定状態になるまで調整する。
         int displayCount = 0;
         do
         {
-            displayCount = ::ShowCursor(visible ? TRUE : FALSE);
-        } while ((visible && displayCount < 0) || (!visible && displayCount >= 0));
+            displayCount = ::ShowCursor(state.visible ? TRUE : FALSE);
+        } while ((state.visible && displayCount < 0) || (!state.visible && displayCount >= 0));
     }
 
-    m_rawDelta = Vector2::Zero();
-    m_rawDeltaAccumulated = Vector2::Zero();
-    UpdateCursorClip();
-}
-
-bool Mouse::IsCursorVisible() const
-{
-    return QueryCursorVisible();
+    if (state.locked)
+    {
+        ApplyCursorClip();
+    }
+    else
+    {
+        ::ClipCursor(nullptr);
+    }
 }
 
 bool Mouse::ApplyCursorClip() const
@@ -316,7 +335,7 @@ bool Mouse::ApplyCursorClip() const
 
 void Mouse::UpdateCursorClip() const
 {
-    if (!m_windowActive || m_cursorVisible)
+    if (!m_windowCursorState.locked)
     {
         ::ClipCursor(nullptr);
         return;
