@@ -14,6 +14,7 @@
 #include "Script/Health.h"
 #include "Script/Player.h"
 #include "Script/PostProcessImpulse.h"
+#include "Script/Result.h"
 #include "Script/Score.h"
 #include "Script/ObjectShake.h"
 #include "Script/UI/GameHud.h"
@@ -342,6 +343,7 @@ void Enemy::FinalizeDeath()
     }
 
     DropTimeRecoveryItem();
+    Result::AddDefeatedEnemy();
     m_owner->Destroy();
 }
 

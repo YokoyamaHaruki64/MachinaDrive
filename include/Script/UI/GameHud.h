@@ -64,6 +64,7 @@ public:
     void SetWave(int wave);
     void SetEnemyCount(int count);
     void SetCombo(int count);
+    int GetComboCount() const { return m_comboCount; }
     void AddCombo();
     void ResetCombo();
     void SetShards(int count);

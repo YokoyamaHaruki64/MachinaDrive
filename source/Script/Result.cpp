@@ -4,6 +4,7 @@
 
 #include "Script/GrayScalePostProcess.h"
 #include "Script/UI/GameHud.h"
+#include "Script/WaveDirector.h"
 #include "System/Core/GM_Time.h"
 #include "System/Core/manager.h"
 #include "System/Diagnostics/Logger.h"
@@ -19,10 +20,15 @@ void Result::OnStart()
     s_isResult = false;
     m_duration = Math::Max(m_duration, 0.0f);
     m_elapsedTime = 0.0f;
+    m_survivalTime = 0.0f;
     m_isTransitioning = false;
+    m_maxCombo = 0;
+    m_wave = 0;
+    m_defeatedEnemyCount = 0;
 
     ResolveGrayScalePostProcess();
     ResolveGameHud();
+    ResolveWaveDirector();
     if (m_grayScalePostProcess)
     {
         m_grayScalePostProcess->SetIntensity(0.0f);
@@ -59,10 +65,25 @@ bool Result::BeginResult()
     return true;
 }
 
+void Result::AddDefeatedEnemy()
+{
+    if (!s_instance || s_instance->m_isTransitioning || s_isResult)
+    {
+        return;
+    }
+
+    ++s_instance->m_defeatedEnemyCount;
+}
+
 void Result::Update()
 {
     if (!m_isTransitioning)
     {
+        if (!s_isResult)
+        {
+            CollectGameStats();
+        }
+
         return;
     }
 
@@ -125,5 +146,35 @@ void Result::ResolveGameHud()
     if (GameObject* const gameHudObject = Manager::GetFirstObjectByComponent<GameHud>())
     {
         m_gameHud = gameHudObject->GetComponent<GameHud>();
+    }
+}
+
+void Result::ResolveWaveDirector()
+{
+    if (m_waveDirector)
+    {
+        return;
+    }
+
+    if (GameObject* const waveDirectorObject = Manager::GetFirstObjectByComponent<WaveDirector>())
+    {
+        m_waveDirector = waveDirectorObject->GetComponent<WaveDirector>();
+    }
+}
+
+void Result::CollectGameStats()
+{
+    m_survivalTime += Time::GetDeltaTime();
+
+    ResolveGameHud();
+    if (m_gameHud)
+    {
+        m_maxCombo = Math::Max(m_maxCombo, m_gameHud->GetComboCount());
+    }
+
+    ResolveWaveDirector();
+    if (m_waveDirector)
+    {
+        m_wave = m_waveDirector->GetWave();
     }
 }
