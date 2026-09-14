@@ -253,8 +253,9 @@ public:
     static bool GetMouseTrigger(MouseButton button);
     static bool GetMouseRelease(MouseButton button);
 
-    // OSカーソルの表示状態を変更する。
+    // OSカーソルの表示状態を変更・取得する。
     static void SetCursorVisible(bool visible);
+    static bool IsCursorVisible();
     // OSカーソルのロック状態を変更する。
     static void SetCursorLock(bool locked);
 

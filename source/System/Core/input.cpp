@@ -99,6 +99,11 @@ void Input::SetCursorVisible(bool visible)
     m_mouse.SetCursorVisible(visible);
 }
 
+bool Input::IsCursorVisible()
+{
+    return m_mouse.IsCursorVisible();
+}
+
 void Input::SetCursorLock(bool locked)
 {
     m_mouse.SetCursorLock(locked);
