@@ -1,6 +1,14 @@
 ﻿#pragma once
 
+#include <vector>
+#include <unordered_set>
+
+#include "Common/Color.h"
 #include "System/Core/Script.h"
+
+class GameObject;
+class UIImage;
+class UIText;
 
 // ゲームロジックから表示状態を受け取る窓口。参照先はSceneで設定する。
 class GameHud final : public Script
@@ -26,6 +34,17 @@ class GameHud final : public Script
     class ComboUI* m_comboUI = nullptr;
     class WaveStartUI* m_waveStartUI = nullptr;
     class TimeRecoveryUI* m_timeRecoveryUI = nullptr;
+    struct FadeTarget
+    {
+        UIImage* image = nullptr;
+        UIText* text = nullptr;
+        Color color{};
+    };
+
+    std::vector<FadeTarget> m_fadeTargets;
+    float m_fadeDuration{};
+    float m_fadeElapsedTime{};
+    bool m_isFadingOut{};
     bool m_visible = true;
     bool m_comboVisible = true;
     bool m_driveReady = true;
@@ -33,9 +52,12 @@ class GameHud final : public Script
 
     void ApplyVisibility();
     void ApplyDriveState();
+    void CollectFadeTargets(GameObject* object, std::unordered_set<GameObject*>& visited);
+    void ApplyFade(float alpha);
 
 public:
     void OnStart() override;
+    void Update() override;
     void SetHealth(float current, float maximum);
     // 被ダメージ量を反映し、FillBarのChip表示を維持する。
     void ApplyHealthDamage(float damage);
@@ -46,6 +68,8 @@ public:
     void ResetCombo();
     void SetShards(int count);
     void SetVisible(bool visible);
+    // Unscaled時間でHUD全体を透明化し、完了時に非アクティブ化する。
+    void FadeOut(float duration);
     void SetComboVisible(bool visible);
     // 0.0（空）から1.0（満タン）までをGaugeInnerへ渡す。
     void SetDriveGauge(float progress);

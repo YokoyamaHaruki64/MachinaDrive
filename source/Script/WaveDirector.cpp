@@ -3,9 +3,9 @@
 #include "Component/ComponentInc.h"
 
 #include "Common/Random.h"
-#include "Scene/ResultScene.h"
 #include "Script/Player.h"
 #include "Script/PostProcessImpulse.h"
+#include "Script/Result.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
@@ -445,5 +445,5 @@ void WaveDirector::FinishGame()
     }
 
     m_hasFinished = true;
-    SceneTransition::ChangeScene<ResultScene>(0.8f, EaseType::InOutQuad);
+    Result::BeginResult();
 }

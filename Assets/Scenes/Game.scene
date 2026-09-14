@@ -455,6 +455,11 @@ gameObjects:
           enabled: true
           m_name: BlockGlitch
           m_materialPath: Assets/Materials/PostProcess/BlockGlitch.material
+      - type: GrayScalePostProcess
+        fields:
+          enabled: true
+          m_name: GrayScale
+          m_materialPath: Assets/Materials/PostProcess/GrayScale.material
       - type: DigitalWipeTransition
         fields:
           enabled: true
@@ -765,7 +770,7 @@ gameObjects:
           m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
           m_timeRecoveryDropRate: 1
           m_maxTime: 11111
-          m_startTime: 11111
+          m_startTime: 3
           m_timeDrainPerSecond: 1
           m_baseClearTimeBonus: 8
           m_clearTimeGrowth: 2
@@ -1998,3 +2003,20 @@ gameObjects:
           m_raycastTarget: true
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
+  - id: 608
+    name: Result
+    tag:
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Result
+        fields:
+          enabled: true
+          m_duration: 3

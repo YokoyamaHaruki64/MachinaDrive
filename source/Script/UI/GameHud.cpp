@@ -7,6 +7,7 @@
 #include "Script/UI/WaveStartUI.h"
 #include "Component/UIImage.h"
 #include "Component/UIText.h"
+#include "System/Core/GM_Time.h"
 #include "System/Core/GameObject.h"
 #include "System/Core/manager.h"
 #include "System/Editor/FieldRegistry.h"
@@ -69,12 +70,36 @@ void GameHud::OnStart()
     m_comboUI = m_comboUIObject.Get() ? m_comboUIObject->GetComponent<ComboUI>() : nullptr;
     m_waveStartUI = m_waveRoot.Get() ? m_waveRoot->GetComponent<WaveStartUI>() : nullptr;
     m_timeRecoveryUI = m_healthRoot.Get() ? m_healthRoot->GetComponent<TimeRecoveryUI>() : nullptr;
+    m_fadeTargets.clear();
+    m_fadeDuration = 0.0f;
+    m_fadeElapsedTime = 0.0f;
+    m_isFadingOut = false;
 
     // 現時点でシーンから確定できる初期値だけを表示へ反映する。
     SetWave(1);
     SetEnemyCount(static_cast<int>(Manager::GetObjectsByTag("Enemy").size()));
     ResetCombo();
     ApplyVisibility();
+}
+
+void GameHud::Update()
+{
+    if (!m_isFadingOut)
+    {
+        return;
+    }
+
+    m_fadeElapsedTime += Time::GetUnscaledDeltaTime();
+    const float progress = m_fadeDuration > 0.0f
+        ? Math::Clamp(m_fadeElapsedTime / m_fadeDuration, 0.0f, 1.0f)
+        : 1.0f;
+    ApplyFade(1.0f - progress);
+
+    if (progress >= 1.0f)
+    {
+        m_isFadingOut = false;
+        SetVisible(false);
+    }
 }
 
 void GameHud::SetHealth(float current, float maximum)
@@ -156,8 +181,34 @@ void GameHud::SetShards(int count)
 
 void GameHud::SetVisible(bool visible)
 {
+    if (visible)
+    {
+        m_isFadingOut = false;
+        ApplyFade(1.0f);
+    }
+
     m_visible = visible;
     ApplyVisibility();
+}
+
+void GameHud::FadeOut(float duration)
+{
+    if (m_isFadingOut || !m_visible)
+    {
+        return;
+    }
+
+    m_fadeTargets.clear();
+    std::unordered_set<GameObject*> visited;
+    CollectFadeTargets(m_healthRoot.Get(), visited);
+    CollectFadeTargets(m_waveRoot.Get(), visited);
+    CollectFadeTargets(m_comboRoot.Get(), visited);
+    CollectFadeTargets(m_driveRoot.Get(), visited);
+    CollectFadeTargets(m_shardsRoot.Get(), visited);
+
+    m_fadeDuration = Math::Max(duration, 0.0f);
+    m_fadeElapsedTime = 0.0f;
+    m_isFadingOut = true;
 }
 
 void GameHud::SetComboVisible(bool visible)
@@ -193,6 +244,47 @@ void GameHud::ApplyDriveState()
     if (m_driveChargingText)
     {
         m_driveChargingText->SetActive(m_visible && !m_driveReady);
+    }
+}
+
+void GameHud::CollectFadeTargets(GameObject* object, std::unordered_set<GameObject*>& visited)
+{
+    if (!object || object->IsDestroyed() || !visited.emplace(object).second)
+    {
+        return;
+    }
+
+    if (UIImage* image = object->GetComponent<UIImage>())
+    {
+        m_fadeTargets.push_back({ image, nullptr, image->GetColor() });
+    }
+    if (UIText* text = object->GetComponent<UIText>())
+    {
+        m_fadeTargets.push_back({ nullptr, text, text->GetColor() });
+    }
+
+    for (TransformBase* child : object->GetTransformBase()->GetChildren())
+    {
+        CollectFadeTargets(child->GetOwner(), visited);
+    }
+}
+
+void GameHud::ApplyFade(float alpha)
+{
+    const float clampedAlpha = Math::Clamp(alpha, 0.0f, 1.0f);
+    for (const FadeTarget& target : m_fadeTargets)
+    {
+        Color color = target.color;
+        color.a *= clampedAlpha;
+
+        if (target.image)
+        {
+            target.image->SetColor(color);
+        }
+        if (target.text)
+        {
+            target.text->SetColor(color);
+        }
     }
 }
 
