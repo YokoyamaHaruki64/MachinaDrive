@@ -395,3 +395,4 @@ gameObjects:
           m_filePath: Assets/Local/Sounds/TitleBGM_Static_AfterImage_3.mp3
           m_playOnStart: true
           m_loop: true
+          m_initialVolume: 0.25

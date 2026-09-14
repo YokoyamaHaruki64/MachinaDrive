@@ -53,6 +53,7 @@ void WaveDirector::OnStart()
 {
     m_waveBeginAudios[0] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_WaveBegin01.mp3");
     m_waveBeginAudios[1] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_WaveBegin02.mp3");
+    m_timeRecoveryAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_TimeRecovery.mp3");
 
     if (GameObject* hudObject = Manager::GetFirstObjectByComponent<GameHud>())
     {
@@ -416,6 +417,10 @@ void WaveDirector::AddTime(float amount)
     if (m_gameHud && m_remainingTime > previousTime)
     {
         m_gameHud->ShowTimeRecovery(m_remainingTime - previousTime);
+    }
+    if (m_timeRecoveryAudio && m_remainingTime > previousTime)
+    {
+        m_timeRecoveryAudio->Play();
     }
     UpdateHud();
 }

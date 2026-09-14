@@ -31,7 +31,8 @@ void Player::OnStart()
     Input::SetCursorVisible(false);
     Input::SetCursorLock(true);
 
-    m_jumpSE = GetComponent<Audio>();
+    m_chargeAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Charge_Loop.wav");
+    m_shotAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Shot.wav");
     m_rigidbody = GetComponent<Rigidbody>();
     m_health = GetComponent<Health>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
@@ -186,6 +187,11 @@ void Player::UpdateIdle()
     {
         m_state = AttackReady;
 
+        if (m_chargeAudio)
+        {
+            m_chargeAudio->Play(true);
+        }
+
         if (m_playerAnimation)
         {
             m_playerAnimation->StartAttackReadyAnimation();
@@ -226,6 +232,15 @@ void Player::UpdateAttackReady()
 
     if (Input::GetMouseRelease(Input::MouseButton::Left))
     {
+        if (m_chargeAudio)
+        {
+            m_chargeAudio->Stop();
+        }
+        if (m_shotAudio)
+        {
+            m_shotAudio->Play();
+        }
+
         m_state = Attacking;
         m_attackTimer = (std::max)(m_attackTime, 0.0f);
         m_attackEndTimer = (std::max)(m_attackEndDuration, 0.0f);

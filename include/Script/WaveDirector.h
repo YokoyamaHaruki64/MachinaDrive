@@ -55,6 +55,7 @@ class WaveDirector final : public Script
 
     GameHud* m_gameHud = nullptr;
     std::array<class Audio*, 2> m_waveBeginAudios{};
+    class Audio* m_timeRecoveryAudio = nullptr;
     int m_wave = 0;
     float m_remainingTime = 0.0f;
     float m_minX = 0.0f;

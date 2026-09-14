@@ -44,7 +44,8 @@ private:
 
     GameHud* m_gameHud = nullptr;
 
-    Audio* m_jumpSE = nullptr;
+    Audio* m_chargeAudio = nullptr;
+    Audio* m_shotAudio = nullptr;
 
     Vector2 m_beginMousePos{ Vector2::Zero() };
     Vector2 m_accumulatedMouse{ Vector2::Zero() };

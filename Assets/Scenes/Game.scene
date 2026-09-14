@@ -325,6 +325,7 @@ gameObjects:
           m_filePath: Assets/Local/Sounds/GameBGM_Electric_Highway.mp3
           m_playOnStart: true
           m_loop: true
+          m_initialVolume: 0.25
   - id: 33
     name: Wall_Left
     tag: Wall
