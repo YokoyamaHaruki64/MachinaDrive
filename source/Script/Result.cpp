@@ -17,11 +17,11 @@ FIELDS_END()
 void Result::OnStart()
 {
     s_instance = this;
-    s_isResult = false;
     m_duration = Math::Max(m_duration, 0.0f);
     m_elapsedTime = 0.0f;
     m_survivalTime = 0.0f;
-    m_isTransitioning = false;
+    m_state = ResultState::Playing;
+
     m_maxCombo = 0;
     m_wave = 0;
     m_defeatedEnemyCount = 0;
@@ -45,7 +45,6 @@ void Result::OnDestroy()
     // 次のSceneへ移る際、停止状態を持ち越さない。
     Time::SetTimeScale(1.0f);
     s_instance = nullptr;
-    s_isResult = false;
 }
 
 bool Result::BeginResult()
@@ -56,7 +55,7 @@ bool Result::BeginResult()
         return false;
     }
 
-    if (s_instance->m_isTransitioning || s_isResult)
+    if (s_instance->m_state != ResultState::Playing)
     {
         return false;
     }
@@ -67,7 +66,7 @@ bool Result::BeginResult()
 
 void Result::AddDefeatedEnemy()
 {
-    if (!s_instance || s_instance->m_isTransitioning || s_isResult)
+    if (!s_instance || s_instance->m_state != ResultState::Playing)
     {
         return;
     }
@@ -77,16 +76,23 @@ void Result::AddDefeatedEnemy()
 
 void Result::Update()
 {
-    if (!m_isTransitioning)
+    switch (m_state)
     {
-        if (!s_isResult)
-        {
-            CollectGameStats();
-        }
+    case ResultState::Playing:
+        CollectGameStats();
+        break;
 
-        return;
+    case ResultState::Transition:
+        UpdateTransition();
+        break;
+
+    case ResultState::Completed:
+        break;
     }
+}
 
+void Result::UpdateTransition()
+{
     m_elapsedTime += Time::GetUnscaledDeltaTime();
     const float progress = m_duration > 0.0f
         ? Math::Clamp(m_elapsedTime / m_duration, 0.0f, 1.0f)
@@ -101,8 +107,7 @@ void Result::Update()
     if (progress >= 1.0f)
     {
         Time::SetTimeScale(0.0f);
-        m_isTransitioning = false;
-        s_isResult = true;
+        m_state = ResultState::Completed;
     }
 }
 
@@ -129,7 +134,7 @@ void Result::Begin()
     }
 
     m_elapsedTime = 0.0f;
-    m_isTransitioning = true;
+    m_state = ResultState::Transition;
     if (m_gameHud)
     {
         m_gameHud->FadeOut(m_duration);
