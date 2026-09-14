@@ -355,7 +355,7 @@ void Audio::ApplyVolume()
 {
     if (m_SourceVoice)
     {
-        m_SourceVoice->SetVolume(m_volume);
+        m_SourceVoice->SetVolume(m_volume * m_gain);
     }
 }
 
@@ -434,9 +434,18 @@ void Audio::SetVolume(float volume)
     ApplyVolume();
 }
 
+
+void Audio::SetGain(float gain)
+{
+    m_gain = (std::max)(gain, 0.0f);
+    ApplyVolume();
+}
+
+
 void Audio::OnLoaded()
 {
     m_volume = std::clamp(m_initialVolume, 0.0f, 1.0f);
+    m_gain = (std::max)(m_initialGain, 0.0f);
 
     if (!m_SourceVoice && !m_filePath.empty())
     {
@@ -468,6 +477,7 @@ void Audio::RegisterFields(FieldRegistry& fields)
     GM_FIELD(m_playOnStart);
     GM_FIELD(m_loop);
     GM_FIELD(m_initialVolume);
+    GM_FIELD(m_initialGain);
 }
 
 
