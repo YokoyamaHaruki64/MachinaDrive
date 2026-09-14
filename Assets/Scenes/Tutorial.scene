@@ -1850,3 +1850,296 @@ gameObjects:
           m_raycastTarget: true
           m_dragEnabled: false
           m_materialPath: Assets/Materials/UI.material
+  - id: 401
+    name: Pause Canvas
+    tag: 
+    active: false
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 402
+    name: Pause Exit
+    tag: 
+    active: false
+    prefab: 
+    parent: 401
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0,1]
+          m_stretch: [0.115,0.205]
+          m_pos: [0.025,-0.025]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+  - id: 403
+    name: Pause Exit Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 402
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Pause_Exit.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.9,0.9,0.9,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 404
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 402
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/UI/Pause_Exit_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 405
+    name: Retry
+    tag: 
+    active: false
+    prefab: 
+    parent: 401
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.09]
+          m_pos: [-0.025,0.135]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 406
+    name: Retry Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 405
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Retry.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.9,0.9,0.9,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 407
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 405
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 408
+    name: Return Title
+    tag: 
+    active: false
+    prefab: 
+    parent: 401
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.09]
+          m_pos: [-0.025,0.025]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 409
+    name: Return Title Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 408
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Return.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.9,0.9,0.9,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 410
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 408
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 411
+    name: Pause UI
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: PauseUI
+        fields:
+          enabled: true
+          m_pauseCanvas: 401
+          m_uiObjects:
+            - 402
+            - 405
+            - 408

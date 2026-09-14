@@ -110,6 +110,11 @@ void Player::Update()
     {
         return;
     }
+    if (Pause::IsPause())
+    {
+        return;
+    }
+
     if (Input::GetKeyTrigger(Input::KeyCode::E))
     {
         Vector3 playerForward = transform()->GetForward();

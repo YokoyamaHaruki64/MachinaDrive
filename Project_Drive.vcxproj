@@ -276,6 +276,7 @@
     <ClCompile Include="source\Script\RadialBlurPostProcess.cpp" />
     <ClCompile Include="source\Script\PostProcessImpulse.cpp" />
     <ClCompile Include="source\Script\Pause.cpp" />
+    <ClCompile Include="source\Script\PauseUI.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
@@ -522,6 +523,7 @@
     <ClInclude Include="include\Script\RadialBlurPostProcess.h" />
     <ClInclude Include="include\Script\PostProcessImpulse.h" />
     <ClInclude Include="include\Script\Pause.h" />
+    <ClInclude Include="include\Script\PauseUI.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
