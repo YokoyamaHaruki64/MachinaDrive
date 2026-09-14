@@ -1019,6 +1019,18 @@ bool Manager::StopPlayMode()
     return true;
 }
 
+void Manager::Quit()
+{
+#if GM_ENABLE_EDITOR
+    if (m_gameMode == GameMode::Play)
+    {
+        StopPlayMode();
+    }
+#else
+    PostQuitMessage(0);
+#endif
+}
+
 #if GM_ENABLE_EDITOR
 namespace
 {

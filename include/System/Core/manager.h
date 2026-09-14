@@ -126,6 +126,7 @@ public:
     static std::filesystem::path GetCurrentSceneFilePath();
     static bool EnterPlayMode();
     static bool StopPlayMode();
+    static void Quit();
 #if GM_ENABLE_EDITOR
     static bool LoadEditorScene(const std::filesystem::path& path);
 #endif
