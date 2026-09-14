@@ -326,6 +326,11 @@ bool EditorSystem::IsGameWindowReady()
     return m_gameWindow.IsRenderTargetReady();
 }
 
+bool EditorSystem::IsGameWindowFocused()
+{
+    return m_gameWindow.IsGameWindowFocused();
+}
+
 bool EditorSystem::IsUIDisplayEnabled()
 {
     return m_gameWindow.IsUIDisplayEnabled();

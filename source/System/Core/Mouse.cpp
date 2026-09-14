@@ -121,6 +121,15 @@ void Mouse::Update(const BYTE* keyState)
     m_delta = m_position - m_previousPosition;
 }
 
+void Mouse::ClearInputState()
+{
+    memset(m_oldButtonState, 0, sizeof(m_oldButtonState));
+    memset(m_buttonState, 0, sizeof(m_buttonState));
+    m_delta = Vector2::Zero();
+    m_rawDelta = Vector2::Zero();
+    m_rawDeltaAccumulated = Vector2::Zero();
+}
+
 void Mouse::ProcessRawInput(HRAWINPUT rawInput)
 {
     if (!rawInput || !m_windowCursorState.locked)
