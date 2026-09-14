@@ -1496,7 +1496,7 @@ gameObjects:
           m_stretch: [0.0520833321,0.0925925896]
           m_pos: [-0.119999997,-0.289999992]
           m_offset: [0,0]
-          m_uiRotation: 0
+          m_uiRotation: 0.150000006
           m_uiScale: [1,1]
           m_aspectRatio: 0
       - type: ComboUI
@@ -1504,18 +1504,18 @@ gameObjects:
           enabled: true
           m_comboValue: 261
           m_comboLabel: 260
-          m_boundTime: 0.319999993
-          m_boundScale: 0.5
+          m_boundTime: 0.400000006
+          m_boundScale: 1
           m_gap: 100
           m_boundCurve:
             - time: 0
               value: 0
               inControl: 0
-              outControl: 0.533333302
+              outControl: 1
             - time: 0.5
               value: 1
               inControl: 1
-              outControl: 1
+              outControl: 0
             - time: 1
               value: 0
               inControl: 0
@@ -1545,7 +1545,7 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: Combo!!
           m_fontSize: 70
-          m_color: [1,0,0,1]
+          m_color: [0,1,0.965250731,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 5
           horizontalAlignment: 1
@@ -1576,7 +1576,7 @@ gameObjects:
           font: Assets/Local/Font/AprilGothicOne-R.fnt
           text: 00
           m_fontSize: 90
-          m_color: [0.980695009,1,0,1]
+          m_color: [0.6795367,1,0.988864124,1]
           m_outlineColor: [0,0,0,1]
           m_outlineWidth: 5
           horizontalAlignment: 1
@@ -1629,7 +1629,7 @@ gameObjects:
   - id: 271
     name: Wave_Begin_Text
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 210
     components:

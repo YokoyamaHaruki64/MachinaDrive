@@ -238,6 +238,7 @@
     </ClCompile>
     <ClCompile Include="source\Scene\GameScene.cpp" />
     <ClCompile Include="source\Scene\ResultScene.cpp" />
+    <ClCompile Include="source\Scene\TutorialScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\Script\EnemyBullet.cpp" />
     <ClCompile Include="source\Script\ObjectShake.cpp" />
@@ -280,6 +281,7 @@
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
     <ClCompile Include="source\Script\ShotDirector.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
+    <ClCompile Include="source\Script\TutorialDirector.cpp" />
     <ClCompile Include="source\Script\WaveDirector.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
@@ -482,6 +484,7 @@
     <ClInclude Include="include\Scene\GameScene.h" />
     <ClInclude Include="include\Scene\ResultScene.h" />
     <ClInclude Include="include\Scene\Scene.h" />
+    <ClInclude Include="include\Scene\TutorialScene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
     <ClInclude Include="include\Script\EnemyBullet.h" />
     <ClInclude Include="include\Script\ObjectShake.h" />
@@ -526,6 +529,7 @@
     <ClInclude Include="include\Script\ShotDirector.h" />
     <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\TutorialDirector.h" />
     <ClInclude Include="include\Script\WaveDirector.h" />
     <ClInclude Include="include\System\Core\component.h" />
     <ClInclude Include="include\System\Core\component.inl" />

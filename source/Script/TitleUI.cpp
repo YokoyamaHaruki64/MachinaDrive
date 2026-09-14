@@ -4,7 +4,7 @@
 
 #include "Script/TItleUI.h"
 
-#include "Scene/GameScene.h"
+#include "Scene/TutorialScene.h"
 #include "Component/UITransform.h"
 #include "Script/SceneTransition.h"
 
@@ -24,6 +24,6 @@ void TitleUI::Update()
     m_owner->GetUITransform()->SetOffset(m_originalOffset + Vector2(0.0f, offsetY));
 
     if (Input::GetKeyTrigger(Input::KeyCode::ENTER))
-        SceneTransition::ChangeScene<GameScene>(0.8f, EaseType::InOutQuad);
+        SceneTransition::ChangeScene<TutorialScene>(0.8f, EaseType::InOutQuad);
 
 }
