@@ -36,7 +36,7 @@ void SceneTransition::OnDestroy()
     s_duration = 0.0f;
     s_progress = 0.0f;
     s_phase = Phase::None;
-    s_scenePathBeforeChange.clear();
+    s_sceneLoadGenerationBeforeChange = 0;
     s_waitingForSceneLoad = false;
     s_skipNextDeltaTime = false;
 }
@@ -50,7 +50,7 @@ void SceneTransition::Update()
     {
         if (s_waitingForSceneLoad)
         {
-            if (Manager::GetCurrentSceneFilePath() == s_scenePathBeforeChange)
+            if (Manager::GetSceneLoadGeneration() == s_sceneLoadGenerationBeforeChange)
                 return;
 
             // シーン読込にかかった時間を、Openingの経過時間へ含めない。
@@ -97,7 +97,7 @@ void SceneTransition::Update()
         s_progress = 0.0f;
         s_phase = Phase::None;
         s_changeScene = {};
-        s_scenePathBeforeChange.clear();
+        s_sceneLoadGenerationBeforeChange = 0;
         s_waitingForSceneLoad = false;
         s_skipNextDeltaTime = false;
         SetEffectProgress();

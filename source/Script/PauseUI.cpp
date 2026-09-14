@@ -198,7 +198,7 @@ void PauseUI::HandleClick(const UIElement& element)
 
 void PauseUI::Update()
 {
-#ifdef GM_ENABLE_EDITOR
+#if GM_ENABLE_EDITOR
 
     if (Input::GetKeyTrigger(Input::KeyCode::F1))
         SetPauseActive(!Pause::IsPause());
