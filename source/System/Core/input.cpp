@@ -4,6 +4,10 @@
 #include "System/Core/Mouse.h"
 #include "System/Core/input.h"
 
+#if GM_ENABLE_EDITOR
+#include "System/Editor/EditorSystem.h"
+#endif
+
 
 BYTE Input::m_OldKeyState[256];
 BYTE Input::m_KeyState[256];
@@ -32,6 +36,16 @@ void Input::Update()
 	GetKeyboardState( m_KeyState );
 
 	m_mouse.Update(m_KeyState);
+
+#if GM_ENABLE_EDITOR
+    if (!EditorSystem::IsGameWindowFocused())
+    {
+        // Editorの別Window操作中は、ゲーム側へ入力の押下・解放を渡さない。
+        memset(m_OldKeyState, 0, sizeof(m_OldKeyState));
+        memset(m_KeyState, 0, sizeof(m_KeyState));
+        m_mouse.ClearInputState();
+    }
+#endif
 }
 
 bool Input::GetKeyPress(BYTE KB)

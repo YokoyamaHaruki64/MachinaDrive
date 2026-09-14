@@ -61,6 +61,7 @@ public:
     static void ResetEditorCameraToScene();
     static bool ApplyGameWindowRenderTargetSize();
     static bool IsGameWindowReady();
+    static bool IsGameWindowFocused();
     static bool IsUIDisplayEnabled();
     static bool GetGameWindowDisplayRect(Vector2& position, Vector2& size);
     static bool RequestApplicationClose();

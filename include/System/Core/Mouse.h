@@ -30,6 +30,7 @@ class Mouse final
     void Initialize(HWND window);
     void Shutdown();
     void Update(const BYTE* keyState);
+    void ClearInputState();
     void ProcessRawInput(HRAWINPUT rawInput);
     void SetWindowCursorState(bool useGameCursorState);
 
