@@ -13,7 +13,7 @@ gameObjects:
           enabled: true
           m_localPosition: [26.9799995,0,13.6199999]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
+          m_localScale: [1.29999995,1.29999995,1.29999995]
       - type: Rigidbody
         fields:
           enabled: true
@@ -43,7 +43,7 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1.50999999,0]
+          m_center: [0,2.01999998,0]
           m_isTrigger: false
           m_layer: 2
           m_radius: 1.79999995

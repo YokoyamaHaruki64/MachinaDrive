@@ -101,11 +101,11 @@ gameObjects:
           enabled: true
           m_localPosition: [0,1,2.61216004e-15]
           m_localRotation: [0,1,0,0]
-          m_localScale: [1.20000005,1.20000005,1.20000005]
+          m_localScale: [1.39999998,1.39999998,1.39999998]
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0.600000024,0]
+          m_center: [0,1.05999994,0]
           m_isTrigger: false
           m_layer: 1
           m_radius: 0.769999981
@@ -153,7 +153,7 @@ gameObjects:
           enabled: true
           m_localPosition: [26.9799995,0,13.6199999]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
+          m_localScale: [1.29999995,1.29999995,1.29999995]
       - type: Rigidbody
         fields:
           enabled: true
@@ -183,7 +183,7 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1.50999999,0]
+          m_center: [0,2.01999998,0]
           m_isTrigger: false
           m_layer: 2
           m_radius: 1.79999995
@@ -199,7 +199,7 @@ gameObjects:
           enabled: true
           m_localPosition: [-34.9799995,0,18.5]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
+          m_localScale: [1.25,1.25,1.25]
       - type: Rigidbody
         fields:
           enabled: true
@@ -233,7 +233,7 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1.50999999,0]
+          m_center: [0,2.01999998,0]
           m_isTrigger: false
           m_layer: 2
           m_radius: 1.79999995
@@ -249,7 +249,7 @@ gameObjects:
           enabled: true
           m_localPosition: [0,0,26.1900005]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1.70000005,1.70000005,1.70000005]
+          m_localScale: [2,2,2]
       - type: Rigidbody
         fields:
           enabled: true
@@ -283,106 +283,6 @@ gameObjects:
           m_isTrigger: false
           m_layer: 2
           m_radius: 2.3599999
-  - id: 8
-    name: Tree(Instance)
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [5,3.5,12]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
-  - id: 9
-    name: Tree(Instance)
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [-5,3.5,12]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
-  - id: 10
-    name: Tree(Instance)
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [7,3.5,8]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
-  - id: 11
-    name: Tree(Instance)
-    tag: 
-    active: false
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [-7,3.5,8]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
   - id: 12
     name: Skydome
     tag: 
@@ -527,10 +427,10 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,0.769999981,0]
+          m_center: [0,1.41999996,0]
           m_isTrigger: true
           m_layer: 4
-          m_radius: 1.62
+          m_radius: 1.79999995
       - type: PlayerHit
         fields:
           enabled: true
@@ -875,10 +775,10 @@ gameObjects:
           m_maxClearTimeBonus: 20
           m_waveStartDelay: 2
           m_waveBeginDuration: 2
-          m_baseEnemyCount: 91
+          m_baseEnemyCount: 5
           m_enemyCountGrowth: 1.5
-          m_enemyCountExponent: 1.25
-          m_maxEnemyCount: 125
+          m_enemyCountExponent: 1.5
+          m_maxEnemyCount: 64
           m_movingStart: 0.150000006
           m_movingGrowth: 0.0199999996
           m_movingMax: 0.400000006

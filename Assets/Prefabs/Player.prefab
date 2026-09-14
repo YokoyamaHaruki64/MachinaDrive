@@ -13,11 +13,11 @@ gameObjects:
           enabled: true
           m_localPosition: [0,1,2.61216004e-15]
           m_localRotation: [0,1,0,0]
-          m_localScale: [1.20000005,1.20000005,1.20000005]
+          m_localScale: [1.39999998,1.39999998,1.39999998]
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,0.600000024,0]
+          m_center: [0,1.05999994,0]
           m_isTrigger: false
           m_layer: 1
           m_radius: 0.769999981
@@ -116,10 +116,10 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,0.769999981,0]
+          m_center: [0,1.41999996,0]
           m_isTrigger: true
           m_layer: 4
-          m_radius: 1.62
+          m_radius: 1.79999995
       - type: PlayerHit
         fields:
           enabled: true
