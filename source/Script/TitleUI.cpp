@@ -19,6 +19,8 @@ FIELDS_END()
 namespace
 {
     constexpr float ButtonSlideDuration = 0.2f;
+    constexpr const char* HoverSoundPath = "Assets/Local/Sounds/SE_HoverButton.mp3";
+    constexpr const char* ClickSoundPath = "Assets/Local/Sounds/SE_ClickButton.mp3";
 }
 
 void TitleUI::OnStart()
@@ -28,6 +30,8 @@ void TitleUI::OnStart()
 
     m_uiElements.clear();
     m_hoverLineMaterial = MaterialManager::Load("Assets/Materials/HUDFrameMask.material");
+    m_hoverAudio = m_owner->AddComponent<Audio>(HoverSoundPath);
+    m_clickAudio = m_owner->AddComponent<Audio>(ClickSoundPath);
 
     for (const GameObjectReference& uiObjectRef : m_uiObjects)
     {
@@ -99,6 +103,10 @@ void TitleUI::UpdateElement(UIElement& element)
     {
         element.isHovered = hovered;
         ApplyHoverVisual(element, hovered);
+        if (hovered && m_hoverAudio)
+        {
+            m_hoverAudio->Play();
+        }
     }
 
     const float progressStep = std::min(
@@ -116,6 +124,11 @@ void TitleUI::HandleClick(const UIElement& element)
     if (!element.buttonComponent->WasClicked())
     {
         return;
+    }
+
+    if (m_clickAudio)
+    {
+        m_clickAudio->Play();
     }
 
     const std::string& buttonName = element.buttonComponent->GetOwner()->GetName();

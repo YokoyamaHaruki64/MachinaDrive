@@ -51,6 +51,9 @@ FIELDS_END()
 
 void WaveDirector::OnStart()
 {
+    m_waveBeginAudios[0] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_WaveBegin01.mp3");
+    m_waveBeginAudios[1] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_WaveBegin02.mp3");
+
     if (GameObject* hudObject = Manager::GetFirstObjectByComponent<GameHud>())
     {
         m_gameHud = hudObject->GetComponent<GameHud>();
@@ -243,6 +246,13 @@ void WaveDirector::StartNextWave()
         }
     }
     PostProcessImpulse::Play("WaveBegin");
+    for (Audio* waveBeginAudio : m_waveBeginAudios)
+    {
+        if (waveBeginAudio)
+        {
+            waveBeginAudio->Play();
+        }
+    }
     UpdateHud();
 }
 

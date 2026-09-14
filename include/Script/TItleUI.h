@@ -7,6 +7,7 @@
 #include <vector>
 
 class Material;
+class Audio;
 class UIButton;
 class UIImage;
 class UIOffset;
@@ -29,6 +30,8 @@ private:
     std::vector<GameObjectReference> m_uiObjects;
     std::vector<UIElement> m_uiElements;
     Material* m_hoverLineMaterial{};
+    Audio* m_hoverAudio{};
+    Audio* m_clickAudio{};
 
     void ApplyHoverVisual(UIElement& element, bool hovered);
     void UpdateElement(UIElement& element);

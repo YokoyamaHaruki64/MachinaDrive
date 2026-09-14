@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <array>
+
 #include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 
@@ -52,6 +54,7 @@ class WaveDirector final : public Script
     float m_spawnHeight = 0.0f;
 
     GameHud* m_gameHud = nullptr;
+    std::array<class Audio*, 2> m_waveBeginAudios{};
     int m_wave = 0;
     float m_remainingTime = 0.0f;
     float m_minX = 0.0f;

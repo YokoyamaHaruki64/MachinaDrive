@@ -18,6 +18,9 @@ FIELDS_END()
 
 void PlayerHit::OnStart()
 {
+    m_hitAudios[0] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Hit01.mp3");
+    m_hitAudios[1] = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Hit02.mp3");
+
     m_player = GetComponent<Player>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
 
@@ -61,6 +64,14 @@ void PlayerHit::OnHitBegin(const HitInfo& hitInfo)
             return;
 
         Logger::Log("PlayerHit: Enemyへの有効ヒットを検出しました。");
+
+        for (Audio* hitAudio : m_hitAudios)
+        {
+            if (hitAudio)
+            {
+                hitAudio->Play();
+            }
+        }
 
         if (m_collisionVfxPrefab)
         {

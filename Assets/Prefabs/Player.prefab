@@ -37,12 +37,6 @@ gameObjects:
           m_playerLaunchVfxPrefab: Assets/Prefabs/VFX_PlayerLaunch.prefab
           m_attackDashTrailPrefab: Assets/Prefabs/VFX_PlayerDashTrail.prefab
           m_debug: true
-      - type: Audio
-        fields:
-          enabled: true
-          m_filePath: Assets/Local/Sounds/wan.wav
-          m_playOnStart: false
-          m_loop: false
       - type: Rigidbody
         fields:
           enabled: true
