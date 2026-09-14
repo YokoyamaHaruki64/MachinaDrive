@@ -882,9 +882,12 @@ GameObject* Manager::InstantiatePrefabInternal(
     {
         if (Transform* transform = root->GetTransform())
         {
+            const Vector3 defaultRotation = transform->GetEulerAngles();
+            const Vector3 defaultScale = transform->GetScale();
+
             transform->SetPosition(*position);
-            transform->SetEulerAngles(*rotation);
-            transform->SetScale(*scale);
+            transform->SetRotation(Quaternion::EulerToQuat(*rotation + defaultRotation));
+            transform->SetScale(Vector3::Multiply(*scale, defaultScale));
         }
     }
 
