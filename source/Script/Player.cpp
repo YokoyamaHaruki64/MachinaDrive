@@ -109,6 +109,7 @@ void Player::Update()
 {
     if (Result::GetResultState() != Result::ResultState::Playing)
     {
+        StopForResult();
         return;
     }
 
@@ -183,6 +184,50 @@ void Player::Update()
             Pause::SetPause(!Pause::IsPause());
         }
 
+    }
+}
+
+void Player::StopForResult()
+{
+    if (m_chargeAudio)
+    {
+        m_chargeAudio->Stop();
+    }
+
+    if (m_cameraController)
+    {
+        m_cameraController->EndLock();
+    }
+
+    if (m_director.Get())
+    {
+        m_director->Destroy();
+        m_director.Clear();
+    }
+
+    if (m_attackReadyVfx.Get())
+    {
+        m_attackReadyVfx->Destroy();
+        m_attackReadyVfx.Clear();
+    }
+
+    m_isHitStop = false;
+    m_hitStopTimer = 0.0f;
+    m_state = Idle;
+    m_attackTimer = 0.0f;
+    m_attackEndTimer = 0.0f;
+    m_accumulatedMouse = Vector2::Zero();
+
+    if (m_gameHud)
+    {
+        m_gameHud->SetDriveGauge(1.0f);
+        m_gameHud->SetDriveReady(true);
+    }
+
+    if (m_rigidbody)
+    {
+        m_rigidbody->SetEnabled(true);
+        m_rigidbody->SetVelocity(Vector3::Zero());
     }
 }
 

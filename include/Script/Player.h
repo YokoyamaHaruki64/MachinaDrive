@@ -68,6 +68,7 @@ private:
     void UpdateAttacking();
     void UpdateAttackEnd();
     void UpdateAttackProgress();
+    void StopForResult();
 
     Color m_debugColor[Count] = {
         Color(0.0f, 1.0f, 0.0f, 1.0f), // Idle
