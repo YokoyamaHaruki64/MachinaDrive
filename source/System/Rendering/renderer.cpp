@@ -675,8 +675,9 @@ void Renderer::Uninit()
 
 void Renderer::Begin()
 {
-	// PerFrameを毎フレーム更新し、common.hlslのTimeへゲーム経過時間を渡す。
+	// PerFrameを毎フレーム更新し、TimeScale反映済み／非反映の両方の経過時間を渡す。
 	m_PerFrame.Time = Time::GetTotalTime();
+	m_PerFrame.UnscaledTime = Time::GetUnscaledTotalTime();
 	m_DeviceContext->UpdateSubresource(m_PerFrameBuffer, 0, nullptr, &m_PerFrame, 0, 0);
 
 	// ImGuiの外部Viewport描画がD3D11コンテキストのRTVを変更するため、毎フレームの描画先を明示的に復元する。

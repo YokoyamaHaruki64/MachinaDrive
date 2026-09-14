@@ -35,6 +35,8 @@ struct PerFrame
 	XMFLOAT4X4	Projection;
 	XMFLOAT3	CameraPosition;
 	float		Time;
+	float		UnscaledTime;
+	float		Padding[3];
 };
 
 
