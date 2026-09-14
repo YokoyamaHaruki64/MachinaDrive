@@ -5,6 +5,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Scene/GameScene.h"
 #include "Scene/TutorialScene.h"
+#include "System/Core/manager.h"
 #include "Script/TItleUI.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/UIOffset.h"
@@ -125,6 +126,10 @@ void TitleUI::HandleClick(const UIElement& element)
     else if (buttonName == "Tutorial Button")
     {
         SceneTransition::ChangeScene<TutorialScene>(0.8f, EaseType::InOutQuad);
+    }
+    else if (buttonName == "Exit Button")
+    {
+        Manager::Quit();
     }
 }
 

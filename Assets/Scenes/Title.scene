@@ -34,17 +34,17 @@ gameObjects:
           enabled: true
           m_anchor: [0.5,0.5]
           m_pivot: [0.5,0.5]
-          m_stretch: [1,1]
+          m_stretch: [1.00199997,1.0025326]
           m_pos: [0,0]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
-          m_aspectRatio: 1.75
+          m_aspectRatio: 1.77683318
       - type: UIImage
         fields:
           enabled: true
           m_drawLayer: 0
-          image: Assets/Local/Textures/Title/TitleBackground_MachinaDrive.png
+          image: Assets/Local/Textures/Title/TitleBackground.png
           m_color: [1,1,1,1]
           m_raycastTarget: false
           m_dragEnabled: false
@@ -213,7 +213,7 @@ gameObjects:
           m_anchor: [1,1]
           m_pivot: [1,1]
           m_stretch: [1,1]
-          m_pos: [0,0]
+          m_pos: [-0.0500000007,-0.0700000003]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -238,7 +238,7 @@ gameObjects:
           m_anchor: [1,1]
           m_pivot: [1,1]
           m_stretch: [1,1]
-          m_pos: [0,0]
+          m_pos: [-0.0500000007,-0.0700000003]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
@@ -263,7 +263,7 @@ gameObjects:
           m_anchor: [1,1]
           m_pivot: [1,1]
           m_stretch: [1,1]
-          m_pos: [0,0]
+          m_pos: [-0.0500000007,-0.0700000003]
           m_offset: [0,0]
           m_uiRotation: 0
           m_uiScale: [1,1]
