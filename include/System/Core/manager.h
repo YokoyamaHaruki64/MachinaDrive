@@ -44,6 +44,7 @@ private:
     static bool m_stopPlayRequested;
     static bool m_sceneDirty;
     static uint64_t m_nextGameObjectId;
+    static uint64_t m_sceneLoadGeneration;
 
     static uint64_t AllocateGameObjectId();
     static void EnsureGameObjectIds(
@@ -120,10 +121,12 @@ public:
 
     static GameMode GetGameMode() { return m_gameMode; }
     static bool IsPlayMode() { return m_gameMode == GameMode::Play; }
+    static bool IsSceneTransitioning() { return m_sceneTransitionPhase != SceneTransitionPhase::None; }
     static bool IsCurrentSceneDirty() { return m_sceneDirty; }
     static void MarkCurrentSceneDirty();
     static void ClearCurrentSceneDirty();
     static std::filesystem::path GetCurrentSceneFilePath();
+    static uint64_t GetSceneLoadGeneration() { return m_sceneLoadGeneration; }
     static bool EnterPlayMode();
     static bool StopPlayMode();
     static void Quit();
@@ -147,6 +150,7 @@ public:
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
     static std::vector<GameObject*> GetObjectsByTag(const std::string& tag);
     static GameObject* GetObjectFirstByTag(const std::string& tag);
+    static GameObject* GetObjectFirstByName(const std::string& name);
 
 #if GM_ENABLE_EDITOR
     static std::unique_ptr<EditorCommand> CreateEditorCreationCommand(

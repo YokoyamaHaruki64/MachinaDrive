@@ -57,6 +57,7 @@ Manager::GameMode Manager::m_gameMode =
 bool Manager::m_stopPlayRequested = false;
 bool Manager::m_sceneDirty = false;
 uint64_t Manager::m_nextGameObjectId = 1;
+uint64_t Manager::m_sceneLoadGeneration = 0;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
@@ -154,6 +155,18 @@ GameObject* Manager::GetObjectFirstByTag(const std::string& tag)
     for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
     {
         if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            return gameObject.get();
+        }
+    }
+    return nullptr;
+}
+
+GameObject* Manager::GetObjectFirstByName(const std::string& name)
+{
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetName() == name)
         {
             return gameObject.get();
         }
@@ -928,6 +941,7 @@ void Manager::InitScene()
 
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ++m_sceneLoadGeneration;
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
     if (m_gameMode == GameMode::Edit)
@@ -960,6 +974,7 @@ void Manager::ReloadCurrentScene()
     m_currentScene->Init();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ++m_sceneLoadGeneration;
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
     if (m_gameMode == GameMode::Edit)
