@@ -33,6 +33,8 @@ private:
     bool                    m_loop = false;
     float                   m_initialVolume = 1.0f;
     float                   m_volume = 1.0f;
+    float                   m_initialGain = 1.0f;
+    float                   m_gain = 1.0f;
 
     void Load(const char* FileName);
     bool LoadWav(const char* FileName, AudioData& audioData);
@@ -64,6 +66,8 @@ public:
     void Stop();
     void SetVolume(float volume);
     [[nodiscard]] float GetVolume() const { return m_volume; }
+    void SetGain(float gain);
+    [[nodiscard]] float GetGain() const { return m_gain; }
     void OnLoaded() override;
     void OnEditorUpdate() override;
     void OnStart() override;
