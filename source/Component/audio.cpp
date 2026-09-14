@@ -412,6 +412,22 @@ void Audio::Play(bool Loop)
 }
 
 
+void Audio::Stop()
+{
+    // 再生待ちのバッファも破棄し、次のPlayで先頭から確実に再生する。
+    m_playOnStart = false;
+    m_loop = false;
+
+    if (!m_SourceVoice)
+    {
+        return;
+    }
+
+    m_SourceVoice->Stop();
+    m_SourceVoice->FlushSourceBuffers();
+}
+
+
 void Audio::SetVolume(float volume)
 {
     m_volume = std::clamp(volume, 0.0f, 1.0f);

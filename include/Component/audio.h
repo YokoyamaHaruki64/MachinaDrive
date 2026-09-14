@@ -61,6 +61,7 @@ public:
     ~Audio() override { Uninit(); }
 
     void Play(bool Loop = false);
+    void Stop();
     void SetVolume(float volume);
     [[nodiscard]] float GetVolume() const { return m_volume; }
     void OnLoaded() override;
