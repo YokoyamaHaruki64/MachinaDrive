@@ -15,6 +15,7 @@ class WaveDirector final : public Script
     PrefabReference m_movingEnemyPrefab{ "Assets/Prefabs/MovingEnemy.prefab" };
     PrefabReference m_heavyEnemyPrefab{ "Assets/Prefabs/HeavyEnemy.prefab" };
     PrefabReference m_enemySpawnVfxPrefab{ "Assets/Prefabs/VFX_EnemySpawn.prefab" };
+    float m_timeRecoveryDropRate = 1.0f;
 
     GameObjectReference m_player;
 
@@ -83,5 +84,6 @@ public:
     int GetWave() const { return m_wave; }
     float GetRemainingTime() const { return m_remainingTime; }
     float GetWaveBeginDuration() const { return m_waveBeginDuration; }
+    float GetTimeRecoveryDropRate() const { return m_timeRecoveryDropRate; }
     void AddRemainingTime(float amount) { AddTime(amount); }
 };

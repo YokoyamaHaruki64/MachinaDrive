@@ -1,7 +1,7 @@
 version: 1
 name: TimeRecoveryItem
 gameObjects:
-  - id: 2771
+  - id: 457
     name: TimeRecoveryItem(Instance)
     tag: TimeRecoveryItem
     active: true
@@ -12,8 +12,8 @@ gameObjects:
         fields:
           enabled: true
           m_localPosition: [10,0,0]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [0.075000003,0.075000003,0.075000003]
+          m_localRotation: [-0,0,-0.258819073,0.965925872]
+          m_localScale: [0.0500000492,0.0500000492,0.0500000007]
       - type: ModelRenderer
         fields:
           enabled: true
@@ -31,10 +31,10 @@ gameObjects:
       - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1.89999998,0]
+          m_center: [0,1.12,0]
           m_isTrigger: true
           m_layer: 0
-          m_radius: 33.7700005
+          m_radius: 26.8199997
       - type: Rigidbody
         fields:
           enabled: true
@@ -52,3 +52,5 @@ gameObjects:
           m_lifetime: 12
           m_idleVfxPrefab: Assets/Prefabs/VFX_TimeItemIdle.prefab
           m_pickupVfxPrefab: Assets/Prefabs/VFX_TimeRecoveryPickup.prefab
+          m_amplitude: 0.25
+          m_frequency: 0.5

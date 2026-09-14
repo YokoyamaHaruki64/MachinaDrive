@@ -12,6 +12,8 @@ FIELDS_BEGIN(TimeRecoveryItem)
     GM_FIELD(m_lifetime);
     GM_FIELD(m_idleVfxPrefab);
     GM_FIELD(m_pickupVfxPrefab);
+    GM_FIELD(m_amplitude);
+    GM_FIELD(m_frequency);
 FIELDS_END()
 
 void TimeRecoveryItem::OnStart()
@@ -25,8 +27,9 @@ void TimeRecoveryItem::OnStart()
     m_lifetime = Math::Max(0.0f, m_lifetime);
     m_elapsedTime = 0.0f;
     m_isCollected = false;
+    m_initialPosition = transform()->GetPosition();
 
-    if (m_idleVfxPrefab && transform())
+    if (m_idleVfxPrefab)
     {
         m_idleVfx = Manager::Instantiate(
             m_idleVfxPrefab.GetPath(),
@@ -34,16 +37,23 @@ void TimeRecoveryItem::OnStart()
             Vector3::Zero(),
             Vector3::One());
     }
+
+
 }
 
 void TimeRecoveryItem::Update()
 {
-    if (m_idleVfx && transform())
+
+    const float verticalOffset = m_amplitude * std::sin(m_frequency * m_elapsedTime * Math::PI_2);
+    transform()->SetPosition(m_initialPosition + Vector3(0.0f, verticalOffset, 0.0f));
+
+    if (m_idleVfx)
     {
         m_idleVfx->GetTransform()->SetPosition(transform()->GetPosition());
     }
 
     m_elapsedTime += Time::GetDeltaTime();
+
     if (m_elapsedTime >= m_lifetime)
     {
         m_owner->Destroy();

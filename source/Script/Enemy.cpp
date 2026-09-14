@@ -4,6 +4,8 @@
 
 #include "Common/Easing.h"
 
+#include "Common/Random.h"
+
 #include "Component/Collider.h"
 #include "Component/modelRenderer.h"
 #include "Component/Rigidbody.h"
@@ -15,6 +17,7 @@
 #include "Script/Score.h"
 #include "Script/ObjectShake.h"
 #include "Script/UI/GameHud.h"
+#include "Script/WaveDirector.h"
 #include "System/Editor/FieldRegistry.h"
 
 #include <cmath>
@@ -345,6 +348,19 @@ void Enemy::FinalizeDeath()
 void Enemy::DropTimeRecoveryItem()
 {
     if (!m_timeRecoveryItemPrefab)
+    {
+        return;
+    }
+
+    float dropRate = 1.0f;
+    if (GameObject* directorObject = Manager::GetFirstObjectByComponent<WaveDirector>())
+    {
+        dropRate = directorObject->GetComponent<WaveDirector>()->GetTimeRecoveryDropRate();
+    }
+
+    dropRate = Math::Clamp(dropRate, 0.0f, 1.0f);
+    if (dropRate <= 0.0f
+        || (dropRate < 1.0f && Random::Range(0.0f, 1.0f) >= dropRate))
     {
         return;
     }

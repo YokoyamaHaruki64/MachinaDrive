@@ -25,6 +25,7 @@ FIELDS_BEGIN(WaveDirector)
     GM_FIELD(m_movingEnemyPrefab);
     GM_FIELD(m_heavyEnemyPrefab);
     GM_FIELD(m_enemySpawnVfxPrefab);
+    GM_FIELD(m_timeRecoveryDropRate);
     GM_FIELD(m_maxTime);
     GM_FIELD(m_startTime);
     GM_FIELD(m_timeDrainPerSecond);
@@ -67,6 +68,7 @@ void WaveDirector::OnStart()
     m_minPlayerDistance = Math::Max(m_minPlayerDistance, 0.0f);
     m_waveStartDelay = Math::Max(m_waveStartDelay, 0.0f);
     m_waveBeginDuration = Math::Max(m_waveBeginDuration, 0.0f);
+    m_timeRecoveryDropRate = Math::Clamp(m_timeRecoveryDropRate, 0.0f, 1.0f);
     m_remainingTime = m_startTime;
     m_wave = 0;
     m_stateTimer = SceneTransitionWaitDuration;

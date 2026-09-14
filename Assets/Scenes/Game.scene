@@ -435,8 +435,8 @@ gameObjects:
         fields:
           enabled: true
           m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
-          m_shakeDuration: 0.800000012
-          m_shakeMagnitude: 3
+          m_shakeDuration: 0.600000024
+          m_shakeMagnitude: 6
           m_hitStopDuration: 0.300000012
   - id: 51
     name: PostProcess
@@ -767,6 +767,7 @@ gameObjects:
           m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
           m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
           m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
+          m_timeRecoveryDropRate: 1
           m_maxTime: 11111
           m_startTime: 11111
           m_timeDrainPerSecond: 1
@@ -1681,3 +1682,56 @@ gameObjects:
           horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
+  - id: 457
+    name: TimeRecoveryItem(Instance)
+    tag: TimeRecoveryItem
+    active: true
+    prefab: Assets/Prefabs/TimeRecoveryItem.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [10,0,0]
+          m_localRotation: [-0,0,-0.258819073,0.965925872]
+          m_localScale: [0.0500000492,0.0500000492,0.0500000007]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Battery.fbx
+          m_materialPaths:
+            - Assets/Materials/Battery_Body.material
+            - Assets/Materials/Battery_Cap.material
+            - Assets/Materials/Battery_Light.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.12,0]
+          m_isTrigger: true
+          m_layer: 0
+          m_radius: 26.8199997
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: TimeRecoveryItem
+        fields:
+          enabled: true
+          m_recoveryTime: 3
+          m_lifetime: 12
+          m_idleVfxPrefab: Assets/Prefabs/VFX_TimeItemIdle.prefab
+          m_pickupVfxPrefab: Assets/Prefabs/VFX_TimeRecoveryPickup.prefab
+          m_amplitude: 0.25
+          m_frequency: 0.5

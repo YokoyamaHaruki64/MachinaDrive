@@ -20,6 +20,11 @@ class TimeRecoveryItem final : public Script
     WaveDirector* m_waveDirector = nullptr;
     GameObjectReference m_idleVfx;
 
+    float m_amplitude = 0.25f;
+    float m_frequency = 1.0f;
+
+    Vector3 m_initialPosition;
+
     void DestroyIdleVfx();
 
 public:

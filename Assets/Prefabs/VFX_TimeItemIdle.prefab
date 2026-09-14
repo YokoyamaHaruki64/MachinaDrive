@@ -1,7 +1,7 @@
 version: 1
 name: VFX_TimeItemIdle
 gameObjects:
-  - id: 2789
+  - id: 692
     name: VFX_TimeItemIdle(Instance)
     tag: 
     active: true
@@ -17,15 +17,15 @@ gameObjects:
       - type: ParticleEmitter
         fields:
           enabled: true
-          offset: [0,4.32999992,0]
+          offset: [0,0.150000006,0]
           maxParticles: 12
           burst: false
           burstCount: 0
           burstTime: 0
           finishedDestroy: false
           emitRate: 7
-          lifetimeMin: 0.800000012
-          lifetimeMax: 1.20000005
+          lifetimeMin: 1.24000001
+          lifetimeMax: 1.59000003
           gravity: [0,0.150000006,0]
           drag: 0.5
           size: [2,2,2]
@@ -135,14 +135,14 @@ gameObjects:
           flipbookRandomStart: false
           randomizeSpeed: true
           speed: 1.25
-          speedMin: 1.03999996
-          speedMax: 2.0999999
+          speedMin: 1.44000006
+          speedMax: 2.63000011
           direction: [0,1,0]
           coneAngle: 12
-          spawnRadius: 1
+          spawnRadius: 1.75
           spawnNormal: [0,1,0]
           velocityType: 1
-          spawnType: 1
+          spawnType: 2
       - type: ParticleRenderer
         fields:
           enabled: true
