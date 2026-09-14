@@ -23,10 +23,13 @@ private:
     std::string             m_filePath;
     bool                    m_playOnStart = false;
     bool                    m_loop = false;
+    float                   m_initialVolume = 1.0f;
+    float                   m_volume = 1.0f;
 
     void Load(const char* FileName);
     bool LoadMp3(const char* FileName);
     void Uninit();
+    void ApplyVolume();
 
 public:
 	static void InitMaster();
@@ -49,6 +52,8 @@ public:
     ~Audio() override { Uninit(); }
 
     void Play(bool Loop = false);
+    void SetVolume(float volume);
+    [[nodiscard]] float GetVolume() const { return m_volume; }
     void OnLoaded() override;
     void OnEditorUpdate() override;
     void OnStart() override;

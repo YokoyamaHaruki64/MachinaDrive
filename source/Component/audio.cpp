@@ -5,6 +5,7 @@
 #include <mfidl.h>
 #include <mfreadwrite.h>
 
+#include <algorithm>
 #include <cctype>
 #include <limits>
 #include <new>
@@ -190,6 +191,7 @@ void Audio::Load(const char *FileName)
 	// サウンドソース生成
 	m_Xaudio->CreateSourceVoice(&m_SourceVoice, &wfx);
 	assert(m_SourceVoice);
+	ApplyVolume();
 }
 
 bool Audio::LoadMp3(const char* FileName)
@@ -315,6 +317,7 @@ bool Audio::LoadMp3(const char* FileName)
     m_Length = static_cast<int>(decodedData.size());
     m_PlayLength = static_cast<int>(playLength);
     m_SourceVoice = sourceVoice;
+    ApplyVolume();
     return true;
 }
 
@@ -330,6 +333,15 @@ void Audio::Uninit()
 
     delete[] m_SoundData;
     m_SoundData = nullptr;
+}
+
+
+void Audio::ApplyVolume()
+{
+    if (m_SourceVoice)
+    {
+        m_SourceVoice->SetVolume(m_volume);
+    }
 }
 
 
@@ -370,6 +382,7 @@ void Audio::Play(bool Loop)
 	}
 
 	m_SourceVoice->SubmitSourceBuffer(&bufinfo, NULL);
+	ApplyVolume();
 
 /*
 	float outputMatrix[4] = { 0.0f , 0.0f, 1.0f , 0.0f };
@@ -383,11 +396,24 @@ void Audio::Play(bool Loop)
 
 }
 
+
+void Audio::SetVolume(float volume)
+{
+    m_volume = std::clamp(volume, 0.0f, 1.0f);
+    ApplyVolume();
+}
+
 void Audio::OnLoaded()
 {
+    m_volume = std::clamp(m_initialVolume, 0.0f, 1.0f);
+
     if (!m_SourceVoice && !m_filePath.empty())
     {
         Load(m_filePath.c_str());
+    }
+    else
+    {
+        ApplyVolume();
     }
 }
 
@@ -410,6 +436,7 @@ void Audio::RegisterFields(FieldRegistry& fields)
     GM_FIELD_PATH(m_filePath, "Assets/Local/Sounds", ".wav", ".mp3");
     GM_FIELD(m_playOnStart);
     GM_FIELD(m_loop);
+    GM_FIELD(m_initialVolume);
 }
 
 
