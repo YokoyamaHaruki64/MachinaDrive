@@ -394,7 +394,7 @@ void Material::ShowPropertyError(const char* operation, MaterialPropertyID id) c
     // 型不一致や無効IDを呼び出し側で見逃さないよう、値の返却前に理由を通知する。
     const std::string message = "Material property operation failed.\nOperation: " + std::string(operation) +
         "\nMaterialPropertyID: " + std::to_string(id);
-    MessageBoxA(nullptr, message.c_str(), "Material Property Error", MB_OK | MB_ICONERROR);
+    Logger::Error(message);
 }
 
 void Material::SetDefaultValue(const ShaderPropertyDesc& property)

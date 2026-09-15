@@ -237,6 +237,9 @@
     <ClCompile Include="source\System\Core\GM_Time.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Core\StringEncoding.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\Bullet.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
@@ -477,6 +480,9 @@
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\Mouse.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Core\StringEncoding.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\UI\UIRect.h">

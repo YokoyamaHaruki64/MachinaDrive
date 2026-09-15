@@ -7,6 +7,7 @@
 
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 namespace
@@ -24,7 +25,7 @@ namespace
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, buffer.GetAddressOf())))
-            MessageBoxA(nullptr, "スプライト頂点バッファの作成に失敗しました。", "Sprite Renderer Error", MB_OK | MB_ICONERROR);
+            Logger::Error("スプライト頂点バッファの作成に失敗しました。");
 
         return buffer;
     }

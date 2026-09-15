@@ -16,8 +16,8 @@
 #include <thread>
 
 
-const char* CLASS_NAME = "AppClass";
-const char* WINDOW_NAME = "DX11ゲーム";
+constexpr wchar_t CLASS_NAME[] = L"AppClass";
+constexpr wchar_t WINDOW_NAME[] = L"DX11ゲーム";
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -34,26 +34,26 @@ HWND GetWindow()
 }
 
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 
 
-	WNDCLASSEX wcex;
+	WNDCLASSEXW wcex;
 	{
-		wcex.cbSize = sizeof(WNDCLASSEX);
+		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = 0;
 		wcex.lpfnWndProc = WndProc;
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
 		wcex.hInstance = hInstance;
 		wcex.hIcon = nullptr;
-		wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
 		wcex.hbrBackground = nullptr;
 		wcex.lpszMenuName = nullptr;
 		wcex.lpszClassName = CLASS_NAME;
 		wcex.hIconSm = nullptr;
 
-		RegisterClassEx(&wcex);
+		RegisterClassExW(&wcex);
 
 
 		RECT rc{};
@@ -62,7 +62,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		const DWORD windowStyle = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
 		AdjustWindowRect(&rc, windowStyle, FALSE);
 
-		g_Window = CreateWindowEx(0, CLASS_NAME, WINDOW_NAME, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
+		g_Window = CreateWindowExW(0, CLASS_NAME, WINDOW_NAME, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
 			rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 #else
 		// Runtimeはモニター全域をクライアント領域にしたボーダーレスで起動する。
@@ -82,7 +82,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 
 		const DWORD windowStyle = WS_POPUP;
-		g_Window = CreateWindowEx(
+		g_Window = CreateWindowExW(
 			WS_EX_APPWINDOW,
 			CLASS_NAME,
 			WINDOW_NAME,
@@ -108,7 +108,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
         LogSystem::Shutdown();
         CoUninitialize();
-        UnregisterClass(CLASS_NAME, wcex.hInstance);
+        UnregisterClassW(CLASS_NAME, wcex.hInstance);
 		return EXIT_FAILURE;
 	}
 
@@ -161,7 +161,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	timeEndPeriod(1);
 
-	UnregisterClass(CLASS_NAME, wcex.hInstance);
+	UnregisterClassW(CLASS_NAME, wcex.hInstance);
 
 	Manager::Uninit();
     LogSystem::Shutdown();

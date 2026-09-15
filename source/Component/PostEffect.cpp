@@ -8,6 +8,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_positionBuffer;
@@ -28,7 +29,7 @@ namespace
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, buffer.GetAddressOf())))
-            MessageBoxA(nullptr, "ポストプロセス用頂点バッファの作成に失敗しました。", "Post Process Error", MB_OK | MB_ICONERROR);
+            Logger::Error("ポストプロセス用頂点バッファの作成に失敗しました。");
 
         return buffer;
     }

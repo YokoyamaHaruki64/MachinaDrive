@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/TextureManager.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 std::unordered_map<TextureID, TextureManager::TextureResource> TextureManager::m_textures;
@@ -185,7 +186,7 @@ TextureHandle TextureManager::CreateRenderTexture(const std::string& name, UINT 
             FAILED(Renderer::GetDevice()->CreateShaderResourceView(
                 replacement.texture.Get(), nullptr, replacement.shaderResourceView.GetAddressOf())))
         {
-            MessageBoxA(nullptr, "RenderTextureの再生成に失敗しました。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+            Logger::Error("RenderTextureの再生成に失敗しました。");
             return TextureHandle{};
         }
 
@@ -210,7 +211,7 @@ TextureHandle TextureManager::CreateRenderTexture(const std::string& name, UINT 
         FAILED(Renderer::GetDevice()->CreateRenderTargetView(resource.texture.Get(), nullptr, resource.renderTargetView.GetAddressOf())) ||
         FAILED(Renderer::GetDevice()->CreateShaderResourceView(resource.texture.Get(), nullptr, resource.shaderResourceView.GetAddressOf())))
     {
-        MessageBoxA(nullptr, "RenderTextureの作成に失敗しました。", "Texture Manager Error", MB_OK | MB_ICONERROR);
+        Logger::Error("RenderTextureの作成に失敗しました。");
         return TextureHandle{};
     }
 
