@@ -74,6 +74,14 @@ bool UICanvas::IsPointerTarget(const UITransform& target) const
         return false;
     }
 
+    const UIImage* const targetImage = target.GetOwner()->GetComponent<UIImage>();
+    if (!targetImage || !targetImage->IsRaycastTarget())
+    {
+        return false;
+    }
+
+    const int targetDrawLayer = targetImage->GetDrawLayer();
+
     const std::vector<std::unique_ptr<GameObject>>& gameObjects = Manager::GetActiveGameObjects();
     for (auto iterator = gameObjects.rbegin(); iterator != gameObjects.rend(); ++iterator)
     {
@@ -89,6 +97,18 @@ bool UICanvas::IsPointerTarget(const UITransform& target) const
         {
             continue;
         }
+
+        // 入力の最前面も描画順に合わせる。同一レイヤーは生成順の後勝ちを維持する。
+        if (image->GetDrawLayer() < targetDrawLayer)
+        {
+            continue;
+        }
+
+        if (image->GetDrawLayer() > targetDrawLayer)
+        {
+            return false;
+        }
+
         return transform == &target;
     }
 
