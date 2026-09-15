@@ -184,10 +184,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     if (uMsg == WM_ACTIVATEAPP)
     {
-        if (!wParam)
-        {
-            InputInternal::SetWindowCursorState(false);
-        }
+        // 非アクティブ中はOS側の状態を解除し、復帰時にゲーム要求を再適用する。
+        InputInternal::SetWindowCursorState(wParam != FALSE);
 
         return 0;
     }
