@@ -482,7 +482,7 @@ gameObjects:
               prefab: Assets/Prefabs/PostProcessImpulse_WaveBegin.prefab
             - name: TimeUp
               prefab: Assets/Prefabs/PostProcessImpulse_TimeUp.prefab
-  - id: 63
+  - id: 3376
     name: PlayerHit
     tag: 
     active: true
@@ -509,7 +509,7 @@ gameObjects:
           m_shakeDuration: 0.600000024
           m_shakeMagnitude: 6
           m_hitStopDuration: 0.300000012
-  - id: 64
+  - id: 3375
     name: Model
     tag: 
     active: true
@@ -774,21 +774,21 @@ gameObjects:
           m_maxTime: 120
           m_startTime: 120
           m_timeDrainPerSecond: 1
-          m_baseClearTimeBonus: 8
-          m_clearTimeGrowth: 2
+          m_baseClearTimeBonus: 10
+          m_clearTimeGrowth: 3
           m_maxClearTimeBonus: 20
           m_waveStartDelay: 2
           m_waveBeginDuration: 2
           m_baseEnemyCount: 5
           m_enemyCountGrowth: 1.5
           m_enemyCountExponent: 1.5
-          m_maxEnemyCount: 64
+          m_maxEnemyCount: 48
           m_movingStart: 0.150000006
-          m_movingGrowth: 0.0199999996
-          m_movingMax: 0.400000006
+          m_movingGrowth: 0.0149999997
+          m_movingMax: 0.349999994
           m_heavyStartWave: 3
-          m_heavyGrowth: 0.0299999993
-          m_heavyMax: 0.349999994
+          m_heavyGrowth: 0.0399999991
+          m_heavyMax: 0.300000012
           m_minPlayerDistance: 12
           m_spawnAttemptCount: 16
           m_spawnHeight: 0
@@ -1501,7 +1501,7 @@ gameObjects:
   - id: 270
     name: Wave_Start_Progress_Bar
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 395
     components:
@@ -1630,7 +1630,7 @@ gameObjects:
   - id: 395
     name: Wave_Start_Progress_Frame
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 210
     components:
@@ -1657,7 +1657,7 @@ gameObjects:
   - id: 396
     name: Wave_Start_Progress_Text
     tag: 
-    active: true
+    active: false
     prefab: Assets/Prefabs/GameHud.prefab
     parent: 395
     components:

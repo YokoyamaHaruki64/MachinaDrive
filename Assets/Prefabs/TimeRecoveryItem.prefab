@@ -1,7 +1,7 @@
 version: 1
 name: TimeRecoveryItem
 gameObjects:
-  - id: 457
+  - id: 3373
     name: TimeRecoveryItem(Instance)
     tag: TimeRecoveryItem
     active: true
@@ -48,7 +48,7 @@ gameObjects:
       - type: TimeRecoveryItem
         fields:
           enabled: true
-          m_recoveryTime: 3
+          m_recoveryTime: 5
           m_lifetime: 12
           m_idleVfxPrefab: Assets/Prefabs/VFX_TimeItemIdle.prefab
           m_pickupVfxPrefab: Assets/Prefabs/VFX_TimeRecoveryPickup.prefab

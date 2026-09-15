@@ -1,3 +1,5 @@
+
+// HUDのフレーム用
 Shader "HUDFrameMask"
 {
   Properties
@@ -65,45 +67,62 @@ Shader "HUDFrameMask"
       return lengthSquared > 0.0001f ? direction * rsqrt(lengthSquared) : float2(1.0f, 0.0f);
     }
 
+    // 0.0から1.0の範囲でグラデーションの進行度を計算
     float GetGradientProgress(float2 texCoord)
     {
       const float2 direction = NormalizeDirection(GradientDirection);
       const float position = dot(texCoord - 0.5f, direction) + 0.5f;
-      const float phase = frac(position + GradientOffset + UnscaledTime * GradientSpeed);
+
+      const float phase =
+        frac(position + GradientOffset + UnscaledTime * GradientSpeed);
+
       return 1.0f - abs(phase * 2.0f - 1.0f);
     }
 
+    // 0.0から1.0の範囲でハイライトのマスクを計算
     float GetHighlightMask(float2 texCoord)
     {
       const float2 direction = NormalizeDirection(HighlightDirection);
       const float position = dot(texCoord - 0.5f, direction) + 0.5f;
-      const float bandPosition = frac(position + HighlightOffset + UnscaledTime * HighlightSpeed);
+
+      const float bandPosition =
+        frac(position + HighlightOffset + UnscaledTime * HighlightSpeed);
+
       const float distanceFromBand = abs(bandPosition - 0.5f);
+
       const float halfWidth = max(HighlightWidth * 0.5f, 0.0001f);
+
       return 1.0f - smoothstep(halfWidth, halfWidth + 0.01f, distanceFromBand);
     }
 
+    // マスクを取得
     float GetMask(float2 texCoord)
     {
       const float4 maskSample = SpriteTexture.Sample(LinearSampler, texCoord);
       return saturate(UseAlphaMask ? maskSample.a : maskSample.r);
     }
 
+    // ハイライトをぼかす
     float GetBlurredHighlight(float2 texCoord)
     {
       const float2 blur = float2(max(HighlightBlur, 0.0f), max(HighlightBlur, 0.0f));
       const float center = GetMask(texCoord) * GetHighlightMask(texCoord) * 0.25f;
+
       const float horizontal = (
         GetMask(texCoord + float2(blur.x, 0.0f)) * GetHighlightMask(texCoord + float2(blur.x, 0.0f)) +
         GetMask(texCoord - float2(blur.x, 0.0f)) * GetHighlightMask(texCoord - float2(blur.x, 0.0f))) * 0.125f;
+
       const float vertical = (
         GetMask(texCoord + float2(0.0f, blur.y)) * GetHighlightMask(texCoord + float2(0.0f, blur.y)) +
         GetMask(texCoord - float2(0.0f, blur.y)) * GetHighlightMask(texCoord - float2(0.0f, blur.y))) * 0.125f;
+
+        // 斜め方向のぼかし
       const float diagonal = (
         GetMask(texCoord + blur) * GetHighlightMask(texCoord + blur) +
         GetMask(texCoord + float2(blur.x, -blur.y)) * GetHighlightMask(texCoord + float2(blur.x, -blur.y)) +
         GetMask(texCoord + float2(-blur.x, blur.y)) * GetHighlightMask(texCoord + float2(-blur.x, blur.y)) +
         GetMask(texCoord - blur) * GetHighlightMask(texCoord - blur)) * 0.0625f;
+
       return center + horizontal + vertical + diagonal;
     }
 
@@ -111,16 +130,26 @@ Shader "HUDFrameMask"
     {
       const float mask = GetMask(input.texCoord);
 
+      // グラデーションカラーを計算
       const float4 gradientColor = lerp(
         GradientColorA,
         GradientColorB,
         GetGradientProgress(input.texCoord));
+
       const float highlight = GetBlurredHighlight(input.texCoord) * HighlightIntensity;
-      const float3 rgb = gradientColor.rgb * _BaseColor.rgb * input.color.rgb * mask
-        + HighlightColor.rgb * HighlightColor.a * highlight;
+
+      const float3 rgb =
+        gradientColor.rgb *
+        _BaseColor.rgb *
+        input.color.rgb *
+        mask + HighlightColor.rgb * HighlightColor.a * highlight;
+
       const float baseAlpha = gradientColor.a * _BaseColor.a * input.color.a * mask;
+
       const float highlightAlpha = HighlightColor.a * input.color.a * highlight;
+
       const float alpha = max(baseAlpha, highlightAlpha);
+
       return float4(rgb, alpha);
     }
     HLSL_END

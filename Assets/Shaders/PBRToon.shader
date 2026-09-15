@@ -1,3 +1,6 @@
+
+// PBRToon
+// PBRをToonにする。今回のメインシェーダー
 Shader "PBRToon"
 {
     Properties
@@ -20,6 +23,7 @@ Shader "PBRToon"
         _MainTex("Main Texture", 2D) = ""
     }
 
+    // 通常の描画用のパス
     Pass
     {
         RenderPhase = Opaque
@@ -90,6 +94,7 @@ Shader "PBRToon"
 
         float4 PSMain(VSOutput input) : SV_TARGET
         {
+            // カメラ距離に応じてピクセルをディザリングして消す
             if (_CameraDitherEnabled > 0.5f)
             {
                 const float nearDistance = max(_CameraDitherNear, 0.0f);
@@ -99,6 +104,7 @@ Shader "PBRToon"
                 clip(GetBayerDither(int2(input.position.xy)) - ditherFade);
             }
 
+            // PBRの計算に必要な値を取得
             const float4 textureColor = _MainTex.Sample(LinearSampler, input.texCoord);
             const float3 albedo = saturate(_BaseColor.rgb * input.color.rgb * textureColor.rgb);
             const float3 normal = PBRSafeNormalize(input.normal);
@@ -106,6 +112,7 @@ Shader "PBRToon"
             const float3 lightDirection = PBRSafeNormalize(-Light.Direction.xyz);
             const float3 lightColor = Light.Enable ? Light.Diffuse.rgb : float3(0.0f, 0.0f, 0.0f);
 
+            // PBRのライティングを計算。結果はトゥーン化の前に使用される。
             const PBRLightingResult lighting = EvaluatePBRLighting(
                 albedo,
                 normal,
@@ -116,38 +123,59 @@ Shader "PBRToon"
                 _Metallic,
                 _Roughness);
 
+            // ShadowMapからの影を計算
             const float shadow = GetShadowAttenuation(input.worldPosition);
+
+            // ライティングをトゥーン化する
             const float toonLight = Light.Enable
                 ? QuantizeToon(lighting.lightAmount, _ToonBands)
                 : 0.0f;
+
             const float3 shadowColor = Light.Enable
                 ? albedo * _ToonShadowColor.rgb * (1.0f - toonLight)
                 : float3(0.0f, 0.0f, 0.0f);
-            const float3 diffuse = lighting.diffuseResponse * toonLight * shadow * max(_ToonDiffuseStrength, 0.0f);
+
+            const float3 diffuse =
+                lighting.diffuseResponse *
+                toonLight * shadow * max(_ToonDiffuseStrength, 0.0f);
 
             // スペキュラはPBRの応答を閾値化し、細いハイライトとして残す。
-            const float3 physicalSpecular = lighting.specularResponse * lighting.lightAmount;
+            const float3 physicalSpecular =
+                lighting.specularResponse * lighting.lightAmount;
+
             const float specularStrength = max(
                 physicalSpecular.r,
                 max(physicalSpecular.g, physicalSpecular.b));
+
             const float specularMask = Light.Enable
                 ? step(_ToonSpecularThreshold, specularStrength)
                 : 0.0f;
-            const float3 specular = physicalSpecular * specularMask * _ToonSpecularColor.rgb * shadow;
 
+            const float3 specular =
+                physicalSpecular * specularMask * _ToonSpecularColor.rgb * shadow;
+
+            // リムライトを計算
             const float rimFactor = pow(
                 saturate(1.0f - lighting.viewAmount),
                 max(_RimPower, 1.0f));
+
             const float3 rim = Light.Enable
                 ? _RimColor.rgb * rimFactor * max(_RimStrength, 0.0f)
                 : float3(0.0f, 0.0f, 0.0f);
 
-            const float3 color = lighting.ambientResponse + shadowColor + diffuse + specular + rim + _Emission.rgb;
+            // 最終的な色を合成
+            const float3 color =
+                lighting.ambientResponse +
+                shadowColor +
+                diffuse +
+                specular + rim + _Emission.rgb;
+
             return float4(color, _BaseColor.a * input.color.a * textureColor.a);
         }
         HLSL_END
     }
 
+    // 影の描画用のパス
     Pass
     {
         RenderPhase = Shadow

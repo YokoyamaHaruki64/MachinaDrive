@@ -1,6 +1,28 @@
 version: 1
 name: Title
 gameObjects:
+  - id: 7
+    name: Scene Transition
+    tag: 
+    active: true
+    notDestroyBySceneEnd: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: SceneTransition
+        fields:
+          enabled: true
+      - type: HorizontalGlitchTransition
+        fields:
+          enabled: true
+          m_name: HorizontalGlitchTransition
+          m_materialPath: Assets/Materials/PostProcess/HorizontalGlitchTransition.material
   - id: 1
     name: Title Canvas
     tag: 
@@ -178,28 +200,6 @@ gameObjects:
           m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
           m_pressedColor: [0.75,0.75,0.75,1]
           m_disabledColor: [0.5,0.5,0.5,1]
-  - id: 7
-    name: Scene Transition
-    tag: 
-    active: true
-    notDestroyBySceneEnd: true
-    prefab: 
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [1,1,1]
-      - type: SceneTransition
-        fields:
-          enabled: true
-      - type: HorizontalGlitchTransition
-        fields:
-          enabled: true
-          m_name: HorizontalGlitchTransition
-          m_materialPath: Assets/Materials/PostProcess/HorizontalGlitchTransition.material
   - id: 9
     name: Start
     tag: 
