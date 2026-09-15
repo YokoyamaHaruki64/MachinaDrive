@@ -1,5 +1,6 @@
 ﻿
 #include "Component/audio.h"
+#include "System/Core/StringEncoding.h"
 
 #include <mfapi.h>
 #include <mfidl.h>
@@ -166,12 +167,18 @@ void Audio::Load(const char* FileName)
 
 bool Audio::LoadWav(const char* FileName, AudioData& audioData)
 {
+    std::wstring wideFileName = StringEncoding::Utf8ToWide(FileName ? FileName : "");
+    if (wideFileName.empty())
+    {
+        return false;
+    }
+
     WAVEFORMATEX waveFormat{};
     MMIOINFO mmioInfo{};
     MMCKINFO riffChunkInfo{};
     MMCKINFO dataChunkInfo{};
     MMCKINFO formatChunkInfo{};
-    HMMIO hmmio = mmioOpen(const_cast<LPSTR>(FileName), &mmioInfo, MMIO_READ);
+    HMMIO hmmio = mmioOpenW(wideFileName.data(), &mmioInfo, MMIO_READ);
     if (!hmmio)
     {
         return false;

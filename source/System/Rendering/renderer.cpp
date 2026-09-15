@@ -10,6 +10,7 @@
 #include "Graphics/Material.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#include "System/Diagnostics/Logger.h"
 #include <io.h>
 
 
@@ -834,7 +835,7 @@ bool Renderer::SetRenderTarget(TextureHandle renderTexture, bool useDepthStencil
     UINT height{};
     if (!renderTargetView || !TextureManager::GetTextureSize(renderTexture, width, height))
     {
-        MessageBoxA(nullptr, "指定されたTextureHandleはRenderTextureではありません。", "Renderer Error", MB_OK | MB_ICONERROR);
+        Logger::Error("指定されたTextureHandleはRenderTextureではありません。");
         return false;
     }
 

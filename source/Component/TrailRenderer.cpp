@@ -7,6 +7,7 @@
 
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 namespace
@@ -24,7 +25,7 @@ namespace
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, nullptr, buffer.GetAddressOf())))
-            MessageBoxA(nullptr, "トレイル頂点バッファの作成に失敗しました。", "Trail Renderer Error", MB_OK | MB_ICONERROR);
+            Logger::Error("トレイル頂点バッファの作成に失敗しました。");
 
         return buffer;
     }

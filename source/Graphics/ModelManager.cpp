@@ -5,6 +5,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelLoader.h"
 #include "Graphics/Shader/ShaderManager.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 #include <algorithm>
@@ -32,7 +33,7 @@ namespace
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, buffer.GetAddressOf())))
-            MessageBoxA(nullptr, "Primitive Meshの頂点バッファ作成に失敗しました。", "Model Manager Error", MB_OK | MB_ICONERROR);
+            Logger::Error("Primitive Meshの頂点バッファ作成に失敗しました。");
 
         return buffer;
     }
@@ -52,7 +53,7 @@ namespace
         Material* defaultMaterial = defaultShader ? MaterialManager::GetDefault(*defaultShader) : nullptr;
         if (!defaultMaterial)
         {
-            MessageBoxA(nullptr, "Primitive Meshの既定Materialを取得できません。", "Model Manager Error", MB_OK | MB_ICONERROR);
+            Logger::Error("Primitive Meshの既定Materialを取得できません。");
             return nullptr;
         }
 
@@ -77,7 +78,7 @@ namespace
         Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, indexBuffer.GetAddressOf())))
         {
-            MessageBoxA(nullptr, "Primitive Meshのインデックスバッファ作成に失敗しました。", "Model Manager Error", MB_OK | MB_ICONERROR);
+            Logger::Error("Primitive Meshのインデックスバッファ作成に失敗しました。");
             return nullptr;
         }
 
@@ -201,7 +202,7 @@ ModelAsset* ModelManager::CreateRuntimeModel(
 {
     if (assetName.empty() || meshData.positions.empty() || meshData.indices.empty())
     {
-        MessageBoxA(nullptr, "Runtime Meshにはアセット名、Position頂点、Indexが必要です。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        Logger::Error("Runtime Meshにはアセット名、Position頂点、Indexが必要です。");
         return nullptr;
     }
 
@@ -221,7 +222,7 @@ ModelAsset* ModelManager::CreateRuntimeModel(
         [vertexCount](uint32_t index) { return index < vertexCount; });
     if (!validVertexStreams || !validIndices)
     {
-        MessageBoxA(nullptr, "Runtime Meshの頂点ストリームまたはIndexが不正です。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        Logger::Error("Runtime Meshの頂点ストリームまたはIndexが不正です。");
         return nullptr;
     }
 
@@ -232,7 +233,7 @@ ModelAsset* ModelManager::CreateRuntimeModel(
     }
     if (!material)
     {
-        MessageBoxA(nullptr, "Runtime MeshのMaterialを取得できません。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        Logger::Error("Runtime MeshのMaterialを取得できません。");
         return nullptr;
     }
 
@@ -273,7 +274,7 @@ ModelAsset* ModelManager::CreateRuntimeModel(
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
     if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, indexBuffer.GetAddressOf())))
     {
-        MessageBoxA(nullptr, "Runtime Meshのインデックスバッファ作成に失敗しました。", "Model Manager Error", MB_OK | MB_ICONERROR);
+        Logger::Error("Runtime Meshのインデックスバッファ作成に失敗しました。");
         return nullptr;
     }
 

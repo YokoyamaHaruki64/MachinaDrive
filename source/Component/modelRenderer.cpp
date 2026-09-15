@@ -9,6 +9,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Graphics/ModelManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 #include <unordered_set>
@@ -73,8 +74,7 @@ namespace
                         // Positionの欠落は形状を復元できないため、既定値で補完せず一度だけ通知する。
                         if (g_reportedMissingPositionMeshes.insert(mesh.meshID).second)
                         {
-                            MessageBoxA(nullptr, "Mesh does not contain a Position vertex stream.",
-                                "Model Renderer Error", MB_OK | MB_ICONERROR);
+                            Logger::Error("Mesh does not contain a Position vertex stream.");
                         }
 
                         hasAllRequiredStreams = false;
