@@ -184,8 +184,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     if (uMsg == WM_ACTIVATEAPP)
     {
-        // 非アクティブ中はOS側の状態を解除し、復帰時にゲーム要求を再適用する。
+#if GM_ENABLE_EDITOR
+        // Editorではアプリ全体の復帰とGameWindowのフォーカスを分離する。
+        if (!wParam)
+        {
+            InputInternal::SetWindowCursorState(false);
+        }
+#else
+        // Runtimeではアプリ復帰時にゲーム側のカーソル要求を再適用する。
         InputInternal::SetWindowCursorState(wParam != FALSE);
+#endif
 
         return 0;
     }
