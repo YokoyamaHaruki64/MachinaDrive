@@ -56,19 +56,52 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		RegisterClassEx(&wcex);
 
 
-		RECT rc = { 0, 0, (LONG)SCREEN_WIDTH, (LONG)SCREEN_HEIGHT };
+		RECT rc{};
+#if GM_ENABLE_EDITOR
+		rc = { 0, 0, (LONG)SCREEN_WIDTH, (LONG)SCREEN_HEIGHT };
 		const DWORD windowStyle = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
 		AdjustWindowRect(&rc, windowStyle, FALSE);
 
 		g_Window = CreateWindowEx(0, CLASS_NAME, WINDOW_NAME, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
 			rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
+#else
+		// Runtimeはモニター全域をクライアント領域にしたボーダーレスで起動する。
+		const POINT primaryMonitorPoint{ 0, 0 };
+		const HMONITOR primaryMonitor = MonitorFromPoint(
+			primaryMonitorPoint,
+			MONITOR_DEFAULTTOPRIMARY);
+		MONITORINFO monitorInfo{ sizeof(monitorInfo) };
+		if (primaryMonitor && GetMonitorInfo(primaryMonitor, &monitorInfo))
+		{
+			rc = monitorInfo.rcMonitor;
+		}
+		else
+		{
+			rc.right = GetSystemMetrics(SM_CXSCREEN);
+			rc.bottom = GetSystemMetrics(SM_CYSCREEN);
+		}
+
+		const DWORD windowStyle = WS_POPUP;
+		g_Window = CreateWindowEx(
+			WS_EX_APPWINDOW,
+			CLASS_NAME,
+			WINDOW_NAME,
+			windowStyle,
+			rc.left,
+			rc.top,
+			rc.right - rc.left,
+			rc.bottom - rc.top,
+			nullptr,
+			nullptr,
+			hInstance,
+			nullptr);
+#endif
 	}
 
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
 
-	// WS_MAXIMIZE により、表示せずに最大化状態のクライアント領域を確定させる。
-	// 初期化が終わるまで ShowWindow を呼ばず、OS の未描画領域を見せない。
+	// 初期化が終わるまでShowWindowを呼ばず、OSの未描画領域を見せない。
 
 	LogSystem::Init();
 	if (!Manager::Init())
@@ -79,8 +112,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return EXIT_FAILURE;
 	}
 
-	// 描画済みのフレームから最大化状態で表示する。
+	// 描画済みのフレームからEditorは最大化、Runtimeはボーダーレスで表示する。
+#if GM_ENABLE_EDITOR
 	ShowWindow(g_Window, SW_SHOWMAXIMIZED);
+#else
+	ShowWindow(g_Window, SW_SHOW);
+#endif
 	UpdateWindow(g_Window);
 
 	DWORD dwExecLastTime;
