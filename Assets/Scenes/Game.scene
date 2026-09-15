@@ -771,7 +771,7 @@ gameObjects:
           m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
           m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
           m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
-          m_timeRecoveryDropRate: 1
+          m_timeRecoveryDropRate: 0.330000013
           m_maxTime: 120
           m_startTime: 120
           m_timeDrainPerSecond: 1
