@@ -43,6 +43,13 @@ void Logger::Write(
     std::string_view message,
     const std::source_location& source)
 {
+#if !GM_ENABLE_EDITOR
+    // Releaseではログの表示先がないため、エントリ生成とキュー操作を省略する。
+    (void)level;
+    (void)message;
+    (void)source;
+    return;
+#else
     LogEntry entry{
         .level = level,
         .message = std::string(message),
@@ -60,6 +67,7 @@ void Logger::Write(
     }
 
     s_entries.emplace_back(std::move(entry));
+#endif
 }
 
 
