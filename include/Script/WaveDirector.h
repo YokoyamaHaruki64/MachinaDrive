@@ -1,8 +1,5 @@
 ﻿#pragma once
 
-#include <array>
-
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 
 class GameHud;

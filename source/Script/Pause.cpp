@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/Pause.h"
-#include "System/Core/GM_Time.h"
 
 bool Pause::IsPause()
 {

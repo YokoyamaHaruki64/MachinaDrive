@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Common/Color.h"
 #include "System/Core/Script.h"
 
 class UIImage;

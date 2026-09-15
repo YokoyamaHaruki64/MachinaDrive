@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "System/Core/Script.h"
-#include "math/Curve.h"
 
 class EnemyBullet final : public Script
 {

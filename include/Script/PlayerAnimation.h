@@ -2,11 +2,6 @@
 
 #include "System/Core/Script.h"
 
-#include <vector>
-
-class Player;
-class ModelRenderer;
-
 // Playerの子Modelだけを動かし、親の物理形状を固定したまま見た目をアニメーションする。
 class PlayerAnimation : public Script
 {

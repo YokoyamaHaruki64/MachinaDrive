@@ -1,16 +1,11 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/PostProcessImpulse.h"
 
-#include "Component/PostEffect.h"
 #include "Graphics/MaterialPropertyOverride.h"
 #include "Graphics/Shader/ShaderProgram.h"
-#include "System/Core/GM_Time.h"
-#include "System/Core/manager.h"
-#include "System/Rendering/renderer.h"
 
-#include <algorithm>
-#include <type_traits>
 
 namespace
 {

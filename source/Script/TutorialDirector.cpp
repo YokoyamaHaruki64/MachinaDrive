@@ -1,20 +1,11 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Component/Rigidbody.h"
-#include "Component/Transform.h"
-#include "Component/UIText.h"
-#include "Scene/GameScene.h"
+#include "Scene/TitleScene.h"
 #include "Script/Player.h"
 #include "Script/TutorialDirector.h"
 #include "Script/SceneTransition.h"
 #include "Script/PostProcessImpulse.h"
-#include "System/Core/GameObject.h"
-#include "System/Core/GM_Time.h"
-#include "System/Diagnostics/Logger.h"
-#include "System/Core/manager.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(TutorialDirector)
     GM_FIELD(m_player);
@@ -92,7 +83,7 @@ void TutorialDirector::Update()
         m_stateTimer = Math::Max(0.0f, m_stateTimer - Time::GetDeltaTime());
         if (m_stateTimer <= 0.0f)
         {
-            SceneTransition::ChangeScene<GameScene>(0.8f, EaseType::InOutQuad);
+            SceneTransition::ChangeScene<TitleScene>(0.8f, EaseType::InOutQuad);
         }
         break;
     }

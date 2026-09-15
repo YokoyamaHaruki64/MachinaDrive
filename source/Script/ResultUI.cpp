@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Easing.h"
 #include "Graphics/MaterialManager.h"
 #include "Scene/GameScene.h"
 #include "Scene/TitleScene.h"
@@ -10,10 +8,6 @@
 #include "Script/ResultUI.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/UIOffset.h"
-
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
 
 namespace
 {

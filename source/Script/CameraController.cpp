@@ -1,19 +1,12 @@
 ﻿#include "pch.h"
 
 #include "Component/ComponentInc.h"
-#include "Common/Random.h"
 
-#include "Component/BoxCollider.h"
-#include "Component/Transform.h"
 #include "Script/CameraController.h"
-
 
 #include "Script/Player.h"
 #include "Script/Pause.h"
 #include "Script/Result.h"
-
-#include <algorithm>
-#include <cmath>
 
 namespace
 {

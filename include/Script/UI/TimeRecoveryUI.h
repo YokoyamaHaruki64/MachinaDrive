@@ -2,7 +2,6 @@
 
 #include "System/Core/Script.h"
 
-class UIText;
 class UIFade;
 class UIOffset;
 

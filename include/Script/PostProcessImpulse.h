@@ -1,9 +1,6 @@
 ﻿#pragma once
 
-#include "Common/Easing.h"
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
-#include "System/Serialization/YAMLReflection.h"
 
 #include <string>
 #include <unordered_set>

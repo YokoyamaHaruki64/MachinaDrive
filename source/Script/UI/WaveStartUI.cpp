@@ -1,5 +1,4 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/UI/WaveStartUI.h"

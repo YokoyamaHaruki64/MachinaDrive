@@ -1,8 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
-#include "Component/Transform.h"
 #include "Script/EnemyAnimation.h"
-#include "System/Core/GM_Time.h"
 
 FIELDS_BEGIN(EnemyAnimation)
     GM_FIELD(m_floatHeight);

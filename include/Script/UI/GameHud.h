@@ -3,12 +3,7 @@
 #include <vector>
 #include <unordered_set>
 
-#include "Common/Color.h"
 #include "System/Core/Script.h"
-
-class GameObject;
-class UIImage;
-class UIText;
 
 // ゲームロジックから表示状態を受け取る窓口。参照先はSceneで設定する。
 class GameHud final : public Script

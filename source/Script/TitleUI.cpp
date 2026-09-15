@@ -1,16 +1,13 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
+
+#include "Script/TItleUI.h"
 
 #include "Graphics/MaterialManager.h"
 #include "Scene/GameScene.h"
 #include "Scene/TutorialScene.h"
-#include "System/Core/manager.h"
-#include "Script/TItleUI.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/UIOffset.h"
-
-#include <algorithm>
 
 FIELDS_BEGIN(TitleUI)
     GM_FIELD(m_uiObjects);

@@ -1,12 +1,8 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
-#include "Component/modelRenderer.h"
-#include "Component/Transform.h"
 #include "Script/Player.h"
 #include "Script/PlayerAnimation.h"
-#include "System/Core/GameObject.h"
-#include "System/Core/GM_Time.h"
-#include "System/Diagnostics/Logger.h"
 
 FIELDS_BEGIN(PlayerAnimation)
     GM_FIELD(m_stateColors);
@@ -18,16 +14,8 @@ FIELDS_BEGIN(PlayerAnimation)
     GM_FIELD(m_floatSpeed);
     GM_FIELD(m_idleYawSpeed);
     GM_FIELD(m_atkReadyRotSpeed);
-    //GM_FIELD(m_attackReadyPitchAngle);
-    //GM_FIELD(m_attackReadyRollAngle);
-    //GM_FIELD(m_attackReadyPitchSpeed);
-    //GM_FIELD(m_attackReadyRollSpeed);
     GM_FIELD(m_atkStartRotSpeed);
     GM_FIELD(m_attackSpinDecay);
-    //GM_FIELD(m_attackingPitchAngle);
-    //GM_FIELD(m_attackingRollAngle);
-    //GM_FIELD(m_attackingPitchSpeed);
-    //GM_FIELD(m_attackingRollSpeed);
     GM_FIELD(m_rotationSpeedTransitionRate);
 FIELDS_END()
 

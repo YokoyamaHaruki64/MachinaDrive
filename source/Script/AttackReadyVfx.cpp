@@ -1,13 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Random.h"
 #include "Script/AttackReadyVfx.h"
 #include "Script/Player.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
 
 FIELDS_BEGIN(AttackReadyVfx)
     GM_FIELD(m_headPrefab);

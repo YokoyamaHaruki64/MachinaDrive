@@ -1,16 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Easing.h"
-
-#include "Common/Random.h"
-
-#include "Component/Collider.h"
-#include "Component/modelRenderer.h"
-#include "Component/Rigidbody.h"
-#include "Component/Transform.h"
 #include "Script/Enemy.h"
+
 #include "Script/Health.h"
 #include "Script/Player.h"
 #include "Script/PostProcessImpulse.h"
@@ -19,9 +11,6 @@
 #include "Script/ObjectShake.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
 
 void Enemy::RegisterFields(FieldRegistry& fields)
 {

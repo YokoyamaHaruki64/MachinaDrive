@@ -1,11 +1,6 @@
 ﻿#pragma once
 
-#include <string>
-
-#include "math/Vector2.h"
 #include "System/Core/Script.h"
-
-class UITransform;
 
 // 進捗0から1へ、指定したUIオフセットまで移動する。
 class UIOffset final : public Script

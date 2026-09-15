@@ -1,12 +1,8 @@
 ﻿#pragma once
 
-#include "System/Core/GameObjectReference.h"
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 
 class Player;
-class Rigidbody;
-class UIText;
 
 // プレイヤーの発射操作からBasicEnemy撃破までのチュートリアルを進行する。
 class TutorialDirector final : public Script

@@ -1,12 +1,7 @@
-﻿#include "ComboUI.h"
-
+﻿#include "pch.h"
 #include "Component/ComponentInc.h"
 
-#include "Component/UIText.h"
-
-#include <cmath>
-#include <cstdio>
-#include <numbers>
+#include "Script/ComboUI.h"
 
 FIELDS_BEGIN(ComboUI)
     GM_FIELD(m_comboValue);

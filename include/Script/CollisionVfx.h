@@ -1,12 +1,6 @@
 ﻿#pragma once
 
-#include "Common/Color.h"
 #include "System/Core/Script.h"
-#include "math/Curve.h"
-#include "math/Vector3.h"
-
-#include <cstdint>
-#include <vector>
 
 class ParticleEmitter;
 

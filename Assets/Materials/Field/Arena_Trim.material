@@ -7,10 +7,14 @@ properties:
   _Metallic: 0.449999988
   _Roughness: 0.449999988
   _ToonBands: 4
+  _ToonDiffuseStrength: 1
   _ToonShadowColor: [0.350000024,0.400000006,0.550000012,1]
   _ToonSpecularColor: [1,1,1,1]
   _ToonSpecularThreshold: 0
   _RimColor: [0.262745112,0.313725501,0.368627459,1]
   _RimPower: 4
   _RimStrength: 1
+  _CameraDitherEnabled: 0
+  _CameraDitherNear: 0.800000012
+  _CameraDitherFar: 1.79999995
   _MainTex: 

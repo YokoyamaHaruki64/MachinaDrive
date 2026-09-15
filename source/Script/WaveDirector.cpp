@@ -1,18 +1,12 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Random.h"
 #include "Script/Player.h"
 #include "Script/PostProcessImpulse.h"
 #include "Script/Result.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <algorithm>
-#include <cmath>
 
 namespace
 {

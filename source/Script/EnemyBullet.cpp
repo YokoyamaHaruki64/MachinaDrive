@@ -1,11 +1,9 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-
 #include "Script/EnemyBullet.h"
+
 #include "Script/Health.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(EnemyBullet)
     GM_FIELD(m_trailWidthCurve);

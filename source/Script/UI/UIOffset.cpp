@@ -1,13 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/UI/UIOffset.h"
-
-#include "Common/Easing.h"
-#include "Component/UITransform.h"
-#include "System/Core/GameObject.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
 
 FIELDS_BEGIN(UIOffset)
     GM_FIELD(m_easeType);

@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/AttackChargeHead.h"
 #include "Script/Player.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(AttackChargeHead)
     GM_FIELD(m_initialSpeed);

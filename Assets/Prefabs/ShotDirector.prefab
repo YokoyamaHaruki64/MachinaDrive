@@ -1,8 +1,8 @@
 version: 1
 name: ShotDirector
 gameObjects:
-  - id: 117
-    name: ShotDirector
+  - id: 1043
+    name: ShotDirector(Instance)
     tag: 
     active: true
     prefab: 
@@ -12,8 +12,8 @@ gameObjects:
         fields:
           enabled: true
           m_localPosition: [2.61999989,0.0500000007,-5.25]
-          m_localRotation: [0.704954267,2.12229428e-10,-2.10943082e-10,0.709252775]
-          m_localScale: [3.63000011,14.999999,1.00004888]
+          m_localRotation: [0.704954267,2.12229428e-10,-2.10943041e-10,0.709252775]
+          m_localScale: [3.63000011,22,1.00004888]
       - type: ModelRenderer
         fields:
           enabled: true
@@ -24,8 +24,10 @@ gameObjects:
           m_materialPaths:
             - Assets/Materials/ShotDirector.material
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
       - type: ShotDirector
         fields:
           enabled: true
-          m_pivotOffset: 6
+          m_pivotOffset: 8
           m_positionOffset: [0,-0.949999988,0]

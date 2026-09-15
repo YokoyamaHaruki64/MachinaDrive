@@ -1,17 +1,9 @@
 ﻿#pragma once
 
-#include "Common/Color.h"
-#include "System/Core/GameObjectReference.h"
 #include "System/Core/Script.h"
 
-#include <vector>
-
-class Audio;
-class Material;
 class UIButton;
-class UIImage;
 class UIOffset;
-class UITransform;
 
 // リザルト演出完了後にCanvasを表示し、リトライとタイトル復帰を受け付ける。
 class ResultUI final : public Script

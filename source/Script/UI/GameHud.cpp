@@ -1,19 +1,12 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
+
 #include "Script/UI/GameHud.h"
 
 #include "Script/ComboUI.h"
 #include "Script/FillBar.h"
 #include "Script/UI/TimeRecoveryUI.h"
 #include "Script/UI/WaveStartUI.h"
-#include "Component/UIImage.h"
-#include "Component/UIText.h"
-#include "System/Core/GM_Time.h"
-#include "System/Core/GameObject.h"
-#include "System/Core/manager.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
-#include <cstdio>
 
 namespace
 {

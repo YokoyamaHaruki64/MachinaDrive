@@ -2,9 +2,6 @@
 
 #include "System/Core/Script.h"
 
-#include <functional>
-#include <vector>
-
 // 同一GameObjectで生存するComponentが、被ダメージと死亡へ反応するための共通Script。
 class Health final : public Script
 {

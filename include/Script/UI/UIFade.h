@@ -1,12 +1,6 @@
 ﻿#pragma once
 
-#include <string>
-
-#include "Common/Color.h"
 #include "System/Core/Script.h"
-
-class UIImage;
-class UIText;
 
 // 同一GameObjectのUI描画要素を、進捗に応じて透明化する。
 class UIFade final : public Script

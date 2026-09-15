@@ -2,6 +2,7 @@
 
 #include "System/Core/component.h"
 #include "System/Core/ScriptTypes.h"
+#include "System/Diagnostics/Logger.h"
 
 // ゲーム固有の振る舞いを記述するComponentの基底クラス。
 class Script : public Component

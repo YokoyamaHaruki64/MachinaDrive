@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/AttackDashTrail.h"
 #include "Script/Player.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(AttackDashTrail)
     GM_FIELD(m_offset);

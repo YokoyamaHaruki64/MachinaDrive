@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "System/Core/Script.h"
-#include "System/Core/GameObjectReference.h"
 
 class Camera;
 

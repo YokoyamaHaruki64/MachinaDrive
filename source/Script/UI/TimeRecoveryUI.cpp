@@ -1,16 +1,10 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/UI/TimeRecoveryUI.h"
 
-#include "Component/UIText.h"
 #include "Script/UI/UIFade.h"
 #include "Script/UI/UIOffset.h"
-#include "System/Core/GM_Time.h"
-#include "System/Core/GameObject.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
-#include <cstdio>
 
 FIELDS_BEGIN(TimeRecoveryUI)
     GM_FIELD(m_recoveryText);

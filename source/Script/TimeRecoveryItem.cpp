@@ -1,11 +1,9 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/TimeRecoveryItem.h"
 
 #include "Script/WaveDirector.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(TimeRecoveryItem)
     GM_FIELD(m_recoveryTime);

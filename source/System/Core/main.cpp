@@ -17,7 +17,11 @@
 
 
 constexpr wchar_t CLASS_NAME[] = L"AppClass";
-constexpr wchar_t WINDOW_NAME[] = L"DX11ゲーム";
+#if GM_ENABLE_EDITOR
+constexpr wchar_t WINDOW_NAME[] = L"GameMaker Editor";
+#else
+constexpr wchar_t WINDOW_NAME[] = L"MachinaDrive";
+#endif
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

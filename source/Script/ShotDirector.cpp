@@ -1,13 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Component/Camera.h"
 #include "Script/Player.h"
 #include "Script/ShotDirector.h"
-#include "math/Vector2.h"
-
-#include <cmath>
 
 FIELDS_BEGIN(ShotDirector)
     GM_FIELD(m_pivotOffset);

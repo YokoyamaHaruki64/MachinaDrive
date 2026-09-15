@@ -1,12 +1,6 @@
 ﻿#pragma once
 
-#include "System/Core/ComponentRegistry.h"
-#include "System/Core/GameObjectReference.h"
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
-#include "System/Serialization/YAMLReflection.h"
-
-class Audio;
 
 // 複数の調整値を1つのInspector項目とYAML Mapへまとめる設定例。
 struct SampleMoveSettings

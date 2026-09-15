@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Common/Easing.h"
 #include "System/Core/Script.h"
 #include "System/Core/manager.h"
 

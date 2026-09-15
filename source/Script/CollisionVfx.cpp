@@ -3,7 +3,6 @@
 #include "Component/ComponentInc.h"
 
 #include "Script/CollisionVfx.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(CollisionVfx)
     GM_FIELD(m_coneAngle);

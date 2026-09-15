@@ -1,14 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/UI/UIFade.h"
-
-#include "Component/UIImage.h"
-#include "Component/UIText.h"
-#include "Common/Easing.h"
-#include "System/Core/GameObject.h"
-#include "System/Editor/FieldRegistry.h"
-
-#include <cmath>
 
 FIELDS_BEGIN(UIFade)
     GM_FIELD(m_easeType);

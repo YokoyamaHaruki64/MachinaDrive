@@ -1,17 +1,15 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Graphics/MaterialManager.h"
 #include "Scene/GameScene.h"
 #include "Scene/TitleScene.h"
+
 #include "Script/Pause.h"
 #include "Script/PauseUI.h"
 #include "Script/SceneTransition.h"
 #include "Script/UI/UIOffset.h"
-#include "System/Core/manager.h"
 
-#include <algorithm>
+#include "Graphics/MaterialManager.h"
 
 namespace
 {

@@ -1,11 +1,7 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Random.h"
-#include "Component/Transform.h"
 #include "Script/ObjectShake.h"
-#include "System/Core/GM_Time.h"
 
 void ObjectShake::OnStart()
 {

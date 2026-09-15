@@ -1,14 +1,11 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/Result.h"
 
 #include "Script/GrayScalePostProcess.h"
 #include "Script/UI/GameHud.h"
 #include "Script/WaveDirector.h"
-#include "System/Core/GM_Time.h"
-#include "System/Core/manager.h"
-#include "System/Diagnostics/Logger.h"
-#include "System/Editor/FieldRegistry.h"
 
 FIELDS_BEGIN(Result)
     GM_FIELD(m_duration);

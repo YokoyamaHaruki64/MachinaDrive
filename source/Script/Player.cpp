@@ -1,11 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/Player.h"
-#include "System/Editor/FieldRegistry.h"
-#include "System/Core/Physics.h"
-#include "Scene/ResultScene.h"
+
 #include "Script/Enemy.h"
 #include "Script/CameraController.h"
 #include "Script/PlayerAnimation.h"
@@ -24,7 +21,6 @@ FIELDS_BEGIN(Player)
     GM_FIELD(m_attackReadyVfxPrefab);
     GM_FIELD(m_playerLaunchVfxPrefab);
     GM_FIELD(m_attackDashTrailPrefab);
-    GM_FIELD(m_debug);
 FIELDS_END()
 
 void Player::OnStart()
@@ -35,7 +31,6 @@ void Player::OnStart()
 
     m_chargeAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Charge_Loop.wav");
     m_shotAudio = m_owner->AddComponent<Audio>("Assets/Local/Sounds/SE_Shot.wav");
-    m_shotAudio->SetGain(5.0f);
     m_rigidbody = GetComponent<Rigidbody>();
     m_health = GetComponent<Health>();
     m_cameraController = Manager::GetFirstObjectByComponent<CameraController>()->GetComponent<CameraController>();
@@ -101,10 +96,6 @@ void Player::OnStart()
 
     }
 
-#ifndef _DEBUG
-    m_debug = false;
-#endif // !_DEBUG
-
     m_didBrake = false;
 }
 
@@ -117,23 +108,10 @@ void Player::Update()
     }
 
     if (!m_rigidbody)
-    {
         return;
-    }
+
     if (Pause::IsPause())
-    {
         return;
-    }
-
-    if (Input::GetKeyTrigger(Input::KeyCode::E))
-    {
-        Vector3 playerForward = transform()->GetForward();
-        Manager::Instantiate("Assets/Prefabs/Enemy.prefab",
-            playerForward * 20.0f + transform()->GetPosition(),
-            Quaternion::Identity().QuatToEuler(),
-            Vector3::One());
-
-    }
 
     if(m_isHitStop)
     {
@@ -168,26 +146,6 @@ void Player::Update()
             break;
     }
 
-    if (m_debug)
-    {
-        GameObject* model = transform()->GetChildren()[1]->GetOwner();
-        MaterialPropertyOverride& debugMaterial = model->GetComponent<ModelRenderer>()->GetMaterialPropertyOverride(0);
-        debugMaterial.SetColor("_BaseColor", m_debugColor[m_state]);
-
-        if(Input::GetKeyTrigger(Input::KeyCode::G))
-        {
-            if (m_health)
-            {
-                m_health->TakeDamage(10.0f);
-            }
-        }
-
-        if(Input::GetKeyTrigger(Input::KeyCode::P))
-        {
-            Pause::SetPause(!Pause::IsPause());
-        }
-
-    }
 }
 
 void Player::StopForResult()

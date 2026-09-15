@@ -1,10 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/Health.h"
-
-#include "System/Editor/FieldRegistry.h"
-
-#include <algorithm>
 
 FIELDS_BEGIN(Health)
     GM_FIELD(m_maxHP);

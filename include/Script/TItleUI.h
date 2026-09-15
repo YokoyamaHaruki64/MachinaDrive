@@ -1,15 +1,9 @@
 ﻿#pragma once
 
-#include "Common/Color.h"
-#include "System/Core/GameObjectReference.h"
 #include "System/Core/Script.h"
 
-#include <vector>
 
-class Material;
-class Audio;
 class UIButton;
-class UIImage;
 class UIOffset;
 
 class TitleUI : public Script

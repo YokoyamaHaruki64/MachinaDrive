@@ -26,41 +26,6 @@ gameObjects:
           m_sensitivity: 0.00100000005
           m_offset: [0,2,0]
           m_collisionPadding: 0.300000012
-  - id: 2
-    name: Field
-    tag: 
-    active: true
-    prefab: 
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [0,-1.46000004,0]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [0.0199999996,0.0199999996,0.0199999996]
-      - type: BoxCollider
-        fields:
-          enabled: true
-          m_center: [0,-0.0299999993,0]
-          m_isTrigger: false
-          m_layer: 0
-          m_size: [6000,140,6000]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Arena_3.fbx
-          m_materialPaths:
-            - ''
-            - Assets/Materials/Field/Arena_Wall.material
-            - Assets/Materials/Field/Arena_Cyan.material
-            - Assets/Materials/Field/Arena_Floor.material
-          m_inverseAxisFlags: 0
-          m_castShadow: true
-          m_receiveShadow: true
   - id: 3
     name: MateoCube
     tag: 
@@ -125,7 +90,6 @@ gameObjects:
           m_attackReadyVfxPrefab: Assets/Prefabs/VFX_AttackReady.prefab
           m_playerLaunchVfxPrefab: Assets/Prefabs/VFX_PlayerLaunch.prefab
           m_attackDashTrailPrefab: Assets/Prefabs/VFX_PlayerDashTrail.prefab
-          m_debug: true
       - type: Rigidbody
         fields:
           enabled: true
@@ -1019,7 +983,7 @@ gameObjects:
             - 405
             - 408
   - id: 889
-    name: GameHud(Instance)
+    name: GameHud
     tag: 
     active: true
     prefab: Assets/Prefabs/GameHud.prefab
@@ -2042,3 +2006,371 @@ gameObjects:
           horizontalAlignment: 0
           verticalAlignment: 0
           m_materialPath: Assets/Materials/Text.material
+  - id: 1450
+    name: Field
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,-1.46000004,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.0199999996,0.0199999996,0.0199999996]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-0.0299999993,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [6000,140,6000]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Arena_3.fbx
+          m_materialPaths:
+            - Assets/Materials/Field/Arena_Trim.material
+            - Assets/Materials/Field/Arena_Wall.material
+            - Assets/Materials/Field/Arena_Cyan.material
+            - Assets/Materials/Field/Arena_Floor.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+  - id: 1451
+    name: Collider
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1450
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,73,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [50,50,50]
+  - id: 1452
+    name: Left_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-58.5999985,13.3599997,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1453
+    name: Right_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [58.5999985,13.3599997,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1454
+    name: Left_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-58.5999985,13.3599997,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1455
+    name: Right_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [58.5999985,13.3599997,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1456
+    name: Fore_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-28.0100002,8.96000004,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1457
+    name: Fore_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [27.8600006,8.96000004,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1458
+    name: Left_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.7900009,8.84000015,-28.0300007]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1459
+    name: Left_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.7900009,8.84000015,27.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1460
+    name: Back_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-28.0100002,8.96000004,-56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1461
+    name: Back_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [27.8600006,8.96000004,-56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1462
+    name: Right_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [56.7900009,8.84000015,-28.0300007]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1463
+    name: Right_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [56.7900009,8.84000015,27.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1464
+    name: Wall_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [120,10,5]
+  - id: 1465
+    name: Wall_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,56.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [120,10,5]
+  - id: 1466
+    name: Wall_Right
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [56.7900009,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,10,120]
+  - id: 1467
+    name: Wall_Left
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1451
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.8800011,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,10,120]

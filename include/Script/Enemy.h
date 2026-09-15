@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 
 #include <vector>

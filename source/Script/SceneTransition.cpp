@@ -1,12 +1,8 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
 #include "Script/SceneTransition.h"
 
-#include "Component/PostEffect.h"
-#include "System/Core/GM_Time.h"
-#include "System/Rendering/renderer.h"
-
-#include <algorithm>
 
 namespace
 {

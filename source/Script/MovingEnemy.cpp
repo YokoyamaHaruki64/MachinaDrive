@@ -1,11 +1,8 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
-#include "Common/Random.h"
 #include "Script/MovingEnemy.h"
 
-#include <cmath>
 
 void MovingEnemy::RegisterFields(FieldRegistry& fields)
 {

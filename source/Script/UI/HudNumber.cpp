@@ -1,9 +1,7 @@
 ﻿#include "pch.h"
-#include "Script/UI/HudNumber.h"
+#include "Component/ComponentInc.h"
 
-#include "Component/UIImage.h"
-#include "System/Core/GameObject.h"
-#include "System/Editor/FieldRegistry.h"
+#include "Script/UI/HudNumber.h"
 
 FIELDS_BEGIN(HudNumber)
     GM_FIELD(m_value);

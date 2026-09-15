@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-#include "System/Core/GameObjectReference.h"
 #include "System/Core/Script.h"
-#include "math/Vector3.h"
 
 // Playerの引っ張り方向を表示する一時的なガイド。
 class ShotDirector final : public Script

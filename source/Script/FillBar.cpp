@@ -1,9 +1,7 @@
 ﻿#include "pch.h"
+#include "Component/ComponentInc.h"
 
-#include "Component/UIImage.h"
 #include "Script/FillBar.h"
-#include "System/Core/GM_Time.h"
-#include "System/Editor/FieldRegistry.h"
 
 void FillBar::ClampValues()
 {
