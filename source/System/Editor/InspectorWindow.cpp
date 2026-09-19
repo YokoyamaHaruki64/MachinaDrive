@@ -4,6 +4,7 @@
 
 #include "Component/Transform.h"
 #include "Component/UITransform.h"
+#include "Component/PostEffect.h"
 #include "Graphics/Material.h"
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
@@ -16,6 +17,7 @@
 #include "System/Diagnostics/Logger.h"
 #include "System/Core/manager.h"
 #include "System/Rendering/RendererBase.h"
+#include "System/Rendering/renderer.h"
 #include <algorithm>
 #include <typeinfo>
 
@@ -281,6 +283,85 @@ void InspectorWindow::DrawMaterialInspector(RendererBase& renderer, uint32_t slo
     ImGui::PopID();
 }
 
+void InspectorWindow::DrawPostProcessMaterialInspector(PostProcess& postProcess)
+{
+    ImGui::PushID("PostProcessMaterial");
+    Material* material = postProcess.GetMaterial();
+    const char* label = material ? "Material" : "Material (None)";
+    ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
+    if (ImGui::TreeNode(label))
+    {
+        if (ImGui::Button("Select Material"))
+        {
+            const std::optional<std::filesystem::path> selectedPath = FileSystem::OpenFileDialog("Assets/Materials", ".material");
+            if (selectedPath)
+            {
+                const std::optional<std::filesystem::path> sourcePath = ToAssetRelativePath(*selectedPath, "Assets", L".material", "Material");
+                Material* source = sourcePath ? MaterialManager::Load(*sourcePath) : nullptr;
+                if (source && source->IsValid())
+                {
+                    if (Renderer::IsPostProcessMaterialUsed(source, &postProcess))
+                    {
+                        Logger::Error("選択したMaterialは別のPostProcessが使用中です。");
+                    }
+                    else
+                    {
+                        postProcess.SetMaterial(source);
+                    }
+                }
+            }
+        }
+
+        material = postProcess.GetMaterial();
+        if (!material || !material->IsValid())
+        {
+            ImGui::TextUnformatted(material ? "Status: Error" : "Status: None");
+            if (ImGui::Button("Create Material"))
+            {
+                const std::optional<std::filesystem::path> selectedPath = FileSystem::OpenFileDialog("Assets/Shaders", ".shader");
+                if (selectedPath)
+                {
+                    const std::optional<std::filesystem::path> shaderPath = ToAssetRelativePath(*selectedPath, "Assets", L".shader", "Shader");
+                    GraphicsShader* shader = shaderPath ? ShaderManager::LoadShaderFromFile(shaderPath->generic_string()) : nullptr;
+                    if (shader)
+                        postProcess.SetMaterial(MaterialManager::Create(shaderPath->stem().string() + " Material", *shader));
+                }
+            }
+        }
+        else
+        {
+            DrawMaterialName(*material);
+            ImGui::Separator();
+            ImGui::Text("Path: %s", material->GetFilePath().c_str());
+            if (!material->GetFilePath().empty() && ImGui::Button("Save"))
+                MaterialManager::Save(*material, material->GetFilePath());
+            if (!material->GetFilePath().empty())
+                ImGui::SameLine();
+            if (ImGui::Button("New Save"))
+            {
+                const std::optional<std::filesystem::path> selectedPath =
+                    FileSystem::SaveFileDialog("Assets/Materials/PostProcess", ".material", material->GetName() + ".material");
+                if (selectedPath)
+                {
+                    const std::optional<std::filesystem::path> path = ToAssetRelativePath(*selectedPath, "Assets", L".material", "Material");
+                    if (path && MaterialManager::Save(*material, *path))
+                        postProcess.SetMaterial(material);
+                }
+            }
+
+            ImGui::Separator();
+            if (ImGui::Button("Select Shader") && SelectShader(*material))
+                postProcess.SetMaterial(material);
+            ImGui::Text("Shader: %s", material->GetShader().GetShaderName().c_str());
+            ImGui::Separator();
+            material->DrawInspectorImGui();
+        }
+
+        ImGui::TreePop();
+    }
+    ImGui::PopID();
+}
+
 void InspectorWindow::DrawImGui()
 {
     BeginWindow("Inspector", Vector2(360.0f, 500.0f));
@@ -288,6 +369,7 @@ void InspectorWindow::DrawImGui()
     if (!m_selectedGameObjects || m_selectedGameObjects->empty())
     {
         m_gameObjectNameTarget = nullptr;
+        m_gameObjectTagTarget = nullptr;
         m_componentEditSnapshots.clear();
         ImGui::TextUnformatted("GameObjectを選択してください。");
         EndWindow();
@@ -297,6 +379,7 @@ void InspectorWindow::DrawImGui()
     if (m_selectedGameObjects->size() > 1)
     {
         m_gameObjectNameTarget = nullptr;
+        m_gameObjectTagTarget = nullptr;
         m_componentEditSnapshots.clear();
         ImGui::Text("%zu 個のGameObjectを選択中です。", m_selectedGameObjects->size());
         EndWindow();
@@ -304,14 +387,19 @@ void InspectorWindow::DrawImGui()
     }
 
     GameObject* selectedGameObject = m_selectedGameObjects->front();
-    if (m_gameObjectNameTarget != selectedGameObject)
+    if (m_gameObjectNameTarget != selectedGameObject || m_gameObjectTagTarget != selectedGameObject)
     {
         m_gameObjectNameTarget = selectedGameObject;
+        m_gameObjectTagTarget = selectedGameObject;
         m_componentEditSnapshots.clear();
         std::fill(m_gameObjectNameBuffer.begin(), m_gameObjectNameBuffer.end(), '\0');
         const std::string& name = selectedGameObject->GetName();
         const size_t length = std::min(name.size(), m_gameObjectNameBuffer.size() - 1);
         std::copy_n(name.data(), length, m_gameObjectNameBuffer.data());
+        std::fill(m_gameObjectTagBuffer.begin(), m_gameObjectTagBuffer.end(), '\0');
+        const std::string& tag = selectedGameObject->GetTag();
+        const size_t tagLength = std::min(tag.size(), m_gameObjectTagBuffer.size() - 1);
+        std::copy_n(tag.data(), tagLength, m_gameObjectTagBuffer.data());
     }
 
     const bool nameSubmitted = ImGui::InputText(
@@ -331,6 +419,25 @@ void InspectorWindow::DrawImGui()
                 [gameObject = selectedGameObject, previousName]() { gameObject->SetName(previousName); });
         }
     }
+
+    const bool tagSubmitted = ImGui::InputText(
+        "Tag",
+        m_gameObjectTagBuffer.data(),
+        m_gameObjectTagBuffer.size(),
+        ImGuiInputTextFlags_EnterReturnsTrue);
+    if (tagSubmitted || ImGui::IsItemDeactivatedAfterEdit())
+    {
+        const std::string tag = m_gameObjectTagBuffer.data();
+        if (tag != selectedGameObject->GetTag())
+        {
+            const std::string previousTag = selectedGameObject->GetTag();
+            selectedGameObject->SetTag(tag);
+            EditorSystem::RecordExecutedCommand(
+                [gameObject = selectedGameObject, tag]() { gameObject->SetTag(tag); },
+                [gameObject = selectedGameObject, previousTag]() { gameObject->SetTag(previousTag); });
+        }
+    }
+
     bool active = selectedGameObject->IsActive();
     if (ImGui::Checkbox("Active", &active))
     {
@@ -353,6 +460,15 @@ void InspectorWindow::DrawImGui()
         if (ImGui::Button("Apply to Prefab"))
         {
             Manager::ApplyToPrefab(*selectedGameObject);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Revert from Prefab") && Manager::RevertFromPrefab(*selectedGameObject))
+        {
+            m_gameObjectNameTarget = nullptr;
+            m_gameObjectTagTarget = nullptr;
+            m_componentEditSnapshots.clear();
+            EndWindow();
+            return;
         }
         ImGui::Separator();
     }
@@ -452,6 +568,10 @@ void InspectorWindow::DrawImGui()
                 {
                     DrawMaterialInspector(*renderer, slot);
                 }
+            }
+            else if (PostProcess* postProcess = dynamic_cast<PostProcess*>(component))
+            {
+                DrawPostProcessMaterialInspector(*postProcess);
             }
             ImGui::TreePop();
         }

@@ -1,8 +1,7 @@
 ﻿/*=============================================================================
 
 File   : [GraphicInc.h]
-Desc   : グラフィックス関連の共通の型や定数を定義するヘッダーファイル
-        これをインクルードすることで、グラフィックス関連のクラスで共通して使用する型や定数を利用できるようにする
+Desc   : 描画機能を利用する側が共有する値型・GPU形状型・描画状態を定義する
 
 ------------------------------------------------------------------------------
 
@@ -15,6 +14,12 @@ Author : Yokoyama Haruki
 #define _GRAPHIC_INC_H_
 
 #include <variant>
+#include <array>
+#include <bitset>
+#include <d3d11.h>
+#include <utility>
+#include <vector>
+#include <wrl/client.h>
 #include "math/Vector2.h"
 #include "math/Vector3.h"
 #include "math/Vector4.h"
@@ -27,6 +32,10 @@ using ShaderID = UINT;
 using MaterialID = UINT;
 using MaterialPropertyID = uint64_t;
 using TextureID = int;
+
+class Material;
+class GraphicsShader;
+class GraphicsShaderPass;
 
 static constexpr UINT INVALID_PROPERTY_OFFSET = UINT_MAX;
 
@@ -60,6 +69,7 @@ enum class RenderPhase : uint8_t
     Transparent,
     PostProcess,
     Overlay,
+    FinalPostProcess,
 
     Count,
 };
@@ -139,6 +149,8 @@ enum class VertexStreamType
     Color,
     Count,
 
+    // SV_InstanceIDのようにGPUが自動供給する入力。頂点ストリームには含めない。
+    InstanceID,
     Error = -1
 };
 
@@ -211,6 +223,83 @@ struct ColorVertex
     // Offset : 0
     // Stride : 16bytes
     // Slot : 5
+};
+
+// GPU上の共有可能な形状データ。頂点属性はStreamTypeごとの独立した頂点バッファで保持する。
+struct Mesh
+{
+private:
+    static constexpr size_t VERTEX_STREAM_COUNT = static_cast<size_t>(VertexStreamType::Count);
+
+    std::array<Microsoft::WRL::ComPtr<ID3D11Buffer>, VERTEX_STREAM_COUNT> m_vertexBuffers{};
+    std::bitset<VERTEX_STREAM_COUNT> m_vertexStreamMask{};
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer{};
+
+public:
+    uint32_t materialSlot{};
+    unsigned int indexCount{};
+    uint32_t meshID{};
+
+    void SetVertexBuffer(VertexStreamType streamType, Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer)
+    {
+        const size_t index = static_cast<size_t>(streamType);
+        if (streamType == VertexStreamType::Error || index >= VERTEX_STREAM_COUNT)
+            return;
+
+        m_vertexBuffers[index] = std::move(vertexBuffer);
+        m_vertexStreamMask.set(index, m_vertexBuffers[index] != nullptr);
+    }
+
+    bool HasVertexStream(VertexStreamType streamType) const
+    {
+        if (streamType == VertexStreamType::Error || static_cast<size_t>(streamType) >= VERTEX_STREAM_COUNT)
+            return false;
+
+        return m_vertexStreamMask.test(static_cast<size_t>(streamType));
+    }
+
+    ID3D11Buffer* GetVertexBuffer(VertexStreamType streamType) const
+    {
+        const size_t index = static_cast<size_t>(streamType);
+        return HasVertexStream(streamType) ? m_vertexBuffers[index].Get() : nullptr;
+    }
+
+    static UINT GetVertexStreamStride(VertexStreamType streamType)
+    {
+        switch (streamType)
+        {
+        case VertexStreamType::Position: return sizeof(PositionVertex);
+        case VertexStreamType::NormalTangent: return sizeof(NormalTangentVertex);
+        case VertexStreamType::PrimaryTexCoord: return sizeof(PrimaryTexCoordVertex);
+        case VertexStreamType::SecondaryTexCoord: return sizeof(SecondaryTexCoordVertex);
+        case VertexStreamType::ExtraTexCoord: return sizeof(ExtraTexCoordVertex);
+        case VertexStreamType::Color: return sizeof(ColorVertex);
+        default: return 0;
+        }
+    }
+
+    std::vector<VertexStreamType> GetVertexStreamTypes() const
+    {
+        std::vector<VertexStreamType> streamTypes;
+        for (size_t index = 0; index < VERTEX_STREAM_COUNT; ++index)
+        {
+            if (m_vertexStreamMask.test(index))
+                streamTypes.push_back(static_cast<VertexStreamType>(index));
+        }
+        return streamTypes;
+    }
+
+    void SetIndexBuffer(Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer) { m_indexBuffer = std::move(indexBuffer); }
+    ID3D11Buffer* GetIndexBuffer() const { return m_indexBuffer.Get(); }
+    void Clear()
+    {
+        m_vertexBuffers = {};
+        m_vertexStreamMask.reset();
+        m_indexBuffer.Reset();
+        materialSlot = 0;
+        indexCount = 0;
+        meshID = 0;
+    }
 };
 
 struct PerFrameData

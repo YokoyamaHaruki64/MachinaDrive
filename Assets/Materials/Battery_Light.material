@@ -1,0 +1,17 @@
+version: 1
+name: Battery_Light
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [0.0178888142,0.579150558,0.0785657316,1]
+  _Emission: [0.594299376,0.710424721,0.57053411,1]
+  _Metallic: 0
+  _Roughness: 0.5
+  _ToonBands: 4
+  _ToonDiffuseStrength: 1
+  _ToonShadowColor: [0.350000024,0.400000006,0.550000012,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.450000018
+  _RimColor: [0.199999988,1,0.3050192,1]
+  _RimPower: 4
+  _RimStrength: 1.01999998
+  _MainTex: 

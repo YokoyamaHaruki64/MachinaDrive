@@ -1,0 +1,7 @@
+version: 1
+name: HudWaveLabels
+shader: Assets/Shaders/UI.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  _UVScale: [0.41,0.43]
+  _UVOffset: [0.21,0.32]

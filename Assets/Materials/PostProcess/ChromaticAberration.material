@@ -1,0 +1,8 @@
+version: 1
+name: ChromaticAberration
+shader: Assets/Shaders/PostProcessChromaticAberration.shader
+properties:
+  _Intensity: 0
+  _RedOffset: [0.003,0]
+  _GreenOffset: [0,0]
+  _BlueOffset: [-0.003,0]

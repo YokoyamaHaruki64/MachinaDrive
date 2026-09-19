@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "math/MathCommon.h"
 #include "math/Vector3.h"
 
 class Random

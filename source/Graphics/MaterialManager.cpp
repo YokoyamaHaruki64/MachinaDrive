@@ -49,14 +49,6 @@ YAMLValueConversionResult MaterialManager::PropertyToYAMLValue(
         }
 
         output = YAMLValue::Null();
-        if (material.GetTexture(id).IsValid())
-        {
-            return {
-                true,
-                YAMLMessageLevel::Warning,
-                "ファイルパスを持たないTextureをNoneとして保存します",
-            };
-        }
         return {};
     }
 

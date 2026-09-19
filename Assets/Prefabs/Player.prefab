@@ -3,6 +3,7 @@ name: Player
 gameObjects:
   - id: 4
     name: Player
+    tag: Player
     active: true
     prefab: 
     parent: 
@@ -10,36 +11,113 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,2.61216004e-15]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1.00034523,1,1.00034523]
+          m_localPosition: [0,1,2.61216004e-15]
+          m_localRotation: [0,1,0,0]
+          m_localScale: [1.39999998,1.39999998,1.39999998]
+      - type: CapsuleCollider
+        fields:
+          enabled: true
+          m_center: [0,1.05999994,0]
+          m_isTrigger: false
+          m_layer: 1
+          m_radius: 0.769999981
+          m_height: 3.75
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 100
+      - type: Player
+        fields:
+          enabled: true
+          m_speed: 100
+          m_attackTime: 5
+          m_attackEndDuration: 0.5
+          m_attackCancelEndRate: 0.5
+          m_speedFriction: 0.300000012
+          m_attackReadyVfxPrefab: Assets/Prefabs/VFX_AttackReady.prefab
+          m_playerLaunchVfxPrefab: Assets/Prefabs/VFX_PlayerLaunch.prefab
+          m_attackDashTrailPrefab: Assets/Prefabs/VFX_PlayerDashTrail.prefab
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 1
+          m_friction: 0
+          m_useGravity: true
+          m_allowSleep: true
+          m_freezeRotation: true
+  - id: 64
+    name: Model
+    tag: 
+    active: true
+    prefab: 
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0.939999938,2.61216004e-15]
+          m_localRotation: [0.103015825,0.168601349,-0.017720513,0.980126202]
+          m_localScale: [0.0100004338,0.0100000054,0.0100004757]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
+          m_modelPath: Assets/Local/Models/Player_2.fbx
           m_materialPaths:
-            - ''
-            - Assets/Materials/Player/PlayerBody.material
-            - Assets/Materials/Player/PlayerFlont.material
-            - Assets/Materials/Player/PlayerHead.material
+            - Assets/Materials/Player/Player_Core.material
+            - Assets/Materials/Player/Player_DefArmor.material
+            - Assets/Materials/Player/Player_SpecialArmor.material
+            - Assets/Materials/Player/Player_SensorArmor.material
           m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: PlayerAnimation
         fields:
           enabled: true
-      - type: Player
+          m_stateColors:
+            - [0.231660232,0.62264806,0.714285731,1]
+            - [0.822393835,0.680013061,0.244495466,1]
+            - [1,0.0888031125,0.0888031125,1]
+            - [0.523365319,0.308880329,1,1]
+          m_attackReadyBlinkSpeed: 5
+          m_attackReadyBlinkAmount: 0.349999994
+          m_attackingBlinkSpeed: 16
+          m_attackingBlinkAmount: 0.699999988
+          m_floatHeight: 0.200000003
+          m_floatSpeed: 2
+          m_idleYawSpeed: 1
+          m_atkReadyRotSpeed: 8
+          m_atkStartRotSpeed: 35
+          m_attackSpinDecay: 0.5
+          m_rotationSpeedTransitionRate: 8
+  - id: 63
+    name: PlayerHit
+    tag: 
+    active: true
+    prefab: 
+    parent: 4
+    components:
+      - type: Transform
         fields:
           enabled: true
-          m_velocity: [0,0,0]
-          m_isGrounded: true
-      - type: Audio
+          m_localPosition: [0,0,-2.61125858e-15]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
         fields:
           enabled: true
-          m_filePath: Assets/Local/Sounds/wan.wav
-          m_playOnStart: false
-          m_loop: false
-      - type: Rigidbody
+          m_center: [0,1.41999996,0]
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.79999995
+      - type: PlayerHit
         fields:
           enabled: true
+          m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
+          m_shakeDuration: 0.600000024
+          m_shakeMagnitude: 6
+          m_hitStopDuration: 0.300000012

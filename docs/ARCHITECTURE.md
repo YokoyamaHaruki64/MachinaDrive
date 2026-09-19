@@ -156,9 +156,11 @@ Position、Rotation、Scaleの`Get...()`と`Set...()`はすべてWorld値を扱�
 
 - `Opaque`: MaterialID、MeshID、描画レイヤーでソートする。
 - `Transparent`: 描画レイヤーの後、カメラ前方方向の距離を用いて奥から手前へ描画する。
+- `PostProcess`: 通常のポストプロセスを実行する。Overlayより前の描画結果が対象となる。
 - `Overlay`: 描画レイヤーを優先して前面要素を描画する。
+- `FinalPostProcess`: Overlayを含む最終描画結果にポストプロセスを実行する。
 
-描画後には `PostEffect` を順に適用する。Editor構成ではその後にImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへ転送する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
+`PostEffect` は、Materialの先頭Shader Passに設定した `RenderPhase` で実行位置を決める。`PostProcess` は通常描画向け、`FinalPostProcess` はUIを含めた最終画面向けである。Editor構成では全Phaseの後にImGuiを描画し、Runtime構成ではGame RenderTargetをBackBufferへ転送する。`Bloom` は標準で `GameScene` から追加されるポストエフェクトである。
 
 Game描画はRenderer所有の可変サイズPing-Pong RenderTextureへ行う。Editor構成の`GameWindow`はこのSRVをImGui Imageとして表示し、表示領域に合わせて次フレームのRenderTargetサイズを要求する。`Free`は領域全体、`16:9`はレターボックス付きで表示する。3D Cameraのアスペクト比とBloomの中間RenderTextureは現在のGame RenderTargetサイズへ追従し、2Dの射影と初期UI配置も現在のサイズへ追従する。`SCREEN_WIDTH`／`SCREEN_HEIGHT`は初期値・フォールバックとしてのみ使用する。
 

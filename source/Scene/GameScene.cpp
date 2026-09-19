@@ -26,7 +26,6 @@ void GameScene::Init()
 {
     if (std::filesystem::exists(GetSceneFilePath()) && Manager::LoadSceneObjects(GetSceneFilePath()))
     {
-        Manager::AddPostEffect(std::make_unique<Bloom>());
         return;
     }
 
@@ -109,8 +108,6 @@ void GameScene::Init()
 
     GameObject* scoreObj = Manager::CreateEmpty(Vector3(100.0f,100.0f, 0.0f));
     scoreObj->AddComponent<Score>();
-
-    Manager::AddPostEffect(std::make_unique<Bloom>());
 
     Manager::CreateEmpty()->AddComponent<Audio>("Assets\\Local\\Sounds\\bgm.wav")->Play(true);
 }

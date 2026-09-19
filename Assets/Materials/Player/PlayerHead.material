@@ -1,8 +1,0 @@
-version: 1
-name: PlayerHead
-shader: Assets/Shaders/DefaultLit.shader
-properties:
-  _BaseColor: [0.00704099983,0.401968986,0.00982700009,1]
-  _Emission: [0,0,0,1]
-  _Shininess: 250
-  _MainTex: 

@@ -1,5 +1,4 @@
 ﻿#include "pch.h"
-
 #include "Component/ComponentInc.h"
 
 #include "Script/SampleMoveScript.h"
@@ -19,19 +18,19 @@ void SampleMoveScript::OnStart()
 Vector3 SampleMoveScript::BuildMoveDirection() const
 {
     Vector3 direction = Vector3::Zero();
-    if (Input::GetKeyPress(Input::KK_W))
+    if (Input::GetKeyPress(Input::KeyCode::W))
     {
         direction += transform()->GetForward();
     }
-    if (Input::GetKeyPress(Input::KK_S))
+    if (Input::GetKeyPress(Input::KeyCode::S))
     {
         direction -= transform()->GetForward();
     }
-    if (Input::GetKeyPress(Input::KK_D))
+    if (Input::GetKeyPress(Input::KeyCode::D))
     {
         direction += transform()->GetRight();
     }
-    if (Input::GetKeyPress(Input::KK_A))
+    if (Input::GetKeyPress(Input::KeyCode::A))
     {
         direction -= transform()->GetRight();
     }
@@ -43,14 +42,14 @@ void SampleMoveScript::Update()
 {
     const Vector3 direction = BuildMoveDirection();
     float moveSpeed = m_settings.GetMoveSpeed();
-    if (m_settings.IsDashAllowed() && Input::GetKeyPress(Input::KK_SHIFT))
+    if (m_settings.IsDashAllowed() && Input::GetKeyPress(Input::KeyCode::SHIFT))
     {
         moveSpeed *= m_settings.GetDashMultiplier();
     }
 
     transform()->Translate(direction * (moveSpeed * Time::GetDeltaTime()));
 
-    if (Input::GetKeyTrigger(Input::KK_F) && m_spawnPrefab)
+    if (Input::GetKeyTrigger(Input::KeyCode::F) && m_spawnPrefab)
     {
         const Vector3 spawnPosition = transform()->GetPosition() + m_settings.GetSpawnOffset();
         GameObject* spawnedObject = Manager::Instantiate(

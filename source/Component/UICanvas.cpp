@@ -69,10 +69,18 @@ Vector2 UICanvas::GetPointerPosition() const
 bool UICanvas::IsPointerTarget(const UITransform& target) const
 {
     const Vector2 pointer = Input::GetMousePosition();
-    if (!target.GetPixelRect().Contains(pointer))
+    if (!target.ContainsPoint(pointer))
     {
         return false;
     }
+
+    const UIImage* const targetImage = target.GetOwner()->GetComponent<UIImage>();
+    if (!targetImage || !targetImage->IsRaycastTarget())
+    {
+        return false;
+    }
+
+    const int targetDrawLayer = targetImage->GetDrawLayer();
 
     const std::vector<std::unique_ptr<GameObject>>& gameObjects = Manager::GetActiveGameObjects();
     for (auto iterator = gameObjects.rbegin(); iterator != gameObjects.rend(); ++iterator)
@@ -85,10 +93,22 @@ bool UICanvas::IsPointerTarget(const UITransform& target) const
 
         UITransform* const transform = gameObject->GetUITransform();
         UIImage* const image = gameObject->GetComponent<UIImage>();
-        if (!transform || !image || !image->IsRaycastTarget() || transform->GetCanvas() != this || !transform->GetPixelRect().Contains(pointer))
+        if (!transform || !image || !image->IsRaycastTarget() || transform->GetCanvas() != this || !transform->ContainsPoint(pointer))
         {
             continue;
         }
+
+        // 入力の最前面も描画順に合わせる。同一レイヤーは生成順の後勝ちを維持する。
+        if (image->GetDrawLayer() < targetDrawLayer)
+        {
+            continue;
+        }
+
+        if (image->GetDrawLayer() > targetDrawLayer)
+        {
+            return false;
+        }
+
         return transform == &target;
     }
 
@@ -98,7 +118,6 @@ bool UICanvas::IsPointerTarget(const UITransform& target) const
 bool UICanvas::GetOverlappingGameObjects(const UITransform& source, std::vector<GameObject*>& output) const
 {
     output.clear();
-    const UIRect& sourceRect = source.GetPixelRect();
     const std::vector<std::unique_ptr<GameObject>>& gameObjects = Manager::GetActiveGameObjects();
     for (auto iterator = gameObjects.rbegin(); iterator != gameObjects.rend(); ++iterator)
     {
@@ -109,7 +128,7 @@ bool UICanvas::GetOverlappingGameObjects(const UITransform& source, std::vector<
         }
 
         UITransform* const uiTransform = gameObject->GetUITransform();
-        if (!uiTransform || uiTransform->GetCanvas() != this || !sourceRect.Overlaps(uiTransform->GetPixelRect()))
+        if (!uiTransform || uiTransform->GetCanvas() != this || !source.Overlaps(*uiTransform))
         {
             continue;
         }

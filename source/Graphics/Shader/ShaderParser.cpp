@@ -463,6 +463,9 @@ bool ShaderParser::ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffs
                     else if (phaseStr == ShaderToken::RENDER_PHASE_OVERLAY)
                         outRenderPhase = RenderPhase::Overlay;
 
+                    else if (phaseStr == ShaderToken::RENDER_PHASE_FINAL_POST_PROCESS)
+                        outRenderPhase = RenderPhase::FinalPostProcess;
+
                     else
                         return false; // 不明なコマンド
 
@@ -471,6 +474,7 @@ bool ShaderParser::ExtractRenderPhase(RenderPhase& outRenderPhase, int braceOffs
             }
         }
     }
+    return true;
 }
 
 bool ShaderParser::ExtractStateCommand(RenderState& outStateCommand, int braceOffset) const
@@ -594,6 +598,48 @@ bool ShaderParser::ExtractStateCommand(RenderState& outStateCommand, int braceOf
             }
         }
     }
+    return true;
+}
+
+bool ShaderParser::ExtractInstanced(bool& outInstanced, int braceOffset) const
+{
+    outInstanced = false;
+    int braceCount = 0;
+    for (size_t index = 0; index < m_sourceCode.size(); ++index)
+    {
+        if (m_sourceCode[index] == ShaderToken::BLOCK_START)
+        {
+            ++braceCount;
+            continue;
+        }
+        if (m_sourceCode[index] == ShaderToken::BLOCK_END)
+        {
+            --braceCount;
+            continue;
+        }
+        if (braceCount != braceOffset)
+            continue;
+
+        std::string line;
+        while (index < m_sourceCode.size() && m_sourceCode[index] != '\n')
+        {
+            line += m_sourceCode[index];
+            ++index;
+        }
+        removeSpaceAndNewlines(line);
+        const size_t equalPosition = line.find('=');
+        if (equalPosition == std::string::npos || line.substr(0, equalPosition) != ShaderToken::INSTANCED)
+            continue;
+
+        const std::string value = line.substr(equalPosition + 1);
+        if (value == "true")
+        {
+            outInstanced = true;
+            return true;
+        }
+        return value == "false";
+    }
+    return true;
 }
 
 bool ShaderParser::ExtractShaderName(std::string& outName) const

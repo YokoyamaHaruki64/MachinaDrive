@@ -1,0 +1,20 @@
+version: 1
+name: Player_DefArmor
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [0.617760658,0.617760658,0.617760658,1]
+  _Emission: [0,0,0,1]
+  _Metallic: 0
+  _Roughness: 1.25999999
+  _ToonBands: 4
+  _ToonDiffuseStrength: 3.26999998
+  _ToonShadowColor: [0.350000024,0.400000006,0.550000012,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.450000018
+  _RimColor: [1,1,1,1]
+  _RimPower: 4
+  _RimStrength: 0.349999994
+  _CameraDitherEnabled: 1
+  _CameraDitherNear: 2
+  _CameraDitherFar: 5
+  _MainTex: 

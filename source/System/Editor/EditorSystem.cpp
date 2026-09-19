@@ -12,7 +12,6 @@
 #include "System/Serialization/YAMLTypes.h"
 #include "Component/Camera.h"
 #include "Component/Transform.h"
-#include "math/MathCommon.h"
 
 #include "imgui.h"
 
@@ -243,26 +242,26 @@ void EditorSystem::UpdateEditorCameraInput()
         Vector3 movement = Vector3::Zero();
         const Vector3 forward = CalculateEditorCameraForward(m_editorCameraYaw, m_editorCameraPitch);
         const Vector3 right = Vector3::Cross(Vector3::Up(), forward).Normalized();
-        if (Input::GetKeyPress(Input::KK_W))
+        if (Input::GetKeyPress(Input::KeyCode::W))
         {
             movement += forward;
         }
-        if (Input::GetKeyPress(Input::KK_S))
+        if (Input::GetKeyPress(Input::KeyCode::S))
         {
             movement -= forward;
         }
-        if (Input::GetKeyPress(Input::KK_A))
+        if (Input::GetKeyPress(Input::KeyCode::A))
         {
             movement -= right;
         }
-        if (Input::GetKeyPress(Input::KK_D))
+        if (Input::GetKeyPress(Input::KeyCode::D))
         {
             movement += right;
         }
 
         if (movement.LengthSqr() > 0.0f)
         {
-            const float speed = Input::GetKeyPress(Input::KK_SHIFT)
+            const float speed = Input::GetKeyPress(Input::KeyCode::SHIFT)
                 ? EDITOR_CAMERA_MOVE_SPEED * EDITOR_CAMERA_FAST_MULTIPLIER
                 : EDITOR_CAMERA_MOVE_SPEED;
             m_editorCamera->transform()->Translate(
@@ -327,9 +326,26 @@ bool EditorSystem::IsGameWindowReady()
     return m_gameWindow.IsRenderTargetReady();
 }
 
+bool EditorSystem::IsGameWindowFocused()
+{
+    return m_gameWindow.IsGameWindowFocused();
+}
+
 bool EditorSystem::IsUIDisplayEnabled()
 {
     return m_gameWindow.IsUIDisplayEnabled();
+}
+
+bool EditorSystem::GetGameWindowDisplayRect(Vector2& position, Vector2& size)
+{
+    if (!m_gameWindow.IsLayoutReady())
+    {
+        return false;
+    }
+
+    position = m_gameWindow.GetDisplayPosition();
+    size = m_gameWindow.GetDisplaySize();
+    return size.x > 0.0f && size.y > 0.0f;
 }
 
 void EditorSystem::ReloadStyle()

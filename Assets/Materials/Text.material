@@ -1,0 +1,10 @@
+version: 1
+name: Text
+shader: Assets/Shaders/Text.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  OutlineColor: [0,0,0,1]
+  OutlineWidth: 0
+  FontTexelSize: [0.00100000005,0.00100000005]
+  _UVScale: [1,1]
+  _UVOffset: [0,0]

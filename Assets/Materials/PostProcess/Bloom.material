@@ -1,0 +1,8 @@
+version: 1
+name: Bloom
+shader: Assets/Shaders/PostProcessBloom.shader
+properties:
+  _Threshold: 0.899999976
+  _BlurRadius: 0.75
+  _Intensity: 1
+  _Bloom: 

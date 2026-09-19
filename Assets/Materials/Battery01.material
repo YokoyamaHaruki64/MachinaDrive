@@ -1,0 +1,17 @@
+version: 1
+name: Battery_Body
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  _Emission: [0,0,0,1]
+  _Metallic: 0
+  _Roughness: 0.5
+  _ToonBands: 4
+  _ToonDiffuseStrength: 1
+  _ToonShadowColor: [0.255929381,0.334804177,0.571428537,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.450000018
+  _RimColor: [0.200000003,0.600000024,1,1]
+  _RimPower: 4
+  _RimStrength: 0
+  _MainTex: Assets/Local/Textures/particle.png

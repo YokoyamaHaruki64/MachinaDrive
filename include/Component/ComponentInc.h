@@ -5,8 +5,10 @@
 #include "System/SystemInc.h"
 
 #include "Component/audio.h"
+#include "Component/Bloom.h"
 #include "Component/BoxCollider.h"
 #include "Component/Camera.h"
+#include "Component/FXAA.h"
 #include "Component/CapsuleCollider.h"
 #include "Component/Collider.h"
 #include "Component/modelRenderer.h"
@@ -17,6 +19,7 @@
 #include "Component/SpriteRenderer.h"
 #include "Component/SphereCollider.h"
 #include "Component/TrailRenderer.h"
+#include "Component/VfxLifetime.h"
 #include "Component/UIButton.h"
 #include "Component/UICanvas.h"
 #include "Component/UIImage.h"

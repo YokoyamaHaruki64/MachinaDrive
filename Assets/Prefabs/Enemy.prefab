@@ -2,7 +2,8 @@ version: 1
 name: Enemy
 gameObjects:
   - id: 5
-    name: Enemy(Instance)
+    name: BasicEnemy
+    tag: Enemy
     active: true
     prefab: 
     parent: 
@@ -10,30 +11,73 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [4,0,4]
+          m_localPosition: [26.9799995,0,13.6199999]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
+          m_localScale: [1.29999995,1.29999995,1.29999995]
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 1
+      - type: BasicEnemy
+        fields:
+          enabled: true
+          m_invincibilityDuration: 0.5
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,2.01999998,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 1.79999995
+  - id: 66
+    name: Model
+    tag: 
+    active: true
+    prefab: 
+    parent: 5
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
+          m_modelPath: Assets/Local/Models/Drone.fbx
           m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
+            - Assets/Materials/Enemy/BasicDrone_Body.material
+            - Assets/Materials/Enemy/BasicDrone_Line.material
           m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: EnemyAnimation
         fields:
           enabled: true
-          m_center: [0,1,0]
-          m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
+          m_floatHeight: 0.129999995
+          m_floatSpeed: 2.5
+      - type: ObjectShake
         fields:
           enabled: true

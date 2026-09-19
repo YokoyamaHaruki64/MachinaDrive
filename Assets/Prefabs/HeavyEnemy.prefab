@@ -1,0 +1,83 @@
+version: 1
+name: HeavyEnemy
+gameObjects:
+  - id: 7
+    name: HeavyEnemy
+    tag: Enemy
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,26.1900005]
+          m_localRotation: [0,1,0,-1.19209304e-07]
+          m_localScale: [2,2,2]
+      - type: Rigidbody
+        fields:
+          enabled: true
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 3
+      - type: HeavyEnemy
+        fields:
+          enabled: true
+          m_invincibilityDuration: 0.5
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 8
+          m_knockbackDistance: 0
+          m_knockbackDuration: 0.00999999978
+          m_knockbackAngle: 0
+          m_knockbackUpwardSpeed: 0
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,3.74000001,0]
+          m_isTrigger: false
+          m_layer: 2
+          m_radius: 2.3599999
+  - id: 75
+    name: Model
+    tag: 
+    active: true
+    prefab: 
+    parent: 7
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-2.65906965e-06,2.18000007,0]
+          m_localRotation: [0,0.707106829,0,-0.707106709]
+          m_localScale: [0.00499991933,0.00400000112,0.00399993965]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/HeavyDrone_Body.material
+            - Assets/Materials/Enemy/HeavyDrone_Line.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.400000006
+          m_floatSpeed: 1.5
+      - type: ObjectShake
+        fields:
+          enabled: true

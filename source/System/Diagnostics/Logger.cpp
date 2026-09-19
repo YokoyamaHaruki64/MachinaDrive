@@ -4,39 +4,7 @@
 
 #include "System/Diagnostics/Logger.h"
 
-namespace
-{
-std::wstring ToWideString(std::string_view message)
-{
-    if (message.empty())
-    {
-        return {};
-    }
-
-    const int requiredLength = MultiByteToWideChar(
-        CP_UTF8,
-        0,
-        message.data(),
-        static_cast<int>(message.size()),
-        nullptr,
-        0);
-    if (requiredLength <= 0)
-    {
-        return L"致命的なエラーが発生しました。";
-    }
-
-    std::wstring result(static_cast<size_t>(requiredLength), L'\0');
-    MultiByteToWideChar(
-        CP_UTF8,
-        0,
-        message.data(),
-        static_cast<int>(message.size()),
-        result.data(),
-        requiredLength);
-
-    return result;
-}
-}
+#include "System/Core/StringEncoding.h"
 
 std::mutex Logger::s_mutex;
 std::deque<LogEntry> Logger::s_entries;
@@ -65,7 +33,7 @@ void Logger::Fatal(std::string_view message, const std::source_location& source)
 {
     Write(LogLevel::Fatal, message, source);
 
-    const std::wstring wideMessage = ToWideString(message);
+    const std::wstring wideMessage = StringEncoding::Utf8ToWide(message);
     MessageBoxW(nullptr, wideMessage.c_str(), L"致命的なエラー", MB_OK | MB_ICONERROR);
 }
 
@@ -75,6 +43,13 @@ void Logger::Write(
     std::string_view message,
     const std::source_location& source)
 {
+#if !GM_ENABLE_EDITOR
+    // Releaseではログの表示先がないため、エントリ生成とキュー操作を省略する。
+    (void)level;
+    (void)message;
+    (void)source;
+    return;
+#else
     LogEntry entry{
         .level = level,
         .message = std::string(message),
@@ -92,6 +67,7 @@ void Logger::Write(
     }
 
     s_entries.emplace_back(std::move(entry));
+#endif
 }
 
 

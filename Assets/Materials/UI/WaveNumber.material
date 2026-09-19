@@ -1,0 +1,10 @@
+version: 1
+name: ChannelPackedNumber
+shader: Assets/Shaders/ChannelPackedNumber.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  TextColor: [1,1,1,1]
+  GlowColor: [0.580820203,0.972247005,0.976833999,1]
+  OutlineColor: [0,0,0,1]
+  _UVScale: [0.200000003,0.5]
+  _UVOffset: [0,0]

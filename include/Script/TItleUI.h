@@ -2,20 +2,38 @@
 
 #include "System/Core/Script.h"
 
+
+class UIButton;
+class UIOffset;
+
 class TitleUI : public Script
 {
-    REGISTER_COMPONENT(TitleUI, "TitleUI");
+    GM_SCRIPT(TitleUI, "Title UI")
+    USE_FIELDS
 private:
-    Vector2 m_originalOffset = Vector2::Zero();
-    float m_amplitude = 15.0f; // 振幅
-    float m_frequency = 0.5f; // 周波数
-    float m_elapsedTime = 0.0f; // 経過時間
-public:
-    TitleUI() = delete;
-    explicit TitleUI(GameObject* owner)
-        : Script(owner)
+    struct UIElement
     {
-    }
+        UIOffset* offsetComponent{};
+        UIButton* buttonComponent{};
+        UIImage* lineImage{};
+        Material* originalLineMaterial{};
+        Color originalLineColor{};
+        bool isHovered{};
+    };
+
+    std::vector<GameObjectReference> m_uiObjects;
+    std::vector<UIElement> m_uiElements;
+    Material* m_hoverLineMaterial{};
+    Audio* m_hoverAudio{};
+    Audio* m_clickAudio{};
+
+    float m_clickAudioGain = 1.0f;
+
+    void ApplyHoverVisual(UIElement& element, bool hovered);
+    void UpdateElement(UIElement& element);
+    void HandleClick(const UIElement& element);
+
+public:
     void OnStart() override;
     void Update() override;
 };

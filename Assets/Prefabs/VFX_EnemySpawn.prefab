@@ -1,0 +1,231 @@
+version: 1
+name: VFX_EnemySpawn
+gameObjects:
+  - id: 1
+    name: VFX_EnemySpawn
+    tag:
+    active: true
+    prefab:
+    parent:
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: VfxLifetime
+        fields:
+          enabled: true
+  - id: 2
+    name: EnemySpawn_Pulse
+    tag:
+    active: true
+    prefab:
+    parent: 1
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0,0,0]
+          maxParticles: 1
+          burst: true
+          burstCount: 1
+          burstTime: 0
+          finishedDestroy: false
+          emitRate: 0
+          lifetimeMin: 0.349999994
+          lifetimeMax: 0.349999994
+          gravity: [0,0,0]
+          drag: 0
+          size: [4.5,4.5,4.5]
+          scaleOverLifetime:
+            - time: 0
+              value: 0.100000001
+              inControl: 0.100000001
+              outControl: 0.100000001
+            - time: 0.699999988
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 1.35000002
+              inControl: 1.35000002
+              outControl: 1.35000002
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 0.5
+                inControl: 0.5
+                outControl: 0.5
+              - time: 1
+                value: 0.100000001
+                inControl: 0.100000001
+                outControl: 0.100000001
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.649999976
+                inControl: 0.649999976
+                outControl: 0.649999976
+            b:
+              - time: 0
+                value: 0.800000012
+                inControl: 0.800000012
+                outControl: 0.800000012
+              - time: 1
+                value: 0.200000003
+                inControl: 0.200000003
+                outControl: 0.200000003
+            a:
+              - time: 0
+                value: 0.850000024
+                inControl: 0.850000024
+                outControl: 0.850000024
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0.0500000007,0.349999994,0.100000001,1]
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 1
+          flipbookRows: 1
+          flipbookFrameCount: 0
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: false
+          randomizeSpeed: false
+          speed: 0
+          speedMin: 0
+          speedMax: 0
+          direction: [0,1,0]
+          coneAngle: 0
+          spawnRadius: 0
+          spawnNormal: [0,1,0]
+          velocityType: 0
+          spawnType: 0
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/Pulse.material
+  - id: 3
+    name: EnemySpawn_UpwardSparks
+    tag:
+    active: true
+    prefab:
+    parent: 1
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: ParticleEmitter
+        fields:
+          enabled: true
+          offset: [0,0,0]
+          maxParticles: 12
+          burst: true
+          burstCount: 10
+          burstTime: 0.100000001
+          finishedDestroy: false
+          emitRate: 0
+          lifetimeMin: 0.300000012
+          lifetimeMax: 0.5
+          gravity: [0,-1,0]
+          drag: 3
+          size: [1.20000005,1.20000005,1.20000005]
+          scaleOverLifetime:
+            - time: 0
+              value: 1
+              inControl: 1
+              outControl: 1
+            - time: 1
+              value: 0.100000001
+              inControl: 0.100000001
+              outControl: 0.100000001
+          colorOverLifetime:
+            r:
+              - time: 0
+                value: 0.600000024
+                inControl: 0.600000024
+                outControl: 0.600000024
+              - time: 1
+                value: 0.100000001
+                inControl: 0.100000001
+                outControl: 0.100000001
+            g:
+              - time: 0
+                value: 1
+                inControl: 1
+                outControl: 1
+              - time: 1
+                value: 0.550000012
+                inControl: 0.550000012
+                outControl: 0.550000012
+            b:
+              - time: 0
+                value: 0.850000024
+                inControl: 0.850000024
+                outControl: 0.850000024
+              - time: 1
+                value: 0.200000003
+                inControl: 0.200000003
+                outControl: 0.200000003
+            a:
+              - time: 0
+                value: 0.850000024
+                inControl: 0.850000024
+                outControl: 0.850000024
+              - time: 1
+                value: 0
+                inControl: 0
+                outControl: 0
+          emissionColor: [0.0500000007,0.25,0.100000001,1]
+          emissionStrength: 0
+          rotationMin: 0
+          rotationMax: 0
+          angularVelocityMin: 0
+          angularVelocityMax: 0
+          velocityStretch: 0
+          flipbookColumns: 4
+          flipbookRows: 4
+          flipbookFrameCount: 16
+          flipbookFrameRate: 0
+          flipbookLoop: false
+          flipbookRandomStart: true
+          randomizeSpeed: true
+          speed: 5
+          speedMin: 3
+          speedMax: 7
+          direction: [0,1,0]
+          coneAngle: 28
+          spawnRadius: 0.25
+          spawnNormal: [0,1,0]
+          velocityType: 2
+          spawnType: 1
+      - type: ParticleRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 2
+          billboardType: 1
+          m_materialPath: Assets/Materials/VFX/CollisionSpark.material

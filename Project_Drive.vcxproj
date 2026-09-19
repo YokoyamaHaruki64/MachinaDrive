@@ -43,14 +43,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -145,7 +145,9 @@
   <ItemGroup>
     <ClCompile Include="source\Component\audio.cpp" />
     <ClCompile Include="source\Component\BoxCollider.cpp" />
+    <ClCompile Include="source\Component\Bloom.cpp" />
     <ClCompile Include="source\Component\Camera.cpp" />
+    <ClCompile Include="source\Component\FXAA.cpp" />
     <ClCompile Include="source\Component\CapsuleCollider.cpp" />
     <ClCompile Include="source\Component\Collider.cpp" />
     <ClCompile Include="source\Component\modelRenderer.cpp" />
@@ -157,6 +159,7 @@
     <ClCompile Include="source\Component\SpriteRenderer.cpp" />
     <ClCompile Include="source\Component\SphereCollider.cpp" />
     <ClCompile Include="source\Component\TrailRenderer.cpp" />
+    <ClCompile Include="source\Component\VfxLifetime.cpp" />
     <ClCompile Include="source\Component\Transform.cpp" />
     <ClCompile Include="source\Component\TransformBase.cpp" />
     <ClCompile Include="source\Component\UIButton.cpp" />
@@ -235,18 +238,58 @@
     </ClCompile>
     <ClCompile Include="source\Scene\GameScene.cpp" />
     <ClCompile Include="source\Scene\ResultScene.cpp" />
+    <ClCompile Include="source\Scene\TutorialScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
-    <ClCompile Include="source\Script\Bullet.cpp" />
+    <ClCompile Include="source\Script\EnemyBullet.cpp" />
+    <ClCompile Include="source\Script\ObjectShake.cpp" />
+    <ClCompile Include="source\Script\TimeRecoveryItem.cpp" />
+    <ClCompile Include="source\Script\AttackReadyVfx.cpp" />
+    <ClCompile Include="source\Script\AttackChargeHead.cpp" />
+    <ClCompile Include="source\Script\AttackDashTrail.cpp" />
+    <ClCompile Include="source\Script\CollisionVfx.cpp" />
+    <ClCompile Include="source\Script\BasicEnemy.cpp" />
     <ClCompile Include="source\Script\CameraController.cpp" />
+    <ClCompile Include="source\Script\ComboUI.cpp" />
+    <ClCompile Include="source\Script\UI\GameHud.cpp" />
+    <ClCompile Include="source\Script\UI\HudNumber.cpp" />
+    <ClCompile Include="source\Script\UI\TimeRecoveryUI.cpp" />
+    <ClCompile Include="source\Script\UI\UIFade.cpp" />
+    <ClCompile Include="source\Script\UI\UIOffset.cpp" />
+    <ClCompile Include="source\Script\UI\WaveStartUI.cpp" />
     <ClCompile Include="source\Script\Enemy.cpp" />
+    <ClCompile Include="source\Script\BlockGlitchPostProcess.cpp" />
+    <ClCompile Include="source\Script\DigitalWipeTransition.cpp" />
+    <ClCompile Include="source\Script\HorizontalGlitchTransition.cpp" />
+    <ClCompile Include="source\Script\SceneTransition.cpp" />
+    <ClCompile Include="source\Script\GlitchPostProcess.cpp" />
+    <ClCompile Include="source\Script\EnemyAnimation.cpp" />
+    <ClCompile Include="source\Script\Health.cpp" />
+    <ClCompile Include="source\Script\HeavyEnemy.cpp" />
+    <ClCompile Include="source\Script\MovingEnemy.cpp" />
     <ClCompile Include="source\Script\ExplosionEffect.cpp" />
+    <ClCompile Include="source\Script\FillBar.cpp" />
     <ClCompile Include="source\Script\Player.cpp" />
+    <ClCompile Include="source\Script\PlayerAnimation.cpp" />
+    <ClCompile Include="source\Script\PlayerHit.cpp" />
+    <ClCompile Include="source\Script\ChromaticAberrationPostProcess.cpp" />
+    <ClCompile Include="source\Script\GrayScalePostProcess.cpp" />
+    <ClCompile Include="source\Script\NoisePostProcess.cpp" />
+    <ClCompile Include="source\Script\RadialBlurPostProcess.cpp" />
+    <ClCompile Include="source\Script\PostProcessImpulse.cpp" />
+    <ClCompile Include="source\Script\Pause.cpp" />
+    <ClCompile Include="source\Script\PauseUI.cpp" />
     <ClCompile Include="source\Script\ResultUI.cpp" />
+    <ClCompile Include="source\Script\Result.cpp" />
     <ClCompile Include="source\Script\Score.cpp" />
     <ClCompile Include="source\Script\SampleMoveScript.cpp" />
+    <ClCompile Include="source\Script\ShotDirector.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
+    <ClCompile Include="source\Script\TutorialDirector.cpp" />
+    <ClCompile Include="source\Script\WaveDirector.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
+    <ClCompile Include="source\System\Core\Mouse.cpp" />
+    <ClCompile Include="source\System\Core\StringEncoding.cpp" />
     <ClCompile Include="source\System\Editor\EditorWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
@@ -380,6 +423,7 @@
     <ClInclude Include="External\Include\Assimp\XMLTools.h" />
     <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="include\Common\Color.h" />
+    <ClInclude Include="include\Common\Easing.h" />
     <ClInclude Include="include\Common\ValueType.h" />
     <ClInclude Include="include\Common\Random.h" />
     <ClInclude Include="include\Component\audio.h" />
@@ -387,6 +431,8 @@
     <ClInclude Include="include\Component\CapsuleCollider.h" />
     <ClInclude Include="include\Component\Collider.h" />
     <ClInclude Include="include\Component\BoxCollider.h" />
+    <ClInclude Include="include\Component\Bloom.h" />
+    <ClInclude Include="include\Component\FXAA.h" />
     <ClInclude Include="include\Component\modelRenderer.h" />
     <ClInclude Include="include\Component\ParticleSystem.h" />
     <ClInclude Include="include\Component\PostEffect.h" />
@@ -395,6 +441,7 @@
     <ClInclude Include="include\Component\SpriteRenderer.h" />
     <ClInclude Include="include\Component\SphereCollider.h" />
     <ClInclude Include="include\Component\TrailRenderer.h" />
+    <ClInclude Include="include\Component\VfxLifetime.h" />
     <ClInclude Include="include\Component\Transform.h" />
     <ClInclude Include="include\Component\TransformBase.h" />
     <ClInclude Include="include\Component\UIButton.h" />
@@ -441,18 +488,56 @@
     <ClInclude Include="include\Scene\GameScene.h" />
     <ClInclude Include="include\Scene\ResultScene.h" />
     <ClInclude Include="include\Scene\Scene.h" />
+    <ClInclude Include="include\Scene\TutorialScene.h" />
     <ClInclude Include="include\Scene\TitleScene.h" />
-    <ClInclude Include="include\Script\Bullet.h" />
+    <ClInclude Include="include\Script\EnemyBullet.h" />
+    <ClInclude Include="include\Script\ObjectShake.h" />
+    <ClInclude Include="include\Script\TimeRecoveryItem.h" />
+    <ClInclude Include="include\Script\AttackReadyVfx.h" />
+    <ClInclude Include="include\Script\AttackChargeHead.h" />
+    <ClInclude Include="include\Script\AttackDashTrail.h" />
+    <ClInclude Include="include\Script\CollisionVfx.h" />
+    <ClInclude Include="include\Script\BasicEnemy.h" />
     <ClInclude Include="include\Script\CameraController.h" />
+    <ClInclude Include="include\Script\ComboUI.h" />
+    <ClInclude Include="include\Script\UI\GameHud.h" />
+    <ClInclude Include="include\Script\UI\HudNumber.h" />
+    <ClInclude Include="include\Script\UI\TimeRecoveryUI.h" />
+    <ClInclude Include="include\Script\UI\UIFade.h" />
+    <ClInclude Include="include\Script\UI\UIOffset.h" />
+    <ClInclude Include="include\Script\UI\WaveStartUI.h" />
     <ClInclude Include="include\Script\Enemy.h" />
+    <ClInclude Include="include\Script\BlockGlitchPostProcess.h" />
+    <ClInclude Include="include\Script\DigitalWipeTransition.h" />
+    <ClInclude Include="include\Script\HorizontalGlitchTransition.h" />
+    <ClInclude Include="include\Script\SceneTransition.h" />
+    <ClInclude Include="include\Script\GlitchPostProcess.h" />
+    <ClInclude Include="include\Script\EnemyAnimation.h" />
+    <ClInclude Include="include\Script\Health.h" />
+    <ClInclude Include="include\Script\HeavyEnemy.h" />
+    <ClInclude Include="include\Script\MovingEnemy.h" />
     <ClInclude Include="include\Script\ExplosionEffect.h" />
+    <ClInclude Include="include\Script\FillBar.h" />
     <ClInclude Include="include\Script\Player.h" />
+    <ClInclude Include="include\Script\PlayerAnimation.h" />
+    <ClInclude Include="include\Script\PlayerHit.h" />
+    <ClInclude Include="include\Script\ChromaticAberrationPostProcess.h" />
+    <ClInclude Include="include\Script\GrayScalePostProcess.h" />
+    <ClInclude Include="include\Script\NoisePostProcess.h" />
+    <ClInclude Include="include\Script\RadialBlurPostProcess.h" />
+    <ClInclude Include="include\Script\PostProcessImpulse.h" />
+    <ClInclude Include="include\Script\Pause.h" />
+    <ClInclude Include="include\Script\PauseUI.h" />
     <ClInclude Include="include\Script\ResultUI.h" />
+    <ClInclude Include="include\Script\Result.h" />
     <ClInclude Include="include\Script\RotateCube.h" />
     <ClInclude Include="include\Script\Score.h" />
     <ClInclude Include="include\Script\SampleMoveScript.h" />
+    <ClInclude Include="include\Script\ShotDirector.h" />
     <ClInclude Include="include\Script\FieldRegistryTest.h" />
     <ClInclude Include="include\Script\TItleUI.h" />
+    <ClInclude Include="include\Script\TutorialDirector.h" />
+    <ClInclude Include="include\Script\WaveDirector.h" />
     <ClInclude Include="include\System\Core\component.h" />
     <ClInclude Include="include\System\Core\component.inl" />
     <ClInclude Include="include\System\Core\ComponentRegistry.h" />
@@ -479,11 +564,14 @@
     <ClInclude Include="include\System\Core\GameObjectReference.h" />
     <ClInclude Include="include\System\Core\PrefabReference.h" />
     <ClInclude Include="include\System\Core\Script.h" />
+    <ClInclude Include="include\System\Core\ScriptTypes.h" />
     <ClInclude Include="include\System\GameplayMacros.h" />
     <ClInclude Include="include\System\SystemInc.h" />
     <ClInclude Include="include\Component\ComponentInc.h" />
     <ClInclude Include="include\System\Core\GM_Time.h" />
     <ClInclude Include="include\System\Core\input.h" />
+    <ClInclude Include="include\System\Core\Mouse.h" />
+    <ClInclude Include="include\System\Core\StringEncoding.h" />
     <ClInclude Include="include\System\Diagnostics\LogFileWorker.h" />
     <ClInclude Include="include\System\Diagnostics\Logger.h" />
     <ClInclude Include="include\System\Diagnostics\LogSystem.h" />
@@ -519,6 +607,14 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BuildedShader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Assets\Shaders\common.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shaders\PBRLighting.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shaders\lighting.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -601,8 +697,25 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Assets\Shaders\ChannelPackedNumber.shader" />
     <None Include="Assets\Shaders\DefaultLit.shader" />
+    <None Include="Assets\Shaders\GaugeInner.shader" />
+    <None Include="Assets\Shaders\HUDFrameMask.shader" />
+    <None Include="Assets\Shaders\PBRDefault.shader" />
+    <None Include="Assets\Shaders\PBRToon.shader" />
+    <None Include="Assets\Shaders\FillBarShader.shader" />
     <None Include="Assets\Shaders\PostProcessBloom.shader" />
+    <None Include="Assets\Shaders\ShotDirector.shader" />
+    <None Include="Assets\Shaders\UI.shader" />
+    <None Include="Assets\Shaders\UIImageFill.shader" />
+    <None Include="Assets\Shaders\PostProcessFXAA.shader" />
+    <None Include="Assets\Shaders\PostProcessBlockGlitch.shader" />
+    <None Include="Assets\Shaders\PostProcessDigitalWipeTransition.shader" />
+    <None Include="Assets\Shaders\PostProcessHorizontalGlitchTransition.shader" />
+    <None Include="Assets\Shaders\PostProcessGlitch.shader" />
+    <None Include="Assets\Shaders\PostProcessChromaticAberration.shader" />
+    <None Include="Assets\Shaders\PostProcessNoise.shader" />
+    <None Include="Assets\Shaders\PostProcessRadialBlur.shader" />
     <None Include="Assets\Shaders\UnlitAdditive.shader" />
     <None Include="Assets\Shaders\UnlitTexture.shader" />
     <None Include="Assets\Shaders\UnlitTransparent.shader" />

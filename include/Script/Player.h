@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
 #include "System/Core/GameObject.h"
 
@@ -7,33 +8,84 @@
 
 class Audio;
 class Collider;
+class Health;
 struct HitInfo;
+class CameraController;
+class PlayerAnimation;
+class GameHud;
 
 class Player : public Script
 {
-    REGISTER_COMPONENT(Player, "Player");
+    GM_SCRIPT(Player, "Player");
+    USE_FIELDS
+
+public:
+    enum AttackState
+    {
+        Idle,
+        AttackReady,
+        Attacking,
+        AttackEnd,
+
+        Count
+    };
+
+
 private:
-    // 旧シーンに残るフィールドとの互換用。実際の速度はRigidbodyを正とする。
-    Vector3 m_velocity{ Vector3::Zero() };
+    Rigidbody* m_rigidbody = nullptr;
+    Health* m_health = nullptr;
+    CameraController* m_cameraController = nullptr;
+    PlayerAnimation* m_playerAnimation = nullptr;
+    GameObjectReference m_director;
+    PrefabReference m_attackReadyVfxPrefab{ "Assets/Prefabs/VFX_AttackReady.prefab" };
+    PrefabReference m_playerLaunchVfxPrefab{ "Assets/Prefabs/VFX_PlayerLaunch.prefab" };
+    PrefabReference m_attackDashTrailPrefab{ "Assets/Prefabs/VFX_PlayerDashTrail.prefab" };
+    GameObjectReference m_attackReadyVfx;
 
-    bool m_isGrounded = false;
+    GameHud* m_gameHud = nullptr;
 
-    // 段差や複数Colliderに同時接触しても、1つが離れただけで空中判定にならないようにする。
-    std::unordered_set<Collider*> m_groundColliders;
+    Audio* m_chargeAudio = nullptr;
+    Audio* m_shotAudio = nullptr;
 
-    Audio* m_jumpSE = nullptr;
+    Vector2 m_beginMousePos{ Vector2::Zero() };
+    Vector2 m_accumulatedMouse{ Vector2::Zero() };
+    
+    float m_speed = 10.0f;
+    float m_attackTime = 5.0f;
+    float m_attackEndDuration = 0.5f;
+    float m_attackCancelEndRate = 0.5f;
+    float m_speedFriction = 0.9f;
 
+    float m_attackTimer = 0.0f;
+    float m_attackEndTimer = 0.0f;
+    float m_additionalEnd = 0.0f;
+    bool m_didBrake = false;
+
+    bool m_isHitStop = false;
+    float m_hitStopTimer = 0.0f;
+
+    AttackState m_state = Idle;
+
+    void UpdateIdle();
+    void UpdateAttackReady();
+    void UpdateAttacking();
+    void UpdateAttackEnd();
+    void UpdateAttackProgress();
+    void StopForResult();
+
+    bool GetCameraDirection(Vector3& forward, Vector3& right) const;
 public:
     void OnStart() override;
     void Update() override;
     void OnHitBegin(const HitInfo& hitInfo) override;
     void OnHit(const HitInfo& hitInfo) override;
     void OnHitEnd(const HitInfo& hitInfo) override;
-    Player() = delete;
-    Player(GameObject* owner) : Script(owner)
-    {
-    }
 
-protected:
-    void RegisterFields(FieldRegistry& fields) override;
+    void HitStop(float duration);
+    bool IsHitStop() const { return m_isHitStop; }
+
+    const Vector2 GetShotDirection()& { return m_accumulatedMouse; }
+    const AttackState GetAttackState() const { return m_state; }
+    bool DidBrake() const { return m_didBrake; }
+
 };

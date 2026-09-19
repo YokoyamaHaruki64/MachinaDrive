@@ -1,0 +1,936 @@
+version: 1
+name: GameHud
+gameObjects:
+  - id: 100
+    name: GameHUD
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+      - type: GameHud
+        fields:
+          enabled: true
+          m_healthBar: 203
+          m_timerText: 205
+          m_waveNumber: 249
+          m_enemyNumber: 250
+          m_comboUIObject: 259
+          m_shardsNumber: 
+          m_healthRoot: 200
+          m_waveRoot: 210
+          m_comboRoot: 259
+          m_driveRoot: 220
+          m_shardsRoot: 
+          m_driveGauge: 223
+          m_driveChargingText: 225
+          m_driveReadyText: 226
+          m_visible: true
+          m_comboVisible: true
+  - id: 259
+    name: HUD_Combo
+    tag: 
+    active: true
+    prefab: 
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0.5]
+          m_pivot: [1,0.5]
+          m_stretch: [0.0520833321,0.0925925896]
+          m_pos: [-0.119999997,-0.289999992]
+          m_offset: [0,0]
+          m_uiRotation: 0.150000006
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: ComboUI
+        fields:
+          enabled: true
+          m_comboValue: 261
+          m_comboLabel: 260
+          m_boundTime: 0.400000006
+          m_boundScale: 1
+          m_gap: 100
+          m_boundCurve:
+            - time: 0
+              value: 0
+              inControl: 0
+              outControl: 0.605555534
+            - time: 0.5
+              value: 1
+              inControl: 1
+              outControl: 0
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+  - id: 261
+    name: Combo_Value
+    tag: 
+    active: true
+    prefab: 
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [-1.24000001,-0.200000003]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 00
+          m_fontSize: 90
+          m_color: [0.6795367,1,0.988864124,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 260
+    name: Combo_Label
+    tag: 
+    active: true
+    prefab: 
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0.649999976,0]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: Combo!!
+          m_fontSize: 70
+          m_color: [0,1,0.965250731,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 220
+    name: HUD_Drive
+    tag: 
+    active: true
+    prefab: 
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.310000002,0.204999998]
+          m_pos: [0.174999997,-0.136000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+  - id: 226
+    name: Drive_ReadyText
+    tag: 
+    active: true
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.312999994,0.129999995]
+          m_pos: [-0.164000005,0.187000006]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: READY!!
+          m_fontSize: 48
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 1
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 225
+    name: Drive_ChargingText
+    tag: 
+    active: false
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.316000015,0.200000003]
+          m_pos: [-0.163000003,0.222000003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: CHARGING...
+          m_fontSize: 48
+          m_color: [0.957528949,0.930993199,0.428854674,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 1
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 224
+    name: Drive_Label
+    tag: 
+    active: true
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.200000003,0.159999996]
+          m_pos: [-0.201000005,-0.123999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: DRIVE
+          m_fontSize: 61.9500008
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 223
+    name: Drive_Gauge
+    tag: 
+    active: true
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.513000011,0.671000004]
+          m_pos: [-0.202000007,-0.123999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1.96186435
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/GaugeInner.material
+  - id: 222
+    name: Drive_Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 221
+    name: Drive_Panel
+    tag: 
+    active: true
+    prefab: 
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 210
+    name: HUD_Wave
+    tag: 
+    active: true
+    prefab: 
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.125]
+          m_pos: [0,0.0670000017]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: WaveStartUI
+        fields:
+          enabled: true
+          m_frame: 395
+          m_beginText: 271
+          m_onDuration: 0.150000006
+          m_offDuration: 0.150000006
+  - id: 395
+    name: Wave_Start_Progress_Frame
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.472000003,0.232999995]
+          m_pos: [0,4.78000021]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: ''
+          m_color: [0,0,0,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 396
+    name: Wave_Start_Progress_Text
+    tag: 
+    active: true
+    prefab: 
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.512000024,1.32299995]
+          m_pos: [-0.239999995,-1.81700003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/Exo2.fnt
+          text: Next...
+          m_fontSize: 68.9899979
+          m_color: [0.34362936,0.931575298,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.82999992
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 270
+    name: Wave_Start_Progress_Bar
+    tag: 
+    active: true
+    prefab: 
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.970000029,0.689999998]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: ''
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 1
+          m_current: 1
+          m_barColor: [0.345098048,0.933333337,1,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 271
+    name: Wave_Begin_Text
+    tag: 
+    active: false
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.0900000036]
+          m_pos: [0,3.18000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: WAVE      BEGIN
+          m_fontSize: 153.860001
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.30000019
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 250
+    name: Enemy_Value
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.075000003,0.300000012]
+          m_pos: [0.115000002,0.187999994]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/Exo2.fnt
+          text: 00
+          m_fontSize: 60
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 249
+    name: Wave_Value
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.100000001,0.389999986]
+          m_pos: [0.120999999,-0.31400001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/Exo2.fnt
+          text: 00
+          m_fontSize: 80
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 214
+    name: Enemy_Label
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.159999996,0.219999999]
+          m_pos: [-0.0780000016,0.234999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: ENEMIES
+          m_fontSize: 40
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 213
+    name: Wave_Label
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.141000003,0.300999999]
+          m_pos: [-0.101000004,-0.31099999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: WAVE
+          m_fontSize: 70
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 212
+    name: Wave_Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 211
+    name: Wave_Panel
+    tag: 
+    active: true
+    prefab: 
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 200
+    name: HUD_Timer
+    tag: 
+    active: true
+    prefab: 
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.289999992,0.120374054]
+          m_pos: [0.159999996,0.100000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: TimeRecoveryUI
+        fields:
+          enabled: true
+          m_recoveryText: 272
+          m_duration: 0.75
+  - id: 272
+    name: Timer_Time_Recovery_Text
+    tag: 
+    active: false
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.550000012,0.280000001]
+          m_pos: [-0.243000001,0.930000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: + 0 Sec
+          m_fontSize: 45.9599991
+          m_color: [0.381657988,0.969111979,0.472384453,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.42000008
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_offset: [0,-35]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 233
+    name: Timer_Separator
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,0.999999881]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Separator.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 205
+    name: Timer_Value
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.460000008,0.5]
+          m_pos: [0.187000006,-0.150999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: 060.00
+          m_fontSize: 99.7699966
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 204
+    name: Timer_Label
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.180000007,0.319999993]
+          m_pos: [-0.266000003,-0.241999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: TIME
+          m_fontSize: 60.6300011
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 203
+    name: Timer_Bar
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.73299998,0.141055852]
+          m_pos: [-0.0199999996,0.243000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Bar_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 60
+          m_current: 60
+          m_barColor: [0.338322341,0.98455596,0.887246609,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 202
+    name: Timer_Line
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 201
+    name: Timer_Panel
+    tag: 
+    active: true
+    prefab: 
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Panel.png
+          m_color: [1,1,1,0.607843161]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material

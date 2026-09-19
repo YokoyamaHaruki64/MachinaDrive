@@ -38,6 +38,7 @@ private:
     ComPtr<ID3D11InputLayout> m_inputLayout{ nullptr };
 
     RenderState m_renderState{};
+    bool m_isInstanced{};
 
     std::vector<InputSlotBinding> m_bindings;
     std::vector<ConstantBufferInfo> m_constantBufferInfo{};
@@ -52,6 +53,7 @@ public:
         ComPtr<ID3D11PixelShader> pixelShader,
         ComPtr<ID3D11InputLayout> inputLayout,
         RenderState renderState,
+        bool isInstanced,
         std::vector<InputSlotBinding> bindings,
         std::vector<ConstantBufferInfo> constantBufferInfo,
         std::vector<ShaderTextureInfo> textureInfo
@@ -61,6 +63,7 @@ public:
         m_pixelShader(std::move(pixelShader)),
         m_inputLayout(std::move(inputLayout)),
         m_renderState(renderState),
+        m_isInstanced(isInstanced),
         m_bindings(std::move(bindings)),
         m_constantBufferInfo(std::move(constantBufferInfo)),
         m_textureInfo(std::move(textureInfo))
@@ -78,6 +81,7 @@ public:
 
     const std::string& GetTag() const { return m_tag; }
     const RenderState& GetRenderState() const { return m_renderState; }
+    bool IsInstanced() const { return m_isInstanced; }
     const std::vector<InputSlotBinding>& GetInputSlotBindings() const { return m_bindings; }
     const std::vector<ConstantBufferInfo>& GetConstantBufferInfo() const { return m_constantBufferInfo; }
     const std::vector<ShaderTextureInfo>& GetTextureInfo() const { return m_textureInfo; }

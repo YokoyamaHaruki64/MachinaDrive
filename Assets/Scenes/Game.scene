@@ -2,7 +2,8 @@ version: 1
 name: Game
 gameObjects:
   - id: 1
-    name: Empty
+    name: Camera
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -21,31 +22,49 @@ gameObjects:
       - type: CameraController
         fields:
           enabled: true
+          m_distance: 20
+          m_sensitivity: 0.00100000005
+          m_offset: [0,2,0]
+          m_collisionPadding: 0.300000012
   - id: 2
-    name: Empty
+    name: Field
+    tag: 
     active: true
-    prefab: 
+    prefab: Assets/Prefabs/Field.prefab
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [10,1,10]
+          m_localPosition: [0,-1.46000004,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [0.0199999996,0.0199999996,0.0199999996]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,-0.0299999993,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [6000,140,6000]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: __primitive_plane
+          m_modelPath: Assets/Local/Models/Arena_3.fbx
           m_materialPaths:
-            - Assets/Materials/Field.material
+            - Assets/Materials/Field/Arena_Trim.material
+            - Assets/Materials/Field/Arena_Wall.material
+            - Assets/Materials/Field/Arena_Cyan.material
+            - Assets/Materials/Field/Arena_Floor.material
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
   - id: 3
-    name: Empty
-    active: true
+    name: MateoCube
+    tag: 
+    active: false
     prefab: 
     parent: 
     components:
@@ -65,11 +84,14 @@ gameObjects:
           m_materialPaths:
             - Assets/Materials/Mateo.material
           m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
       - type: RotateCube
         fields:
           enabled: true
   - id: 4
     name: Player
+    tag: Player
     active: true
     prefab: Assets/Prefabs/Player.prefab
     parent: 
@@ -77,249 +99,187 @@ gameObjects:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,3.75999999,2.61216004e-15]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [1.00034523,1,1.00034523]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - Assets/Materials/Player/PlayerBody.material
-            - Assets/Materials/Player/PlayerFlont.material
-            - Assets/Materials/Player/PlayerHead.material
-          m_inverseAxisFlags: 0
+          m_localPosition: [0,1,2.61216004e-15]
+          m_localRotation: [0,1,0,0]
+          m_localScale: [1.39999998,1.39999998,1.39999998]
       - type: CapsuleCollider
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_center: [0,1.05999994,0]
           m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
+          m_layer: 1
+          m_radius: 0.769999981
+          m_height: 3.75
+      - type: Health
+        fields:
+          enabled: true
+          m_maxHP: 100
       - type: Player
         fields:
           enabled: true
-          m_velocity: [0,0,0]
-          m_isGrounded: true
-      - type: Audio
+          m_speed: 100
+          m_attackTime: 5
+          m_attackEndDuration: 0.5
+          m_attackCancelEndRate: 0.5
+          m_speedFriction: 0.300000012
+          m_attackReadyVfxPrefab: Assets/Prefabs/VFX_AttackReady.prefab
+          m_playerLaunchVfxPrefab: Assets/Prefabs/VFX_PlayerLaunch.prefab
+          m_attackDashTrailPrefab: Assets/Prefabs/VFX_PlayerDashTrail.prefab
+      - type: Rigidbody
         fields:
           enabled: true
-          m_filePath: Assets/Local/Sounds/wan.wav
-          m_playOnStart: false
-          m_loop: false
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 1
+          m_friction: 0
+          m_useGravity: true
+          m_allowSleep: true
+          m_freezeRotation: true
+  - id: 5
+    name: BasicEnemy
+    tag: Enemy
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [26.9799995,0,13.6199999]
+          m_localRotation: [0,1,0,-1.19209304e-07]
+          m_localScale: [1.29999995,1.29999995,1.29999995]
       - type: Rigidbody
         fields:
           enabled: true
           m_motionType: 2
           m_mass: 1
           m_bounciness: 0
-          m_friction: 0.200000003
-          m_useGravity: true
-          m_allowSleep: true
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
           m_freezeRotation: true
-  - id: 5
-    name: Enemy(Instance)
-    active: true
-    prefab: Assets/Prefabs/Enemy.prefab
-    parent: 
-    components:
-      - type: Transform
+      - type: Health
         fields:
           enabled: true
-          m_localPosition: [4,0,4]
-          m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
-      - type: ModelRenderer
+          m_maxHP: 1
+      - type: BasicEnemy
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_invincibilityDuration: 0.5
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
+      - type: SphereCollider
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_center: [0,2.01999998,0]
           m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
-        fields:
-          enabled: true
+          m_layer: 2
+          m_radius: 1.79999995
   - id: 6
-    name: Enemy(Instance)
+    name: MovingEnemy
+    tag: Enemy
     active: true
-    prefab: Assets/Prefabs/Enemy.prefab
+    prefab: Assets/Prefabs/MovingEnemy.prefab
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [-4,0,4]
+          m_localPosition: [-34.9799995,0,18.5]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
-      - type: ModelRenderer
+          m_localScale: [1.25,1.25,1.25]
+      - type: Rigidbody
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_motionType: 2
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_maxHP: 1
+      - type: MovingEnemy
+        fields:
+          enabled: true
+          m_invincibilityDuration: 0.5
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 6
+          m_knockbackDistance: 10
+          m_knockbackDuration: 0.100000001
+          m_knockbackAngle: 45
+          m_knockbackUpwardSpeed: 6
+          m_amplitudeMin: 5
+          m_amplitudeMax: 10
+          m_frequencyMin: 0.300000012
+          m_frequencyMax: 0.800000012
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,2.01999998,0]
           m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
-        fields:
-          enabled: true
+          m_layer: 2
+          m_radius: 1.79999995
   - id: 7
-    name: Enemy(Instance)
+    name: HeavyEnemy
+    tag: Enemy
     active: true
-    prefab: Assets/Prefabs/Enemy.prefab
+    prefab: Assets/Prefabs/HeavyEnemy.prefab
     parent: 
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [0,0,6]
+          m_localPosition: [0,0,26.1900005]
           m_localRotation: [0,1,0,-1.19209304e-07]
-          m_localScale: [1,1,1]
-      - type: ModelRenderer
+          m_localScale: [2,2,2]
+      - type: Rigidbody
         fields:
           enabled: true
-          m_drawLayer: 0
-          renderPhase: 1
-          billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
-          m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
-          m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_motionType: 1
+          m_mass: 1
+          m_bounciness: 0
+          m_friction: 0
+          m_useGravity: false
+          m_allowSleep: false
+          m_freezeRotation: true
+      - type: Health
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_maxHP: 3
+      - type: HeavyEnemy
+        fields:
+          enabled: true
+          m_invincibilityDuration: 0.5
+          m_timeRecoveryItemPrefab: Assets/Prefabs/TimeRecoveryItem.prefab
+          m_enemyDeathVfxPrefab: Assets/Prefabs/VFX_EnemyDeath.prefab
+          m_hitShakeDuration: 0.5
+          m_hitShakePower: 8
+          m_knockbackDistance: 0
+          m_knockbackDuration: 0.00999999978
+          m_knockbackAngle: 0
+          m_knockbackUpwardSpeed: 0
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,3.74000001,0]
           m_isTrigger: false
-          m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
-        fields:
-          enabled: true
-  - id: 8
-    name: Tree(Instance)
-    active: true
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [5,3.5,12]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-  - id: 9
-    name: Tree(Instance)
-    active: true
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [-5,3.5,12]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-  - id: 10
-    name: Tree(Instance)
-    active: true
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [7,3.5,8]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
-  - id: 11
-    name: Tree(Instance)
-    active: true
-    prefab: Assets/Prefabs/Tree.prefab
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [-7,3.5,8]
-          m_localRotation: [-0,0,-0,1]
-          m_localScale: [5,5,5]
-      - type: ModelRenderer
-        fields:
-          enabled: true
-          m_drawLayer: 0
-          renderPhase: 2
-          billboardType: 2
-          m_modelPath: __primitive_quad
-          m_materialPaths:
-            - Assets/Materials/Tree.material
-          m_inverseAxisFlags: 0
+          m_layer: 2
+          m_radius: 2.3599999
   - id: 12
-    name: Empty
+    name: Skydome
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -344,23 +304,11 @@ gameObjects:
             - ''
             - Assets/Materials/Skydome.material
           m_inverseAxisFlags: 0
-  - id: 13
-    name: Empty
-    active: true
-    prefab: 
-    parent: 
-    components:
-      - type: Transform
-        fields:
-          enabled: true
-          m_localPosition: [100,100,0]
-          m_localRotation: [0,0,0,1]
-          m_localScale: [1,1,1]
-      - type: Score
-        fields:
-          enabled: true
+          m_castShadow: true
+          m_receiveShadow: true
   - id: 14
-    name: Empty
+    name: BGM
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -374,11 +322,94 @@ gameObjects:
       - type: Audio
         fields:
           enabled: true
-          m_filePath: Assets\Local\Sounds\bgm.wav
+          m_filePath: Assets/Local/Sounds/GameBGM_Electric_Highway.mp3
           m_playOnStart: true
           m_loop: true
-  - id: 15
-    name: Empty
+          m_initialVolume: 0.25
+          m_initialGain: 1
+  - id: 33
+    name: Wall_Left
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.8800011,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,10,120]
+  - id: 34
+    name: Wall_Right
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [56.7900009,0,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,10,120]
+  - id: 35
+    name: Wall_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,56.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [120,10,5]
+  - id: 36
+    name: Wall_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [120,10,5]
+  - id: 51
+    name: PostProcess
+    tag: 
     active: true
     prefab: 
     parent: 
@@ -389,49 +420,2297 @@ gameObjects:
           m_localPosition: [0,0,0]
           m_localRotation: [0,0,0,1]
           m_localScale: [1,1,1]
-      - type: BoxCollider
+      - type: Bloom
         fields:
           enabled: true
-          m_center: [0,-0.5,0]
-          m_isTrigger: false
-          m_layer: 0
-          m_size: [100,1,100]
-      - type: Enemy
+          m_name: Bloom
+          m_materialPath: Assets/Materials/PostProcess/Bloom.material
+      - type: FXAA
         fields:
-          enabled: false
-  - id: 28
-    name: Enemy(Instance)
+          enabled: true
+          m_name: FXAA
+          m_materialPath: Assets/Materials/PostProcess/FXAA.material
+      - type: RadialBlurPostProcess
+        fields:
+          enabled: true
+          m_name: RadialBlur
+          m_materialPath: Assets/Materials/PostProcess/RadialBlur.material
+      - type: ChromaticAberrationPostProcess
+        fields:
+          enabled: true
+          m_name: ChromaticAberration
+          m_materialPath: Assets/Materials/PostProcess/ChromaticAberration.material
+      - type: NoisePostProcess
+        fields:
+          enabled: true
+          m_name: Noise
+          m_materialPath: Assets/Materials/PostProcess/Noise.material
+      - type: GlitchPostProcess
+        fields:
+          enabled: true
+          m_name: Glitch
+          m_materialPath: Assets/Materials/PostProcess/Glitch.material
+      - type: BlockGlitchPostProcess
+        fields:
+          enabled: true
+          m_name: BlockGlitch
+          m_materialPath: Assets/Materials/PostProcess/BlockGlitch.material
+      - type: GrayScalePostProcess
+        fields:
+          enabled: true
+          m_name: GrayScale
+          m_materialPath: Assets/Materials/PostProcess/GrayScale.material
+      - type: DigitalWipeTransition
+        fields:
+          enabled: true
+          m_name: DigitalWipeTransition
+          m_materialPath: Assets/Materials/PostProcess/DigitalWipeTransition.material
+      - type: HorizontalGlitchTransition
+        fields:
+          enabled: true
+          m_name: HorizontalGlitchTransition
+          m_materialPath: Assets/Materials/PostProcess/HorizontalGlitchTransition.material
+      - type: PostProcessImpulse
+        fields:
+          enabled: true
+          m_presets:
+            - name: PlayerShot
+              prefab: Assets/Prefabs/PostProcessImpulse_PlayerShot.prefab
+            - name: EnemyHit
+              prefab: Assets/Prefabs/PostProcessImpulse_EnemyHit.prefab
+            - name: WaveBegin
+              prefab: Assets/Prefabs/PostProcessImpulse_WaveBegin.prefab
+            - name: TimeUp
+              prefab: Assets/Prefabs/PostProcessImpulse_TimeUp.prefab
+  - id: 3376
+    name: PlayerHit
+    tag: 
     active: true
-    prefab: Assets/Prefabs/Enemy.prefab
-    parent: 
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 4
     components:
       - type: Transform
         fields:
           enabled: true
-          m_localPosition: [2.27999997,0.0299999993,0]
+          m_localPosition: [0,0,-2.61125858e-15]
           m_localRotation: [-0,0,-0,1]
-          m_localScale: [1,1,1]
+          m_localScale: [0.999654889,1,0.999654889]
+      - type: SphereCollider
+        fields:
+          enabled: true
+          m_center: [0,1.41999996,0]
+          m_isTrigger: true
+          m_layer: 4
+          m_radius: 1.79999995
+      - type: PlayerHit
+        fields:
+          enabled: true
+          m_collisionVfxPrefab: Assets/Prefabs/VFX_Collision.prefab
+          m_shakeDuration: 0.600000024
+          m_shakeMagnitude: 6
+          m_hitStopDuration: 0.300000012
+  - id: 3375
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Player.prefab
+    parent: 4
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0.939999938,2.61216004e-15]
+          m_localRotation: [0.103015825,0.168601349,-0.017720513,0.980126202]
+          m_localScale: [0.0100004338,0.0100000054,0.0100004757]
       - type: ModelRenderer
         fields:
           enabled: true
           m_drawLayer: 0
           renderPhase: 1
           billboardType: 0
-          m_modelPath: Assets/Local/Models/Player.obj
+          m_modelPath: Assets/Local/Models/Player_2.fbx
           m_materialPaths:
-            - ''
-            - ''
-            - ''
-            - ''
+            - Assets/Materials/Player/Player_Core.material
+            - Assets/Materials/Player/Player_DefArmor.material
+            - Assets/Materials/Player/Player_SpecialArmor.material
+            - Assets/Materials/Player/Player_SensorArmor.material
           m_inverseAxisFlags: 0
-      - type: CapsuleCollider
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: PlayerAnimation
         fields:
           enabled: true
-          m_center: [0,1,0]
+          m_stateColors:
+            - [0.231660232,0.62264806,0.714285731,1]
+            - [0.822393835,0.680013061,0.244495466,1]
+            - [1,0.0888031125,0.0888031125,1]
+            - [0.523365319,0.308880329,1,1]
+          m_attackReadyBlinkSpeed: 5
+          m_attackReadyBlinkAmount: 0.349999994
+          m_attackingBlinkSpeed: 16
+          m_attackingBlinkAmount: 0.699999988
+          m_floatHeight: 0.200000003
+          m_floatSpeed: 2
+          m_idleYawSpeed: 1
+          m_atkReadyRotSpeed: 8
+          m_atkStartRotSpeed: 35
+          m_attackSpinDecay: 0.5
+          m_rotationSpeedTransitionRate: 8
+  - id: 66
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Enemy.prefab
+    parent: 5
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/BasicDrone_Body.material
+            - Assets/Materials/Enemy/BasicDrone_Line.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.129999995
+          m_floatSpeed: 2.5
+      - type: ObjectShake
+        fields:
+          enabled: true
+  - id: 74
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/MovingEnemy.prefab
+    parent: 6
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,2.80999994,0]
+          m_localRotation: [0,-0.707106829,0,0.707106769]
+          m_localScale: [0.00300000003,0.00300000003,0.00300000003]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/MovingDrone_Body.material
+            - Assets/Materials/Enemy/MovingDrone_Line.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.129999995
+          m_floatSpeed: 8.11999989
+      - type: ObjectShake
+        fields:
+          enabled: true
+  - id: 75
+    name: Model
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/HeavyEnemy.prefab
+    parent: 7
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-2.65906965e-06,2.18000007,0]
+          m_localRotation: [0,0.707106829,0,-0.707106709]
+          m_localScale: [0.00499991933,0.00400000112,0.00399993965]
+      - type: ModelRenderer
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          renderPhase: 1
+          billboardType: 0
+          m_modelPath: Assets/Local/Models/Drone.fbx
+          m_materialPaths:
+            - Assets/Materials/Enemy/HeavyDrone_Body.material
+            - Assets/Materials/Enemy/HeavyDrone_Line.material
+          m_inverseAxisFlags: 0
+          m_castShadow: true
+          m_receiveShadow: true
+      - type: EnemyAnimation
+        fields:
+          enabled: true
+          m_floatHeight: 0.400000006
+          m_floatSpeed: 1.5
+      - type: ObjectShake
+        fields:
+          enabled: true
+  - id: 100
+    name: GameHUD
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+      - type: GameHud
+        fields:
+          enabled: true
+          m_healthBar: 203
+          m_timerText: 205
+          m_waveNumber: 249
+          m_enemyNumber: 250
+          m_comboUIObject: 259
+          m_shardsNumber: 
+          m_healthRoot: 200
+          m_waveRoot: 210
+          m_comboRoot: 259
+          m_driveRoot: 220
+          m_shardsRoot: 
+          m_driveGauge: 223
+          m_driveChargingText: 225
+          m_driveReadyText: 226
+          m_visible: true
+          m_comboVisible: true
+  - id: 192
+    name: Field_LeftUp
+    tag: EnemySpawnArea
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-45,0,45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 193
+    name: Field_RightUp
+    tag: EnemySpawnArea
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [45,0,45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 194
+    name: Field_LeftBottom
+    tag: EnemySpawnArea
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-45,0,-45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 195
+    name: Field_RightBottom
+    tag: EnemySpawnArea
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [45,0,-45]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+  - id: 196
+    name: Wave Director
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: WaveDirector
+        fields:
+          enabled: true
+          m_basicEnemyPrefab: Assets/Prefabs/Enemy.prefab
+          m_movingEnemyPrefab: Assets/Prefabs/MovingEnemy.prefab
+          m_heavyEnemyPrefab: Assets/Prefabs/HeavyEnemy.prefab
+          m_enemySpawnVfxPrefab: Assets/Prefabs/VFX_EnemySpawn.prefab
+          m_timeRecoveryDropRate: 0.330000013
+          m_maxTime: 120
+          m_startTime: 120
+          m_timeDrainPerSecond: 1
+          m_baseClearTimeBonus: 10
+          m_clearTimeGrowth: 3
+          m_maxClearTimeBonus: 20
+          m_waveStartDelay: 2
+          m_waveBeginDuration: 2
+          m_baseEnemyCount: 5
+          m_enemyCountGrowth: 1.5
+          m_enemyCountExponent: 1.5
+          m_maxEnemyCount: 48
+          m_movingStart: 0.150000006
+          m_movingGrowth: 0.0149999997
+          m_movingMax: 0.349999994
+          m_heavyStartWave: 3
+          m_heavyGrowth: 0.0399999991
+          m_heavyMax: 0.300000012
+          m_minPlayerDistance: 12
+          m_spawnAttemptCount: 16
+          m_spawnHeight: 0
+  - id: 200
+    name: HUD_Timer
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.289999992,0.120374054]
+          m_pos: [0.159999996,0.100000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: TimeRecoveryUI
+        fields:
+          enabled: true
+          m_recoveryText: 272
+          m_duration: 0.75
+  - id: 201
+    name: Timer_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Panel.png
+          m_color: [1,1,1,0.607843161]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 202
+    name: Timer_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 203
+    name: Timer_Bar
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.73299998,0.141055852]
+          m_pos: [-0.0199999996,0.243000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Bar_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 60
+          m_current: 60
+          m_barColor: [0.338322341,0.98455596,0.887246609,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 204
+    name: Timer_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.180000007,0.319999993]
+          m_pos: [-0.266000003,-0.241999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: TIME
+          m_fontSize: 60.6300011
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 205
+    name: Timer_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.460000008,0.5]
+          m_pos: [0.187000006,-0.150999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: 060.00
+          m_fontSize: 99.7699966
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 210
+    name: HUD_Wave
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.125]
+          m_pos: [0,0.0670000017]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: WaveStartUI
+        fields:
+          enabled: true
+          m_frame: 395
+          m_beginText: 271
+          m_onDuration: 0.150000006
+          m_offDuration: 0.150000006
+  - id: 211
+    name: Wave_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 212
+    name: Wave_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,0]
+          m_pivot: [0,0]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 5.64651155
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Wave_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 213
+    name: Wave_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.141000003,0.300999999]
+          m_pos: [-0.101000004,-0.31099999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: WAVE
+          m_fontSize: 70
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 214
+    name: Enemy_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.159999996,0.219999999]
+          m_pos: [-0.0780000016,0.234999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: ENEMIES
+          m_fontSize: 40
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 220
+    name: HUD_Drive
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.310000002,0.204999998]
+          m_pos: [0.174999997,-0.136000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+  - id: 221
+    name: Drive_Panel
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Panel.png
+          m_color: [1,1,1,0.600000024]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 222
+    name: Drive_Line
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 2.51923084
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 102
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_Line_Mask.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 223
+    name: Drive_Gauge
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.513000011,0.671000004]
+          m_pos: [-0.202000007,-0.123999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1.96186435
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/GaugeInner.material
+  - id: 224
+    name: Drive_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.200000003,0.159999996]
+          m_pos: [-0.201000005,-0.123999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: DRIVE
+          m_fontSize: 61.9500008
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 225
+    name: Drive_ChargingText
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.316000015,0.200000003]
+          m_pos: [-0.163000003,0.222000003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: CHARGING...
+          m_fontSize: 48
+          m_color: [0.957528949,0.930993199,0.428854674,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 1
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 226
+    name: Drive_ReadyText
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 220
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.312999994,0.129999995]
+          m_pos: [-0.164000005,0.187000006]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 103
+          font: Assets/Local/Font/Exo2.fnt
+          text: READY!!
+          m_fontSize: 48
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 1
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 233
+    name: Timer_Separator
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,0.999999881]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.28294563
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: Assets/Local/Textures/UI/GameHud/HUD_Timer_Separator.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 249
+    name: Wave_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.100000001,0.389999986]
+          m_pos: [0.120999999,-0.31400001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/Exo2.fnt
+          text: 00
+          m_fontSize: 80
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 250
+    name: Enemy_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.075000003,0.300000012]
+          m_pos: [0.115000002,0.187999994]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 200
+          font: Assets/Local/Font/Exo2.fnt
+          text: 00
+          m_fontSize: 60
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 3
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 259
+    name: HUD_Combo
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 100
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0.5]
+          m_pivot: [1,0.5]
+          m_stretch: [0.0520833321,0.0925925896]
+          m_pos: [-0.119999997,-0.289999992]
+          m_offset: [0,0]
+          m_uiRotation: 0.150000006
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: ComboUI
+        fields:
+          enabled: true
+          m_comboValue: 261
+          m_comboLabel: 260
+          m_boundTime: 0.400000006
+          m_boundScale: 1
+          m_gap: 100
+          m_boundCurve:
+            - time: 0
+              value: 0
+              inControl: 0
+              outControl: 0.605555534
+            - time: 0.5
+              value: 1
+              inControl: 1
+              outControl: 0
+            - time: 1
+              value: 0
+              inControl: 0
+              outControl: 0
+  - id: 260
+    name: Combo_Label
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0.649999976,0]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: Combo!!
+          m_fontSize: 70
+          m_color: [0,1,0.965250731,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 261
+    name: Combo_Value
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 259
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [-1.24000001,-0.200000003]
+          m_offset: [0,0]
+          m_uiRotation: 0.0799999982
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: 00
+          m_fontSize: 90
+          m_color: [0.6795367,1,0.988864124,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 5
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 270
+    name: Wave_Start_Progress_Bar
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.970000029,0.689999998]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 22.833334
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 101
+          image: ''
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/FillBar.material
+      - type: FillBar
+        fields:
+          enabled: true
+          m_max: 1
+          m_current: 1
+          m_barColor: [0.345098048,0.933333337,1,1]
+          m_chipColor: [1,1,1,1]
+          m_chipDecreaseSpeed: 10
+          m_chipDecreaseDelay: 0
+          m_verticalFill: false
+          m_horizontalFill: true
+          m_verticalFromTop: false
+          m_verticalFromCenter: false
+          m_verticalFromBottom: false
+          m_horizontalFromLeft: true
+          m_horizontalFromCenter: false
+          m_horizontalFromRight: false
+  - id: 271
+    name: Wave_Begin_Text
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.400000006,0.0900000036]
+          m_pos: [0,3.18000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: WAVE      BEGIN
+          m_fontSize: 153.860001
+          m_color: [0.378378391,1,0.978399098,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.30000019
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 272
+    name: Timer_Time_Recovery_Text
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 200
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.550000012,0.280000001]
+          m_pos: [-0.243000001,0.930000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 250
+          font: Assets/Local/Font/AprilGothicOne-R.fnt
+          text: + 0 Sec
+          m_fontSize: 45.9599991
+          m_color: [0.381657988,0.969111979,0.472384453,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.42000008
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+      - type: UIFade
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_startAlpha: 1
+          m_endAlpha: 0
+          m_reverse: false
+          m_reverseEaseType: true
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: OutSine
+          m_offset: [0,-35]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 395
+    name: Wave_Start_Progress_Frame
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 210
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.472000003,0.232999995]
+          m_pos: [0,4.78000021]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 100
+          image: ''
+          m_color: [0,0,0,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 396
+    name: Wave_Start_Progress_Text
+    tag: 
+    active: false
+    prefab: Assets/Prefabs/GameHud.prefab
+    parent: 395
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.512000024,1.32299995]
+          m_pos: [-0.239999995,-1.81700003]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          font: Assets/Local/Font/Exo2.fnt
+          text: Next...
+          m_fontSize: 68.9899979
+          m_color: [0.34362936,0.931575298,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 6.82999992
+          horizontalAlignment: 0
+          verticalAlignment: 0
+          m_materialPath: Assets/Materials/Text.material
+  - id: 458
+    name: Pause Canvas
+    tag: 
+    active: false
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 459
+    name: Pause Exit
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0,1]
+          m_pivot: [0,1]
+          m_stretch: [0.075000003,0.13333334]
+          m_pos: [0.0549999997,-0.795000017]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+  - id: 460
+    name: Pause Exit Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 459
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Pause_Exit.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 461
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 459
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 1
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/UI/Pause_Exit_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 462
+    name: Retry
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,0.595000029]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 463
+    name: Retry Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 462
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Retry.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 464
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 462
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 465
+    name: Return Title
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,0]
+          m_pivot: [1,0]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,0.754999995]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 466
+    name: Return Title Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 465
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1000
+          image: Assets/Local/Textures/UI/Button_Return.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 467
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 465
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 1001
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 468
+    name: Pause UI
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: PauseUI
+        fields:
+          enabled: true
+          m_pauseCanvas: 458
+          m_uiObjects:
+            - 459
+            - 462
+            - 465
+  - id: 607
+    name: Fill
+    tag: 
+    active: false
+    prefab: 
+    parent: 458
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 999
+          image: ''
+          m_color: [0,0,0,0.670588255]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 608
+    name: Result
+    tag: 
+    active: true
+    prefab: 
+    parent: 
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,0,0]
+          m_localRotation: [0,0,0,1]
+          m_localScale: [1,1,1]
+      - type: Result
+        fields:
+          enabled: true
+          m_duration: 1.79999995
+      - type: ResultUI
+        fields:
+          enabled: true
+          m_resultCanvas: 609
+          m_resultPanel: 611
+          m_uiObjects:
+            - 615
+            - 618
+          m_timeText: 848
+          m_maxWaveText: 849
+          m_maxComboText: 850
+          m_destroyEnemyText: 851
+          m_displayDelay: 1
+          m_displayDuration: 0.5
+  - id: 609
+    name: Result Canvas
+    tag: 
+    active: false
+    prefab: 
+    parent: 
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UICanvas
+        fields:
+          enabled: true
+  - id: 611
+    name: Result Panel
+    tag: 
+    active: false
+    prefab: 
+    parent: 609
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.439999998,1.09544027]
+          m_pos: [-0.0900000036,-0.0399999991]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0.714071095
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2001
+          image: Assets/Local/Textures/UI/Result_Panel.png
+          m_color: [1,1,1,0.552941203]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 612
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0.714071095
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2002
+          image: Assets/Local/Textures/UI/Result_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/HUDFrameMask.material
+  - id: 613
+    name: Result Text
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0.714071095
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2003
+          image: Assets/Local/Textures/UI/Result_Text.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 615
+    name: Result Retry
+    tag: 
+    active: false
+    prefab: 
+    parent: 609
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,-0.314999998]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 616
+    name: Result Retry Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 615
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2004
+          image: Assets/Local/Textures/UI/Button_Retry.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 617
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 615
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2005
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 618
+    name: Result Return Title
+    tag: 
+    active: false
+    prefab: 
+    parent: 609
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [1,1]
+          m_pivot: [1,1]
+          m_stretch: [0.25,0.0900000036]
+          m_pos: [-0.0700000003,-0.153999999]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIOffset
+        fields:
+          enabled: true
+          m_easeType: InOutQuad
+          m_offset: [-32,0]
+          m_reverse: false
+          m_reverseEaseType: true
+  - id: 619
+    name: Result Return Title Button
+    tag: 
+    active: false
+    prefab: 
+    parent: 618
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2004
+          image: Assets/Local/Textures/UI/Button_Return.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+      - type: UIButton
+        fields:
+          enabled: true
+          m_normalColor: [1,1,1,1]
+          m_hoveredColor: [0.899999976,0.899999976,0.899999976,1]
+          m_pressedColor: [0.75,0.75,0.75,1]
+          m_disabledColor: [0.5,0.5,0.5,1]
+  - id: 620
+    name: Line
+    tag: 
+    active: false
+    prefab: 
+    parent: 618
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [1,1]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 4.8462553
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 2005
+          image: Assets/Local/Textures/Title/Button_Line.png
+          m_color: [1,1,1,1]
+          m_raycastTarget: false
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 621
+    name: Fill
+    tag: 
+    active: false
+    prefab: 
+    parent: 609
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [2.70000005,3.47000003]
+          m_pos: [0,0]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIImage
+        fields:
+          enabled: true
+          m_drawLayer: 0
+          image: ''
+          m_color: [0,0,0,0.70588237]
+          m_raycastTarget: true
+          m_dragEnabled: false
+          m_materialPath: Assets/Materials/UI.material
+  - id: 848
+    name: Time Value
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.693000019,0.100000001]
+          m_pos: [0,-0.0270000007]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 2009
+          font: Assets/Local/Font/Exo2.fnt
+          text: 01:55.16
+          m_fontSize: 177.850006
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 2
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 849
+    name: MaxWave Value
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.200000003,0.0700000003]
+          m_pos: [0.272000015,0.118000001]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 2003
+          font: Assets/Local/Font/Exo2.fnt
+          text: '12 '
+          m_fontSize: 116
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 0
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 850
+    name: MaxCombo Value
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.200000003,0.0700000003]
+          m_pos: [0.261999995,0.216999993]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 2003
+          font: Assets/Local/Font/Exo2.fnt
+          text: 12
+          m_fontSize: 116
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 0
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 851
+    name: DestroyEnemy Value
+    tag: 
+    active: false
+    prefab: 
+    parent: 611
+    components:
+      - type: UITransform
+        fields:
+          enabled: true
+          m_anchor: [0.5,0.5]
+          m_pivot: [0.5,0.5]
+          m_stretch: [0.200000003,0.0700000003]
+          m_pos: [0.261999995,0.316000015]
+          m_offset: [0,0]
+          m_uiRotation: 0
+          m_uiScale: [1,1]
+          m_aspectRatio: 0
+      - type: UIText
+        fields:
+          enabled: true
+          m_drawLayer: 2003
+          font: Assets/Local/Font/Exo2.fnt
+          text: 12
+          m_fontSize: 116
+          m_color: [1,1,1,1]
+          m_outlineColor: [0,0,0,1]
+          m_outlineWidth: 0
+          horizontalAlignment: 1
+          verticalAlignment: 1
+          m_materialPath: Assets/Materials/Text.material
+  - id: 1251
+    name: Collider
+    tag: 
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 2
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [0,73,0]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [50,50,50]
+  - id: 1252
+    name: Right_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [56.7900009,8.84000015,27.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
           m_isTrigger: false
           m_layer: 0
-          m_radius: 0.5
-          m_height: 2
-      - type: Enemy
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1253
+    name: Right_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
         fields:
           enabled: true
+          m_localPosition: [56.7900009,8.84000015,-28.0300007]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1254
+    name: Back_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [27.8600006,8.96000004,-56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1255
+    name: Back_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-28.0100002,8.96000004,-56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1256
+    name: Left_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.7900009,8.84000015,27.9300003]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1257
+    name: Left_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-56.7900009,8.84000015,-28.0300007]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [5,7.65999985,4.1500001]
+  - id: 1258
+    name: Fore_01
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [27.8600006,8.96000004,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1259
+    name: Fore_02
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-28.0100002,8.96000004,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [4.1500001,7.65999985,5]
+  - id: 1260
+    name: Right_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [58.5999985,13.3599997,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1261
+    name: Left_Back
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-58.5999985,13.3599997,-56.8899994]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1262
+    name: Right_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [58.5999985,13.3599997,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]
+  - id: 1263
+    name: Left_Fore
+    tag: Wall
+    active: true
+    prefab: Assets/Prefabs/Field.prefab
+    parent: 1251
+    components:
+      - type: Transform
+        fields:
+          enabled: true
+          m_localPosition: [-58.5999985,13.3599997,56.5600014]
+          m_localRotation: [-0,0,-0,1]
+          m_localScale: [1,1,1]
+      - type: BoxCollider
+        fields:
+          enabled: true
+          m_center: [0,0,0]
+          m_isTrigger: false
+          m_layer: 0
+          m_size: [12.3400002,16.5400009,9]

@@ -6,6 +6,7 @@
 #include "Graphics/MaterialManager.h"
 #include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/TextureManager.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 #include <Assimp/Importer.hpp>
@@ -36,7 +37,7 @@ namespace
 
     void ShowLoadError(const std::string& message)
     {
-        MessageBoxA(nullptr, message.c_str(), "Model Loader Error", MB_OK | MB_ICONERROR);
+        Logger::Error(message);
     }
 
     TextureHandle LoadMaterialTexture(

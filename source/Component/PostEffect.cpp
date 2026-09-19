@@ -6,9 +6,9 @@
 #include "Component/PostEffect.h"
 
 #include "Graphics/MaterialManager.h"
-#include "Graphics/Shader/ShaderManager.h"
 #include "Graphics/Shader/ShaderProgram.h"
 #include "Graphics/TextureManager.h"
+#include "System/Diagnostics/Logger.h"
 #include "System/Rendering/renderer.h"
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> PostProcess::m_positionBuffer;
@@ -29,7 +29,7 @@ namespace
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
         if (FAILED(Renderer::GetDevice()->CreateBuffer(&description, &initialData, buffer.GetAddressOf())))
-            MessageBoxA(nullptr, "ポストプロセス用頂点バッファの作成に失敗しました。", "Post Process Error", MB_OK | MB_ICONERROR);
+            Logger::Error("ポストプロセス用頂点バッファの作成に失敗しました。");
 
         return buffer;
     }
@@ -58,12 +58,48 @@ void PostProcess::Uninit()
     m_texCoordBuffer.Reset();
 }
 
-PostProcess::PostProcess(const char* shaderFilePath)
+void PostProcess::RegisterFields(FieldRegistry& fields)
 {
-    // PostProcessごとの値は独立したMaterialへ持たせ、Property APIを通常描画と共用する。
-    static uint32_t materialInstanceIndex = 0;
-    if (GraphicsShader* shader = ShaderManager::LoadShaderFromFile(shaderFilePath))
-        m_material = MaterialManager::Create("PostProcess." + std::to_string(materialInstanceIndex++), *shader);
+    GM_FIELD(m_name);
+    GM_FIELD_TYPE(m_materialPath, InspectorFieldType::Hidden);
+}
+
+void PostProcess::SetMaterial(Material* material)
+{
+    m_material = material;
+    m_materialPath = material ? material->GetFilePath() : std::string{};
+    OnMaterialChanged();
+}
+
+void PostProcess::SetMaterialPath(const std::string& path)
+{
+    if (path.empty())
+        return;
+
+    Material* material = MaterialManager::Load(path);
+    if (material && material->IsValid())
+        SetMaterial(material);
+}
+
+void PostProcess::OnLoaded()
+{
+    if (!m_material && !m_materialPath.empty())
+        SetMaterialPath(m_materialPath);
+}
+
+void PostProcess::OnEnable()
+{
+    Renderer::RegisterPostEffect(this);
+}
+
+void PostProcess::OnDisable()
+{
+    Renderer::UnregisterPostEffect(this);
+}
+
+void PostProcess::OnDestroy()
+{
+    Renderer::UnregisterPostEffect(this);
 }
 
 bool PostProcess::BindFullscreenVertices(const GraphicsShaderPass& shaderPass) const
@@ -119,7 +155,7 @@ void PostProcess::ClearBoundTextures(const GraphicsShaderPass& shaderPass) const
     }
 }
 
-bool PostProcess::ExecutePass(size_t passIndex)
+bool PostProcess::ExecuteScreenPassAndSwap(size_t passIndex)
 {
     if (!m_material || passIndex >= m_material->GetShader().GetShaderPasses().size())
         return false;
@@ -128,7 +164,7 @@ bool PostProcess::ExecutePass(size_t passIndex)
 
     // 画面出力では、現在のSourceと異なるDstへ描画して完了後にSwapする。
     Renderer::SetDstRTV();
-    m_material->Bind(passIndex);
+    m_material->Bind(passIndex, m_impulseOverride.Empty() ? nullptr : &m_impulseOverride);
     BindSourceTexture();
     const bool canDraw = BindFullscreenVertices(shaderPass);
     if (canDraw)
@@ -142,16 +178,16 @@ bool PostProcess::ExecutePass(size_t passIndex)
     return true;
 }
 
-bool PostProcess::ExecutePass(std::string_view passTag)
+bool PostProcess::ExecuteScreenPassAndSwap(std::string_view passTag)
 {
     if (!m_material)
         return false;
 
     const std::optional<size_t> passIndex = m_material->GetShader().GetShaderPassIndex(passTag);
-    return passIndex && ExecutePass(*passIndex);
+    return passIndex && ExecuteScreenPassAndSwap(*passIndex);
 }
 
-bool PostProcess::ExecutePass(size_t passIndex, TextureHandle renderTarget)
+bool PostProcess::ExecuteMiddlePass(size_t passIndex, TextureHandle renderTarget)
 {
     if (!m_material || passIndex >= m_material->GetShader().GetShaderPasses().size())
         return false;
@@ -161,7 +197,7 @@ bool PostProcess::ExecutePass(size_t passIndex, TextureHandle renderTarget)
         return false;
 
     // 中間RTへの出力ではSwapせず、次のPassも同じ画面入力を参照できるようにする。
-    m_material->Bind(passIndex);
+    m_material->Bind(passIndex, m_impulseOverride.Empty() ? nullptr : &m_impulseOverride);
     BindSourceTexture();
     const bool canDraw = BindFullscreenVertices(shaderPass);
     if (canDraw)
@@ -171,13 +207,13 @@ bool PostProcess::ExecutePass(size_t passIndex, TextureHandle renderTarget)
     return canDraw;
 }
 
-bool PostProcess::ExecutePass(std::string_view passTag, TextureHandle renderTarget)
+bool PostProcess::ExecuteMiddlePass(std::string_view passTag, TextureHandle renderTarget)
 {
     if (!m_material)
         return false;
 
     const std::optional<size_t> passIndex = m_material->GetShader().GetShaderPassIndex(passTag);
-    return passIndex && ExecutePass(*passIndex, renderTarget);
+    return passIndex && ExecuteMiddlePass(*passIndex, renderTarget);
 }
 
 void PostProcess::DrawFullscreen() const
@@ -188,47 +224,3 @@ void PostProcess::DrawFullscreen() const
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-Bloom::Bloom()
-    : PostProcess(SHADER_FILE_PATH)
-{
-    // 中間RTはTextureManagerが所有し、Material Propertyへ共通Handleで渡す。
-    const UINT bloomWidth = std::max<UINT>(Renderer::GetGameWidth() / 2, 1);
-    const UINT bloomHeight = std::max<UINT>(Renderer::GetGameHeight() / 2, 1);
-    m_bloomTexture = TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
-    if (!m_bloomTexture.IsValid())
-        return;
-
-    if (Material* material = GetMaterial())
-    {
-        material->SetTexture("_Bloom", m_bloomTexture);
-        m_bloomExtractPassIndex = material->GetShader().GetShaderPassIndex("BloomExtract").value_or(-1);
-        m_compositePassIndex = material->GetShader().GetShaderPassIndex("Composite").value_or(-1);
-    }
-
-}
-
-void Bloom::Resize(UINT width, UINT height)
-{
-    const UINT bloomWidth = std::max<UINT>(width / 2, 1);
-    const UINT bloomHeight = std::max<UINT>(height / 2, 1);
-    const TextureHandle resizedTexture =
-        TextureManager::CreateRenderTexture("PostProcess/Bloom", bloomWidth, bloomHeight);
-    if (!resizedTexture.IsValid())
-        return;
-
-    m_bloomTexture = resizedTexture;
-    if (Material* material = GetMaterial())
-        material->SetTexture("_Bloom", m_bloomTexture);
-}
-
-void Bloom::Apply()
-{
-    if (!m_bloomTexture.IsValid() || !GetMaterial())
-        return;
-
-    // 中間RTへ抽出してから、Materialの_Bloom Propertyを使って画面へ合成する。
-    if (!ExecutePass(m_bloomExtractPassIndex, m_bloomTexture))
-        return;
-
-    ExecutePass(m_compositePassIndex);
-}

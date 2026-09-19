@@ -1,0 +1,17 @@
+version: 1
+name: MovingDrone_Body
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [0,0.82625556,1,1]
+  _Emission: [0.104619786,0.219792053,0.223938227,1]
+  _Metallic: 0.300000012
+  _Roughness: 0.5
+  _ToonBands: 4.25
+  _ToonDiffuseStrength: 1
+  _ToonShadowColor: [0.158718556,0.240306109,0.243243217,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.0299999993
+  _RimColor: [0.749034762,0.898257315,1,1]
+  _RimPower: 4
+  _RimStrength: 0.479999989
+  _MainTex: 

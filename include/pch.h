@@ -37,7 +37,20 @@
 #include <cassert>
 #include <limits>
 
-// 独自のヘッダーファイル
+// ほぼ全翻訳単位で利用する安定した基盤型
+#include "Common/Color.h"
+#include "Common/ValueType.h"
+#include "Common/Random.h"
+#include "Common/Easing.h"
+#include "math/Curve.h"
 #include "math/MathCommon.h"
+#include "math/Matrix3x3.h"
+#include "math/Matrix4x4.h"
+#include "math/Quaternion.h"
+#include "math/Vector2.h"
+#include "math/Vector3.h"
+#include "math/Vector4.h"
+
+// 独自のヘッダーファイル
 #include "System/Core/GameObject.h"
 #include "System/Core/component.h"

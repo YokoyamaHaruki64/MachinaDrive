@@ -1,16 +1,8 @@
 ﻿#pragma once
 
-#include <string>
-#include <vector>
 
-#include "System/Core/GameObjectReference.h"
-#include "System/Core/PrefabReference.h"
 #include "System/Core/Script.h"
-#include "System/Diagnostics/Logger.h"
-#include "System/Serialization/YAMLDocumentIO.h"
-#include "math/Matrix3x3.h"
-#include "math/Matrix4x4.h"
-#include "math/Quaternion.h"
+
 
 struct ReflectNestedSettingsTest
 {

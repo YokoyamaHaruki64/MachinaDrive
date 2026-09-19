@@ -1,0 +1,11 @@
+version: 1
+name: BlockGlitch
+shader: Assets/Shaders/PostProcessBlockGlitch.shader
+properties:
+  _Intensity: 0
+  _BlockCount: 8
+  _BlockSizeMin: [0.02,0.01]
+  _BlockSizeMax: [0.16,0.05]
+  _Probability: 0.35
+  _Speed: 10
+  _Seed: 0

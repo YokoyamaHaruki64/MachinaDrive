@@ -1,0 +1,10 @@
+version: 1
+name: GaugeInner
+shader: Assets/Shaders/GaugeInner.shader
+properties:
+  _BaseColor: [1,1,1,1]
+  Progress: 1
+  SpriteTexture: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner.png
+  ProgressMask: Assets/Local/Textures/UI/GameHud/HUD_Drive_GaugeInner_ProgressMask.png
+  _UVScale: [1,1]
+  _UVOffset: [0,0]

@@ -1,0 +1,8 @@
+version: 1
+name: VFX Moving Enemy Trail
+shader: Assets/Shaders/UnlitAdditive.shader
+properties:
+  _BaseColor: [0.15,0.9,0.55,0.85]
+  _UVScale: [1,1]
+  _UVOffset: [0,0]
+  _MainTex: Assets/Local/Textures/VFX/VFX_AttackChargeTrail.png

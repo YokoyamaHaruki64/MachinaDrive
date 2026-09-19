@@ -8,7 +8,6 @@
 #include <utility>
 #include "math/vector3.h"
 #include "System/Core/GameObject.h"
-#include "Component/PostEffect.h"
 #include "Component/UICanvas.h"
 
 class Camera;
@@ -36,7 +35,6 @@ private:
 
 	static std::vector<std::unique_ptr<GameObject>> m_GameObjects;
     static std::vector<std::unique_ptr<GameObject>> m_pendingGameObjects;   // オブジェクト追加用の一時的な格納場所
-    static std::vector<std::unique_ptr<PostProcess>> m_postEffects;         // ポストエフェクトのリスト
     static std::vector<RendererBase*> m_Renderers;                          // 描画用のレンダラーリスト
 
     static std::unique_ptr<Scene> m_currentScene;
@@ -46,6 +44,7 @@ private:
     static bool m_stopPlayRequested;
     static bool m_sceneDirty;
     static uint64_t m_nextGameObjectId;
+    static uint64_t m_sceneLoadGeneration;
 
     static uint64_t AllocateGameObjectId();
     static void EnsureGameObjectIds(
@@ -104,7 +103,7 @@ private:
 
     static void InitScene();
     static void ReloadCurrentScene();
-    static void DestroyGameObjects();
+    static void DestroyGameObjects(bool destroyPersistentObjects);
     static void StartLoadedGameObjects(
         std::vector<std::unique_ptr<GameObject>> gameObjects,
         bool assignNewIds = false);
@@ -122,12 +121,15 @@ public:
 
     static GameMode GetGameMode() { return m_gameMode; }
     static bool IsPlayMode() { return m_gameMode == GameMode::Play; }
+    static bool IsSceneTransitioning() { return m_sceneTransitionPhase != SceneTransitionPhase::None; }
     static bool IsCurrentSceneDirty() { return m_sceneDirty; }
     static void MarkCurrentSceneDirty();
     static void ClearCurrentSceneDirty();
     static std::filesystem::path GetCurrentSceneFilePath();
+    static uint64_t GetSceneLoadGeneration() { return m_sceneLoadGeneration; }
     static bool EnterPlayMode();
     static bool StopPlayMode();
+    static void Quit();
 #if GM_ENABLE_EDITOR
     static bool LoadEditorScene(const std::filesystem::path& path);
 #endif
@@ -137,6 +139,7 @@ public:
     static bool LoadSceneObjects(const std::filesystem::path& path);
     static bool SavePrefab(GameObject& root, const std::filesystem::path& path);
     static bool ApplyToPrefab(GameObject& gameObject);
+    static bool RevertFromPrefab(GameObject& gameObject);
     static GameObject* Instantiate(const std::filesystem::path& path);
     static GameObject* Instantiate(
         const std::filesystem::path& path,
@@ -145,6 +148,9 @@ public:
         const Vector3& scale);
 
     static const std::vector<std::unique_ptr<GameObject>>& GetActiveGameObjects() { return m_GameObjects; }
+    static std::vector<GameObject*> GetObjectsByTag(const std::string& tag);
+    static GameObject* GetObjectFirstByTag(const std::string& tag);
+    static GameObject* GetObjectFirstByName(const std::string& name);
 
 #if GM_ENABLE_EDITOR
     static std::unique_ptr<EditorCommand> CreateEditorCreationCommand(
@@ -276,21 +282,4 @@ public:
         return result; // 見つからない場合は空のベクターを返す
     }
 
-    static void AddPostEffect(std::unique_ptr<PostProcess> postEffect)
-    {
-        m_postEffects.push_back(std::move(postEffect));
-    }
-
-    static void RemovePostEffect(PostProcess* postEffect)
-    {
-        for (size_t i = 0; i < m_postEffects.size(); ++i)
-        {
-            if (m_postEffects[i].get() == postEffect)
-            {
-                std::swap(m_postEffects[i], m_postEffects.back());
-                m_postEffects.pop_back();
-                break;
-            }
-        }
-    }
 };

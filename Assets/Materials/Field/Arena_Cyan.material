@@ -1,0 +1,17 @@
+version: 1
+name: Arena_Cyan
+shader: Assets/Shaders/PBRToon.shader
+properties:
+  _BaseColor: [0.220151126,0.198864058,0.888030887,1]
+  _Emission: [0.337711126,0.360598892,0.930501938,1]
+  _Metallic: 0
+  _Roughness: 0.5
+  _ToonBands: 4
+  _ToonDiffuseStrength: 1
+  _ToonShadowColor: [0.350000024,0.400000006,0.550000012,1]
+  _ToonSpecularColor: [1,1,1,1]
+  _ToonSpecularThreshold: 0.450000018
+  _RimColor: [0.200000003,0.600000024,1,1]
+  _RimPower: 4
+  _RimStrength: 0
+  _MainTex: 

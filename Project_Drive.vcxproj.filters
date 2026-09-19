@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="ソース ファイル\Script\UI" />
+    <Filter Include="ヘッダー ファイル\Script\UI" />
     <Filter Include="ソース ファイル">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
@@ -135,6 +137,9 @@
     <ClCompile Include="source\System\Core\input.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\System\Core\Mouse.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\System\Core\main.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
@@ -234,10 +239,64 @@
     <ClCompile Include="source\System\Core\GM_Time.cpp">
       <Filter>ソース ファイル\System\Core</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\EnemyBullet.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\ObjectShake.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\TimeRecoveryItem.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\AttackReadyVfx.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\AttackChargeHead.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\AttackDashTrail.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\CollisionVfx.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\BasicEnemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\System\Core\StringEncoding.cpp">
+      <Filter>ソース ファイル\System\Core</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\Bullet.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\Script\Enemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\BlockGlitchPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\DigitalWipeTransition.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\HorizontalGlitchTransition.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\SceneTransition.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\GlitchPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\EnemyAnimation.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Health.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\HeavyEnemy.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\MovingEnemy.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\System\Rendering\RendererBase.cpp">
@@ -270,19 +329,37 @@
     <ClCompile Include="source\Script\TitleUI.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
+    <ClCompile Include="source\Script\TutorialDirector.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\WaveDirector.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
     <ClCompile Include="source\Scene\GameScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="source\Scene\ResultScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="source\Scene\TutorialScene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="source\Script\ResultUI.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Result.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\FillBar.cpp">
       <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\ParticleSystem.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\TrailRenderer.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\VfxLifetime.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\Transform.cpp">
@@ -319,6 +396,12 @@
       <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\PostEffect.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\Bloom.cpp">
+      <Filter>ソース ファイル\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component\FXAA.cpp">
       <Filter>ソース ファイル\Component</Filter>
     </ClCompile>
     <ClCompile Include="source\Component\audio.cpp">
@@ -371,6 +454,57 @@
     </ClCompile>
     <ClCompile Include="source\Graphics\Shader\ShaderReflector.cpp">
       <Filter>ソース ファイル\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\ShotDirector.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PlayerHit.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\ChromaticAberrationPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\NoisePostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\GrayScalePostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\RadialBlurPostProcess.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PostProcessImpulse.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Pause.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PauseUI.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\PlayerAnimation.cpp">
+      <Filter>ソース ファイル\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\GameHud.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\HudNumber.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\TimeRecoveryUI.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\UIFade.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\UIOffset.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\UI\WaveStartUI.cpp">
+      <Filter>ソース ファイル\Script\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\ComboUI.cpp">
+      <Filter>ソース ファイル\Script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -452,6 +586,9 @@
     <ClInclude Include="include\System\Core\Script.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\System\Core\ScriptTypes.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
     <ClInclude Include="include\System\SystemInc.h">
       <Filter>ヘッダー ファイル\System</Filter>
     </ClInclude>
@@ -462,6 +599,12 @@
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\input.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Core\Mouse.h">
+      <Filter>ヘッダー ファイル\System\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Core\StringEncoding.h">
       <Filter>ヘッダー ファイル\System\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\System\UI\UIRect.h">
@@ -560,10 +703,58 @@
     <ClInclude Include="include\System\Rendering\RendererBase.h">
       <Filter>ヘッダー ファイル\System\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="include\Script\Bullet.h">
+    <ClInclude Include="include\Script\EnemyBullet.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ObjectShake.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\TimeRecoveryItem.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackReadyVfx.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackChargeHead.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\AttackDashTrail.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\CollisionVfx.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\BasicEnemy.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\Script\Enemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\BlockGlitchPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\DigitalWipeTransition.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\HorizontalGlitchTransition.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\SceneTransition.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\GlitchPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\EnemyAnimation.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\Health.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\HeavyEnemy.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\MovingEnemy.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
     <ClInclude Include="include\System\Core\GM_Time.h">
@@ -584,16 +775,34 @@
     <ClInclude Include="include\Script\TItleUI.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\TutorialDirector.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\WaveDirector.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="include\Scene\GameScene.h">
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\Scene\ResultScene.h">
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="include\Scene\TutorialScene.h">
+      <Filter>ヘッダー ファイル\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="include\Script\ResultUI.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\Result.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\FillBar.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="include\Common\Color.h">
+      <Filter>ヘッダー ファイル\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Easing.h">
       <Filter>ヘッダー ファイル\Common</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\ValueType.h">
@@ -609,6 +818,9 @@
       <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\TrailRenderer.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\VfxLifetime.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\ImGui\imgui.h">
@@ -639,6 +851,12 @@
       <Filter>ヘッダー ファイル\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="include\Component\PostEffect.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\Bloom.h">
+      <Filter>ヘッダー ファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Component\FXAA.h">
       <Filter>ヘッダー ファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\GraphicInc.h">
@@ -905,6 +1123,9 @@
     <ClInclude Include="include\Script\SampleMoveScript.h">
       <Filter>ヘッダー ファイル\Script</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\ShotDirector.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
     <ClInclude Include="External\Include\Assimp\SGSpatialSort.h">
       <Filter>External\Assimp</Filter>
     </ClInclude>
@@ -971,9 +1192,63 @@
     <ClInclude Include="External\Include\Assimp\ZipArchiveIOSystem.h">
       <Filter>External\Assimp</Filter>
     </ClInclude>
+    <ClInclude Include="include\Script\PlayerHit.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ChromaticAberrationPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\NoisePostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\GrayScalePostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\RadialBlurPostProcess.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PostProcessImpulse.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PlayerAnimation.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\Pause.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\PauseUI.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\GameHud.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\HudNumber.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\TimeRecoveryUI.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\UIFade.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\UIOffset.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\UI\WaveStartUI.h">
+      <Filter>ヘッダー ファイル\Script\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Script\ComboUI.h">
+      <Filter>ヘッダー ファイル\Script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shaders\common.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shaders\PBRLighting.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shaders\lighting.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Assets\Shaders\postprocess_common.hlsl">
@@ -1039,7 +1314,52 @@
     <None Include="Assets\Shaders\DefaultLit.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Assets\Shaders\ChannelPackedNumber.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\GaugeInner.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\HUDFrameMask.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\UI.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PBRDefault.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PBRToon.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\FillBarShader.shader">
+      <Filter>Shader</Filter>
+    </None>
     <None Include="Assets\Shaders\PostProcessBloom.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessFXAA.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessBlockGlitch.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessDigitalWipeTransition.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessHorizontalGlitchTransition.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessGlitch.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessChromaticAberration.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessNoise.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\PostProcessRadialBlur.shader">
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\UnlitAdditive.shader">
@@ -1049,6 +1369,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Assets\Shaders\UnlitTransparent.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\ShotDirector.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Assets\Shaders\UIImageFill.shader">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

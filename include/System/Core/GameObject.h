@@ -24,6 +24,7 @@ class GameObject
 protected:
     uint64_t m_id = 0;
     std::string m_name{ "Empty" };
+    std::string m_tag;
     std::string m_prefabPath;
     bool m_isPrefabResolutionError = false;
     TransformBase* m_transformBase = nullptr;
@@ -32,6 +33,7 @@ protected:
 
     bool m_isStarted = false;
     bool m_isActive = true;
+    bool m_notDestroyBySceneEnd = false;
     bool m_isDestroyRequested = false;
     bool m_isDestroyed = false;
 public:
@@ -66,6 +68,16 @@ public:
     void SetName(std::string name)
     {
         m_name = std::move(name);
+    }
+
+    const std::string& GetTag() const
+    {
+        return m_tag;
+    }
+
+    void SetTag(std::string tag)
+    {
+        m_tag = std::move(tag);
     }
 
     const std::string& GetPrefabPath() const
@@ -108,6 +120,16 @@ public:
     }
 
     void SetActive(bool active);
+
+    void SetNotDestroyBySceneEnd(bool enabled)
+    {
+        m_notDestroyBySceneEnd = enabled;
+    }
+
+    bool IsNotDestroyBySceneEnd() const
+    {
+        return m_notDestroyBySceneEnd;
+    }
 
     template <typename T, typename... Args>
 	T* AddComponent(Args&&... args)

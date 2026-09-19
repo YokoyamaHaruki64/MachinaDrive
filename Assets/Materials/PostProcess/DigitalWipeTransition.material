@@ -1,0 +1,15 @@
+version: 1
+name: DigitalWipeTransition
+shader: Assets/Shaders/PostProcessDigitalWipeTransition.shader
+properties:
+  _Progress: 0
+  _Direction: [1,0]
+  _TransitionColor: [0,0,0,1]
+  _BlockScale: [32,12]
+  _Jitter: 0.025
+  _NoiseSpeed: 12
+  _EdgeWidth: 0.04
+  _EdgeColor: [0.1,0.8,1,1]
+  _EdgeIntensity: 1
+  _ChromaticOffset: [0.003,0]
+  _Seed: 0

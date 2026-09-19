@@ -28,10 +28,11 @@
 #include "Scene/TitleScene.h"
 
 #include "Component/Camera.h"
-#include "Component/PostEffect.h"
 #include "Component/Transform.h"
 #include "Component/TransformBase.h"
 #include "Component/audio.h"
+#include "System/Core/ComponentRegistry.h"
+#include "System/Core/GameObjectReference.h"
 
 #if GM_ENABLE_EDITOR
 #include "imgui.h"
@@ -40,10 +41,10 @@
 #include "imgui_curve_custom.h"
 #endif
 
+
+
 std::vector<std::unique_ptr<GameObject>> Manager::m_GameObjects;
 std::vector<std::unique_ptr<GameObject>> Manager::m_pendingGameObjects; // オブジェクト追加用の一時的な格納場所
-std::vector<std::unique_ptr<PostProcess>> Manager::m_postEffects;         // ポストエフェクトのリスト
-
 std::unique_ptr<Scene> Manager::m_currentScene;
 std::unique_ptr<Scene> Manager::m_nextScene;
 Manager::SceneTransitionPhase Manager::m_sceneTransitionPhase = Manager::SceneTransitionPhase::None;
@@ -56,6 +57,7 @@ Manager::GameMode Manager::m_gameMode =
 bool Manager::m_stopPlayRequested = false;
 bool Manager::m_sceneDirty = false;
 uint64_t Manager::m_nextGameObjectId = 1;
+uint64_t Manager::m_sceneLoadGeneration = 0;
 
 std::vector<RendererBase*> Manager::m_Renderers; // 描画用のレンダラーリスト
 
@@ -134,7 +136,45 @@ void Manager::EnsureGameObjectIds(
     }
 }
 
-void Manager::DestroyGameObjects()
+std::vector<GameObject*> Manager::GetObjectsByTag(const std::string& tag)
+{
+    std::vector<GameObject*> result;
+    result.reserve(m_GameObjects.size());
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            result.push_back(gameObject.get());
+        }
+    }
+    return result;
+}
+
+GameObject* Manager::GetObjectFirstByTag(const std::string& tag)
+{
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetTag() == tag)
+        {
+            return gameObject.get();
+        }
+    }
+    return nullptr;
+}
+
+GameObject* Manager::GetObjectFirstByName(const std::string& name)
+{
+    for (const std::unique_ptr<GameObject>& gameObject : m_GameObjects)
+    {
+        if (!gameObject->IsDestroyed() && gameObject->GetName() == name)
+        {
+            return gameObject.get();
+        }
+    }
+    return nullptr;
+}
+
+void Manager::DestroyGameObjects(bool destroyPersistentObjects)
 {
     // PhysicsのBodyRecordはGameObject／Colliderへの参照を持つため、
     // OnDestroyでGameObjectを解放する前に物理側のキャッシュを空にする。
@@ -145,9 +185,18 @@ void Manager::DestroyGameObjects()
 
     for (auto& gameObject : m_GameObjects)
     {
+        if (!destroyPersistentObjects && gameObject->IsNotDestroyBySceneEnd() && !gameObject->IsDestroyed())
+        {
+            continue;
+        }
         gameObject->OnDestroy();
     }
-    m_GameObjects.clear();
+    std::erase_if(m_GameObjects, [destroyPersistentObjects](const auto& gameObject)
+    {
+        return destroyPersistentObjects
+            || !gameObject->IsNotDestroyBySceneEnd()
+            || gameObject->IsDestroyed();
+    });
 
     // OnDestroyから生成されたオブジェクトを次のシーンへ持ち越さない。
     m_pendingGameObjects.clear();
@@ -565,7 +614,7 @@ bool Manager::LoadSceneObjects(const std::filesystem::path& path)
     }
 
     // 復元完了後にだけ旧Object群を破棄し、読込失敗時は現在のSceneを維持する。
-    DestroyGameObjects();
+    DestroyGameObjects(m_sceneTransitionPhase == SceneTransitionPhase::None);
     if (m_sceneTransitionPhase == SceneTransitionPhase::None)
     {
         StartLoadedGameObjects(std::move(loaded.gameObjects));
@@ -640,6 +689,162 @@ bool Manager::ApplyToPrefab(GameObject& gameObject)
     return SavePrefab(*root, gameObject.GetPrefabPath());
 }
 
+bool Manager::RevertFromPrefab(GameObject& gameObject)
+{
+    if (m_gameMode != GameMode::Edit || gameObject.IsDestroyed() || gameObject.GetPrefabPath().empty())
+    {
+        return false;
+    }
+
+    const std::string prefabPath = gameObject.GetPrefabPath();
+    GameObject* root = &gameObject;
+    while (TransformBase* parent = root->GetTransformBase()->GetParent())
+    {
+        GameObject* const parentObject = parent->GetOwner();
+        if (parentObject->GetPrefabPath() != prefabPath)
+        {
+            break;
+        }
+        root = parentObject;
+    }
+    GameObject& instanceRoot = *root;
+
+    GameObjectLoadResult loaded;
+    if (!GameObjectYamlSerializer::LoadFromFile(
+        prefabPath, loaded, PrefabSourcePathMode::UseSourceFilePath))
+    {
+        return false;
+    }
+
+    GameObject* prefabRoot = nullptr;
+    for (const auto& object : loaded.gameObjects)
+    {
+        if (!object->GetParent())
+        {
+            if (prefabRoot)
+            {
+                Logger::Error("PrefabにはRoot GameObjectを1つだけ定義してください。");
+                return false;
+            }
+            prefabRoot = object.get();
+        }
+    }
+    if (!prefabRoot ||
+        typeid(*prefabRoot->GetTransformBase()) != typeid(*instanceRoot.GetTransformBase()))
+    {
+        Logger::Error("PrefabのRootが存在しないか、Transform種別が一致しません。");
+        return false;
+    }
+
+    // 子同士の参照は読込済み。Rootへの参照だけ既存インスタンスへ向け直す。
+    while (!prefabRoot->m_references.empty())
+    {
+        prefabRoot->m_references.back()->Set(&instanceRoot);
+    }
+
+    YAMLValueConversionContext context;
+    context.getObjectId = [](const GameObject* object)
+        -> std::optional<uint64_t> { return object->GetId(); };
+    context.resolveObject = [&loaded, &instanceRoot](uint64_t id) -> GameObject*
+    {
+        if (id == instanceRoot.GetId())
+        {
+            return &instanceRoot;
+        }
+        for (const auto& object : loaded.gameObjects)
+        {
+            if (object->GetId() == id)
+            {
+                return object.get();
+            }
+        }
+        return nullptr;
+    };
+
+    // Scene内IDと衝突しないIDを先に割り当て、RootのFieldを順に退避する。
+    EnsureGameObjectIds(loaded.gameObjects, true);
+    struct ComponentState
+    {
+        const ComponentRegistration* registration;
+        YAMLValue fields;
+    };
+    std::vector<ComponentState> rootComponents;
+    for (Component* component : prefabRoot->GetComponents())
+    {
+        if (component == prefabRoot->GetTransformBase())
+        {
+            continue;
+        }
+        const auto* registration = ComponentRegistry::Find(typeid(*component));
+        YAMLValue fields;
+        if (!registration || !component->ToYAMLValue(fields, context))
+        {
+            return false;
+        }
+        rootComponents.push_back({ registration, std::move(fields) });
+    }
+
+#if GM_ENABLE_EDITOR
+    // 破棄対象を指すUndo履歴は、構成変更より前に解放する。
+    EditorSystem::ClearCommandHistory();
+#endif
+
+    // Rootの名前・Transform・外部の親は保持し、旧子階層を破棄予約する。
+    instanceRoot.GetTransformBase()->DestroyChildren();
+    const auto oldChildren = instanceRoot.GetTransformBase()->GetChildren();
+    for (TransformBase* child : oldChildren)
+    {
+        child->SetParent(nullptr, ParentTransformMode::KeepLocal);
+    }
+    std::erase_if(instanceRoot.m_components, [&instanceRoot](const auto& component)
+    {
+        if (component.get() == instanceRoot.GetTransformBase())
+        {
+            return false;
+        }
+        component->OnDestroy();
+        return true;
+    });
+
+    instanceRoot.SetTag(prefabRoot->GetTag());
+    instanceRoot.SetActive(prefabRoot->IsActive());
+    instanceRoot.SetPrefabPath(prefabRoot->GetPrefabPath());
+    for (const ComponentState& state : rootComponents)
+    {
+        Component* component = ComponentRegistry::Add(*state.registration, instanceRoot);
+        if (component)
+        {
+            component->FromYAMLValue(state.fields, context);
+        }
+    }
+
+    // 読込済みの子階層をそのまま移管し、全体が揃ってからロード通知する。
+    const auto newChildren = prefabRoot->GetTransformBase()->GetChildren();
+    for (TransformBase* child : newChildren)
+    {
+        child->SetParent(instanceRoot.GetTransformBase(), ParentTransformMode::KeepLocal);
+    }
+    std::erase_if(loaded.gameObjects, [prefabRoot](const auto& object)
+    {
+        if (object.get() != prefabRoot)
+        {
+            return false;
+        }
+        object->OnDestroy();
+        return true;
+    });
+    StartLoadedGameObjects(std::move(loaded.gameObjects));
+    for (Component* component : instanceRoot.GetComponents())
+    {
+        if (component != instanceRoot.GetTransformBase())
+        {
+            component->OnLoaded();
+        }
+    }
+    MarkCurrentSceneDirty();
+    return true;
+}
+
 GameObject* Manager::Instantiate(const std::filesystem::path& path)
 {
     return InstantiatePrefabInternal(path, nullptr, nullptr, nullptr);
@@ -690,9 +895,12 @@ GameObject* Manager::InstantiatePrefabInternal(
     {
         if (Transform* transform = root->GetTransform())
         {
+            const Vector3 defaultRotation = transform->GetEulerAngles();
+            const Vector3 defaultScale = transform->GetScale();
+
             transform->SetPosition(*position);
-            transform->SetEulerAngles(*rotation);
-            transform->SetScale(*scale);
+            transform->SetRotation(Quaternion::EulerToQuat(*rotation + defaultRotation));
+            transform->SetScale(Vector3::Multiply(*scale, defaultScale));
         }
     }
 
@@ -718,8 +926,8 @@ void Manager::InitScene()
     {
         m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
         m_currentScene->Uninit();
-        DestroyGameObjects();
-        m_postEffects.clear();
+        DestroyGameObjects(false);
+        Renderer::ClearScenePostEffects();
         m_currentScene.reset();
     }
 
@@ -733,6 +941,7 @@ void Manager::InitScene()
 
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ++m_sceneLoadGeneration;
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
     if (m_gameMode == GameMode::Edit)
@@ -758,13 +967,14 @@ void Manager::ReloadCurrentScene()
 
     m_sceneTransitionPhase = SceneTransitionPhase::Destroying;
     m_currentScene->Uninit();
-    DestroyGameObjects();
-    m_postEffects.clear();
+    DestroyGameObjects(true);
+    Renderer::ClearPostEffects();
 
     m_sceneTransitionPhase = SceneTransitionPhase::Initializing;
     m_currentScene->Init();
     m_sceneTransitionPhase = SceneTransitionPhase::None;
     PendingGameObjectsProcess();
+    ++m_sceneLoadGeneration;
     ClearCurrentSceneDirty();
 #if GM_ENABLE_EDITOR
     if (m_gameMode == GameMode::Edit)
@@ -818,8 +1028,22 @@ bool Manager::StopPlayMode()
     }
 
     // 描画途中のRendererを破棄しないよう、次のUpdate冒頭で処理する。
+    Input::SetCursorLock(false);
+    Input::SetCursorVisible(true);
     m_stopPlayRequested = true;
     return true;
+}
+
+void Manager::Quit()
+{
+#if GM_ENABLE_EDITOR
+    if (m_gameMode == GameMode::Play)
+    {
+        StopPlayMode();
+    }
+#else
+    PostQuitMessage(0);
+#endif
 }
 
 #if GM_ENABLE_EDITOR
@@ -897,10 +1121,9 @@ bool Manager::Init()
         return false;
     }
 #if GM_ENABLE_EDITOR
-    DebugDrawer::Initialize();
+	DebugDrawer::Initialize();
 #endif
 	Input::Init();
-    PostProcess::Init();
     Audio::InitMaster();
 
 #if GM_ENABLE_EDITOR
@@ -975,7 +1198,7 @@ void Manager::Uninit()
     {
         m_currentScene->Uninit();
     }
-    DestroyGameObjects();
+    DestroyGameObjects(true);
 
     // SceneのGameObject破棄後に、PhysicsのBodyと接触キャッシュを破棄する。
     Physics::Uninitialize();
@@ -992,8 +1215,7 @@ void Manager::Uninit()
 #endif
 
     // PostProcessはMaterialを参照するため、MaterialManagerより先に破棄する。
-    m_postEffects.clear();
-    PostProcess::Uninit();
+    Renderer::ClearPostEffects();
     ModelManager::Uninit();
     MaterialManager::Uninit();
     FontManager::Clear();
@@ -1036,10 +1258,7 @@ void Manager::Update()
 
     if (EditorSystem::ApplyGameWindowRenderTargetSize())
 	{
-		for (const std::unique_ptr<PostProcess>& postEffect : m_postEffects)
-		{
-            postEffect->Resize(Renderer::GetGameWidth(), Renderer::GetGameHeight());
-        }
+        Renderer::ResizePostEffects();
     }
     EditorSystem::Update();
 #endif
@@ -1171,17 +1390,9 @@ void Manager::Draw()
 	Renderer::Draw();
 
 #if GM_ENABLE_EDITOR
-    // 通常のMesh描画後、PostProcess前にCollider線を重ねる。
+    // 通常のMesh描画後、Collider線を重ねる。
     // 深度テストは専用Shaderで維持するため、遮蔽物の裏側は自然に隠れる。
     DebugDrawer::Draw();
-#endif
-
-    for (int i = 0; i < m_postEffects.size(); ++i)
-    {
-        m_postEffects[i]->Apply();
-    }
-
-#if GM_ENABLE_EDITOR
     EditorSystem::DrawImGui();
 
 	Renderer::BeginEditorFrame();
