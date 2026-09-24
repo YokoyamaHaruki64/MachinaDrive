@@ -285,6 +285,7 @@
     <ClCompile Include="source\Script\ShotDirector.cpp" />
     <ClCompile Include="source\Script\TitleUI.cpp" />
     <ClCompile Include="source\Script\TutorialDirector.cpp" />
+    <ClCompile Include="source\Script\Wave.cpp" />
     <ClCompile Include="source\Script\WaveDirector.cpp" />
     <ClCompile Include="source\System\Core\GM_Time.cpp" />
     <ClCompile Include="source\System\Core\input.cpp" />
@@ -538,6 +539,7 @@
     <ClInclude Include="include\Script\TItleUI.h" />
     <ClInclude Include="include\Script\TutorialDirector.h" />
     <ClInclude Include="include\Script\WaveDirector.h" />
+    <ClInclude Include="include\Script\Wave.h" />
     <ClInclude Include="include\System\Core\component.h" />
     <ClInclude Include="include\System\Core\component.inl" />
     <ClInclude Include="include\System\Core\ComponentRegistry.h" />
@@ -719,6 +721,7 @@
     <None Include="Assets\Shaders\UnlitAdditive.shader" />
     <None Include="Assets\Shaders\UnlitTexture.shader" />
     <None Include="Assets\Shaders\UnlitTransparent.shader" />
+    <None Include="Assets\Shaders\WaveShader.shader" />
     <None Include="External\Include\Assimp\color4.inl" />
     <None Include="External\Include\Assimp\material.inl" />
     <None Include="External\Include\Assimp\matrix3x3.inl" />
